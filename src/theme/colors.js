@@ -14,37 +14,37 @@
 // LIGHT MODE PALETTE
 // ---------------------
 export const LIGHT = {
-  // Primary brand color — used for buttons, links, active states
+  // Primary brand color — Meghali's Silk deep bottle-green
   primary: {
-    main:  "#667eea",
-    light: "#8b9af3",
-    dark:  "#4c5ed0",
+    main:  "#0B3B2E",
+    light: "#13573F",
+    dark:  "#0A2E24",
   },
-  // Secondary accent color — used for badges, chips, secondary buttons
+  // Secondary accent color — gold/champagne (readable on white)
   secondary: {
-    main:  "#f093fb",
-    light: "#f4b3fc",
-    dark:  "#d673e0",
+    main:  "#B6863C",
+    light: "#CBA35A",
+    dark:  "#9A7728",
   },
   // Page and component backgrounds
   background: {
-    default: "#f5f7fa",
-    paper:   "#ffffff",
+    default: "#FBF8F2",
+    paper:   "#FFFFFF",
   },
   // Text colors
   text: {
-    primary:   "#1a202c",
-    secondary: "#4a5568",
+    primary:   "#10221C",
+    secondary: "#4A5550",
   },
-  // Gradient used for contained buttons, hero section, etc.
+  // Gradient used for contained buttons, hero section, etc. (gold gradient)
   gradient: {
-    primary:        "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-    primaryReverse: "linear-gradient(135deg, #764ba2 0%, #667eea 100%)",
-    // Hero background gradient
-    hero: "linear-gradient(135deg, #667eea 0%, #764ba2 50%, #6B8DD6 100%)",
+    primary:        "linear-gradient(135deg, #E6C27A 0%, #CBA35A 50%, #B6863C 100%)",
+    primaryReverse: "linear-gradient(135deg, #B6863C 0%, #CBA35A 50%, #9A7728 100%)",
+    // Hero background gradient — deep brand green
+    hero: "linear-gradient(135deg, #0B3B2E 0%, #0A2E24 50%, #13573F 100%)",
   },
   // Body background applied on initial HTML load (before React mounts)
-  bodyBackground: "linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%)",
+  bodyBackground: "linear-gradient(135deg, #FBF8F2 0%, #FFFFFF 100%)",
 };
 
 // ---------------------
@@ -52,27 +52,27 @@ export const LIGHT = {
 // ---------------------
 export const DARK = {
   primary: {
-    main:  "#a855f7",
-    light: "#c084fc",
-    dark:  "#9333ea",
+    main:  "#0B3B2E",
+    light: "#1C6E50",
+    dark:  "#0A2E24",
   },
   secondary: {
-    main:  "#ec4899",
-    light: "#f472b6",
-    dark:  "#db2777",
+    main:  "#CBA35A",
+    light: "#E6C27A",
+    dark:  "#B6863C",
   },
   background: {
-    default: "#0a0e27",
-    paper:   "#1a1f3a",
+    default: "#0B0C0B",
+    paper:   "#15171A",
   },
   text: {
-    primary:   "#f5f7fa",
-    secondary: "#a0aec0",
+    primary:   "#F3EFE6",
+    secondary: "#C3C9C4",
   },
   gradient: {
-    primary:        "linear-gradient(135deg, #a855f7 0%, #ec4899 100%)",
-    primaryReverse: "linear-gradient(135deg, #ec4899 0%, #a855f7 100%)",
-    hero: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%)",
+    primary:        "linear-gradient(135deg, #E6C27A 0%, #CBA35A 50%, #B6863C 100%)",
+    primaryReverse: "linear-gradient(135deg, #B6863C 0%, #CBA35A 50%, #9A7728 100%)",
+    hero: "linear-gradient(135deg, #0B3B2E 0%, #0A2E24 50%, #101312 100%)",
   },
-  bodyBackground: "linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%)",
+  bodyBackground: "linear-gradient(135deg, #0B0C0B 0%, #15171A 100%)",
 };

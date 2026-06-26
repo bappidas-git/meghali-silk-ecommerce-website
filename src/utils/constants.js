@@ -1,7 +1,7 @@
 // App Info (override via .env)
-export const APP_NAME = process.env.REACT_APP_NAME || "My Store";
-export const APP_TAGLINE = "Quality products, great prices";
-export const APP_DESCRIPTION = "Shop with confidence – fast delivery, secure payments, easy returns";
+export const APP_NAME = process.env.REACT_APP_NAME || "Meghali's Silk";
+export const APP_TAGLINE = "Heritage handloom silk, woven for you";
+export const APP_DESCRIPTION = "Authentic women's silk sarees and ethnic wear, handwoven by master artisans – free shipping, easy returns, 100% genuine silk";
 
 // Routes
 export const ROUTES = {
@@ -235,8 +235,8 @@ export const BREAKPOINTS = {
 
 // Trust badges
 export const TRUST_BADGES = [
-  "100% Secure Payment",
-  "Easy 7-Day Returns",
-  "24/7 Support",
-  "Best Price Guarantee",
+  "7-Day Easy Returns",
+  "100% Money Back",
+  "Free Shipping",
+  "Authentic Silk",
 ];

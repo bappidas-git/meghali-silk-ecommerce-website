@@ -36,11 +36,10 @@ const iconButtonTouchOverrides = {
 
 export const ThemeContextProvider = ({ children }) => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
+    // Dark is the primary/default experience for Meghali's Silk. With no saved
+    // choice we default to dark; only an explicit "light" selection opts out.
     const savedTheme = localStorage.getItem("theme");
-    return (
-      savedTheme === "dark" ||
-      (!savedTheme && window.matchMedia("(prefers-color-scheme: dark)").matches)
-    );
+    return savedTheme !== "light";
   });
 
   useEffect(() => {
