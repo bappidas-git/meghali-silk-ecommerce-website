@@ -1,12 +1,24 @@
+/* =============================================================================
+ * ProductCard — Meghali's Silk brand card (token-driven, no raw hex)
+ * =============================================================================
+ * Dark-first heritage silk card: portrait saree image, discount badge, wishlist
+ * heart, optional gold PREMIUM ribbon, name, authentic rating, gold price with
+ * struck compare + "Save ₹X", and an emerald Add-to-Cart with an "Added ✓"
+ * micro-interaction. Every colour/space/radius/shadow comes from the storefront
+ * tokens so the whole storefront re-skins from one file.
+ * ========================================================================== */
+
 .card {
   display: flex;
   flex-direction: column;
   background: var(--sf-color-surface);
   border: 1px solid var(--sf-color-border);
   border-radius: var(--sf-radius-lg);
+  box-shadow: var(--sf-shadow-sm);
   overflow: hidden;
-  transition: transform var(--sf-transition-fast), box-shadow var(--sf-transition-fast),
-    border-color var(--sf-transition-fast);
+  font-family: var(--sf-font-family);
+  transition: transform var(--sf-transition-fast),
+    box-shadow var(--sf-transition-fast), border-color var(--sf-transition-fast);
   height: 100%;
 }
 
@@ -16,10 +28,17 @@
   border-color: var(--sf-color-border-strong);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .card:hover {
+    transform: none;
+  }
+}
+
+/* ---- Media (portrait ~3:4 — saree photography is tall) ------------------- */
 .media {
   position: relative;
   display: block;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 3 / 4;
   background: var(--sf-color-surface-2);
 }
 
@@ -28,20 +47,75 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  transition: transform var(--sf-transition);
 }
 
+.card:hover .media img {
+  transform: scale(1.04);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card:hover .media img {
+    transform: none;
+  }
+}
+
+/* Out-of-stock: dim the media, keep the card visible. */
+.isOutOfStock .media img {
+  opacity: 0.5;
+  filter: saturate(0.7);
+}
+
+/* ---- Discount badge — top-left ------------------------------------------ */
 .discountBadge {
   position: absolute;
   top: var(--sf-space-2);
   left: var(--sf-space-2);
-  background: var(--sf-color-danger);
-  color: #fff;
+  background: var(--sf-color-discount-bg);
+  color: var(--sf-color-discount);
   font-size: var(--sf-text-xs);
   font-weight: var(--sf-font-bold);
-  padding: 3px 8px;
+  letter-spacing: 0.02em;
+  padding: 4px 9px;
+  border-radius: var(--sf-radius-pill);
+  backdrop-filter: blur(4px);
+}
+
+/* ---- PREMIUM ribbon — top-right (opposite the badge) -------------------- */
+.premiumRibbon {
+  position: absolute;
+  top: var(--sf-space-2);
+  right: var(--sf-space-2);
+  background: var(--sf-gradient-gold);
+  color: var(--sf-color-emerald-contrast);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-bold);
+  letter-spacing: 0.08em;
+  padding: 4px 9px;
+  border-radius: var(--sf-radius-sm);
+  box-shadow: var(--sf-shadow-sm);
+}
+
+/* When both the heart and the ribbon sit top-right, drop the heart below it. */
+.premiumRibbon ~ .wishlist {
+  top: calc(var(--sf-space-2) + 30px);
+}
+
+.stockTag {
+  position: absolute;
+  bottom: var(--sf-space-2);
+  left: var(--sf-space-2);
+  background: var(--sf-color-overlay);
+  color: var(--sf-color-primary-contrast);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 4px 9px;
   border-radius: var(--sf-radius-pill);
 }
 
+/* ---- Wishlist heart — top-right ----------------------------------------- */
 .wishlist {
   position: absolute;
   top: var(--sf-space-2);
@@ -49,20 +123,22 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  border: none;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--sf-color-border);
   border-radius: var(--sf-radius-pill);
   background: var(--sf-color-surface);
-  color: var(--sf-color-text-muted);
+  color: var(--sf-color-text-secondary);
   box-shadow: var(--sf-shadow-sm);
   cursor: pointer;
-  transition: color var(--sf-transition-fast), transform var(--sf-transition-fast);
+  transition: color var(--sf-transition-fast),
+    transform var(--sf-transition-fast), border-color var(--sf-transition-fast);
 }
 
 .wishlist:hover {
   transform: scale(1.08);
-  color: var(--sf-color-accent);
+  color: var(--sf-cat-pink);
+  border-color: var(--sf-color-border-strong);
 }
 
 .wishlist:focus-visible {
@@ -71,9 +147,16 @@
 }
 
 .wishlisted {
-  color: var(--sf-color-accent);
+  color: var(--sf-cat-pink);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .wishlist:hover {
+    transform: none;
+  }
+}
+
+/* ---- Body --------------------------------------------------------------- */
 .body {
   display: flex;
   flex-direction: column;
@@ -84,25 +167,28 @@
 
 .brand {
   font-size: var(--sf-text-xs);
-  color: var(--sf-color-text-muted);
+  color: var(--sf-color-text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
 }
 
 .name {
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-medium);
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-md);
+  font-weight: var(--sf-font-semibold);
   color: var(--sf-color-text);
   text-decoration: none;
   line-height: var(--sf-leading-tight);
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  min-height: calc(2 * var(--sf-text-md) * var(--sf-leading-tight));
 }
 
 .name:hover {
-  color: var(--sf-color-primary);
+  color: var(--sf-color-secondary);
 }
 
 .rating {
@@ -113,25 +199,37 @@
 
 .ratingCount {
   font-size: var(--sf-text-xs);
-  color: var(--sf-color-text-muted);
+  color: var(--sf-color-text-secondary);
 }
 
+.noRating {
+  font-size: var(--sf-text-xs);
+  color: var(--sf-color-text-muted);
+  font-style: italic;
+}
+
+/* ---- Add to Cart — emerald, full-width ---------------------------------- */
 .addBtn {
   margin-top: auto;
   min-height: var(--sf-tap-target);
-  border: 1px solid var(--sf-color-primary);
+  width: 100%;
+  border: 1px solid transparent;
   border-radius: var(--sf-radius-md);
-  background: var(--sf-color-primary-soft);
-  color: var(--sf-color-primary);
+  background: var(--sf-color-emerald);
+  color: var(--sf-color-emerald-contrast);
   font-weight: var(--sf-font-semibold);
   font-size: var(--sf-text-sm);
   cursor: pointer;
-  transition: background var(--sf-transition-fast), color var(--sf-transition-fast);
+  transition: background var(--sf-transition-fast),
+    transform var(--sf-transition-fast);
 }
 
 .addBtn:hover:not(:disabled) {
-  background: var(--sf-color-primary);
-  color: var(--sf-color-primary-contrast);
+  background: var(--sf-color-emerald-hover);
+}
+
+.addBtn:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 .addBtn:focus-visible {
@@ -139,10 +237,21 @@
   box-shadow: var(--sf-shadow-focus);
 }
 
+.addBtn.added {
+  background: var(--sf-color-gold-deep);
+  color: var(--sf-color-emerald-contrast);
+}
+
 .addBtn:disabled {
-  opacity: 0.5;
+  opacity: 0.55;
   cursor: not-allowed;
-  border-color: var(--sf-color-border-strong);
   background: var(--sf-color-surface-2);
+  border-color: var(--sf-color-border-strong);
   color: var(--sf-color-text-muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .addBtn:active:not(:disabled) {
+    transform: none;
+  }
 }
