@@ -1,24 +1,17 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { useTheme } from "../../context/ThemeContext";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useCart } from "../../hooks/useCart";
 import { useWishlist } from "../../context/WishlistContext";
 import apiService from "../../services/api";
+import ProductCard from "../../components/storefront/ProductCard";
 import {
   categoryParam,
   resolveCategory,
   getCategoryScopeIds,
   orderCategoriesHierarchically,
 } from "../../utils/categories";
-import {
-  formatCurrency,
-  getProductMinPrice,
-  truncateText,
-  buildCartItem,
-  productPath,
-  getDeviceType,
-} from "../../utils/helpers";
+import { getProductMinPrice, getDeviceType } from "../../utils/helpers";
 import styles from "./Products.module.css";
 
 // ---------------------------------------------------------------------------
@@ -58,40 +51,78 @@ const normalizeSort = (raw) => {
 };
 
 const PRICE_RANGES = [
-  { label: "Under \u20b9500", min: 0, max: 500 },
-  { label: "\u20b9500 \u2013 \u20b91,000", min: 500, max: 1000 },
-  { label: "\u20b91,000 \u2013 \u20b95,000", min: 1000, max: 5000 },
-  { label: "Above \u20b95,000", min: 5000, max: Infinity },
+  { label: "Under ₹500", min: 0, max: 500 },
+  { label: "₹500 – ₹1,000", min: 500, max: 1000 },
+  { label: "₹1,000 – ₹5,000", min: 1000, max: 5000 },
+  { label: "Above ₹5,000", min: 5000, max: Infinity },
 ];
 
 const RATING_OPTIONS = [4, 3, 2, 1];
 const DISCOUNT_OPTIONS = [50, 30, 20, 10];
 const PER_PAGE_OPTIONS = [12, 24, 48];
 
+// Recognised silk families (the "Fabric" facet). The chip set is derived from the
+// LOADED catalogue — a family only appears if at least one real product exposes it
+// (via variants[].attributes.Fabric or a matching tag), so nothing is fabricated
+// and the whole facet hides when no product carries a fabric. Order here is the
+// display order. Each entry's `match` tokens are lower-cased substrings tested
+// against a product's fabric strings + tags.
+const FABRIC_FAMILIES = [
+  { label: "Banarasi", match: ["banarasi"] },
+  { label: "Kanjivaram", match: ["kanjivaram"] },
+  { label: "Tussar", match: ["tussar", "kosa", "ghicha"] },
+  { label: "Mulberry", match: ["mulberry"] },
+  { label: "Eri", match: ["eri", "ahimsa"] },
+  { label: "Muga", match: ["muga"] },
+  { label: "Baluchari", match: ["baluchari"] },
+  { label: "Jamdani", match: ["jamdani", "dhakai"] },
+  { label: "Brocade", match: ["brocade"] },
+];
+
+// Collect a product's fabric "haystack" (variant Fabric attributes + tags) once,
+// lower-cased, then resolve to the family labels it satisfies.
+const productFabricLabels = (product) => {
+  const hay = [];
+  (product.variants || []).forEach((v) => {
+    const f = v?.attributes?.Fabric;
+    if (f) hay.push(String(f).toLowerCase());
+  });
+  (product.tags || []).forEach((t) => hay.push(String(t).toLowerCase()));
+  const joined = hay.join(" ");
+  if (!joined) return [];
+  return FABRIC_FAMILIES.filter((fam) =>
+    fam.match.some((token) => joined.includes(token))
+  ).map((fam) => fam.label);
+};
+
 // ---------------------------------------------------------------------------
 // Skeleton Card
 // ---------------------------------------------------------------------------
 const SkeletonCard = () => (
-  <div className={styles.card}>
-    <div className={`${styles.cardImageWrap} ${styles.skeleton} ${styles.skeletonImage}`} />
-    <div className={styles.cardBody}>
-      <div className={`${styles.skeleton} ${styles.skeletonLine}`} style={{ width: "75%" }} />
-      <div className={`${styles.skeleton} ${styles.skeletonLine}`} style={{ width: "50%", height: 14 }} />
-      <div className={`${styles.skeleton} ${styles.skeletonLine}`} style={{ width: "40%", height: 22, marginTop: 8 }} />
+  <div className={styles.skeletonCard}>
+    <div className={`${styles.skeleton} ${styles.skeletonImage}`} />
+    <div className={styles.skeletonBody}>
+      <div className={`${styles.skeleton} ${styles.skeletonLine}`} style={{ width: "40%", height: 10 }} />
+      <div className={`${styles.skeleton} ${styles.skeletonLine}`} style={{ width: "85%" }} />
+      <div className={`${styles.skeleton} ${styles.skeletonLine}`} style={{ width: "55%" }} />
+      <div className={`${styles.skeleton} ${styles.skeletonLine}`} style={{ width: "45%", height: 20, marginTop: 6 }} />
+      <div className={`${styles.skeleton} ${styles.skeletonLine}`} style={{ width: "100%", height: 40, marginTop: 6 }} />
     </div>
   </div>
 );
 
 // ---------------------------------------------------------------------------
-// Star icons (inline SVG so we don't depend on icon libraries)
+// Star icons (inline SVG so we don't depend on icon libraries). Colour comes from
+// the surrounding `.stars` class (var(--sf-color-star)) via currentColor — no hex.
+// Used by the rating FILTER section (the grid cards use the shared ProductCard).
 // ---------------------------------------------------------------------------
 const StarIcon = ({ filled, half }) => (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill={filled ? "#f59e0b" : "none"} stroke="#f59e0b" strokeWidth="2">
+  <svg width="16" height="16" viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" aria-hidden="true">
     {half ? (
       <>
         <defs>
           <linearGradient id="halfStar">
-            <stop offset="50%" stopColor="#f59e0b" />
+            <stop offset="50%" stopColor="currentColor" />
             <stop offset="50%" stopColor="transparent" />
           </linearGradient>
         </defs>
@@ -106,91 +137,50 @@ const StarIcon = ({ filled, half }) => (
   </svg>
 );
 
-const RatingStars = ({ value = 0, count }) => {
+const RatingStars = ({ value = 0 }) => {
   const stars = [];
   for (let i = 1; i <= 5; i++) {
     if (i <= Math.floor(value)) stars.push(<StarIcon key={i} filled />);
     else if (i - 0.5 <= value) stars.push(<StarIcon key={i} half />);
     else stars.push(<StarIcon key={i} />);
   }
-  return (
-    <span className={styles.stars}>
-      {stars}
-      {count !== undefined && <span className={styles.reviewCount}>({count.toLocaleString()})</span>}
-    </span>
-  );
+  return <span className={styles.stars}>{stars}</span>;
 };
 
 // ---------------------------------------------------------------------------
 // SVG Icons
 // ---------------------------------------------------------------------------
-const HeartIcon = ({ filled }) =>
-  filled ? (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="#ec4899" stroke="#ec4899" strokeWidth="2">
-      <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" />
-    </svg>
-  ) : (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-      <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" />
-    </svg>
-  );
-
-const CartIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <circle cx="9" cy="21" r="1" />
-    <circle cx="20" cy="21" r="1" />
-    <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6" />
-  </svg>
-);
-
-const GridIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-    <rect x="3" y="3" width="7" height="7" rx="1" />
-    <rect x="14" y="3" width="7" height="7" rx="1" />
-    <rect x="3" y="14" width="7" height="7" rx="1" />
-    <rect x="14" y="14" width="7" height="7" rx="1" />
-  </svg>
-);
-
-const ListIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-    <rect x="3" y="4" width="18" height="4" rx="1" />
-    <rect x="3" y="10" width="18" height="4" rx="1" />
-    <rect x="3" y="16" width="18" height="4" rx="1" />
-  </svg>
-);
-
 const FilterIcon = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
     <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
   </svg>
 );
 
 const CloseIcon = () => (
-  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
     <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
   </svg>
 );
 
 const ChevronLeft = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6" /></svg>
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><polyline points="15 18 9 12 15 6" /></svg>
 );
 
 const ChevronRight = () => (
-  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 6 15 12 9 18" /></svg>
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><polyline points="9 6 15 12 9 18" /></svg>
 );
 
 // ---------------------------------------------------------------------------
-// Empty state illustration (simple inline SVG)
+// Empty state illustration (simple inline SVG, coloured via tokens — no hex)
 // ---------------------------------------------------------------------------
 const EmptyIllustration = () => (
-  <svg className={styles.emptyIllustration} width="200" height="160" viewBox="0 0 200 160" fill="none">
-    <rect x="40" y="30" width="120" height="90" rx="8" fill="var(--empty-box, #e2e8f0)" />
-    <rect x="55" y="50" width="90" height="10" rx="4" fill="var(--empty-line, #cbd5e1)" />
-    <rect x="55" y="70" width="60" height="10" rx="4" fill="var(--empty-line, #cbd5e1)" />
-    <rect x="55" y="90" width="75" height="10" rx="4" fill="var(--empty-line, #cbd5e1)" />
-    <circle cx="100" cy="135" r="18" fill="var(--empty-circle, #94a3b8)" opacity="0.3" />
-    <text x="100" y="140" textAnchor="middle" fontSize="20" fill="var(--empty-circle, #94a3b8)">?</text>
+  <svg className={styles.emptyIllustration} width="200" height="160" viewBox="0 0 200 160" fill="none" aria-hidden="true">
+    <rect x="40" y="30" width="120" height="90" rx="8" fill="var(--empty-box)" />
+    <rect x="55" y="50" width="90" height="10" rx="4" fill="var(--empty-line)" />
+    <rect x="55" y="70" width="60" height="10" rx="4" fill="var(--empty-line)" />
+    <rect x="55" y="90" width="75" height="10" rx="4" fill="var(--empty-line)" />
+    <circle cx="100" cy="135" r="18" fill="var(--empty-circle)" opacity="0.3" />
+    <text x="100" y="140" textAnchor="middle" fontSize="20" fill="var(--empty-circle)">?</text>
   </svg>
 );
 
@@ -200,9 +190,9 @@ const EmptyIllustration = () => (
 const Products = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { isDarkMode } = useTheme();
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
+  const shouldReduceMotion = useReducedMotion();
 
   // ---- Data state ---
   const [allProducts, setAllProducts] = useState([]);
@@ -211,7 +201,6 @@ const Products = () => {
   const [fetchError, setFetchError] = useState(false);
 
   // ---- UI state ----
-  const [viewMode, setViewMode] = useState("grid"); // grid | list
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
 
   // ---- Refs ----
@@ -237,6 +226,7 @@ const Products = () => {
   const [minDiscount, setMinDiscount] = useState(0);
   const [inStockOnly, setInStockOnly] = useState(false);
   const [selectedBrands, setSelectedBrands] = useState([]);
+  const [selectedFabrics, setSelectedFabrics] = useState([]); // session-only facet
   const [sortBy, setSortBy] = useState(urlSort);
   const [currentPage, setCurrentPage] = useState(urlPage);
   const [perPage, setPerPage] = useState(() =>
@@ -345,8 +335,8 @@ const Products = () => {
   );
 
   // Reset to page 1 and drop the stale page param from the URL. Use this for the
-  // session-only filters (rating/discount/in-stock/brand) that are not URL params
-  // themselves — they only need the page reset reflected in the URL.
+  // session-only filters (rating/discount/in-stock/brand/fabric) that are not URL
+  // params themselves — they only need the page reset reflected in the URL.
   const resetToFirstPage = useCallback(() => {
     setCurrentPage(1);
     syncUrlParams({ page: 1 });
@@ -359,6 +349,18 @@ const Products = () => {
       if (p.brand) brands.add(p.brand);
     });
     return Array.from(brands).sort();
+  }, [allProducts]);
+
+  // ---- Derived: fabric families present in the loaded catalogue ----
+  // Same pattern as availableBrands: a memo over allProducts. Empty when no
+  // product exposes a fabric, which hides the whole "Fabric" facet (chip + sheet
+  // section). Display order follows FABRIC_FAMILIES.
+  const availableFabrics = useMemo(() => {
+    const present = new Set();
+    allProducts.forEach((p) => {
+      productFabricLabels(p).forEach((label) => present.add(label));
+    });
+    return FABRIC_FAMILIES.map((f) => f.label).filter((label) => present.has(label));
   }, [allProducts]);
 
   // ---- Derived: product count per category id ----
@@ -388,6 +390,13 @@ const Products = () => {
   const orderedCategories = useMemo(
     () => orderCategoriesHierarchically(categories),
     [categories]
+  );
+
+  // Top-level categories only, for the compact chip row. The sheet keeps the full
+  // hierarchical list (with indentation + counts).
+  const topCategories = useMemo(
+    () => orderedCategories.ordered.filter((c) => !orderedCategories.depthOf(c.id)),
+    [orderedCategories]
   );
 
   // ---- Filtering + Sorting (client-side) ----
@@ -456,6 +465,15 @@ const Products = () => {
       result = result.filter((p) => selectedBrands.includes(p.brand));
     }
 
+    // Fabric (silk family) — derived client-side from variants/tags; a product
+    // passes if it satisfies ANY selected family.
+    if (selectedFabrics.length > 0) {
+      result = result.filter((p) => {
+        const labels = productFabricLabels(p);
+        return selectedFabrics.some((f) => labels.includes(f));
+      });
+    }
+
     // Sorting
     switch (sortBy) {
       case "price-low":
@@ -478,7 +496,7 @@ const Products = () => {
     }
 
     return result;
-  }, [allProducts, categories, urlSearch, selectedCategories, minPrice, maxPrice, minRating, minDiscount, inStockOnly, selectedBrands, sortBy]);
+  }, [allProducts, categories, urlSearch, selectedCategories, minPrice, maxPrice, minRating, minDiscount, inStockOnly, selectedBrands, selectedFabrics, sortBy]);
 
   // ---- Pagination ----
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / perPage));
@@ -543,7 +561,9 @@ const Products = () => {
     minRating > 0 ||
     minDiscount > 0 ||
     inStockOnly ||
-    selectedBrands.length > 0;
+    selectedBrands.length > 0 ||
+    selectedFabrics.length > 0 ||
+    sortBy !== "relevance";
 
   // Whether anything is constraining the result set — includes the search query
   // (set from the header), so the empty state always offers a way out.
@@ -557,6 +577,7 @@ const Products = () => {
     setMinDiscount(0);
     setInStockOnly(false);
     setSelectedBrands([]);
+    setSelectedFabrics([]);
     setSortBy("relevance");
     setCurrentPage(1);
     // Pass every reset value as an explicit override so no stale param survives.
@@ -593,6 +614,30 @@ const Products = () => {
       syncUrlParams({ min_price: newMin, max_price: newMax, page: 1 });
     },
     [syncUrlParams]
+  );
+
+  // A price chip reflects the canonical min/max for its range. Clicking the
+  // already-active chip clears the price filter (chips toggle).
+  const isPriceRangeActive = useCallback(
+    (range) => {
+      const max = range.max === Infinity ? "" : String(range.max);
+      return minPrice === String(range.min) && maxPrice === max;
+    },
+    [minPrice, maxPrice]
+  );
+
+  const handlePriceRangeToggle = useCallback(
+    (range) => {
+      if (isPriceRangeActive(range)) {
+        setMinPrice("");
+        setMaxPrice("");
+        setCurrentPage(1);
+        syncUrlParams({ min_price: "", max_price: "", page: 1 });
+      } else {
+        handlePriceRangeClick(range);
+      }
+    },
+    [isPriceRangeActive, handlePriceRangeClick, syncUrlParams]
   );
 
   const handlePriceApply = useCallback(() => {
@@ -646,33 +691,6 @@ const Products = () => {
     [syncUrlParams]
   );
 
-  const handleProductClick = useCallback(
-    (product) => {
-      // Route is /products/:slug, resolved via getBySlug (with a legacy-id
-      // fallback + canonical redirect), so link by the human-readable slug.
-      navigate(productPath(product));
-    },
-    [navigate]
-  );
-
-  const handleAddToCart = useCallback(
-    (e, product) => {
-      e.stopPropagation();
-      // buildCartItem produces the same id scheme the product page uses, so a
-      // quick-add merges with a detail-page add instead of creating a duplicate.
-      addToCart(buildCartItem(product));
-    },
-    [addToCart]
-  );
-
-  const handleWishlistToggle = useCallback(
-    (e, product) => {
-      e.stopPropagation();
-      toggleWishlist(product);
-    },
-    [toggleWishlist]
-  );
-
   // Select semantics (value, or 0 to clear). onChange handles keyboard + click;
   // a paired onClick clears when the already-selected radio is re-clicked.
   const handleRatingChange = useCallback(
@@ -706,6 +724,16 @@ const Products = () => {
     [resetToFirstPage]
   );
 
+  const handleFabricToggle = useCallback(
+    (fabric) => {
+      setSelectedFabrics((prev) =>
+        prev.includes(fabric) ? prev.filter((f) => f !== fabric) : [...prev, fabric]
+      );
+      resetToFirstPage();
+    },
+    [resetToFirstPage]
+  );
+
   // ---- Category name helper ----
   const getCategoryName = useCallback(
     (slug) => {
@@ -729,6 +757,46 @@ const Products = () => {
     return items;
   }, [selectedCategories, getCategoryName]);
 
+  // ---- Results heading: query echo, single-category name, or a brand default --
+  const resultsHeading = useMemo(() => {
+    if (urlSearch) {
+      return (
+        <>
+          Results for <span className={styles.resultsQuery}>&ldquo;{urlSearch}&rdquo;</span>
+        </>
+      );
+    }
+    if (selectedCategories.length === 1) {
+      return getCategoryName(selectedCategories[0]);
+    }
+    return "All Silk";
+  }, [urlSearch, selectedCategories, getCategoryName]);
+
+  // ---- Live result summary (bound to the real filtered set) ----
+  const resultSummary = useMemo(() => {
+    if (loading) return "Loading products…";
+    if (fetchError) return "Couldn't load products";
+    if (filteredProducts.length === 0) return "No products found";
+    if (filteredProducts.length > perPage) {
+      return (
+        <>
+          Showing{" "}
+          <strong>
+            {(safePage - 1) * perPage + 1}&ndash;
+            {Math.min(safePage * perPage, filteredProducts.length)}
+          </strong>{" "}
+          of <strong>{filteredProducts.length}</strong> products
+        </>
+      );
+    }
+    return (
+      <>
+        Showing <strong>{filteredProducts.length}</strong>{" "}
+        {filteredProducts.length === 1 ? "product" : "products"}
+      </>
+    );
+  }, [loading, fetchError, filteredProducts.length, perPage, safePage]);
+
   // ---- Pagination range ----
   const paginationRange = useMemo(() => {
     const range = [];
@@ -745,9 +813,9 @@ const Products = () => {
     return range;
   }, [safePage, totalPages]);
 
-  // ---- Filter Sidebar JSX (reused for desktop + mobile) ----
-  const renderFilters = (isMobile = false) => (
-    <div className={`${styles.filterContent} ${isMobile ? styles.filterContentMobile : ""}`}>
+  // ---- Full filter set JSX (the bottom sheet / drawer body) ----
+  const renderFilters = () => (
+    <div className={styles.filterContent}>
       {/* Categories */}
       <div className={styles.filterSection}>
         <h4 className={styles.filterTitle}>Categories</h4>
@@ -785,6 +853,7 @@ const Products = () => {
             value={minPrice}
             onChange={(e) => setMinPrice(e.target.value)}
             className={styles.priceInput}
+            aria-label="Minimum price"
           />
           <span className={styles.priceSeparator}>to</span>
           <input
@@ -793,6 +862,7 @@ const Products = () => {
             value={maxPrice}
             onChange={(e) => setMaxPrice(e.target.value)}
             className={styles.priceInput}
+            aria-label="Maximum price"
           />
           <button className={styles.priceGoBtn} onClick={handlePriceApply}>
             Go
@@ -802,14 +872,36 @@ const Products = () => {
           {PRICE_RANGES.map((range) => (
             <button
               key={range.label}
-              className={styles.quickRangeBtn}
-              onClick={() => handlePriceRangeClick(range)}
+              type="button"
+              className={`${styles.quickRangeBtn} ${isPriceRangeActive(range) ? styles.quickRangeBtnActive : ""}`}
+              onClick={() => handlePriceRangeToggle(range)}
+              aria-pressed={isPriceRangeActive(range)}
             >
               {range.label}
             </button>
           ))}
         </div>
       </div>
+
+      {/* Fabric — only when the catalogue exposes a fabric */}
+      {availableFabrics.length > 0 && (
+        <div className={styles.filterSection}>
+          <h4 className={styles.filterTitle}>Fabric</h4>
+          <div className={styles.filterList}>
+            {availableFabrics.map((fabric) => (
+              <label key={fabric} className={styles.checkboxLabel}>
+                <input
+                  type="checkbox"
+                  checked={selectedFabrics.includes(fabric)}
+                  onChange={() => handleFabricToggle(fabric)}
+                  className={styles.checkbox}
+                />
+                <span className={styles.checkboxText}>{fabric} Silk</span>
+              </label>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Rating */}
       <div className={styles.filterSection}>
@@ -899,101 +991,11 @@ const Products = () => {
     </div>
   );
 
-  // ---- Product card ----
-  const renderProductCard = (product, index) => {
-    const priceInfo = getProductMinPrice(product);
-    const discount = priceInfo.discount;
-    const wishlisted = isInWishlist(product.id);
-
-    return (
-      <motion.div
-        key={product.id}
-        className={`${styles.cardWrap} ${viewMode === "list" ? styles.cardWrapList : ""}`}
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: Math.min(index * 0.04, 0.4) }}
-      >
-        <div
-          className={`${styles.card} ${viewMode === "list" ? styles.cardList : ""}`}
-          onClick={() => handleProductClick(product)}
-        >
-          {/* Image area */}
-          <div className={styles.cardImageWrap}>
-            <img
-              src={product.images?.[0] || product.image || "https://placehold.co/400x300?text=No+Image"}
-              alt={product.name}
-              className={styles.cardImage}
-              loading="lazy"
-            />
-            {/* Wishlist */}
-            <button
-              className={styles.wishlistBtn}
-              onClick={(e) => handleWishlistToggle(e, product)}
-              aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
-            >
-              <HeartIcon filled={wishlisted} />
-            </button>
-            {/* Discount badge */}
-            {discount > 0 && (
-              <span className={styles.discountBadge}>{discount}% OFF</span>
-            )}
-          </div>
-
-          {/* Body */}
-          <div className={styles.cardBody}>
-            <h3 className={styles.cardTitle}>{viewMode === "list" ? product.name : truncateText(product.name, 48)}</h3>
-
-            {viewMode === "list" && product.shortDescription && (
-              <p className={styles.cardDesc}>{truncateText(product.shortDescription, 120)}</p>
-            )}
-
-            {/* Social proof — shown ONLY when real ratings exist (no hollow "(0)") */}
-            {(product.totalReviews || 0) > 0 && (
-              <div className={styles.cardRating}>
-                <RatingStars value={product.rating || 0} count={product.totalReviews || 0} />
-              </div>
-            )}
-
-            <div className={styles.cardPriceRow}>
-              <span className={styles.cardPrice}>
-                {formatCurrency(priceInfo.sellingPrice, "INR")}
-              </span>
-              {priceInfo.originalPrice > priceInfo.sellingPrice && (
-                <span className={styles.cardComparePrice}>
-                  {formatCurrency(priceInfo.originalPrice, "INR")}
-                </span>
-              )}
-              {discount > 0 && (
-                <span className={styles.cardDiscountText}>{discount}% off</span>
-              )}
-            </div>
-
-            {product.stock !== undefined && product.stock <= 5 && product.stock > 0 && (
-              <span className={styles.lowStock}>Only {product.stock} left</span>
-            )}
-            {product.stock === 0 && (
-              <span className={styles.outOfStock}>Out of Stock</span>
-            )}
-
-            <button
-              className={styles.addToCartBtn}
-              onClick={(e) => handleAddToCart(e, product)}
-              disabled={product.stock === 0}
-            >
-              <CartIcon />
-              <span>Add to Cart</span>
-            </button>
-          </div>
-        </div>
-      </motion.div>
-    );
-  };
-
   // ============================
   // RENDER
   // ============================
   return (
-    <div className={`${styles.page} ${isDarkMode ? styles.dark : ""}`}>
+    <div className={styles.page}>
       {/* Breadcrumb */}
       <nav className={styles.breadcrumb}>
         {breadcrumbItems.map((item, i) => (
@@ -1010,218 +1012,242 @@ const Products = () => {
         ))}
       </nav>
 
-      <div className={styles.layout}>
-        {/* ===== Desktop filter sidebar ===== */}
-        <aside className={styles.sidebar}>
-          <div className={styles.sidebarHeader}>
-            <h3 className={styles.sidebarTitle}>Filters</h3>
-            {hasActiveFilters && (
-              <button className={styles.clearLink} onClick={clearAllFilters}>
-                Clear All
+      <div className={styles.container} ref={mainRef}>
+        {/* ===== Results header (query echo / category / brand default) ===== */}
+        <header className={styles.resultsHeader}>
+          <h1 className={styles.resultsHeading}>{resultsHeading}</h1>
+          <p className={styles.resultsSub}>{resultSummary}</p>
+        </header>
+
+        {/* ===== Filter / sort chip toolbar ===== */}
+        <div className={styles.toolbar}>
+          <button
+            className={styles.filterBtn}
+            onClick={() => setMobileFiltersOpen(true)}
+            ref={mobileTriggerRef}
+            aria-haspopup="dialog"
+            aria-expanded={mobileFiltersOpen}
+          >
+            <FilterIcon />
+            <span>Filters</span>
+            {hasActiveFilters && <span className={styles.filterBadge} />}
+          </button>
+
+          <div className={styles.chipScroller}>
+            {/* Category chips (top-level) */}
+            {topCategories.length > 0 && (
+              <div className={styles.chipGroup} role="group" aria-label="Category">
+                {topCategories.map((cat) => {
+                  const active = selectedCategories.some(
+                    (t) => t === cat.slug || String(t) === String(cat.id)
+                  );
+                  return (
+                    <button
+                      key={cat.id || cat.slug}
+                      type="button"
+                      className={`${styles.chip} ${active ? styles.chipActive : ""}`}
+                      onClick={() => handleCategoryToggle(categoryParam(cat))}
+                      aria-pressed={active}
+                    >
+                      {cat.name}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* Price-range chips */}
+            <div className={styles.chipGroup} role="group" aria-label="Price range">
+              {PRICE_RANGES.map((range) => {
+                const active = isPriceRangeActive(range);
+                return (
+                  <button
+                    key={range.label}
+                    type="button"
+                    className={`${styles.chip} ${active ? styles.chipActive : ""}`}
+                    onClick={() => handlePriceRangeToggle(range)}
+                    aria-pressed={active}
+                  >
+                    {range.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Fabric chips — hidden when no product exposes a fabric */}
+            {availableFabrics.length > 0 && (
+              <div className={styles.chipGroup} role="group" aria-label="Fabric">
+                {availableFabrics.map((fabric) => {
+                  const active = selectedFabrics.includes(fabric);
+                  return (
+                    <button
+                      key={fabric}
+                      type="button"
+                      className={`${styles.chip} ${active ? styles.chipActive : ""}`}
+                      onClick={() => handleFabricToggle(fabric)}
+                      aria-pressed={active}
+                    >
+                      {fabric}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Sort */}
+          <label className={styles.sortLabel}>
+            <span className={styles.sortLabelText}>Sort</span>
+            <select
+              value={sortBy}
+              onChange={(e) => handleSortChange(e.target.value)}
+              className={styles.sortSelect}
+              aria-label="Sort products by"
+            >
+              {SORT_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+
+        {/* Product grid / states */}
+        {loading ? (
+          <div className={styles.grid}>
+            {Array.from({ length: perPage }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        ) : fetchError ? (
+          /* Fetch failed — never masquerade as "No silk found" */
+          <div className={styles.emptyState}>
+            <div className={styles.errorIcon}>
+              <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="8" x2="12" y2="12" />
+                <line x1="12" y1="16" x2="12.01" y2="16" />
+              </svg>
+            </div>
+            <h3 className={styles.emptyTitle}>Couldn't load products</h3>
+            <p className={styles.emptyText}>
+              Something went wrong while fetching the catalogue. Please check
+              your connection and try again.
+            </p>
+            <button className={styles.emptyBtn} onClick={fetchCatalog}>
+              Try Again
+            </button>
+          </div>
+        ) : paginatedProducts.length > 0 ? (
+          <div className={styles.grid}>
+            {paginatedProducts.map((product, index) => (
+              <motion.div
+                key={product.id}
+                className={styles.cardWrap}
+                initial={shouldReduceMotion ? false : { opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: shouldReduceMotion ? 0 : Math.min(index * 0.04, 0.4) }}
+              >
+                <ProductCard
+                  product={product}
+                  onAddToCart={(cartItem) => addToCart(cartItem)}
+                  onToggleWishlist={(p) => toggleWishlist(p)}
+                  isWishlisted={isInWishlist(product.id)}
+                />
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          /* Honest empty state — bound to the real (zero) result set */
+          <div className={styles.emptyState}>
+            <EmptyIllustration />
+            <h3 className={styles.emptyTitle}>
+              {urlSearch ? (
+                <>No silk found for &ldquo;{urlSearch}&rdquo;</>
+              ) : (
+                "No silk matches your filters"
+              )}
+            </h3>
+            <p className={styles.emptyText}>
+              {urlSearch
+                ? "Try a different search, or relax a filter to see more of the collection."
+                : "Try relaxing a filter to see more of the collection."}
+            </p>
+            {hasAnyConstraint && (
+              <button className={styles.emptyBtn} onClick={clearAllFilters}>
+                Clear All Filters
               </button>
             )}
           </div>
-          {renderFilters(false)}
-        </aside>
+        )}
 
-        {/* ===== Main content ===== */}
-        <main className={styles.main} ref={mainRef}>
-          {/* Sort bar */}
-          <div className={styles.sortBar}>
-            <div className={styles.sortBarLeft}>
-              {/* Mobile filter trigger */}
-              <button
-                className={styles.mobileFilterBtn}
-                onClick={() => setMobileFiltersOpen(true)}
-                ref={mobileTriggerRef}
-                aria-haspopup="dialog"
-                aria-expanded={mobileFiltersOpen}
-              >
-                <FilterIcon />
-                <span>Filters</span>
-                {hasActiveFilters && <span className={styles.filterBadge} />}
-              </button>
-
-              <span className={styles.resultsCount}>
-                {loading ? (
-                  "Loading products…"
-                ) : fetchError ? (
-                  "Couldn't load products"
-                ) : filteredProducts.length === 0 ? (
-                  "No products found"
-                ) : filteredProducts.length > perPage ? (
-                  <>
-                    Showing{" "}
-                    <strong>
-                      {(safePage - 1) * perPage + 1}&ndash;
-                      {Math.min(safePage * perPage, filteredProducts.length)}
-                    </strong>{" "}
-                    of <strong>{filteredProducts.length}</strong> products
-                  </>
-                ) : (
-                  <>
-                    Showing <strong>{filteredProducts.length}</strong>{" "}
-                    {filteredProducts.length === 1 ? "product" : "products"}
-                  </>
-                )}
-              </span>
-            </div>
-
-            <div className={styles.sortBarRight}>
-              <label className={styles.sortLabel}>
-                Sort by:
+        {/* Pagination */}
+        {!loading && !fetchError && filteredProducts.length > perPage && (
+          <div className={styles.pagination}>
+            <div className={styles.paginationLeft}>
+              <label className={styles.perPageLabel}>
+                Items per page:
                 <select
-                  value={sortBy}
-                  onChange={(e) => handleSortChange(e.target.value)}
-                  className={styles.sortSelect}
+                  value={perPage}
+                  onChange={(e) => handlePerPageChange(Number(e.target.value))}
+                  className={styles.perPageSelect}
                 >
-                  {SORT_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
+                  {PER_PAGE_OPTIONS.map((n) => (
+                    <option key={n} value={n}>{n}</option>
                   ))}
                 </select>
               </label>
-
-              <div className={styles.viewToggle}>
-                <button
-                  className={`${styles.viewBtn} ${viewMode === "grid" ? styles.viewBtnActive : ""}`}
-                  onClick={() => setViewMode("grid")}
-                  aria-label="Grid view"
-                >
-                  <GridIcon />
-                </button>
-                <button
-                  className={`${styles.viewBtn} ${viewMode === "list" ? styles.viewBtnActive : ""}`}
-                  onClick={() => setViewMode("list")}
-                  aria-label="List view"
-                >
-                  <ListIcon />
-                </button>
-              </div>
             </div>
-          </div>
 
-          {/* Product grid / list */}
-          {loading ? (
-            <div className={`${styles.grid} ${viewMode === "list" ? styles.gridList : ""}`}>
-              {Array.from({ length: perPage }).map((_, i) => (
-                <SkeletonCard key={i} />
-              ))}
-            </div>
-          ) : fetchError ? (
-            /* Fetch failed — never masquerade as "No products found" */
-            <div className={styles.emptyState}>
-              <div className={styles.errorIcon}>
-                <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="12" y1="8" x2="12" y2="12" />
-                  <line x1="12" y1="16" x2="12.01" y2="16" />
-                </svg>
-              </div>
-              <h3 className={styles.emptyTitle}>Couldn't load products</h3>
-              <p className={styles.emptyText}>
-                Something went wrong while fetching the catalogue. Please check
-                your connection and try again.
-              </p>
-              <button className={styles.emptyBtn} onClick={fetchCatalog}>
-                Try Again
+            <div className={styles.paginationCenter}>
+              <button
+                className={styles.pageBtn}
+                disabled={safePage <= 1}
+                onClick={() => handlePageChange(safePage - 1)}
+                aria-label="Previous page"
+              >
+                <ChevronLeft />
+                <span className={styles.pageBtnText}>Prev</span>
+              </button>
+
+              {paginationRange.map((item, i) =>
+                item === "..." ? (
+                  <span key={`ellipsis-${i}`} className={styles.pageEllipsis}>
+                    ...
+                  </span>
+                ) : (
+                  <button
+                    key={item}
+                    className={`${styles.pageBtn} ${safePage === item ? styles.pageBtnActive : ""}`}
+                    onClick={() => handlePageChange(item)}
+                  >
+                    {item}
+                  </button>
+                )
+              )}
+
+              <button
+                className={styles.pageBtn}
+                disabled={safePage >= totalPages}
+                onClick={() => handlePageChange(safePage + 1)}
+                aria-label="Next page"
+              >
+                <span className={styles.pageBtnText}>Next</span>
+                <ChevronRight />
               </button>
             </div>
-          ) : paginatedProducts.length > 0 ? (
-            <div className={`${styles.grid} ${viewMode === "list" ? styles.gridList : ""}`}>
-              {paginatedProducts.map((product, index) => renderProductCard(product, index))}
+
+            <div className={styles.paginationRight}>
+              <span className={styles.pageInfo}>
+                Page {safePage} of {totalPages}
+              </span>
             </div>
-          ) : (
-            <div className={styles.emptyState}>
-              <EmptyIllustration />
-              <h3 className={styles.emptyTitle}>No products found</h3>
-              <p className={styles.emptyText}>
-                {urlSearch ? (
-                  <>
-                    We could not find any products matching{" "}
-                    <strong>&ldquo;{urlSearch}&rdquo;</strong>. Try a different
-                    search or adjust your filters.
-                  </>
-                ) : (
-                  "We could not find any products matching your criteria. Try adjusting your filters."
-                )}
-              </p>
-              {hasAnyConstraint && (
-                <button className={styles.emptyBtn} onClick={clearAllFilters}>
-                  Clear All Filters
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* Pagination */}
-          {!loading && filteredProducts.length > perPage && (
-            <div className={styles.pagination}>
-              <div className={styles.paginationLeft}>
-                <label className={styles.perPageLabel}>
-                  Items per page:
-                  <select
-                    value={perPage}
-                    onChange={(e) => handlePerPageChange(Number(e.target.value))}
-                    className={styles.perPageSelect}
-                  >
-                    {PER_PAGE_OPTIONS.map((n) => (
-                      <option key={n} value={n}>{n}</option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-
-              <div className={styles.paginationCenter}>
-                <button
-                  className={styles.pageBtn}
-                  disabled={safePage <= 1}
-                  onClick={() => handlePageChange(safePage - 1)}
-                  aria-label="Previous page"
-                >
-                  <ChevronLeft />
-                  <span className={styles.pageBtnText}>Prev</span>
-                </button>
-
-                {paginationRange.map((item, i) =>
-                  item === "..." ? (
-                    <span key={`ellipsis-${i}`} className={styles.pageEllipsis}>
-                      ...
-                    </span>
-                  ) : (
-                    <button
-                      key={item}
-                      className={`${styles.pageBtn} ${safePage === item ? styles.pageBtnActive : ""}`}
-                      onClick={() => handlePageChange(item)}
-                    >
-                      {item}
-                    </button>
-                  )
-                )}
-
-                <button
-                  className={styles.pageBtn}
-                  disabled={safePage >= totalPages}
-                  onClick={() => handlePageChange(safePage + 1)}
-                  aria-label="Next page"
-                >
-                  <span className={styles.pageBtnText}>Next</span>
-                  <ChevronRight />
-                </button>
-              </div>
-
-              <div className={styles.paginationRight}>
-                <span className={styles.pageInfo}>
-                  Page {safePage} of {totalPages}
-                </span>
-              </div>
-            </div>
-          )}
-        </main>
+          </div>
+        )}
       </div>
 
-      {/* ===== Mobile filter bottom sheet ===== */}
+      {/* ===== Filter sheet (bottom sheet on mobile, drawer on desktop) ===== */}
       <AnimatePresence>
         {mobileFiltersOpen && (
           <motion.div
@@ -1254,7 +1280,7 @@ const Products = () => {
                   <CloseIcon />
                 </button>
               </div>
-              <div className={styles.bottomSheetBody}>{renderFilters(true)}</div>
+              <div className={styles.bottomSheetBody}>{renderFilters()}</div>
               <div className={styles.bottomSheetFooter}>
                 <button
                   className={styles.bottomSheetClearBtn}
