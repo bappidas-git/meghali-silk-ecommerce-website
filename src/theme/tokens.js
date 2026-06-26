@@ -50,9 +50,9 @@ export const TRUST_BADGE_CATALOG = {
 
 // --- The per-client storefront configuration --------------------------------
 export const STOREFRONT_CONFIG = {
-  // Which trust badges appear near the buy box, in order. Domain-agnostic
-  // defaults; a furniture or beauty client can reorder/swap these freely.
-  trustBadges: ["genuine", "securePayment", "easyReturns", "freeShipping"],
+  // Which trust badges appear near the buy box, in order. For Meghali's Silk
+  // this maps to: 7-Day Returns / Authentic Silk / Free Shipping / Support.
+  trustBadges: ["easyReturns", "genuine", "freeShipping", "support"],
 
   // Returns policy window (days). Drives the "Easy Returns" badge + the
   // Delivery & Returns panel copy. Set to 0 to advertise "no returns".

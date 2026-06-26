@@ -5,40 +5,40 @@
     <link rel="icon" type="image/svg+xml" href="%PUBLIC_URL%/favicon.svg" />
     <link rel="alternate icon" type="image/png" href="%PUBLIC_URL%/logo192.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#667eea" />
+    <meta name="theme-color" content="#0B3B2E" />
     <meta
       name="description"
-      content="Your ultimate destination for online shopping. Fast, secure, and reliable delivery for all your favourite products at the best prices."
+      content="Meghali's Silk — a heritage handloom silk house offering authentic women's silk sarees and ethnic wear, woven by master artisans. Free shipping, 7-day easy returns."
     />
     <meta
       name="keywords"
-      content="online shopping, e-commerce, products, deals, electronics, fashion, home, beauty, sports, accessories"
+      content="silk sarees, handloom silk, ethnic wear, women's silk apparel, authentic silk, banarasi, kanjivaram, tussar, Meghali's Silk, heritage handloom"
     />
-    <meta name="author" content="My Store" />
+    <meta name="author" content="Meghali's Silk" />
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://mystore.com/" />
+    <meta property="og:url" content="https://meghalissilk.com/" />
     <meta
       property="og:title"
-      content="My Store - Shop the Best Products Online"
+      content="Meghali's Silk — Authentic Handloom Silk Sarees & Ethnic Wear"
     />
     <meta
       property="og:description"
-      content="Fast, secure, and reliable delivery for all your favourite products. Shop now and enjoy exclusive deals."
+      content="Heritage handloom silk, woven for you. Discover authentic women's silk sarees and ethnic wear from Meghali's Silk."
     />
     <meta property="og:image" content="%PUBLIC_URL%/logo512.png" />
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image" />
-    <meta property="twitter:url" content="https://mystore.com/" />
+    <meta property="twitter:url" content="https://meghalissilk.com/" />
     <meta
       property="twitter:title"
-      content="My Store - Shop the Best Products Online"
+      content="Meghali's Silk — Authentic Handloom Silk Sarees & Ethnic Wear"
     />
     <meta
       property="twitter:description"
-      content="Fast, secure, and reliable delivery for all your favourite products. Shop now and enjoy exclusive deals."
+      content="Heritage handloom silk, woven for you. Discover authentic women's silk sarees and ethnic wear from Meghali's Silk."
     />
     <meta property="twitter:image" content="%PUBLIC_URL%/logo512.png" />
 
@@ -49,11 +49,11 @@
     -->
     <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
 
-    <!-- Google Fonts - Inter -->
+    <!-- Google Fonts - Cormorant Garamond (display) + Inter (body/UI) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@300;400;500;600;700;800;900&display=swap"
       rel="stylesheet"
     />
 
@@ -72,7 +72,7 @@
       work correctly both with client-side routing and a non-root public URL.
       Learn how to configure a non-root public URL by running `npm run build`.
     -->
-    <title>My Store - Shop the Best Products Online</title>
+    <title>Meghali's Silk — Authentic Handloom Silk Sarees & Ethnic Wear</title>
 
     <!-- Custom styles for loading screen -->
     <style>
@@ -84,7 +84,7 @@
           "Helvetica Neue", sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #0B0C0B 0%, #101312 100%);
         min-height: 100vh;
       }
 
@@ -95,7 +95,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: linear-gradient(160deg, #0a0e1a 0%, #0d1224 50%, #0f0f23 100%);
+        background: linear-gradient(160deg, #0B0C0B 0%, #0A2E24 55%, #0B3B2E 100%);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -112,9 +112,9 @@
         width: 100%;
         height: 100%;
         background:
-          radial-gradient(ellipse at 20% 20%, rgba(139, 92, 246, 0.08) 0%, transparent 50%),
-          radial-gradient(ellipse at 80% 80%, rgba(236, 72, 153, 0.06) 0%, transparent 50%),
-          radial-gradient(ellipse at 50% 50%, rgba(59, 130, 246, 0.04) 0%, transparent 70%);
+          radial-gradient(ellipse at 20% 20%, rgba(230, 194, 122, 0.08) 0%, transparent 50%),
+          radial-gradient(ellipse at 80% 80%, rgba(18, 184, 134, 0.07) 0%, transparent 50%),
+          radial-gradient(ellipse at 50% 50%, rgba(11, 59, 46, 0.10) 0%, transparent 70%);
         pointer-events: none;
       }
 
@@ -154,11 +154,11 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(236, 72, 153, 0.1) 100%);
+        background: #0B3B2E; /* logo-on-green rule: logo panel always deep green */
         border-radius: 20px;
-        border: 1px solid rgba(139, 92, 246, 0.2);
+        border: 1px solid rgba(203, 163, 90, 0.3);
         box-shadow:
-          0 0 40px rgba(139, 92, 246, 0.15),
+          0 0 40px rgba(230, 194, 122, 0.15),
           inset 0 1px 0 rgba(255, 255, 255, 0.05);
         animation: logoFloat 3s ease-in-out infinite;
       }
@@ -172,7 +172,8 @@
         font-size: 28px;
         font-weight: 700;
         letter-spacing: 3px;
-        background: linear-gradient(135deg, #ffffff 0%, #a78bfa 50%, #ec4899 100%);
+        font-family: "Cormorant Garamond", "Playfair Display", Georgia, serif;
+        background: linear-gradient(135deg, #E6C27A 0%, #CBA35A 50%, #B6863C 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -201,7 +202,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        border: 2px solid rgba(139, 92, 246, 0.1);
+        border: 2px solid rgba(203, 163, 90, 0.12);
         border-radius: 50%;
       }
 
@@ -212,8 +213,8 @@
         width: 100%;
         height: 100%;
         border: 2px solid transparent;
-        border-top-color: #a78bfa;
-        border-right-color: #a78bfa;
+        border-top-color: #E6C27A;
+        border-right-color: #E6C27A;
         border-radius: 50%;
         animation: spinnerRotate 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
       }
@@ -225,8 +226,8 @@
         right: 6px;
         bottom: 6px;
         border: 2px solid transparent;
-        border-bottom-color: rgba(236, 72, 153, 0.6);
-        border-left-color: rgba(236, 72, 153, 0.6);
+        border-bottom-color: rgba(18, 184, 134, 0.6);
+        border-left-color: rgba(18, 184, 134, 0.6);
         border-radius: 50%;
         animation: spinnerRotateReverse 1.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
       }
@@ -238,9 +239,9 @@
         transform: translateX(-50%);
         width: 6px;
         height: 6px;
-        background: #a78bfa;
+        background: #E6C27A;
         border-radius: 50%;
-        box-shadow: 0 0 12px rgba(167, 139, 250, 0.8);
+        box-shadow: 0 0 12px rgba(230, 194, 122, 0.8);
       }
 
       /* Loading Text */
@@ -279,7 +280,7 @@
       .loader-progress {
         width: 120px;
         height: 2px;
-        background: rgba(139, 92, 246, 0.1);
+        background: rgba(203, 163, 90, 0.12);
         border-radius: 2px;
         overflow: hidden;
       }
@@ -287,7 +288,7 @@
       .loader-progress-bar {
         height: 100%;
         width: 30%;
-        background: linear-gradient(90deg, #a78bfa 0%, #ec4899 100%);
+        background: linear-gradient(90deg, #E6C27A 0%, #12B886 100%);
         border-radius: 2px;
         animation: progressSlide 1.5s ease-in-out infinite;
       }
@@ -421,23 +422,23 @@
                 <path d="M2 12L12 17L22 12" stroke="url(#gradient3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 <defs>
                   <linearGradient id="gradient1" x1="2" y1="7" x2="22" y2="7" gradientUnits="userSpaceOnUse">
-                    <stop stop-color="#a78bfa"/>
-                    <stop offset="1" stop-color="#ec4899"/>
+                    <stop stop-color="#E6C27A"/>
+                    <stop offset="1" stop-color="#12B886"/>
                   </linearGradient>
                   <linearGradient id="gradient2" x1="2" y1="19.5" x2="22" y2="19.5" gradientUnits="userSpaceOnUse">
-                    <stop stop-color="#a78bfa"/>
-                    <stop offset="1" stop-color="#ec4899"/>
+                    <stop stop-color="#E6C27A"/>
+                    <stop offset="1" stop-color="#12B886"/>
                   </linearGradient>
                   <linearGradient id="gradient3" x1="2" y1="14.5" x2="22" y2="14.5" gradientUnits="userSpaceOnUse">
-                    <stop stop-color="#a78bfa"/>
-                    <stop offset="1" stop-color="#ec4899"/>
+                    <stop stop-color="#E6C27A"/>
+                    <stop offset="1" stop-color="#12B886"/>
                   </linearGradient>
                 </defs>
               </svg>
             </div>
           </div>
-          <div class="loader-brand-name">MY STORE</div>
-          <div class="loader-tagline">Your Online Shopping Destination</div>
+          <div class="loader-brand-name">MEGHALI'S SILK</div>
+          <div class="loader-tagline">Heritage Handloom Silk, Woven For You</div>
         </div>
 
         <!-- Spinner -->
@@ -478,16 +479,15 @@
       // first paint already has the correct theme (matches src/context/ThemeContext.js,
       // which keys CSS off body.dark / body.light). Avoids a flash of the wrong theme.
       (function () {
+        // Dark is the default for Meghali's Silk (mirrors src/context/ThemeContext.js):
+        // dark unless the user has explicitly chosen light.
         var savedTheme = localStorage.getItem("theme");
-        var prefersDark = window.matchMedia(
-          "(prefers-color-scheme: dark)"
-        ).matches;
-        var isDark = savedTheme === "dark" || (!savedTheme && prefersDark);
+        var isDark = savedTheme !== "light";
 
         document.body.classList.add(isDark ? "dark" : "light");
         document.body.style.background = isDark
-          ? "linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%)"
-          : "linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%)";
+          ? "linear-gradient(135deg, #0B0C0B 0%, #15171A 100%)"
+          : "linear-gradient(135deg, #FBF8F2 0%, #FFFFFF 100%)";
       })();
 
       // Hide the loading screen once React has mounted. React signals readiness

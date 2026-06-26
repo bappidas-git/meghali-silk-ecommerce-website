@@ -1,6 +1,6 @@
 {
-  "short_name": "My Store",
-  "name": "My Store - Online Shopping",
+  "short_name": "Meghali's Silk",
+  "name": "Meghali's Silk",
   "icons": [
     {
       "src": "favicon.svg",
@@ -23,6 +23,6 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#667eea",
-  "background_color": "#f5f7fa"
+  "theme_color": "#0B3B2E",
+  "background_color": "#0B0C0B"
 }
