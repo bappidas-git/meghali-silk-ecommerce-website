@@ -19,6 +19,9 @@ bridal & ethnic wear).
    `src/services/api.js` (`apiService`); **do not modify the admin panel** except the dedicated logo
    prompt (27); preserve all `db.json` JSON shapes and the **JSON Server ↔ Laravel swap contract**; honor
    **authenticity > persuasion** (no fabricated reviews/stock/urgency); accessibility + mobile-first.
+5. **Catalog data — pick ONE path:** run the granular **03 → 06** sequence, **or** the consolidated
+   all-in-one **31** (it seeds the entire `db.json` catalogue in a single session). They produce the same
+   dataset — **do not run both.** Everything else (01–02, 07–30) is unaffected by which you choose.
 
 ## Brand system at a glance
 - **Dark-first** charcoal canvas (`#0B0C0B`), deep bottle-green brand panels (`#0B3B2E`), **gold/
@@ -86,6 +89,16 @@ bridal & ethnic wear).
 | 28 | Cross-Cutting Storefront Polish & Consistency | all | `src/components/*` (storefront), `src/pages/*` (non-admin) |
 | 29 | Final QA & Acceptance (End-to-End) | all | whole storefront (verification + minimal fixes) |
 | 30 | Brand & Usage Guide | — | `BRAND_README.md` (new) |
+
+## Optional / Alternative — Consolidated Catalog Data
+| # | Title | Designs | Key files |
+|---|-------|---------|-----------|
+| 31 | Seed db.json with the Full Meghali's Silk Catalogue (All-in-One) | `PRODUCT LISTING.png`, `HOME PAGE WITH FOOTER.png` | `db.json` (categories 1–13, ~33 products 1–33, banners, coupons, shipping, reviews, settings, dealsConfig) |
+
+> **Prompt 31 is a single-session alternative to Batch B (03–06)** — it replaces the entire generic
+> catalogue with the cohesive silk dataset in one pass (taxonomy, products with variants/SKUs/prices/
+> imagery/ratings/labels, approved reviews, coupons, `dealsConfig`, brand `settings`), using the exact
+> existing schema shapes. **Run 03–06 _or_ 31, never both.**
 
 ---
 
