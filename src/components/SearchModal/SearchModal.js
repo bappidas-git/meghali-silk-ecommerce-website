@@ -9,15 +9,25 @@ import styles from "./SearchModal.module.css";
 // ---------------------------------------------------------------------------
 // Static config
 // ---------------------------------------------------------------------------
-const TRENDING_SEARCHES = [
-  "Laptop",
-  "Earbuds",
-  "Smartwatch",
-  "Saree",
-  "Running Shoes",
-  "Bedsheet",
-  "T-Shirt",
-  "Speaker",
+// Owner/brand-curated phrases — NOT fabricated data and NOT an "AI answer".
+// Each one simply seeds a normal product query (see handleChipSearch), so the
+// real search engine still produces the real result count. Labelled clearly in
+// the UI as "AI Suggestions" curated picks.
+const AI_SUGGESTIONS = [
+  "Elegant silk sarees for wedding",
+  "Luxury bridal collection",
+  "Premium festive wear",
+];
+
+// Curated trending silk searches (clearly a curated list). The trend-up icon is
+// decorative — we never show fabricated trend percentages or counts. If real
+// trending data is available it overrides this list (see the load effect).
+const CURATED_TRENDING = [
+  "Designer Silk Sarees",
+  "Premium Wedding Collection",
+  "Gold Border Saree",
+  "Festive Collection",
+  "Traditional Handloom",
 ];
 
 // Category filter chips (and the slugs each one matches) are derived at runtime
@@ -27,6 +37,7 @@ const TRENDING_SEARCHES = [
 const RECENT_SEARCHES_KEY = "recentSearches";
 const MAX_RECENT_SEARCHES = 8;
 const MAX_RESULTS = 12;
+const MAX_TRENDING = 5;
 const DEBOUNCE_MS = 300;
 
 // Inline SVG fallback (no external host) shown if a product image fails to load.
@@ -226,7 +237,8 @@ const scoreProduct = (product, lowerQuery, catInfo) => {
 
 // ---------------------------------------------------------------------------
 // Inline SVG icons (match the SVG icon set used across the storefront instead
-// of inconsistent emoji/Unicode glyphs).
+// of inconsistent emoji/Unicode glyphs). Stroke colour inherits via
+// currentColor so the icons are token-driven from their CSS context.
 // ---------------------------------------------------------------------------
 const Icon = {
   Search: (props) => (
@@ -253,6 +265,13 @@ const Icon = {
       <polyline points="17 6 23 6 23 12" />
     </svg>
   ),
+  // Sparkle / "AutoAwesome" — labels the curated AI Suggestions section.
+  Sparkle: (props) => (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none" {...props}>
+      <path d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8L12 2z" />
+      <path d="M19 14l.9 2.6L22.5 17.5l-2.6.9L19 21l-.9-2.6L15.5 17.5l2.6-.9L19 14z" opacity="0.7" />
+    </svg>
+  ),
   Arrow: (props) => (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
       <line x1="5" y1="12" x2="19" y2="12" />
@@ -269,7 +288,9 @@ const Icon = {
 };
 
 // Star rating rendered with inline SVG (filled / half / empty), matching the
-// Products page. A unique gradient id per product avoids cross-card collisions.
+// Products page. Colour comes from currentColor (the .stars wrapper sets it to
+// --sf-color-star), so no hex is hardcoded. A unique gradient id per product
+// avoids cross-card collisions.
 const StarRating = ({ rating = 0, idKey }) => {
   const r = Math.round((Number(rating) || 0) * 2) / 2;
   const gradId = `searchStarHalf-${idKey}`;
@@ -278,15 +299,15 @@ const StarRating = ({ rating = 0, idKey }) => {
       <svg className={styles.starDefs} aria-hidden="true" focusable="false">
         <defs>
           <linearGradient id={gradId} x1="0" x2="1" y1="0" y2="0">
-            <stop offset="50%" stopColor="#f59e0b" />
+            <stop offset="50%" stopColor="currentColor" />
             <stop offset="50%" stopColor="transparent" />
           </linearGradient>
         </defs>
       </svg>
       {[1, 2, 3, 4, 5].map((i) => {
-        const fill = i <= Math.floor(r) ? "#f59e0b" : i - 0.5 === r ? `url(#${gradId})` : "none";
+        const fill = i <= Math.floor(r) ? "currentColor" : i - 0.5 === r ? `url(#${gradId})` : "none";
         return (
-          <svg key={i} width="13" height="13" viewBox="0 0 24 24" fill={fill} stroke="#f59e0b" strokeWidth="1.5" aria-hidden="true">
+          <svg key={i} width="13" height="13" viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
             <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
           </svg>
         );
@@ -302,6 +323,8 @@ const SearchModal = ({ open, onClose }) => {
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
   const inputRef = useRef(null);
+  const modalRef = useRef(null);
+  const triggerRef = useRef(null);
   const debounceTimerRef = useRef(null);
   const activeCategoryRef = useRef("All");
 
@@ -313,6 +336,7 @@ const SearchModal = ({ open, onClose }) => {
   const [isSearching, setIsSearching] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All");
   const [recentSearches, setRecentSearches] = useState([]);
+  const [trendingTerms, setTrendingTerms] = useState(CURATED_TRENDING);
 
   // Keep a ref of the active category so the debounced query effect always uses
   // the latest value without re-subscribing on every chip change.
@@ -369,6 +393,22 @@ const SearchModal = ({ open, onClose }) => {
         if (active) console.error("Failed to load search data:", err);
       });
 
+    // Optionally derive Trending from real data; fall back to the curated list
+    // on error / empty. The labels seed normal queries — no fabricated metrics.
+    apiService.products
+      .getTrending(MAX_TRENDING)
+      .then((list) => {
+        if (!active) return;
+        const labels = (Array.isArray(list) ? list : [])
+          .map((p) => p && p.name)
+          .filter(Boolean)
+          .slice(0, MAX_TRENDING);
+        if (labels.length) setTrendingTerms(labels);
+      })
+      .catch(() => {
+        /* keep the curated fallback */
+      });
+
     const focusTimer = setTimeout(() => inputRef.current?.focus(), 120);
     return () => {
       active = false;
@@ -387,11 +427,51 @@ const SearchModal = ({ open, onClose }) => {
     };
   }, [open]);
 
-  // Escape to close (single listener, added/removed with open state).
+  // Remember the element that opened the overlay and restore focus to it on
+  // close, so keyboard users land back on the trigger.
+  useEffect(() => {
+    if (open) {
+      triggerRef.current = document.activeElement;
+      return undefined;
+    }
+    const trigger = triggerRef.current;
+    triggerRef.current = null;
+    if (trigger && typeof trigger.focus === "function") {
+      // Defer until after the exit animation unmounts the dialog.
+      const t = setTimeout(() => trigger.focus(), 0);
+      return () => clearTimeout(t);
+    }
+    return undefined;
+  }, [open]);
+
+  // Escape to close + focus trap (Tab / Shift+Tab cycle within the overlay).
   useEffect(() => {
     if (!open) return undefined;
     const handleKeyDown = (e) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const modal = modalRef.current;
+      if (!modal) return;
+      const focusable = Array.from(
+        modal.querySelectorAll(
+          'a[href], button:not([disabled]), input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((el) => el.offsetParent !== null || el === document.activeElement);
+      if (!focusable.length) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first || !modal.contains(document.activeElement)) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else if (document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
@@ -446,7 +526,12 @@ const SearchModal = ({ open, onClose }) => {
     navigate(productPath(product));
   };
 
-  const handleChipSearch = (term) => setQuery(term);
+  // Seed the query with a curated phrase / recent / trending term so the real
+  // debounced search runs. Returns focus to the input for continued typing.
+  const handleChipSearch = (term) => {
+    setQuery(term);
+    inputRef.current?.focus();
+  };
 
   const handleClearRecent = () => {
     clearRecentSearches();
@@ -485,13 +570,14 @@ const SearchModal = ({ open, onClose }) => {
           onClick={onClose}
           role="dialog"
           aria-modal="true"
-          aria-label="Product search"
+          aria-label="Search Meghali's Silk"
         >
           <motion.div
+            ref={modalRef}
             className={styles.modal}
-            initial={{ opacity: 0, y: -30 }}
+            initial={{ opacity: 0, y: -24 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -30 }}
+            exit={{ opacity: 0, y: -24 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -505,11 +591,11 @@ const SearchModal = ({ open, onClose }) => {
                   ref={inputRef}
                   type="text"
                   className={styles.searchInput}
-                  placeholder="Search for products, brands, categories..."
+                  placeholder="Search for silk sarees..."
                   value={query}
                   onChange={handleInputChange}
                   autoComplete="off"
-                  aria-label="Search products"
+                  aria-label="Search for silk sarees"
                 />
                 {query && (
                   <button
@@ -538,8 +624,8 @@ const SearchModal = ({ open, onClose }) => {
                 <button
                   key={cat}
                   type="button"
-                  className={`${styles.categoryChip} ${
-                    activeCategory === cat ? styles.categoryChipActive : ""
+                  className={`sf-chip ${styles.categoryChip} ${
+                    activeCategory === cat ? "sf-chip--active" : ""
                   }`}
                   onClick={() => handleCategoryClick(cat)}
                 >
@@ -633,11 +719,43 @@ const SearchModal = ({ open, onClose }) => {
                 </div>
               ) : (
                 <div className={styles.defaultContent}>
+                  {/* AI Suggestions — curated phrases that seed a real query */}
+                  <div className={styles.section}>
+                    <h3 className={styles.sectionTitle}>
+                      <span className={styles.titleIcon}>
+                        <Icon.Sparkle />
+                      </span>
+                      AI Suggestions
+                    </h3>
+                    <div className={styles.suggestionList}>
+                      {AI_SUGGESTIONS.map((phrase) => (
+                        <button
+                          key={phrase}
+                          type="button"
+                          className={styles.suggestionRow}
+                          onClick={() => handleChipSearch(phrase)}
+                        >
+                          <span className={styles.suggestionDot}>
+                            <Icon.Sparkle width="13" height="13" />
+                          </span>
+                          <span className={styles.suggestionText}>{phrase}</span>
+                          <span className={styles.suggestionArrow}>
+                            <Icon.Arrow width="15" height="15" />
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Recent Searches — persisted in localStorage */}
                   {recentSearches.length > 0 && (
                     <div className={styles.section}>
                       <div className={styles.sectionHeader}>
                         <h3 className={styles.sectionTitle}>
-                          <Icon.Clock /> Recent Searches
+                          <span className={styles.titleIcon}>
+                            <Icon.Clock />
+                          </span>
+                          Recent Searches
                         </h3>
                         <button
                           type="button"
@@ -652,7 +770,7 @@ const SearchModal = ({ open, onClose }) => {
                           <button
                             key={term}
                             type="button"
-                            className={styles.searchChip}
+                            className={`sf-chip ${styles.recentChip}`}
                             onClick={() => handleChipSearch(term)}
                           >
                             <Icon.Clock width="13" height="13" />
@@ -663,20 +781,27 @@ const SearchModal = ({ open, onClose }) => {
                     </div>
                   )}
 
+                  {/* Trending — numbered curated/derived list with trend-up icon */}
                   <div className={styles.section}>
                     <h3 className={styles.sectionTitle}>
-                      <Icon.Trending /> Trending Searches
+                      <span className={styles.titleIcon}>
+                        <Icon.Trending />
+                      </span>
+                      Trending
                     </h3>
-                    <div className={styles.chipGroup}>
-                      {TRENDING_SEARCHES.map((term) => (
+                    <div className={styles.trendingList}>
+                      {trendingTerms.map((term, idx) => (
                         <button
                           key={term}
                           type="button"
-                          className={styles.searchChip}
+                          className={styles.trendingRow}
                           onClick={() => handleChipSearch(term)}
                         >
-                          <Icon.Trending width="13" height="13" />
-                          {term}
+                          <span className={styles.trendingRank}>{idx + 1}</span>
+                          <span className={styles.trendingText}>{term}</span>
+                          <span className={styles.trendingIcon} aria-hidden="true">
+                            <Icon.Trending width="15" height="15" />
+                          </span>
                         </button>
                       ))}
                     </div>
