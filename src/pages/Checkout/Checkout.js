@@ -126,7 +126,7 @@ const Checkout = () => {
   const shippingCost = selectedShipping
     ? selectedShipping.rateType === "free" || (selectedShipping.freeAbove && subtotal >= selectedShipping.freeAbove) ? 0 : selectedShipping.flatRate
     : 0;
-  const taxRatePct = storeSettings?.store?.taxRate ?? 18;
+  const taxRatePct = storeSettings?.store?.taxRate ?? 5;
   const taxAmount = Math.round(Math.max(0, subtotal - couponDiscount) * (taxRatePct / 100));
   const total = subtotal - couponDiscount + shippingCost + taxAmount;
 
