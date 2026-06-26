@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+import confetti from "canvas-confetti";
 import { useTheme } from "../../context/ThemeContext";
 import apiService from "../../services/api";
 import { formatCurrency, formatDate, normalizeOrderAddress } from "../../utils/helpers";
@@ -16,6 +17,8 @@ const OrderConfirmation = () => {
   const [fetchError, setFetchError] = useState(false);
   const [copied, setCopied] = useState(false);
   const [showCheck, setShowCheck] = useState(false);
+  // Guards the celebratory confetti to a single one-shot burst per mount.
+  const confettiFiredRef = useRef(false);
 
   useEffect(() => {
     fetchOrder();
@@ -27,6 +30,26 @@ const OrderConfirmation = () => {
       const timer = setTimeout(() => setShowCheck(true), 300);
       return () => clearTimeout(timer);
     }
+  }, [order]);
+
+  // One-shot gold/emerald/green confetti on first successful load. Fired from an
+  // effect so it never blocks render, and skipped entirely when the user prefers
+  // reduced motion.
+  useEffect(() => {
+    if (!order || confettiFiredRef.current) return;
+    confettiFiredRef.current = true;
+    const prefersReducedMotion = window.matchMedia?.(
+      "(prefers-reduced-motion: reduce)"
+    )?.matches;
+    if (prefersReducedMotion) return;
+    confetti({
+      particleCount: 90,
+      spread: 75,
+      startVelocity: 38,
+      origin: { y: 0.3 },
+      colors: ["#E6C27A", "#12B886", "#0B3B2E"],
+      disableForReducedMotion: true,
+    });
   }, [order]);
 
   const fetchOrder = async () => {
@@ -311,6 +334,7 @@ const OrderConfirmation = () => {
                         <img
                           src={item.image || "https://placehold.co/72x72?text=Item"}
                           alt={item.name || "Product"}
+                          loading="lazy"
                         />
                       </div>
                       <div className={styles.itemInfo}>
@@ -441,6 +465,29 @@ const OrderConfirmation = () => {
               transition={{ delay: 0.5 }}
             >
               <button
+                className={styles.btnContinue}
+                onClick={() => navigate("/")}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
+                  <line x1="3" y1="6" x2="21" y2="6" />
+                  <path d="M16 10a4 4 0 01-8 0" />
+                </svg>
+                Continue Shopping
+              </button>
+              <button
+                className={styles.btnSecondary}
+                onClick={() => navigate("/orders")}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                  <line x1="8" y1="13" x2="16" y2="13" />
+                  <line x1="8" y1="17" x2="16" y2="17" />
+                </svg>
+                View Orders
+              </button>
+              <button
                 className={styles.btnTrack}
                 onClick={() => navigate("/orders")}
               >
@@ -451,17 +498,6 @@ const OrderConfirmation = () => {
                   <circle cx="18.5" cy="18.5" r="2.5" />
                 </svg>
                 Track Order
-              </button>
-              <button
-                className={styles.btnContinue}
-                onClick={() => navigate("/")}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
-                  <line x1="3" y1="6" x2="21" y2="6" />
-                  <path d="M16 10a4 4 0 01-8 0" />
-                </svg>
-                Continue Shopping
               </button>
               <button
                 className={styles.btnInvoice}

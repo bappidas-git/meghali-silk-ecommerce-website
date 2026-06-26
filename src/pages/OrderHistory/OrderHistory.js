@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Swal from "sweetalert2";
 import { useTheme } from "../../context/ThemeContext";
+import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../hooks/useAuth";
 import apiService from "../../services/api";
 import { formatCurrency, formatDate, normalizeOrderAddress } from "../../utils/helpers";
@@ -66,12 +67,14 @@ const deriveOrderStatus = (order) => {
 const OrderHistory = () => {
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
+  const { addToCart, setIsCartOpen } = useCart();
   const { user, isAuthenticated, isLoading: authLoading, openAuthModal } = useAuth();
 
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
   const [cancellingId, setCancellingId] = useState(null);
+  const [reorderingId, setReorderingId] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [activeFilter, setActiveFilter] = useState("All");
   const [expandedOrder, setExpandedOrder] = useState(null);
@@ -146,6 +149,78 @@ const OrderHistory = () => {
   // customer kept — derived status "delivered" (delivered, and NOT cancelled,
   // returned or refunded).
   const isReviewable = (order) => deriveOrderStatus(order) === "delivered";
+
+  // Reorder re-adds the order's lines through the cart. An item can only be
+  // re-added when it carries a productId (the key the cart lines on). We don't
+  // fabricate stock — items without a productId are skipped and reported.
+  const reorderableItems = (order) =>
+    (order.items || []).filter((it) => it.productId != null);
+
+  const handleReorder = async (order) => {
+    if (reorderingId) return;
+    const items = order.items || [];
+    const addable = reorderableItems(order);
+    const skipped = items.length - addable.length;
+
+    if (addable.length === 0) {
+      Swal.fire({
+        icon: "info",
+        title: "Couldn't reorder",
+        text: "These items are no longer available to add to your cart.",
+        toast: true,
+        position: "bottom-end",
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+      });
+      return;
+    }
+
+    setReorderingId(order.id);
+    try {
+      // Funnel each line through CartContext (no direct cart mutation). Keep the
+      // drawer closed per-add so it doesn't flash; we open it once at the end.
+      for (const it of addable) {
+        // eslint-disable-next-line no-await-in-loop
+        await addToCart(
+          {
+            productId: it.productId,
+            variantId: it.variantId ?? null,
+            variantName: it.variantName ?? null,
+            name: it.name,
+            image: it.image,
+            price: it.price,
+            currency: it.currency,
+          },
+          it.quantity || 1,
+          { openDrawer: false }
+        );
+      }
+      setIsCartOpen(true);
+      Swal.fire({
+        icon: "success",
+        title: "Added to cart",
+        text:
+          skipped > 0
+            ? `${addable.length} item${addable.length !== 1 ? "s" : ""} added — ${skipped} couldn't be re-added.`
+            : `${addable.length} item${addable.length !== 1 ? "s" : ""} added to your cart.`,
+        toast: true,
+        position: "bottom-end",
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+      });
+    } catch (err) {
+      console.error("Failed to reorder:", err);
+      Swal.fire({
+        icon: "error",
+        title: "Couldn't reorder",
+        text: "Something went wrong adding these items. Please try again.",
+      });
+    } finally {
+      setReorderingId(null);
+    }
+  };
 
   // The customer's existing review for a product (if any), to drive the
   // edit flow and the "your review" status chip.
@@ -511,6 +586,7 @@ const OrderHistory = () => {
                             <img
                               src={item.image || "https://placehold.co/64x64?text=Item"}
                               alt={item.name || "Product"}
+                              loading="lazy"
                             />
                           </div>
                         ))}
@@ -527,6 +603,39 @@ const OrderHistory = () => {
                         </div>
                       </div>
                     </div>
+
+                    {/* Status Timeline — derived only from deriveOrderStatus;
+                        hidden for cancelled/returned, where the badge says it. */}
+                    {(() => {
+                      const status = deriveOrderStatus(order);
+                      if (status === "cancelled" || status === "returned") return null;
+                      const idx =
+                        status === "delivered" ? 2 : status === "shipped" ? 1 : 0;
+                      const steps = ["Placed", "Shipped", "Delivered"];
+                      return (
+                        <div className={styles.statusTimeline}>
+                          {steps.map((label, i) => (
+                            <React.Fragment key={label}>
+                              {i > 0 && (
+                                <span
+                                  className={`${styles.timelineLine} ${i <= idx ? styles.timelineLineDone : ""}`}
+                                />
+                              )}
+                              <div className={styles.timelineStep}>
+                                <span
+                                  className={`${styles.timelineDot} ${i <= idx ? styles.timelineDotDone : ""}`}
+                                />
+                                <span
+                                  className={`${styles.timelineLabel} ${i <= idx ? styles.timelineLabelDone : ""}`}
+                                >
+                                  {label}
+                                </span>
+                              </div>
+                            </React.Fragment>
+                          ))}
+                        </div>
+                      );
+                    })()}
 
                     {/* Action Buttons */}
                     <div className={styles.cardActions}>
@@ -559,6 +668,34 @@ const OrderHistory = () => {
                           <circle cx="12" cy="12" r="3" />
                         </svg>
                         {isExpanded ? "Hide Details" : "View Details"}
+                      </button>
+                      <button
+                        className={styles.btnReorder}
+                        onClick={() => handleReorder(order)}
+                        disabled={
+                          reorderingId !== null ||
+                          reorderableItems(order).length === 0
+                        }
+                        title={
+                          reorderableItems(order).length === 0
+                            ? "These items can't be re-added to the cart"
+                            : "Add these items to your cart again"
+                        }
+                      >
+                        {reorderingId === order.id ? (
+                          <>
+                            <span className={styles.btnSpinner} />
+                            Adding...
+                          </>
+                        ) : (
+                          <>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="23 4 23 10 17 10" />
+                              <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
+                            </svg>
+                            Reorder
+                          </>
+                        )}
                       </button>
                       {isReturnEligible(order) && (
                         <button
@@ -685,6 +822,7 @@ const OrderHistory = () => {
                                       <img
                                         src={item.image || "https://placehold.co/56x56?text=Item"}
                                         alt={item.name || "Product"}
+                                        loading="lazy"
                                       />
                                     </div>
                                     <div className={styles.detailItemInfo}>
