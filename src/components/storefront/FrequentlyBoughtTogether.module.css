@@ -8,7 +8,8 @@
 
 .title {
   margin: 0 0 var(--sf-space-5);
-  font-size: var(--sf-text-lg);
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-xl);
   font-weight: var(--sf-font-bold);
   color: var(--sf-color-text);
 }
@@ -56,8 +57,8 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: var(--sf-color-primary);
-  color: #fff;
+  background: var(--sf-color-brand-green);
+  color: var(--sf-color-gold-light);
   font-size: var(--sf-text-xs);
   font-weight: var(--sf-font-medium);
   text-align: center;
@@ -146,16 +147,16 @@
   min-height: var(--sf-tap-target);
   border: none;
   border-radius: var(--sf-radius-md);
-  background: var(--sf-gradient-primary);
-  color: var(--sf-color-primary-contrast);
+  background: var(--sf-color-emerald);
+  color: var(--sf-color-emerald-contrast);
   font-weight: var(--sf-font-semibold);
   font-size: var(--sf-text-base);
   cursor: pointer;
-  transition: filter var(--sf-transition-fast), transform var(--sf-transition-fast);
+  transition: background var(--sf-transition-fast), transform var(--sf-transition-fast);
 }
 
 .addBtn:hover:not(:disabled) {
-  filter: brightness(1.05);
+  background: var(--sf-color-emerald-hover);
   transform: translateY(-1px);
 }
 

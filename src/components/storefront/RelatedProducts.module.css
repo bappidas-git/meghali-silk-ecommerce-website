@@ -4,8 +4,10 @@
 
 .title {
   margin: 0 0 var(--sf-space-5);
-  font-size: var(--sf-text-xl);
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-2xl);
   font-weight: var(--sf-font-bold);
+  letter-spacing: 0.01em;
   color: var(--sf-color-text);
 }
 

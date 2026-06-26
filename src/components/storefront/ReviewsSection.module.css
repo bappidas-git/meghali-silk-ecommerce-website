@@ -27,6 +27,7 @@
 }
 
 .avgNumber {
+  font-family: var(--sf-font-display);
   font-size: var(--sf-text-3xl);
   font-weight: var(--sf-font-bold);
   color: var(--sf-color-text);
