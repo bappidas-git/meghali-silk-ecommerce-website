@@ -1,10 +1,15 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../context/ThemeContext";
 import { isEmailValid } from "../../utils/helpers";
 import styles from "./AuthModal.module.css";
+
+/* The Meghali's Silk logo ships with its own deep-green background, so it must
+   always sit on a panel filled with that same green (--brand-logo-bg). */
+const LOGO_URL =
+  "https://res.cloudinary.com/dn9gyaiik/image/upload/v1782451315/Logo_gpxble.png";
 
 /* ------------------------------------------------------------------ */
 /*  SVG Icons                                                          */
@@ -173,6 +178,11 @@ const AuthModal = ({ open, onClose, defaultTab = "login" }) => {
   // Detect mobile
   const [isMobile, setIsMobile] = useState(false);
 
+  // Focus-trap refs: the dialog to constrain Tab within, and the element that
+  // had focus before opening so we can restore it on close (a11y).
+  const dialogRef = useRef(null);
+  const previousFocusRef = useRef(null);
+
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 640);
     checkMobile();
@@ -214,6 +224,54 @@ const AuthModal = ({ open, onClose, defaultTab = "login" }) => {
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open, onClose]);
+
+  // Focus trap: on open, move focus into the dialog and keep Tab/Shift+Tab
+  // cycling within it; on close, return focus to whatever opened the modal.
+  useEffect(() => {
+    if (!open) return;
+
+    previousFocusRef.current = document.activeElement;
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    const getFocusable = () =>
+      Array.from(
+        dialog.querySelectorAll(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((el) => el.offsetParent !== null || el === document.activeElement);
+
+    // Move focus to the first focusable control once the dialog has mounted.
+    const focusTimer = window.requestAnimationFrame(() => {
+      const focusables = getFocusable();
+      if (focusables[0]) focusables[0].focus();
+    });
+
+    const handleTab = (e) => {
+      if (e.key !== "Tab") return;
+      const focusables = getFocusable();
+      if (!focusables.length) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first || !dialog.contains(document.activeElement)) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else if (document.activeElement === last || !dialog.contains(document.activeElement)) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    dialog.addEventListener("keydown", handleTab);
+    return () => {
+      window.cancelAnimationFrame(focusTimer);
+      dialog.removeEventListener("keydown", handleTab);
+      const prev = previousFocusRef.current;
+      if (prev && typeof prev.focus === "function") prev.focus();
+    };
+  }, [open]);
 
   /* ---- Tab switching ---- */
 
@@ -394,6 +452,7 @@ const AuthModal = ({ open, onClose, defaultTab = "login" }) => {
           aria-label="Authentication"
         >
           <motion.div
+            ref={dialogRef}
             className={`${styles.dialog} ${isMobile ? styles.dialogMobile : ""}`}
             variants={isMobile ? mobileDialogVariants : desktopDialogVariants}
             initial="hidden"
@@ -408,6 +467,7 @@ const AuthModal = ({ open, onClose, defaultTab = "login" }) => {
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
+                  role="status"
                 >
                   <span className={styles.successIcon}><CheckIcon /></span>
                   {successMessage}
@@ -425,6 +485,12 @@ const AuthModal = ({ open, onClose, defaultTab = "login" }) => {
               <CloseIcon />
             </button>
 
+            {/* ---- Logo panel (logo sits on its own brand-green background) ---- */}
+            <div className={styles.logoPanel}>
+              <img src={LOGO_URL} alt="Meghali's Silk" className={styles.logo} />
+            </div>
+
+            <div className={styles.body}>
             {/* ---- Header ---- */}
             <div className={styles.header}>
               <h2 className={styles.title}>
@@ -468,6 +534,7 @@ const AuthModal = ({ open, onClose, defaultTab = "login" }) => {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
+                  role="alert"
                 >
                   {errors.general}
                 </motion.div>
@@ -482,6 +549,7 @@ const AuthModal = ({ open, onClose, defaultTab = "login" }) => {
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
+                  role="status"
                 >
                   {infoMessage}{" "}
                   <Link to="/support" className={styles.infoBannerLink} onClick={onClose}>
@@ -847,6 +915,7 @@ const AuthModal = ({ open, onClose, defaultTab = "login" }) => {
                   </motion.form>
                 )}
               </AnimatePresence>
+            </div>
             </div>
           </motion.div>
         </motion.div>
