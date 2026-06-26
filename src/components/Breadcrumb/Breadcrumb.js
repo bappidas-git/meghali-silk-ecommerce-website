@@ -1,13 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { useTheme } from "../../context/ThemeContext";
 import styles from "./Breadcrumb.module.css";
 
 const Breadcrumb = ({ items = [] }) => {
-  const { isDarkMode } = useTheme();
-
   return (
-    <nav className={`${styles.breadcrumb} ${isDarkMode ? styles.dark : ""}`} aria-label="Breadcrumb">
+    <nav className={styles.breadcrumb} aria-label="Breadcrumb">
       <Link to="/" className={styles.link}>Home</Link>
       {items.map((item, index) => (
         <React.Fragment key={index}>

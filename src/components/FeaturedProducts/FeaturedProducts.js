@@ -1,7 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { useTheme } from "../../context/ThemeContext";
 import { useCart } from "../../hooks/useCart";
 import { useWishlist } from "../../context/WishlistContext";
 import {
@@ -67,7 +66,6 @@ const ProductCard = ({ product, onAddToCart, onToggleWishlist, isWishlisted, onC
 };
 
 const FeaturedProducts = ({ products = [], title = "Featured Products", viewAllLink = "/products" }) => {
-  const { isDarkMode } = useTheme();
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
@@ -75,7 +73,7 @@ const FeaturedProducts = ({ products = [], title = "Featured Products", viewAllL
   if (products.length === 0) return null;
 
   return (
-    <section className={`${styles.section} ${isDarkMode ? styles.dark : ""}`}>
+    <section className={styles.section}>
       <div className={styles.sectionHeader}>
         <h2>{title}</h2>
         <button className={styles.viewAllBtn} onClick={() => navigate(viewAllLink)}>View All &rarr;</button>

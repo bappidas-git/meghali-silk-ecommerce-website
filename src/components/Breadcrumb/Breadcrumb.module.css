@@ -1,7 +1,5 @@
-.breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 0.875rem; padding: 12px 0; flex-wrap: wrap; }
-.dark { color: #94a3b8; }
-.link { color: #667eea; text-decoration: none; }
-.dark .link { color: #a855f7; }
+.breadcrumb { display: flex; align-items: center; gap: 8px; font-size: 0.875rem; padding: 12px 0; flex-wrap: wrap; color: var(--sf-color-text-muted); }
+.link { color: var(--sf-color-accent); text-decoration: none; }
 .link:hover { text-decoration: underline; }
 /* Touch-target sizing: grow the hit area without moving the row */
 @media (max-width: 768px) {
@@ -11,6 +9,5 @@
     margin: -10px 0;
   }
 }
-.separator { color: #94a3b8; }
-.current { color: #475569; font-weight: 500; }
-.dark .current { color: #e2e8f0; }
+.separator { color: var(--sf-color-text-muted); }
+.current { color: var(--sf-color-text-secondary); font-weight: 500; }

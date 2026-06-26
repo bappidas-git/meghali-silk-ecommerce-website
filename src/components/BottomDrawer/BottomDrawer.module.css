@@ -1,10 +1,8 @@
-.backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1300; }
-.drawer { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-radius: 16px 16px 0 0; z-index: 1301; max-height: 80vh; overflow-y: auto; }
-.dark { background: #1e293b; color: #e2e8f0; }
-.handle { width: 40px; height: 4px; border-radius: 2px; background: #d1d5db; margin: 12px auto 0; }
-.dark .handle { background: #475569; }
-.drawerHeader { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid #e2e8f0; }
-.dark .drawerHeader { border-color: #334155; }
+.backdrop { position: fixed; inset: 0; background: var(--sf-color-overlay); z-index: 1300; }
+.drawer { position: fixed; bottom: 0; left: 0; right: 0; background: var(--sf-color-surface); color: var(--sf-color-text); border-radius: 16px 16px 0 0; z-index: 1301; max-height: 80vh; overflow-y: auto; }
+.handle { width: 40px; height: 4px; border-radius: 2px; background: var(--sf-color-border-strong); margin: 12px auto 0; }
+.drawerHeader { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid var(--sf-color-border); }
 .drawerHeader h3 { font-size: 1.1rem; font-weight: 600; }
-.closeBtn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: inherit; padding: 0; line-height: 1; }
+.closeBtn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: inherit; padding: 0; line-height: 1; min-width: var(--sf-tap-target); min-height: var(--sf-tap-target); }
+.closeBtn:focus-visible { outline: none; box-shadow: var(--sf-shadow-focus); border-radius: var(--sf-radius-sm); }
 .drawerContent { padding: 16px 20px; }
