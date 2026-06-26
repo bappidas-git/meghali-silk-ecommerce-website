@@ -1,30 +1,35 @@
-/* ═══════════════════════════════════════════════════════════════════════════
-   Special Offers & Deals Page
-   ═══════════════════════════════════════════════════════════════════════════ */
+/* =============================================================================
+ * Special Offers & Deals — Meghali's Silk re-skin (tokens only; no hardcoded hex)
+ * =============================================================================
+ * Dark-first, gold-on-green deals experience: a deep-green hero band with gold
+ * countdown tiles, gold coupon stubs, and brand product cards. Every colour
+ * resolves from src/theme/storefront-tokens.css and is theme-aware via body.dark.
+ * Class names are unchanged — the page's data logic in SpecialOffers.js is
+ * untouched; this is a pure re-skin.
+ * ========================================================================== */
 
 /* ── Page Shell ─────────────────────────────────────────────────────────── */
 
 .page {
   min-height: 100vh;
-  background: #f5f6fa;
-  padding-bottom: 80px;
-}
-
-.dark.page {
-  background: #0c0f1d;
+  background: var(--sf-color-bg);
+  color: var(--sf-color-text);
+  font-family: var(--sf-font-family);
+  padding-bottom: var(--sf-space-16);
+  transition: background var(--sf-transition), color var(--sf-transition);
 }
 
 .container {
-  max-width: 1200px;
+  max-width: var(--sf-container-max);
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 var(--sf-space-5);
 }
 
 /* ── Hero Banner ────────────────────────────────────────────────────────── */
 
 .heroBanner {
-  background: linear-gradient(135deg, #ff6b35 0%, #f7418f 50%, #7b2ff7 100%);
-  padding: 56px 20px;
+  background: linear-gradient(135deg, var(--sf-color-brand-green) 0%, var(--sf-color-brand-green-deep) 100%);
+  padding: var(--sf-space-16) var(--sf-space-5);
   text-align: center;
   position: relative;
   overflow: hidden;
@@ -34,15 +39,15 @@
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 20% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
-    radial-gradient(circle at 80% 50%, rgba(255, 255, 255, 0.08) 0%, transparent 50%);
+  background: radial-gradient(circle at 18% 30%, rgba(203, 163, 90, 0.18) 0%, transparent 45%),
+    radial-gradient(circle at 82% 70%, rgba(203, 163, 90, 0.12) 0%, transparent 45%);
   pointer-events: none;
 }
 
 .heroContent {
   position: relative;
   z-index: 1;
-  max-width: 680px;
+  max-width: 720px;
   margin: 0 auto;
 }
 
@@ -50,60 +55,62 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: var(--sf-space-3);
 }
 
 .heroTag {
   display: inline-block;
-  background: rgba(255, 255, 255, 0.2);
-  color: #fff;
-  padding: 6px 18px;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  letter-spacing: 1px;
+  background: var(--sf-color-badge-bg);
+  border: 1px solid var(--sf-color-gold);
+  color: var(--sf-color-gold);
+  padding: var(--sf-space-2) var(--sf-space-5);
+  border-radius: var(--sf-radius-pill);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-semibold);
+  letter-spacing: 1.5px;
   text-transform: uppercase;
-  backdrop-filter: blur(4px);
 }
 
 .heroTitle {
-  font-size: 2.6rem;
-  font-weight: 800;
-  color: #fff;
-  margin: 8px 0 0;
-  line-height: 1.15;
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-3xl);
+  font-weight: var(--sf-font-bold);
+  color: var(--sf-color-gold-light);
+  margin: var(--sf-space-2) 0 0;
+  line-height: var(--sf-leading-tight);
 }
 
 .heroSubtitle {
-  color: rgba(255, 255, 255, 0.88);
-  font-size: 1.05rem;
-  line-height: 1.6;
-  max-width: 520px;
+  color: var(--sf-color-primary-contrast);
+  opacity: 0.88;
+  font-size: var(--sf-text-md);
+  line-height: var(--sf-leading-normal);
+  max-width: 540px;
   margin: 0;
 }
 
-/* Countdown in banner */
+/* Countdown in banner — gold-bordered tiles on dark */
 .heroCountdown {
-  margin-top: 20px;
+  margin-top: var(--sf-space-5);
   display: flex;
   align-items: center;
-  gap: 14px;
-  background: rgba(0, 0, 0, 0.2);
-  padding: 12px 24px;
-  border-radius: 16px;
-  backdrop-filter: blur(4px);
+  gap: var(--sf-space-4);
+  background: rgba(0, 0, 0, 0.22);
+  padding: var(--sf-space-3) var(--sf-space-6);
+  border-radius: var(--sf-radius-lg);
+  border: 1px solid var(--sf-color-border-strong);
 }
 
 .countdownLabel {
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.85rem;
-  font-weight: 500;
+  color: var(--sf-color-gold-light);
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-medium);
 }
 
 .countdownBoxes {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--sf-space-2);
 }
 
 .countdownUnit {
@@ -114,66 +121,62 @@
 }
 
 .countdownNumber {
-  font-size: 1.4rem;
-  font-weight: 800;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 8px;
-  padding: 4px 10px;
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-xl);
+  font-weight: var(--sf-font-bold);
+  color: var(--sf-color-gold);
+  background: var(--sf-color-brand-green-deep);
+  border: 1px solid var(--sf-color-gold-deep);
+  border-radius: var(--sf-radius-sm);
+  padding: var(--sf-space-1) var(--sf-space-3);
   font-variant-numeric: tabular-nums;
 }
 
 .countdownText {
   font-size: 0.65rem;
-  color: rgba(255, 255, 255, 0.7);
+  color: var(--sf-color-gold-light);
+  opacity: 0.8;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  margin-top: 4px;
+  margin-top: var(--sf-space-1);
 }
 
 .countdownSep {
-  font-size: 1.3rem;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.6);
-  margin-bottom: 16px;
+  font-size: var(--sf-text-lg);
+  font-weight: var(--sf-font-bold);
+  color: var(--sf-color-gold-deep);
+  margin-bottom: var(--sf-space-4);
 }
 
 /* ── Sections ───────────────────────────────────────────────────────────── */
 
 .section {
-  margin-top: 40px;
+  margin-top: var(--sf-space-10);
 }
 
 .sectionHeader {
-  margin-bottom: 24px;
+  margin-bottom: var(--sf-space-6);
 }
 
 .sectionTitleRow {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--sf-space-4);
   flex-wrap: wrap;
 }
 
 .sectionTitle {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #1a1a2e;
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-2xl);
+  font-weight: var(--sf-font-semibold);
+  color: var(--sf-color-text);
   margin: 0;
 }
 
-.dark .sectionTitle {
-  color: #f0f0f5;
-}
-
 .sectionSubtitle {
-  font-size: 0.9rem;
-  color: #6b7280;
-  margin: 4px 0 0;
-}
-
-.dark .sectionSubtitle {
-  color: #9ca3af;
+  font-size: var(--sf-text-sm);
+  color: var(--sf-color-text-muted);
+  margin: var(--sf-space-1) 0 0;
 }
 
 /* ── Coupons Grid ───────────────────────────────────────────────────────── */
@@ -181,150 +184,156 @@
 .couponGrid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
+  gap: var(--sf-space-4);
 }
 
 .couponCard {
   display: flex;
-  border-radius: 14px;
+  border-radius: var(--sf-radius-lg);
   overflow: hidden;
-  background: #fff;
-  border: 1px dashed #e5e7eb;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-  transition: box-shadow 0.2s;
+  background: var(--sf-color-surface);
+  border: 1px solid var(--sf-color-border);
+  box-shadow: var(--sf-shadow-xs);
+  transition: box-shadow var(--sf-transition), border-color var(--sf-transition);
 }
 
 .couponCard:hover {
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--sf-shadow-md);
+  border-color: var(--sf-color-border-strong);
 }
 
-.dark .couponCard {
-  background: #1a1f3a;
-  border-color: rgba(168, 85, 247, 0.25);
-}
-
+/* Stub: deep-green panel with a gold left rail + perforated seam. */
 .couponLeft {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 20px 24px;
-  background: linear-gradient(135deg, #7b2ff7, #f7418f);
-  color: #fff;
-  min-width: 100px;
+  padding: var(--sf-space-5) var(--sf-space-6);
+  background: var(--sf-color-brand-green);
+  border-left: 4px solid var(--sf-color-gold);
+  border-right: 2px dashed var(--sf-color-border-strong);
+  min-width: 112px;
+}
+
+/* Ticket notches punched out of the perforated seam. */
+.couponLeft::before,
+.couponLeft::after {
+  content: "";
+  position: absolute;
+  right: -9px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--sf-color-bg);
+}
+.couponLeft::before {
+  top: -9px;
+}
+.couponLeft::after {
+  bottom: -9px;
 }
 
 .couponDiscount {
-  font-size: 1.4rem;
-  font-weight: 800;
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-2xl);
+  font-weight: var(--sf-font-bold);
   line-height: 1.1;
+  color: var(--sf-color-gold);
 }
 
 .couponLabel {
   font-size: 0.7rem;
-  font-weight: 600;
+  font-weight: var(--sf-font-semibold);
   text-transform: uppercase;
   letter-spacing: 1px;
+  color: var(--sf-color-gold-light);
   opacity: 0.85;
 }
 
 .couponRight {
   flex: 1;
-  padding: 16px 20px;
+  padding: var(--sf-space-4) var(--sf-space-5);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--sf-space-2);
 }
 
 .couponDesc {
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: #1a1a2e;
+  font-size: var(--sf-text-base);
+  font-weight: var(--sf-font-semibold);
+  color: var(--sf-color-text);
   margin: 0;
 }
 
-.dark .couponDesc {
-  color: #f0f0f5;
-}
-
 .couponMeta {
-  font-size: 0.75rem;
-  color: #9ca3af;
+  font-size: var(--sf-text-xs);
+  color: var(--sf-color-text-muted);
   margin: 0;
 }
 
 .couponCodeRow {
   display: flex;
   align-items: center;
-  gap: 10px;
-  margin-top: 4px;
+  gap: var(--sf-space-3);
+  margin-top: var(--sf-space-1);
 }
 
 .couponCode {
-  background: #f3f4f6;
-  padding: 5px 12px;
-  border-radius: 6px;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: #7b2ff7;
+  background: var(--sf-color-surface-2);
+  padding: var(--sf-space-1) var(--sf-space-3);
+  border-radius: var(--sf-radius-sm);
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-bold);
+  color: var(--sf-color-gold-deep);
   letter-spacing: 1px;
-  border: 1px dashed #d1d5db;
-}
-
-.dark .couponCode {
-  background: rgba(123, 47, 247, 0.12);
-  border-color: rgba(168, 85, 247, 0.3);
-  color: #c084fc;
+  border: 1px dashed var(--sf-color-border-strong);
 }
 
 .copyBtn {
-  padding: 5px 14px;
+  padding: var(--sf-space-2) var(--sf-space-4);
   border: none;
-  border-radius: 6px;
-  background: #7b2ff7;
-  color: #fff;
-  font-size: 0.78rem;
-  font-weight: 600;
+  border-radius: var(--sf-radius-sm);
+  background: var(--sf-color-emerald);
+  color: var(--sf-color-emerald-contrast);
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-semibold);
+  font-family: var(--sf-font-family);
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background var(--sf-transition-fast);
   white-space: nowrap;
 }
 
 .copyBtn:hover {
-  background: #6d28d9;
+  background: var(--sf-color-emerald-hover);
+}
+
+.copyBtn:focus-visible {
+  outline: none;
+  box-shadow: var(--sf-shadow-focus);
 }
 
 .copyBtn.copied {
-  background: #10b981;
+  background: var(--sf-color-success);
+  color: var(--sf-color-primary-contrast);
 }
 
 /* Empty / skeleton states for the coupons grid */
 .couponEmpty {
   text-align: center;
-  padding: 32px 20px;
-  color: #6b7280;
-  font-size: 0.95rem;
-  background: #fff;
-  border: 1px dashed #e5e7eb;
-  border-radius: 14px;
-}
-
-.dark .couponEmpty {
-  background: #1a1f3a;
-  border-color: rgba(168, 85, 247, 0.25);
-  color: #9ca3af;
+  padding: var(--sf-space-8) var(--sf-space-5);
+  color: var(--sf-color-text-muted);
+  font-size: var(--sf-text-base);
+  background: var(--sf-color-surface);
+  border: 1px dashed var(--sf-color-border-strong);
+  border-radius: var(--sf-radius-lg);
 }
 
 .couponSkeletonLeft {
-  min-width: 100px;
-  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  min-width: 112px;
+  background: linear-gradient(90deg, var(--sf-color-surface-2) 25%, var(--sf-color-surface-hover) 50%, var(--sf-color-surface-2) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite;
-}
-
-.dark .couponSkeletonLeft {
-  background: linear-gradient(90deg, #1e2340 25%, #2d3154 50%, #1e2340 75%);
-  background-size: 200% 100%;
 }
 
 /* ── Deal of the Day ────────────────────────────────────────────────────── */
@@ -332,19 +341,15 @@
 .dotdTimer {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: #fee2e2;
-  color: #dc2626;
-  padding: 4px 14px;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 700;
+  gap: var(--sf-space-2);
+  background: var(--sf-color-badge-bg);
+  border: 1px solid var(--sf-color-border-strong);
+  color: var(--sf-color-gold);
+  padding: var(--sf-space-1) var(--sf-space-4);
+  border-radius: var(--sf-radius-sm);
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-bold);
   font-variant-numeric: tabular-nums;
-}
-
-.dark .dotdTimer {
-  background: rgba(220, 38, 38, 0.15);
-  color: #f87171;
 }
 
 .timerIcon {
@@ -354,51 +359,37 @@
 .dotdGrid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+  gap: var(--sf-space-5);
 }
 
 .dotdCard {
-  background: #fff;
-  border-radius: 16px;
+  background: var(--sf-color-surface);
+  border-radius: var(--sf-radius-lg);
   overflow: hidden;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-  transition: transform 0.25s, box-shadow 0.25s;
-  border: 2px solid transparent;
+  box-shadow: var(--sf-shadow-sm);
+  transition: transform var(--sf-transition), box-shadow var(--sf-transition), border-color var(--sf-transition);
+  border: 1px solid var(--sf-color-border);
 }
 
 .dotdCard:hover {
   transform: translateY(-6px);
-  box-shadow: 0 12px 32px rgba(123, 47, 247, 0.15);
-  border-color: #7b2ff7;
-}
-
-.dark .dotdCard {
-  background: #1a1f3a;
-  border-color: rgba(168, 85, 247, 0.15);
-}
-
-.dark .dotdCard:hover {
-  border-color: #a855f7;
-  box-shadow: 0 12px 32px rgba(168, 85, 247, 0.2);
+  box-shadow: var(--sf-shadow-lg);
+  border-color: var(--sf-color-gold);
 }
 
 .dotdImageWrap {
   position: relative;
   aspect-ratio: 4 / 3;
   overflow: hidden;
-  background: #f9fafb;
-}
-
-.dark .dotdImageWrap {
-  background: #151830;
+  background: var(--sf-color-surface-2);
 }
 
 .dotdImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.3s;
+  transition: transform var(--sf-transition);
 }
 
 .dotdCard:hover .dotdImage {
@@ -407,85 +398,84 @@
 
 .dotdBadge {
   position: absolute;
-  top: 12px;
-  left: 12px;
-  background: linear-gradient(135deg, #dc2626, #ef4444);
-  color: #fff;
-  padding: 4px 12px;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 800;
+  top: var(--sf-space-3);
+  left: var(--sf-space-3);
+  background: var(--sf-gradient-gold);
+  color: var(--sf-color-brand-green-deep);
+  padding: var(--sf-space-1) var(--sf-space-3);
+  border-radius: var(--sf-radius-sm);
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-bold);
 }
 
 .dotdInfo {
-  padding: 18px;
+  padding: var(--sf-space-5);
 }
 
 .dotdName {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #1a1a2e;
-  margin: 0 0 10px;
+  font-size: var(--sf-text-base);
+  font-weight: var(--sf-font-semibold);
+  color: var(--sf-color-text);
+  margin: 0 0 var(--sf-space-3);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.dark .dotdName {
-  color: #f0f0f5;
-}
-
 .dotdPriceRow {
   display: flex;
   align-items: baseline;
-  gap: 10px;
-  margin-bottom: 12px;
+  gap: var(--sf-space-3);
+  margin-bottom: var(--sf-space-3);
 }
 
 .dotdSalePrice {
-  font-size: 1.2rem;
-  font-weight: 800;
-  color: #10b981;
+  font-size: var(--sf-text-lg);
+  font-weight: var(--sf-font-bold);
+  color: var(--sf-color-price);
 }
 
 .dotdOriginalPrice {
-  font-size: 0.85rem;
-  color: #9ca3af;
+  font-size: var(--sf-text-sm);
+  color: var(--sf-color-compare);
   text-decoration: line-through;
 }
 
 .dotdSavings {
-  font-size: 0.82rem;
-  color: #059669;
-  font-weight: 600;
-  margin: 0 0 4px;
-}
-
-.dark .dotdSavings {
-  color: #34d399;
+  font-size: var(--sf-text-sm);
+  color: var(--sf-color-discount);
+  font-weight: var(--sf-font-semibold);
+  margin: 0 0 var(--sf-space-1);
 }
 
 .dotdSavingsAmount {
-  font-weight: 800;
+  font-weight: var(--sf-font-bold);
 }
 
 .dotdBtn {
-  margin-top: 12px;
+  margin-top: var(--sf-space-3);
   width: 100%;
-  padding: 10px;
+  min-height: var(--sf-tap-target);
+  padding: var(--sf-space-3);
   border: none;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #7b2ff7, #f7418f);
-  color: #fff;
-  font-size: 0.9rem;
-  font-weight: 600;
+  border-radius: var(--sf-radius-md);
+  background: var(--sf-gradient-gold);
+  color: var(--sf-color-brand-green-deep);
+  font-size: var(--sf-text-base);
+  font-weight: var(--sf-font-semibold);
+  font-family: var(--sf-font-family);
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: filter var(--sf-transition-fast);
 }
 
 .dotdBtn:hover {
-  opacity: 0.9;
+  filter: brightness(1.05);
+}
+
+.dotdBtn:focus-visible {
+  outline: none;
+  box-shadow: var(--sf-shadow-focus);
 }
 
 /* ── Category Tabs (fully responsive, never clipped) ────────────────────── */
@@ -494,14 +484,14 @@
   position: relative;
   display: flex;
   align-items: center;
-  margin-bottom: 24px;
+  margin-bottom: var(--sf-space-6);
 }
 
 .tabBar {
   display: flex;
-  gap: 8px;
+  gap: var(--sf-space-2);
   overflow-x: auto;
-  padding: 4px 2px;
+  padding: var(--sf-space-1) 2px;
   flex: 1;
   scroll-behavior: smooth;
   scroll-snap-type: x proximity;
@@ -521,7 +511,7 @@
   width: 44px;
   pointer-events: none;
   z-index: 2;
-  transition: opacity 0.2s;
+  transition: opacity var(--sf-transition-fast);
 }
 
 .tabFadeHidden {
@@ -530,20 +520,12 @@
 
 .tabFadeLeft {
   left: 0;
-  background: linear-gradient(to right, #f5f6fa, rgba(245, 246, 250, 0));
+  background: linear-gradient(to right, var(--sf-color-bg), transparent);
 }
 
 .tabFadeRight {
   right: 0;
-  background: linear-gradient(to left, #f5f6fa, rgba(245, 246, 250, 0));
-}
-
-.dark .tabFadeLeft {
-  background: linear-gradient(to right, #0c0f1d, rgba(12, 15, 29, 0));
-}
-
-.dark .tabFadeRight {
-  background: linear-gradient(to left, #0c0f1d, rgba(12, 15, 29, 0));
+  background: linear-gradient(to left, var(--sf-color-bg), transparent);
 }
 
 /* Scroll buttons (desktop/tablet); hidden on touch where the strip swipes. */
@@ -552,9 +534,9 @@
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  border: 1px solid #e5e7eb;
-  background: #fff;
-  color: #4b5563;
+  border: 1px solid var(--sf-color-border);
+  background: var(--sf-color-surface);
+  color: var(--sf-color-text-secondary);
   font-size: 1.3rem;
   line-height: 1;
   cursor: pointer;
@@ -562,21 +544,29 @@
   align-items: center;
   justify-content: center;
   z-index: 3;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: opacity 0.2s, transform 0.15s, background 0.2s, visibility 0.2s;
+  box-shadow: var(--sf-shadow-sm);
+  transition: opacity var(--sf-transition-fast), transform var(--sf-transition-fast),
+    background var(--sf-transition-fast), visibility var(--sf-transition-fast);
 }
 
 .tabScrollBtn:hover {
-  background: #f3f4f6;
+  background: var(--sf-color-surface-hover);
+  border-color: var(--sf-color-gold);
+  color: var(--sf-color-gold);
   transform: scale(1.06);
 }
 
+.tabScrollBtn:focus-visible {
+  outline: none;
+  box-shadow: var(--sf-shadow-focus);
+}
+
 .tabScrollLeft {
-  margin-right: 6px;
+  margin-right: var(--sf-space-2);
 }
 
 .tabScrollRight {
-  margin-left: 6px;
+  margin-left: var(--sf-space-2);
 }
 
 .tabScrollHidden {
@@ -585,57 +575,37 @@
   visibility: hidden;
 }
 
-.dark .tabScrollBtn {
-  background: #1a1f3a;
-  border-color: #2d3154;
-  color: #c7c9e0;
-}
-
-.dark .tabScrollBtn:hover {
-  background: #232845;
-}
-
 .tab {
-  padding: 8px 20px;
-  border: 1px solid #e5e7eb;
-  border-radius: 24px;
-  background: #fff;
-  color: #6b7280;
-  font-size: 0.85rem;
-  font-weight: 500;
+  padding: var(--sf-space-2) var(--sf-space-5);
+  border: 1px solid var(--sf-color-border);
+  border-radius: var(--sf-radius-pill);
+  background: var(--sf-color-surface);
+  color: var(--sf-color-text-secondary);
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-medium);
+  font-family: var(--sf-font-family);
   cursor: pointer;
   white-space: nowrap;
   scroll-snap-align: start;
-  transition: all 0.2s;
+  transition: color var(--sf-transition-fast), border-color var(--sf-transition-fast),
+    background var(--sf-transition-fast);
 }
 
 .tab:hover {
-  border-color: #7b2ff7;
-  color: #7b2ff7;
+  border-color: var(--sf-color-gold);
+  color: var(--sf-color-gold);
+}
+
+.tab:focus-visible {
+  outline: none;
+  box-shadow: var(--sf-shadow-focus);
 }
 
 .tab.tabActive {
-  background: linear-gradient(135deg, #7b2ff7, #f7418f);
-  color: #fff;
+  background: var(--sf-gradient-gold);
+  color: var(--sf-color-brand-green-deep);
   border-color: transparent;
-  font-weight: 600;
-}
-
-.dark .tab {
-  background: #1a1f3a;
-  border-color: #2d3154;
-  color: #9ca3af;
-}
-
-.dark .tab:hover {
-  border-color: #a855f7;
-  color: #c084fc;
-}
-
-.dark .tab.tabActive {
-  background: linear-gradient(135deg, #a855f7, #ec4899);
-  color: #fff;
-  border-color: transparent;
+  font-weight: var(--sf-font-semibold);
 }
 
 /* ── Products Grid ──────────────────────────────────────────────────────── */
@@ -643,18 +613,19 @@
 .productsGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  gap: var(--sf-space-5);
 }
 
 /* ── Product Card ───────────────────────────────────────────────────────── */
 
 .productCard {
-  background: #fff;
-  border-radius: 16px;
+  background: var(--sf-color-surface);
+  border-radius: var(--sf-radius-lg);
   overflow: hidden;
   cursor: pointer;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-  transition: transform 0.25s, box-shadow 0.25s;
+  box-shadow: var(--sf-shadow-xs);
+  border: 1px solid var(--sf-color-border);
+  transition: transform var(--sf-transition), box-shadow var(--sf-transition), border-color var(--sf-transition);
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -662,34 +633,22 @@
 
 .productCard:hover {
   transform: translateY(-6px);
-  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.1);
-}
-
-.dark .productCard {
-  background: #1a1f3a;
-  border: 1px solid rgba(168, 85, 247, 0.1);
-}
-
-.dark .productCard:hover {
-  box-shadow: 0 10px 28px rgba(168, 85, 247, 0.18);
+  box-shadow: var(--sf-shadow-md);
+  border-color: var(--sf-color-border-strong);
 }
 
 .productImageWrap {
   position: relative;
   aspect-ratio: 4 / 3;
   overflow: hidden;
-  background: #f9fafb;
-}
-
-.dark .productImageWrap {
-  background: #151830;
+  background: var(--sf-color-surface-2);
 }
 
 .productImage {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.35s;
+  transition: transform var(--sf-transition-slow);
 }
 
 .productCard:hover .productImage {
@@ -698,64 +657,61 @@
 
 .discountBadge {
   position: absolute;
-  top: 10px;
-  left: 10px;
-  background: linear-gradient(135deg, #dc2626, #ef4444);
-  color: #fff;
-  padding: 3px 10px;
-  border-radius: 8px;
-  font-size: 0.78rem;
-  font-weight: 700;
+  top: var(--sf-space-3);
+  left: var(--sf-space-3);
+  background: var(--sf-gradient-gold);
+  color: var(--sf-color-brand-green-deep);
+  padding: 3px var(--sf-space-3);
+  border-radius: var(--sf-radius-sm);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-bold);
   z-index: 2;
 }
 
 .wishlistBtn {
   position: absolute;
-  top: 10px;
-  right: 10px;
+  top: var(--sf-space-3);
+  right: var(--sf-space-3);
   width: 34px;
   height: 34px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
-  border: none;
+  background: var(--sf-color-surface);
+  border: 1px solid var(--sf-color-border);
   font-size: 1.15rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2;
-  transition: transform 0.2s, background 0.2s;
-  color: #9ca3af;
+  transition: transform var(--sf-transition-fast), background var(--sf-transition-fast);
+  color: var(--sf-color-text-muted);
   line-height: 1;
 }
 
 .wishlistBtn:hover {
   transform: scale(1.15);
+  color: var(--sf-color-discount);
+}
+
+.wishlistBtn:focus-visible {
+  outline: none;
+  box-shadow: var(--sf-shadow-focus);
 }
 
 .wishlistBtn.wishlisted {
-  color: #ef4444;
-  background: #fff;
-}
-
-.dark .wishlistBtn {
-  background: rgba(26, 31, 58, 0.85);
-  color: #9ca3af;
-}
-
-.dark .wishlistBtn.wishlisted {
-  color: #ef4444;
+  color: var(--sf-color-discount);
+  background: var(--sf-color-surface);
 }
 
 .productOverlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  background: var(--sf-color-overlay);
   display: flex;
   align-items: center;
   justify-content: center;
   opacity: 0;
-  transition: opacity 0.25s;
+  transition: opacity var(--sf-transition);
 }
 
 .productCard:hover .productOverlay {
@@ -763,24 +719,30 @@
 }
 
 .quickViewBtn {
-  padding: 8px 22px;
-  background: #fff;
-  color: #7b2ff7;
+  padding: var(--sf-space-2) var(--sf-space-6);
+  background: var(--sf-color-surface);
+  color: var(--sf-color-gold-deep);
   border: none;
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 0.85rem;
+  border-radius: var(--sf-radius-md);
+  font-weight: var(--sf-font-semibold);
+  font-size: var(--sf-text-sm);
+  font-family: var(--sf-font-family);
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background var(--sf-transition-fast);
 }
 
 .quickViewBtn:hover {
-  background: #f3f4f6;
+  background: var(--sf-color-surface-hover);
+}
+
+.quickViewBtn:focus-visible {
+  outline: none;
+  box-shadow: var(--sf-shadow-focus);
 }
 
 /* Product Info */
 .productInfo {
-  padding: 14px 16px 16px;
+  padding: var(--sf-space-4);
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -788,31 +750,23 @@
 
 .productCategory {
   font-size: 0.7rem;
-  font-weight: 600;
+  font-weight: var(--sf-font-semibold);
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  color: #7b2ff7;
-  margin-bottom: 4px;
-}
-
-.dark .productCategory {
-  color: #c084fc;
+  color: var(--sf-color-gold-deep);
+  margin-bottom: var(--sf-space-1);
 }
 
 .productName {
-  font-size: 0.92rem;
-  font-weight: 600;
-  color: #1a1a2e;
-  margin: 0 0 8px;
-  line-height: 1.35;
+  font-size: var(--sf-text-base);
+  font-weight: var(--sf-font-semibold);
+  color: var(--sf-color-text);
+  margin: 0 0 var(--sf-space-2);
+  line-height: var(--sf-leading-tight);
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-}
-
-.dark .productName {
-  color: #f0f0f5;
 }
 
 /* Star Rating */
@@ -820,105 +774,98 @@
   display: flex;
   align-items: center;
   gap: 1px;
-  margin-bottom: 10px;
+  margin-bottom: var(--sf-space-2);
 }
 
 .starFull {
-  color: #f59e0b;
-  font-size: 0.85rem;
+  color: var(--sf-color-star);
+  font-size: var(--sf-text-sm);
 }
 
 .starHalf {
-  color: #f59e0b;
-  font-size: 0.85rem;
+  color: var(--sf-color-star);
+  font-size: var(--sf-text-sm);
   opacity: 0.6;
 }
 
 .starEmpty {
-  color: #d1d5db;
-  font-size: 0.85rem;
-}
-
-.dark .starEmpty {
-  color: #4b5563;
+  color: var(--sf-color-border-strong);
+  font-size: var(--sf-text-sm);
 }
 
 .reviewCount {
-  font-size: 0.72rem;
-  color: #9ca3af;
-  margin-left: 4px;
+  font-size: var(--sf-text-xs);
+  color: var(--sf-color-text-muted);
+  margin-left: var(--sf-space-1);
 }
 
 /* Price */
 .priceRow {
   display: flex;
   align-items: baseline;
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: var(--sf-space-2);
+  margin-bottom: var(--sf-space-3);
   margin-top: auto;
   flex-wrap: wrap;
 }
 
 .salePrice {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: #10b981;
+  font-size: var(--sf-text-md);
+  font-weight: var(--sf-font-bold);
+  color: var(--sf-color-price);
 }
 
 .originalPrice {
-  font-size: 0.82rem;
-  color: #9ca3af;
+  font-size: var(--sf-text-sm);
+  color: var(--sf-color-compare);
   text-decoration: line-through;
 }
 
 .discountPercent {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: #dc2626;
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-semibold);
+  color: var(--sf-color-discount);
 }
 
 .addToCartBtn {
   width: 100%;
-  padding: 10px;
+  min-height: var(--sf-tap-target);
+  padding: var(--sf-space-3);
   border: none;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #7b2ff7, #f7418f);
-  color: #fff;
-  font-size: 0.85rem;
-  font-weight: 600;
+  border-radius: var(--sf-radius-md);
+  background: var(--sf-color-emerald);
+  color: var(--sf-color-emerald-contrast);
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-semibold);
+  font-family: var(--sf-font-family);
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: background var(--sf-transition-fast);
 }
 
 .addToCartBtn:hover {
-  opacity: 0.9;
+  background: var(--sf-color-emerald-hover);
+}
+
+.addToCartBtn:focus-visible {
+  outline: none;
+  box-shadow: var(--sf-shadow-focus);
 }
 
 /* ── Skeleton ───────────────────────────────────────────────────────────── */
 
 .skeletonImage {
-  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  background: linear-gradient(90deg, var(--sf-color-surface-2) 25%, var(--sf-color-surface-hover) 50%, var(--sf-color-surface-2) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite;
-}
-
-.dark .skeletonImage {
-  background: linear-gradient(90deg, #1e2340 25%, #2d3154 50%, #1e2340 75%);
-  background-size: 200% 100%;
 }
 
 .skeletonLine {
   height: 12px;
-  border-radius: 6px;
-  background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
+  border-radius: var(--sf-radius-sm);
+  background: linear-gradient(90deg, var(--sf-color-surface-2) 25%, var(--sf-color-surface-hover) 50%, var(--sf-color-surface-2) 75%);
   background-size: 200% 100%;
   animation: shimmer 1.4s infinite;
-  margin-bottom: 10px;
-}
-
-.dark .skeletonLine {
-  background: linear-gradient(90deg, #1e2340 25%, #2d3154 50%, #1e2340 75%);
-  background-size: 200% 100%;
+  margin-bottom: var(--sf-space-3);
 }
 
 .skeletonShort {
@@ -932,7 +879,7 @@
 .skeletonFull {
   width: 100%;
   height: 36px;
-  border-radius: 10px;
+  border-radius: var(--sf-radius-md);
 }
 
 @keyframes shimmer {
@@ -948,50 +895,50 @@
 
 .emptyState {
   text-align: center;
-  padding: 80px 20px;
+  padding: var(--sf-space-16) var(--sf-space-5);
 }
 
 .emptyIcon {
   font-size: 4rem;
-  margin-bottom: 16px;
+  margin-bottom: var(--sf-space-4);
 }
 
 .emptyTitle {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #4b5563;
-  margin: 0 0 8px;
-}
-
-.dark .emptyTitle {
-  color: rgba(255, 255, 255, 0.8);
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-2xl);
+  font-weight: var(--sf-font-bold);
+  color: var(--sf-color-text);
+  margin: 0 0 var(--sf-space-2);
 }
 
 .emptyText {
-  color: #9ca3af;
+  color: var(--sf-color-text-muted);
   max-width: 400px;
-  margin: 0 auto 24px;
-  line-height: 1.6;
-}
-
-.dark .emptyText {
-  color: rgba(255, 255, 255, 0.5);
+  margin: 0 auto var(--sf-space-6);
+  line-height: var(--sf-leading-normal);
 }
 
 .emptyBtn {
-  padding: 12px 32px;
+  min-height: var(--sf-tap-target);
+  padding: var(--sf-space-3) var(--sf-space-8);
   border: none;
-  border-radius: 12px;
-  background: linear-gradient(135deg, #7b2ff7, #f7418f);
-  color: #fff;
-  font-size: 0.95rem;
-  font-weight: 600;
+  border-radius: var(--sf-radius-md);
+  background: var(--sf-color-emerald);
+  color: var(--sf-color-emerald-contrast);
+  font-size: var(--sf-text-base);
+  font-weight: var(--sf-font-semibold);
+  font-family: var(--sf-font-family);
   cursor: pointer;
-  transition: opacity 0.2s;
+  transition: background var(--sf-transition-fast);
 }
 
 .emptyBtn:hover {
-  opacity: 0.9;
+  background: var(--sf-color-emerald-hover);
+}
+
+.emptyBtn:focus-visible {
+  outline: none;
+  box-shadow: var(--sf-shadow-focus);
 }
 
 /* ── Responsive ─────────────────────────────────────────────────────────── */
@@ -1008,21 +955,21 @@
 
 @media (max-width: 768px) {
   .heroBanner {
-    padding: 40px 16px;
+    padding: var(--sf-space-10) var(--sf-space-4);
   }
 
   .heroTitle {
-    font-size: 1.8rem;
+    font-size: var(--sf-text-2xl);
   }
 
   .heroSubtitle {
-    font-size: 0.95rem;
+    font-size: var(--sf-text-base);
   }
 
   .heroCountdown {
     flex-direction: column;
-    gap: 8px;
-    padding: 10px 18px;
+    gap: var(--sf-space-2);
+    padding: var(--sf-space-3) var(--sf-space-5);
   }
 
   /* On touch, the tab strip swipes — drop the scroll buttons, slim the fades. */
@@ -1039,22 +986,22 @@
   }
 
   .couponLeft {
-    min-width: 80px;
-    padding: 16px;
+    min-width: 88px;
+    padding: var(--sf-space-4);
   }
 
   .couponDiscount {
-    font-size: 1.1rem;
+    font-size: var(--sf-text-xl);
   }
 
   .productsGrid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
+    gap: var(--sf-space-4);
   }
 
   .dotdGrid {
     grid-template-columns: 1fr;
-    gap: 16px;
+    gap: var(--sf-space-4);
   }
 
   .dotdCard {
@@ -1070,64 +1017,48 @@
 
   .dotdInfo {
     flex: 1;
-    padding: 14px;
+    padding: var(--sf-space-4);
   }
 
   .sectionTitle {
-    font-size: 1.25rem;
+    font-size: var(--sf-text-xl);
   }
 
   /* Touch-target sizing */
   .tab {
-    padding: 10px 20px;
-    min-height: 40px;
-  }
-
-  .copyBtn {
-    padding: 10px 14px;
-    min-height: 40px;
-  }
-
-  .quickViewBtn,
-  .addToCartBtn {
     min-height: 40px;
   }
 }
 
 @media (max-width: 480px) {
   .heroBanner {
-    padding: 32px 14px;
+    padding: var(--sf-space-8) var(--sf-space-3);
   }
 
   .heroTitle {
-    font-size: 1.5rem;
+    font-size: var(--sf-text-xl);
   }
 
   .countdownNumber {
-    font-size: 1.1rem;
-    padding: 3px 8px;
+    font-size: var(--sf-text-lg);
+    padding: 3px var(--sf-space-2);
   }
 
   .productsGrid {
     grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    gap: var(--sf-space-3);
   }
 
   .productInfo {
-    padding: 10px 12px 14px;
+    padding: var(--sf-space-3);
   }
 
   .productName {
-    font-size: 0.82rem;
+    font-size: var(--sf-text-sm);
   }
 
   .salePrice {
-    font-size: 0.95rem;
-  }
-
-  .addToCartBtn {
-    padding: 8px;
-    font-size: 0.8rem;
+    font-size: var(--sf-text-base);
   }
 
   .dotdCard {
@@ -1140,32 +1071,31 @@
   }
 
   .tab {
-    padding: 6px 14px;
-    font-size: 0.8rem;
+    padding: var(--sf-space-2) var(--sf-space-4);
   }
 
   .couponRight {
-    padding: 12px 14px;
+    padding: var(--sf-space-3) var(--sf-space-4);
   }
 
   .couponCodeRow {
     flex-direction: column;
     align-items: flex-start;
-    gap: 6px;
+    gap: var(--sf-space-2);
   }
 }
 
 /* ── Hero "ended" note (timer expired with onExpiry: hide) ──────────────── */
 
 .heroEnded {
-  margin-top: 18px;
-  background: rgba(0, 0, 0, 0.2);
-  color: #fff;
-  padding: 10px 22px;
-  border-radius: 14px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  backdrop-filter: blur(4px);
+  margin-top: var(--sf-space-5);
+  background: rgba(0, 0, 0, 0.22);
+  border: 1px solid var(--sf-color-border-strong);
+  color: var(--sf-color-gold-light);
+  padding: var(--sf-space-3) var(--sf-space-6);
+  border-radius: var(--sf-radius-md);
+  font-size: var(--sf-text-base);
+  font-weight: var(--sf-font-semibold);
 }
 
 /* ── Config gate loader ─────────────────────────────────────────────────── */
@@ -1181,8 +1111,8 @@
   width: 44px;
   height: 44px;
   border-radius: 50%;
-  border: 4px solid rgba(123, 47, 247, 0.18);
-  border-top-color: #7b2ff7;
+  border: 4px solid var(--sf-color-border-strong);
+  border-top-color: var(--sf-color-gold);
   animation: spin 0.8s linear infinite;
 }
 
@@ -1198,31 +1128,33 @@
   text-align: center;
   max-width: 540px;
   margin: 0 auto;
-  padding: 90px 20px;
+  padding: var(--sf-space-16) var(--sf-space-5);
 }
 
 .unavailableIcon {
-  font-size: 4rem;
-  margin-bottom: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  margin-bottom: var(--sf-space-4);
+  font-size: 2.6rem;
+  color: var(--sf-color-gold);
+  background: var(--sf-color-brand-green);
+  border: 1px solid var(--sf-color-border-strong);
 }
 
 .unavailableTitle {
-  font-size: 1.9rem;
-  font-weight: 800;
-  color: #1a1a2e;
-  margin: 0 0 10px;
-}
-
-.dark .unavailableTitle {
-  color: #f0f0f5;
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-3xl);
+  font-weight: var(--sf-font-bold);
+  color: var(--sf-color-text);
+  margin: 0 0 var(--sf-space-3);
 }
 
 .unavailableText {
-  color: #6b7280;
-  line-height: 1.6;
-  margin: 0 auto 24px;
-}
-
-.dark .unavailableText {
-  color: #9ca3af;
+  color: var(--sf-color-text-secondary);
+  line-height: var(--sf-leading-normal);
+  margin: 0 auto var(--sf-space-6);
 }

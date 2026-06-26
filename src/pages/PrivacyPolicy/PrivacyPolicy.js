@@ -9,7 +9,7 @@ const PrivacyPolicy = () => {
   const { isDarkMode } = useTheme();
 
   const sections = [
-    { title: "Information We Collect", content: `When you use ${APP_NAME}, we may collect personal information such as your name, email address, phone number, shipping address, and payment details. We also collect browsing data, device information, and cookies to improve your shopping experience.` },
+    { title: "Information We Collect", content: `When you use ${APP_NAME}, operated by Galleria Producer Company Limited (Kolkata, West Bengal), we may collect personal information such as your name, email address, phone number, shipping address, and payment details. We also collect browsing data, device information, and cookies to improve your shopping experience.` },
     { title: "How We Use Your Information", content: "We use your information to process orders, provide customer support, send order updates, personalize your experience, improve our services, and comply with legal obligations. We may also use your data for marketing with your consent." },
     { title: "Data Sharing", content: "We share your data with payment processors, shipping partners, and service providers necessary to fulfill your orders. We do not sell your personal information to third parties. Data may be shared with law enforcement if legally required." },
     { title: "Data Security", content: "We implement industry-standard security measures including SSL encryption, secure payment processing, and regular security audits. Your payment information is never stored on our servers." },
@@ -30,7 +30,7 @@ const PrivacyPolicy = () => {
       <div className={styles.sections}>
         {sections.map((section, i) => (
           <motion.div key={i} className={styles.section} initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: i * 0.05 }}>
-            <h2>{i + 1}. {section.title}</h2>
+            <h2><span>{i + 1}.</span> {section.title}</h2>
             <p>{section.content}</p>
           </motion.div>
         ))}

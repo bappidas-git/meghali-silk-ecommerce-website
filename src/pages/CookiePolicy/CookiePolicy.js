@@ -38,9 +38,9 @@ const CookiePolicy = () => {
           {cookieTypes.map((cookie, i) => (
             <div key={i} className={styles.tableRow}>
               <span className={styles.cookieType}>{cookie.type}</span>
-              <span>{cookie.purpose}</span>
-              <span>{cookie.duration}</span>
-              <span>{cookie.required ? "Yes" : "No"}</span>
+              <span data-label="Purpose">{cookie.purpose}</span>
+              <span data-label="Duration">{cookie.duration}</span>
+              <span data-label="Required">{cookie.required ? "Yes" : "No"}</span>
             </div>
           ))}
         </div>

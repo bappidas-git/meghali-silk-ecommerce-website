@@ -1,24 +1,125 @@
-.container { max-width: 800px; margin: 0 auto; padding: 24px 16px 80px; min-height: calc(100vh - 200px); }
-.dark { color: #e2e8f0; }
-.breadcrumb { display: flex; gap: 8px; align-items: center; margin-bottom: 24px; font-size: 0.875rem; color: #64748b; }
-.breadcrumb a { color: #667eea; text-decoration: none; }
-/* Touch-target sizing: grow the breadcrumb hit area without moving the row */
-@media (max-width: 768px) {
-  .breadcrumb a { display: inline-block; padding: 10px 2px; margin: -10px 0; }
+/* =============================================================================
+ * Privacy Policy — Meghali's Silk re-skin (tokens only; no hardcoded hex)
+ * =============================================================================
+ * Long-form legal document on the dark-first, gold-on-green brand system. Every
+ * colour resolves from src/theme/storefront-tokens.css and is theme-aware via
+ * body.dark; the `.dark` class is kept for parity with the page's useTheme()
+ * pattern. Shared document chrome is mirrored across Terms / Cookies / Refund.
+ * ========================================================================== */
+
+.container {
+  max-width: 820px; /* ~72ch comfortable reading measure */
+  margin: 0 auto;
+  padding: var(--sf-space-6) var(--sf-space-4) var(--sf-space-16);
+  min-height: calc(100vh - 200px);
+  background: var(--sf-color-bg);
+  color: var(--sf-color-text);
+  font-family: var(--sf-font-family);
+  transition: background var(--sf-transition), color var(--sf-transition);
 }
-.dark .breadcrumb { color: #94a3b8; }
-.title { font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
-.subtitle { color: #64748b; font-size: 0.9rem; margin-bottom: 16px; }
-.dark .subtitle { color: #94a3b8; }
-.intro { color: #475569; line-height: 1.6; margin-bottom: 32px; font-size: 1.05rem; }
-.dark .intro { color: #94a3b8; }
-.sections { display: flex; flex-direction: column; gap: 24px; margin-bottom: 40px; }
-.section { padding: 24px; border-radius: 12px; background: #fff; border: 1px solid #e2e8f0; }
-.dark .section { background: #1e293b; border-color: #334155; }
-.section h2 { font-size: 1.15rem; font-weight: 600; margin-bottom: 10px; }
-.section p { color: #475569; line-height: 1.7; font-size: 0.95rem; }
-.dark .section p { color: #94a3b8; }
-.contact { text-align: center; padding: 24px; color: #64748b; }
-.dark .contact { color: #94a3b8; }
-.contact a { color: #667eea; text-decoration: none; }
-.contact a:hover { text-decoration: underline; }
+
+/* ===== Breadcrumb ===== */
+.breadcrumb {
+  display: flex;
+  gap: var(--sf-space-2);
+  align-items: center;
+  margin-bottom: var(--sf-space-6);
+  font-size: var(--sf-text-sm);
+  color: var(--sf-color-text-muted);
+}
+.breadcrumb a {
+  color: var(--sf-color-gold-deep);
+  text-decoration: none;
+  transition: color var(--sf-transition-fast);
+}
+.breadcrumb a:hover {
+  color: var(--sf-color-gold);
+}
+.breadcrumb a:focus-visible {
+  outline: none;
+  box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
+}
+@media (max-width: 768px) {
+  .breadcrumb a {
+    display: inline-block;
+    padding: 10px 2px;
+    margin: -10px 0;
+  }
+}
+
+/* ===== Document head ===== */
+.title {
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-3xl);
+  font-weight: var(--sf-font-bold);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text);
+  margin: 0 0 var(--sf-space-2);
+}
+.subtitle {
+  color: var(--sf-color-text-muted);
+  font-size: var(--sf-text-sm);
+  margin: 0 0 var(--sf-space-4);
+}
+.intro {
+  color: var(--sf-color-text-secondary);
+  line-height: var(--sf-leading-normal);
+  margin: 0 0 var(--sf-space-8);
+  font-size: var(--sf-text-md);
+}
+
+/* ===== Sections ===== */
+.sections {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-5);
+  margin-bottom: var(--sf-space-10);
+}
+.section {
+  padding: var(--sf-space-6);
+  border-radius: var(--sf-radius-lg);
+  background: var(--sf-color-surface);
+  border: 1px solid var(--sf-color-border);
+}
+.section h2 {
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-xl);
+  font-weight: var(--sf-font-semibold);
+  color: var(--sf-color-text);
+  margin: 0 0 var(--sf-space-3);
+}
+.section h2 span {
+  /* Gold section numeral */
+  color: var(--sf-color-gold);
+  margin-right: var(--sf-space-2);
+}
+.section p {
+  color: var(--sf-color-text-secondary);
+  line-height: var(--sf-leading-normal);
+  font-size: var(--sf-text-base);
+  margin: 0;
+}
+
+/* ===== Closing contact line ===== */
+.contact {
+  text-align: center;
+  padding: var(--sf-space-6);
+  color: var(--sf-color-text-muted);
+  font-size: var(--sf-text-base);
+}
+.contact a {
+  color: var(--sf-color-gold-deep);
+  text-decoration: none;
+  font-weight: var(--sf-font-medium);
+  transition: color var(--sf-transition-fast);
+}
+.contact a:hover {
+  color: var(--sf-color-gold);
+  text-decoration: underline;
+}
+.contact a:focus-visible {
+  outline: none;
+  box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
+}

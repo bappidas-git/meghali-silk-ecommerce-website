@@ -16,11 +16,11 @@ const RefundPolicy = () => {
   ];
 
   const nonEligibleItems = [
-    "Products used, altered, or with removed tags",
-    "Intimate wear, swimwear, and personal care items",
-    "Customized or personalized products",
+    "Items worn, washed, or with removed tags",
+    "Blouses stitched or altered to measure",
+    "Customised stitching or made-to-order pieces",
     "Products returned after the 7-day window",
-    "Digital products and gift cards",
+    "Gift cards and store-credit vouchers",
   ];
 
   const steps = [
@@ -37,7 +37,7 @@ const RefundPolicy = () => {
         <h1 className={styles.title}>Return & Refund Policy</h1>
         <p className={styles.subtitle}>Last updated: {POLICY_LAST_UPDATED}</p>
         <div className={styles.highlight}>
-          We offer a <strong>7-day hassle-free return policy</strong> on most products. Your satisfaction is our priority.
+          We offer a <strong>7-day hassle-free return policy</strong> on eligible silk pieces — request a return within 7 days of delivery. Your satisfaction is woven into everything we make.
         </div>
       </motion.div>
 
