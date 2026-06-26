@@ -13,11 +13,12 @@ import {
   PersonOutline,
   Logout as LogoutIcon,
   HeadsetMicOutlined,
+  HelpOutline,
+  SettingsOutlined,
   DarkModeOutlined,
   LightModeOutlined,
   ChevronRight,
   Close as CloseIcon,
-  ShoppingCartRounded,
   // Category glyphs
   DevicesOther,
   LaptopMac,
@@ -42,7 +43,13 @@ import { useDealsConfig } from "../../context/DealsConfigContext";
 import apiService from "../../services/api";
 import { categoryParam } from "../../utils/categories";
 import { APP_NAME } from "../../utils/constants";
+import TrustStrip from "../TrustStrip";
 import styles from "./SidebarMenu.module.css";
+
+// The logo PNG ships with its own deep-green background, so it must always sit
+// on a panel filled with that same green (--brand-logo-bg) — never floating.
+const LOGO_URL =
+  "https://res.cloudinary.com/dn9gyaiik/image/upload/v1782451315/Logo_gpxble.png";
 
 // Categories are admin-managed, so we map a name to a representative glyph by
 // keyword and fall back to a generic icon — it never breaks on an unseen name.
@@ -95,6 +102,8 @@ const SidebarMenu = ({ open, onClose, onOpenAuth }) => {
   const [categoriesExpanded, setCategoriesExpanded] = useState(false);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
   const [expandedCat, setExpandedCat] = useState(null); // id of open parent (single-open)
+  // "Settings" groups the theme toggle + Help — no dedicated /settings route.
+  const [settingsExpanded, setSettingsExpanded] = useState(false);
 
   // Fetch categories the first time the category section is opened (lazy).
   useEffect(() => {
@@ -305,11 +314,9 @@ const SidebarMenu = ({ open, onClose, onOpenAuth }) => {
             {/* ============ Hero ============ */}
             <div className={styles.hero}>
               <div className={styles.heroTop}>
-                <div className={styles.brand}>
-                  <span className={styles.brandIcon}>
-                    <ShoppingCartRounded />
-                  </span>
-                  <span className={styles.brandName}>{APP_NAME}</span>
+                <div className={styles.heroTitle}>
+                  <span className={styles.heroTitleMain}>Menu</span>
+                  <span className={styles.heroTitleSub}>Account &amp; Settings</span>
                 </div>
                 <button
                   className={styles.closeBtn}
@@ -319,6 +326,21 @@ const SidebarMenu = ({ open, onClose, onOpenAuth }) => {
                   <CloseIcon />
                 </button>
               </div>
+
+              {/* Logo on its dedicated deep-green panel (never floats elsewhere) */}
+              <div className={styles.logoPanel}>
+                <img
+                  src={LOGO_URL}
+                  alt={APP_NAME}
+                  width={156}
+                  height={48}
+                  loading="lazy"
+                  className={styles.logoImg}
+                />
+              </div>
+
+              {/* Compact trust strip (shared primitive) */}
+              <TrustStrip className={styles.trust} />
 
               {user ? (
                 <button
@@ -369,6 +391,99 @@ const SidebarMenu = ({ open, onClose, onOpenAuth }) => {
               animate="visible"
               aria-label="Main"
             >
+              {/* Primary items — first three rows mirror the mockup */}
+              <div className={styles.section}>
+                <motion.button
+                  className={`${styles.row} ${styles.rowAccent}`}
+                  onClick={() => handleNavigate("/profile")}
+                  {...nextRow()}
+                >
+                  <span className={`${styles.rowIcon} ${styles.toneGold}`}>
+                    <PersonOutline />
+                  </span>
+                  <span className={styles.rowLabel}>Profile</span>
+                  <ChevronRight className={styles.rowArrow} />
+                </motion.button>
+
+                <motion.button
+                  className={`${styles.row} ${styles.rowAccent}`}
+                  onClick={() => handleNavigate("/support")}
+                  {...nextRow()}
+                >
+                  <span className={`${styles.rowIcon} ${styles.toneEmerald}`}>
+                    <HeadsetMicOutlined />
+                  </span>
+                  <span className={styles.rowLabel}>Contact Us</span>
+                  <ChevronRight className={styles.rowArrow} />
+                </motion.button>
+
+                <motion.button
+                  className={`${styles.row} ${styles.rowAccent}`}
+                  onClick={() => setSettingsExpanded((prev) => !prev)}
+                  aria-expanded={settingsExpanded}
+                  {...nextRow()}
+                >
+                  <span className={`${styles.rowIcon} ${styles.toneGold}`}>
+                    <SettingsOutlined />
+                  </span>
+                  <span className={styles.rowLabel}>Settings</span>
+                  <ChevronRight
+                    className={`${styles.rowChevron} ${
+                      settingsExpanded ? styles.rowChevronOpen : ""
+                    }`}
+                  />
+                </motion.button>
+
+                <AnimatePresence initial={false}>
+                  {settingsExpanded && (
+                    <motion.div
+                      className={styles.subPanel}
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.26, ease: "easeInOut" }}
+                    >
+                      <div className={styles.subInner}>
+                        <button
+                          className={styles.row}
+                          onClick={toggleTheme}
+                          role="switch"
+                          aria-checked={isDarkMode}
+                          aria-label="Toggle dark mode"
+                        >
+                          <span className={`${styles.rowIcon} ${styles.toneNeutral}`}>
+                            {isDarkMode ? <DarkModeOutlined /> : <LightModeOutlined />}
+                          </span>
+                          <span className={styles.rowLabel}>
+                            {isDarkMode ? "Dark Mode" : "Light Mode"}
+                          </span>
+                          <span className={styles.toggleSwitch} aria-hidden="true">
+                            <span
+                              className={`${styles.toggleKnob} ${
+                                isDarkMode ? styles.toggleKnobOn : ""
+                              }`}
+                            />
+                          </span>
+                        </button>
+
+                        <button
+                          className={styles.row}
+                          onClick={() => handleNavigate("/support")}
+                        >
+                          <span className={`${styles.rowIcon} ${styles.toneNeutral}`}>
+                            <HelpOutline />
+                          </span>
+                          <span className={styles.rowLabel}>Help &amp; Support</span>
+                          <ChevronRight className={styles.rowArrow} />
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              <div className={styles.divider} />
+
               {/* Quick links */}
               <div className={styles.section}>
                 <div className={styles.sectionLabel}>Discover</div>
@@ -546,45 +661,6 @@ const SidebarMenu = ({ open, onClose, onOpenAuth }) => {
               </div>
 
               <div className={styles.divider} />
-
-              {/* Preferences */}
-              <div className={styles.section}>
-                <div className={styles.sectionLabel}>Settings</div>
-                <motion.button
-                  className={styles.row}
-                  onClick={() => handleNavigate("/support")}
-                  {...nextRow()}
-                >
-                  <span className={`${styles.rowIcon} ${styles.toneNeutral}`}>
-                    <HeadsetMicOutlined />
-                  </span>
-                  <span className={styles.rowLabel}>Help &amp; Support</span>
-                  <ChevronRight className={styles.rowArrow} />
-                </motion.button>
-
-                <motion.button
-                  className={styles.row}
-                  onClick={toggleTheme}
-                  role="switch"
-                  aria-checked={isDarkMode}
-                  aria-label="Toggle dark mode"
-                  {...nextRow()}
-                >
-                  <span className={`${styles.rowIcon} ${styles.toneNeutral}`}>
-                    {isDarkMode ? <DarkModeOutlined /> : <LightModeOutlined />}
-                  </span>
-                  <span className={styles.rowLabel}>
-                    {isDarkMode ? "Dark Mode" : "Light Mode"}
-                  </span>
-                  <span className={styles.toggleSwitch} aria-hidden="true">
-                    <span
-                      className={`${styles.toggleKnob} ${
-                        isDarkMode ? styles.toggleKnobOn : ""
-                      }`}
-                    />
-                  </span>
-                </motion.button>
-              </div>
 
               {/* Footer */}
               <div className={styles.footer}>
