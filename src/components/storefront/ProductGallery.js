@@ -16,12 +16,22 @@ import styles from "./ProductGallery.module.css";
 //   alt       string    base alt text (the product name)
 //   discount  number    optional honest discount % → corner badge
 //   zoom      boolean   enable hover-zoom (default from STOREFRONT_CONFIG)
+//   ribbon    string    OPTIONAL, additive (default null/off). When a non-empty
+//                       string is passed (e.g. "PREMIUM") a gold ribbon is drawn
+//                       over the TOP-LEFT of the main image. The caller decides
+//                       whether the flag is genuine — the component never invents
+//                       it. Backward-compatible: omit it and nothing changes.
+//   inStock   boolean   OPTIONAL, additive (default false/off). When true, an
+//                       "In Stock" pill is drawn over the TOP-RIGHT of the main
+//                       image. Caller passes only a real, in-stock selection.
 // =============================================================================
 const ProductGallery = ({
   images = [],
   alt = "Product image",
   discount = 0,
   zoom = STOREFRONT_CONFIG.gallery.zoom,
+  ribbon = null,
+  inStock = false,
 }) => {
   const pics = images && images.length > 0 ? images : [PLACEHOLDER_IMG];
   const [index, setIndex] = useState(0);
@@ -89,7 +99,27 @@ const ProductGallery = ({
         role="group"
         aria-label={`${alt} — image ${index + 1} of ${pics.length}`}
       >
-        {discount > 0 && <span className={styles.discountBadge}>-{discount}%</span>}
+        {ribbon && (
+          <span className={styles.premiumRibbon}>
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
+              <path d="M12 2l2.4 5.6L20 8.3l-4 4 1 5.7L12 15.4 7 18l1-5.7-4-4 5.6-.7z" />
+            </svg>
+            {ribbon}
+          </span>
+        )}
+        {inStock && (
+          <span className={styles.stockPill}>
+            <span className={styles.stockDot} aria-hidden="true" />
+            In Stock
+          </span>
+        )}
+        {discount > 0 && (
+          <span
+            className={`${styles.discountBadge} ${ribbon ? styles.discountBadgeLower : ""}`}
+          >
+            -{discount}%
+          </span>
+        )}
         <img
           src={pics[index] || PLACEHOLDER_IMG}
           alt={`${alt}${multi ? ` — view ${index + 1}` : ""}`}

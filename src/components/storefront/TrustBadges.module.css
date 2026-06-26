@@ -34,8 +34,8 @@
   width: 38px;
   height: 38px;
   border-radius: var(--sf-radius-pill);
-  background: var(--sf-color-primary-soft);
-  color: var(--sf-color-primary);
+  background: var(--sf-color-badge-bg);
+  color: var(--sf-color-gold-deep);
 }
 
 .text {
