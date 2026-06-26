@@ -3,6 +3,9 @@
 /* Storefront design tokens (CSS custom properties). Re-skin a client by editing
    src/theme/storefront-tokens.css — see STOREFRONT_UX_GUIDELINES.md. */
 @import "./theme/storefront-tokens.css";
+/* Shared, reusable brand primitives (buttons, badges, cards, skeleton, toast)
+   built on the tokens above. Loaded once, app-wide. See Prompt 02. */
+@import "./theme/storefront-primitives.css";
 
 body {
   margin: 0;

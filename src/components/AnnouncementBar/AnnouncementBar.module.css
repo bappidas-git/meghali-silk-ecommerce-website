@@ -1,0 +1,94 @@
+/* AnnouncementBar — token-driven; the gradient background is set inline per
+   message. Text/controls are light to read on the brand gradients. */
+
+.bar {
+  position: relative;
+  z-index: var(--sf-z-stickybar);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 40px;
+  padding: var(--sf-space-2) var(--sf-space-12);
+  color: var(--sf-color-primary-contrast);
+  font-family: var(--sf-font-family);
+  transition: background var(--sf-transition-slow);
+}
+
+.inner {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sf-space-2);
+  max-width: var(--sf-container-max);
+  text-align: center;
+}
+
+.icon {
+  flex: none;
+  font-size: var(--sf-text-lg);
+  color: var(--sf-color-gold-light);
+  /* Decorative inline icon — hidden on the narrowest screens to save room. */
+  display: none;
+}
+
+/* Keep the message height stable while the keyed motion span swaps. */
+.messageWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.25em;
+}
+
+.message {
+  display: inline-block;
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-semibold);
+  letter-spacing: 0.01em;
+  line-height: var(--sf-leading-tight);
+}
+
+.close {
+  position: absolute;
+  right: var(--sf-space-1);
+  top: 50%;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--sf-tap-target);
+  min-height: var(--sf-tap-target);
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: var(--sf-radius-pill);
+  color: var(--sf-color-primary-contrast);
+  font-size: var(--sf-text-lg);
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.85;
+  transition: var(--sf-transition-fast);
+}
+.close:hover {
+  opacity: 1;
+  background: var(--sf-color-overlay);
+}
+.close:focus-visible {
+  outline: 2px solid var(--sf-color-primary-contrast);
+  outline-offset: -2px;
+  opacity: 1;
+}
+
+/* ≥ small tablets: a touch more breathing room and the inline offer icon. */
+@media (min-width: 640px) {
+  .bar {
+    min-height: 44px;
+  }
+  .icon {
+    display: inline-flex;
+  }
+  .message {
+    font-size: var(--sf-text-sm);
+  }
+}

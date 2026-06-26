@@ -1,0 +1,323 @@
+/* =============================================================================
+ * STOREFRONT PRIMITIVES  —  shared, token-driven, reusable classes
+ * =============================================================================
+ *
+ * Plain CSS (NOT a CSS Module) so these classes are globally usable across the
+ * storefront. Every class is prefixed with `sf-` to avoid collisions. Loaded
+ * app-wide exactly once via `src/index.css` (right after storefront-tokens.css).
+ *
+ * RULES
+ *   • Consume design tokens by name only (var(--sf-*) / var(--brand-*)). Never
+ *     hardcode hex, gradients, shadows, radius, or spacing here.
+ *   • Do NOT redefine tokens and do NOT @import fonts (fonts load elsewhere).
+ *   • These are the brand PRIMITIVES that later prompts (Header, ProductCard,
+ *     pages) compose on top of — the class names are a contract; keep them stable.
+ * ========================================================================== */
+
+/* =============================================================================
+ * A1. BUTTONS
+ * ========================================================================== */
+.sf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sf-space-2);
+  min-height: var(--sf-tap-target);
+  padding: var(--sf-space-3) var(--sf-space-6);
+  border: 1px solid transparent;
+  border-radius: var(--sf-radius-pill);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-semibold);
+  line-height: var(--sf-leading-tight);
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  user-select: none;
+  transition: var(--sf-transition);
+}
+
+.sf-btn:hover {
+  text-decoration: none;
+}
+
+/* Gold primary — luxe headline action */
+.sf-btn--gold {
+  background: var(--sf-gradient-gold);
+  color: var(--sf-color-brand-green-deep);
+  box-shadow: var(--sf-shadow-xs);
+}
+.sf-btn--gold:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--sf-shadow-md);
+}
+
+/* Emerald — primary commerce CTA (Add to Cart, Apply, Proceed) */
+.sf-btn--emerald {
+  background: var(--sf-color-emerald);
+  color: var(--sf-color-emerald-contrast);
+  box-shadow: var(--sf-shadow-xs);
+}
+.sf-btn--emerald:hover {
+  background: var(--sf-color-emerald-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--sf-shadow-md);
+}
+
+/* Ghost — neutral secondary */
+.sf-btn--ghost {
+  background: transparent;
+  border-color: var(--sf-color-border-strong);
+  color: var(--sf-color-text);
+}
+.sf-btn--ghost:hover {
+  background: var(--sf-color-surface-hover);
+}
+
+/* Outline gold — quiet brand action */
+.sf-btn--outline-gold {
+  background: transparent;
+  border-color: var(--sf-color-gold);
+  color: var(--sf-color-gold);
+}
+.sf-btn--outline-gold:hover {
+  background: color-mix(in srgb, var(--sf-color-gold) 12%, transparent);
+}
+
+/* Sizes */
+.sf-btn--sm {
+  min-height: 36px;
+  padding: var(--sf-space-2) var(--sf-space-4);
+  font-size: var(--sf-text-xs);
+}
+.sf-btn--lg {
+  min-height: 52px;
+  padding: var(--sf-space-4) var(--sf-space-8);
+  font-size: var(--sf-text-md);
+}
+.sf-btn--block {
+  display: flex;
+  width: 100%;
+}
+
+/* Disabled */
+.sf-btn:disabled,
+.sf-btn[aria-disabled="true"] {
+  opacity: 0.55;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+.sf-btn:disabled:hover,
+.sf-btn[aria-disabled="true"]:hover {
+  transform: none;
+  box-shadow: var(--sf-shadow-xs);
+}
+
+/* Focus — never remove the ring */
+.sf-btn:focus-visible {
+  outline: 2px solid var(--sf-color-gold);
+  outline-offset: 2px;
+  box-shadow: var(--sf-shadow-focus);
+}
+
+/* =============================================================================
+ * A2. BADGES / CHIPS / PILLS
+ * ========================================================================== */
+
+/* Top-left "-NN%" discount badge on cards */
+.sf-badge-discount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sf-space-1) var(--sf-space-2);
+  background: var(--sf-color-discount-bg);
+  color: var(--sf-color-discount);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-bold);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  border-radius: var(--sf-radius-sm);
+}
+
+/* Gold "PREMIUM" ribbon — PDP / hero */
+.sf-ribbon-premium {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sf-space-1);
+  padding: var(--sf-space-1) var(--sf-space-3);
+  background: var(--sf-gradient-gold);
+  color: var(--sf-color-brand-green-deep);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-bold);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  line-height: 1;
+  border-radius: var(--sf-radius-sm);
+  box-shadow: var(--sf-shadow-xs);
+}
+
+/* Neutral category chip */
+.sf-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sf-space-2);
+  padding: var(--sf-space-2) var(--sf-space-4);
+  background: var(--sf-color-surface-2);
+  color: var(--sf-color-text-secondary);
+  border: 1px solid var(--sf-color-border);
+  border-radius: var(--sf-radius-pill);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-medium);
+  line-height: 1;
+  cursor: pointer;
+  transition: var(--sf-transition-fast);
+}
+/* When used as an interactive control, meet the touch-target minimum. */
+button.sf-chip,
+a.sf-chip {
+  min-height: var(--sf-tap-target);
+}
+.sf-chip:hover {
+  background: var(--sf-color-surface-hover);
+  border-color: var(--sf-color-border-strong);
+}
+.sf-chip:focus-visible {
+  outline: 2px solid var(--sf-color-gold);
+  outline-offset: 2px;
+  box-shadow: var(--sf-shadow-focus);
+}
+.sf-chip--active {
+  background: color-mix(in srgb, var(--sf-color-gold) 14%, transparent);
+  border-color: var(--sf-color-gold);
+  color: var(--sf-color-text);
+  font-weight: var(--sf-font-semibold);
+}
+
+/* "Save ₹X" pill — emerald tint */
+.sf-pill-save {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sf-space-1);
+  padding: var(--sf-space-1) var(--sf-space-3);
+  background: var(--sf-color-discount-bg);
+  color: var(--sf-color-discount);
+  border-radius: var(--sf-radius-pill);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-semibold);
+  line-height: 1;
+}
+
+/* =============================================================================
+ * A3. CARD SURFACE
+ * ========================================================================== */
+.sf-card {
+  background: var(--sf-color-surface);
+  border: 1px solid var(--sf-color-border);
+  border-radius: var(--sf-radius-lg);
+  box-shadow: var(--sf-shadow-sm);
+  overflow: hidden;
+  transition: var(--sf-transition);
+}
+.sf-card--hover:hover {
+  border-color: var(--sf-color-border-strong);
+  box-shadow: var(--sf-shadow-md);
+  transform: translateY(-4px);
+}
+
+/* =============================================================================
+ * A4. SKELETON LOADER
+ * ========================================================================== */
+.sf-skeleton {
+  background-color: var(--sf-color-surface-2);
+  background-image: linear-gradient(
+    90deg,
+    var(--sf-color-surface-2) 0%,
+    var(--sf-color-surface-hover) 50%,
+    var(--sf-color-surface-2) 100%
+  );
+  background-size: 200% 100%;
+  background-repeat: no-repeat;
+  border-radius: var(--sf-radius-md);
+  animation: sf-skeleton-shimmer 1.4s ease-in-out infinite;
+}
+.sf-skeleton--text {
+  height: 0.75em;
+  margin: var(--sf-space-1) 0;
+  border-radius: var(--sf-radius-sm);
+}
+.sf-skeleton--block {
+  width: 100%;
+  height: 100%;
+  min-height: var(--sf-space-12);
+}
+
+@keyframes sf-skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sf-skeleton {
+    animation: none;
+    background-image: none;
+    background-color: var(--sf-color-surface-2);
+  }
+}
+
+/* =============================================================================
+ * A5. TOAST  (style hooks only — no JS engine here)
+ * ========================================================================== */
+.sf-toast {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-1);
+  padding: var(--sf-space-4) var(--sf-space-5);
+  padding-left: var(--sf-space-6);
+  background: var(--sf-color-surface);
+  border: 1px solid var(--sf-color-border-strong);
+  border-radius: var(--sf-radius-lg);
+  box-shadow: var(--sf-shadow-lg);
+  font-family: var(--sf-font-family);
+  color: var(--sf-color-text);
+  overflow: hidden;
+}
+/* Left accent bar */
+.sf-toast::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--sf-space-1);
+  background: var(--sf-color-gold);
+}
+.sf-toast--success::before {
+  background: var(--sf-color-emerald);
+}
+.sf-toast--error::before {
+  background: var(--sf-color-danger);
+}
+.sf-toast--info::before {
+  background: var(--sf-color-gold);
+}
+.sf-toast__title {
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-semibold);
+  line-height: var(--sf-leading-tight);
+}
+.sf-toast__body {
+  font-size: var(--sf-text-sm);
+  color: var(--sf-color-text-muted);
+  line-height: var(--sf-leading-normal);
+}
