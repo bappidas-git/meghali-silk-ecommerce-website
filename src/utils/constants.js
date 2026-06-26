@@ -109,20 +109,20 @@ export const FREE_SHIPPING_THRESHOLD = 999;
 // icon only for entries with a non-empty URL, so blanking one here hides it
 // instead of leaving a dead link.
 export const SOCIAL_LINKS = {
-  FACEBOOK: "https://facebook.com/mystore",
-  TWITTER: "https://twitter.com/mystore",
-  INSTAGRAM: "https://instagram.com/mystore",
-  YOUTUBE: "https://youtube.com/@mystore",
-  WHATSAPP: "",
+  FACEBOOK: "https://facebook.com/meghalissilk",
+  TWITTER: "https://twitter.com/meghalissilk",
+  INSTAGRAM: "https://instagram.com/meghalissilk",
+  YOUTUBE: "https://youtube.com/@meghalissilk",
+  WHATSAPP: "https://wa.me/919830000000",
 };
 
-// Store contact (sensible defaults — update per project). Single source so the
-// Header top bar, Footer, Help Center and Support page all stay in sync.
-export const SUPPORT_EMAIL = "support@mystore.com";
-export const SUPPORT_PHONE = "+91 1800 102 5555";
+// Store contact (Meghali's Silk — Kolkata). Single source so the Header top bar,
+// Footer, Help Center and Support/Contact page all stay in sync.
+export const SUPPORT_EMAIL = "care@meghalissilk.com";
+export const SUPPORT_PHONE = "+91 98300 00000";
 export const SUPPORT_ADDRESS =
-  "123 Commerce Street, Andheri East, Mumbai, Maharashtra 400069";
-export const SUPPORT_HOURS = "Mon – Sat: 9:00 AM – 8:00 PM IST";
+  "Galleria Producer Company Limited, 42 Rashbehari Avenue, Kolkata, West Bengal 700001";
+export const SUPPORT_HOURS = "Mon – Sat: 10:00 AM – 7:00 PM IST";
 
 // Date the legal/policy pages were last reviewed. Single source so the Privacy,
 // Terms, Cookie and Refund pages never show contradictory "last updated" dates.
@@ -166,26 +166,26 @@ export const FAQ_ITEMS = [
 export const WHY_CHOOSE_US = [
   {
     id: 1,
-    title: "Fast Delivery",
-    description: "Same-day and express delivery options available across India",
-    icon: "mdi:truck-fast",
+    title: "Premium Quality Silk",
+    description: "Handwoven pure silk, inspected by hand for purity and finish",
+    icon: "mdi:diamond-stone",
   },
   {
     id: 2,
-    title: "Secure Payments",
-    description: "256-bit SSL encryption protects every transaction",
-    icon: "mdi:shield-check",
+    title: "100% Authentic",
+    description: "Traceable, genuine Bengal handloom silk — guaranteed",
+    icon: "mdi:check-decagram",
   },
   {
     id: 3,
-    title: "Easy Returns",
-    description: "7-day hassle-free returns with full refund guarantee",
-    icon: "mdi:backup-restore",
+    title: "Free Shipping ₹999+",
+    description: "Complimentary delivery on every order above ₹999",
+    icon: "mdi:truck-fast",
   },
   {
     id: 4,
-    title: "24/7 Support",
-    description: "Our support team is always here to help you",
+    title: "Expert Support",
+    description: "Our silk experts are here to guide every purchase",
     icon: "mdi:headset",
   },
 ];
