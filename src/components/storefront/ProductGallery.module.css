@@ -79,12 +79,62 @@
   top: var(--sf-space-3);
   left: var(--sf-space-3);
   z-index: 2;
-  background: var(--sf-color-danger);
+  background: var(--sf-color-discount);
   color: #fff;
   font-size: var(--sf-text-sm);
   font-weight: var(--sf-font-bold);
   padding: 4px 10px;
   border-radius: var(--sf-radius-pill);
+}
+
+/* When a ribbon occupies the top-left corner, drop the discount badge below it. */
+.discountBadgeLower {
+  top: calc(var(--sf-space-3) + 34px);
+}
+
+/* ── Gold PREMIUM ribbon — top-left over the main image (additive) ───────── */
+.premiumRibbon {
+  position: absolute;
+  top: var(--sf-space-3);
+  left: var(--sf-space-3);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: var(--sf-radius-pill);
+  background: var(--sf-gradient-gold);
+  color: var(--sf-color-emerald-contrast);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-bold);
+  letter-spacing: 0.1em;
+  box-shadow: var(--sf-shadow-sm);
+}
+
+/* ── "In Stock" pill — top-right over the main image (additive) ──────────── */
+.stockPill {
+  position: absolute;
+  top: var(--sf-space-3);
+  right: var(--sf-space-3);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border-radius: var(--sf-radius-pill);
+  background: var(--sf-color-surface);
+  color: var(--sf-color-discount);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-semibold);
+  border: 1px solid var(--sf-color-discount);
+  box-shadow: var(--sf-shadow-xs);
+}
+
+.stockDot {
+  width: 7px;
+  height: 7px;
+  border-radius: var(--sf-radius-pill);
+  background: var(--sf-color-emerald);
 }
 
 .dots {

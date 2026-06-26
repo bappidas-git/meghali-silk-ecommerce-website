@@ -92,24 +92,31 @@
   white-space: nowrap;
 }
 
+/* Add to Cart — emerald (matches the in-page buy box) */
 .addBtn {
   border: none;
-  background: var(--sf-gradient-primary);
-  color: var(--sf-color-primary-contrast);
+  background: var(--sf-color-emerald);
+  color: var(--sf-color-emerald-contrast);
 }
 
 .addBtn:hover:not(:disabled) {
-  filter: brightness(1.05);
+  background: var(--sf-color-emerald-hover);
 }
 
 .addBtnDone {
   background: var(--sf-color-success);
+  color: #fff;
 }
 
+/* Buy Now — gold (matches the in-page buy box) */
 .buyNow {
-  border: 1.5px solid var(--sf-color-primary);
-  background: transparent;
-  color: var(--sf-color-primary);
+  border: none;
+  background: var(--sf-gradient-gold);
+  color: var(--sf-color-emerald-contrast);
+}
+
+.buyNow:hover:not(:disabled) {
+  filter: brightness(1.05);
 }
 
 .addBtn:focus-visible,
