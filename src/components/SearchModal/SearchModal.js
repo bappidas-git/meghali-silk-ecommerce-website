@@ -45,8 +45,8 @@ const FALLBACK_IMAGE =
   "data:image/svg+xml;charset=UTF-8," +
   encodeURIComponent(
     '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">' +
-      '<rect width="120" height="120" fill="#e2e8f0"/>' +
-      '<g fill="none" stroke="#94a3b8" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">' +
+      '<rect width="120" height="120" fill="#F4EFE6"/>' +
+      '<g fill="none" stroke="#7A837E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">' +
       '<rect x="30" y="34" width="60" height="52" rx="6"/>' +
       '<circle cx="48" cy="52" r="7"/>' +
       '<path d="M34 80l20-18 16 14 10-8 16 14"/>' +

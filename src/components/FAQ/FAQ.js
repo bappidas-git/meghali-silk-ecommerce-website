@@ -1,14 +1,12 @@
 import React, { useState } from "react";
-import { useTheme } from "../../context/ThemeContext";
 import { FAQ_ITEMS } from "../../utils/constants";
 import styles from "./FAQ.module.css";
 
 const FAQ = () => {
-  const { isDarkMode } = useTheme();
   const [openId, setOpenId] = useState(null);
 
   return (
-    <section className={`${styles.faq} ${isDarkMode ? styles.dark : ""}`}>
+    <section className={styles.faq}>
       <div className={styles.container}>
         <h2>Frequently Asked Questions</h2>
         <div className={styles.list}>

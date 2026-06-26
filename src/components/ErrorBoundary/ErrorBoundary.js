@@ -45,30 +45,38 @@ class ErrorBoundary extends React.Component {
     if (!this.state.hasError) return this.props.children;
 
     const dark = isDarkTheme();
+    // Meghali's Silk brand palette mirrored here as literals on purpose: this
+    // boundary must render even when the provider tree (and the body.dark class
+    // the CSS tokens key off) failed to mount, so it cannot rely on var(--sf-*).
+    // Keep these in sync with storefront-tokens.css.
     const palette = dark
       ? {
-          bg: "#0a0e27",
-          card: "#1a1f3a",
-          border: "rgba(168, 85, 247, 0.25)",
-          heading: "#f5f7fa",
-          text: "#a0aec0",
-          detailsBg: "#0f1430",
+          bg: "#0B0C0B",
+          card: "#15171A",
+          border: "rgba(203, 163, 90, 0.28)",
+          heading: "#F3EFE6",
+          text: "#C3C9C4",
+          detailsBg: "#1B1E20",
           detailsText: "#f4a9a9",
-          primaryGradient: "linear-gradient(135deg, #a855f7 0%, #ec4899 100%)",
+          primaryGradient:
+            "linear-gradient(135deg, #E6C27A 0%, #CBA35A 50%, #B6863C 100%)",
+          primaryText: "#0A2E24",
           ghostBorder: "rgba(255,255,255,0.22)",
-          ghostText: "#e2e8f0",
+          ghostText: "#F3EFE6",
         }
       : {
-          bg: "#f5f7fa",
-          card: "#ffffff",
-          border: "rgba(102, 126, 234, 0.2)",
-          heading: "#1a202c",
-          text: "#4a5568",
-          detailsBg: "#f7f8fb",
+          bg: "#FBF8F2",
+          card: "#FFFFFF",
+          border: "rgba(203, 163, 90, 0.28)",
+          heading: "#10221C",
+          text: "#4A5550",
+          detailsBg: "#F4EFE6",
           detailsText: "#b4232b",
-          primaryGradient: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-          ghostBorder: "rgba(26,32,44,0.18)",
-          ghostText: "#1a202c",
+          primaryGradient:
+            "linear-gradient(135deg, #E6C27A 0%, #CBA35A 50%, #B6863C 100%)",
+          primaryText: "#0A2E24",
+          ghostBorder: "rgba(16,34,28,0.18)",
+          ghostText: "#10221C",
         };
 
     const btnBase = {
@@ -106,7 +114,7 @@ class ErrorBoundary extends React.Component {
             textAlign: "center",
             boxShadow: dark
               ? "0 20px 60px rgba(0,0,0,0.45)"
-              : "0 20px 60px rgba(102,126,234,0.15)",
+              : "0 20px 60px rgba(11,59,46,0.15)",
           }}
         >
           <div style={{ fontSize: "52px", lineHeight: 1, marginBottom: "16px" }}>
@@ -150,7 +158,7 @@ class ErrorBoundary extends React.Component {
               style={{
                 ...btnBase,
                 border: "none",
-                color: "#ffffff",
+                color: palette.primaryText,
                 background: palette.primaryGradient,
               }}
             >

@@ -241,7 +241,7 @@
 
 .addToCartDone {
   background: var(--sf-color-success);
-  color: #fff;
+  color: var(--sf-color-primary-contrast);
 }
 
 /* Buy Now — gold */

@@ -34,7 +34,7 @@ const StarInput = ({ value, onChange }) => {
 // Order History — eligibility (purchase-gated, kept order) is decided by the
 // caller; this is purely the form. Submitting (or editing) (re)enters the
 // pending state for admin moderation, which the caller communicates.
-const ReviewModal = ({ open, onClose, product, existing, onSubmit, isDarkMode }) => {
+const ReviewModal = ({ open, onClose, product, existing, onSubmit }) => {
   const [rating, setRating] = useState(0);
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -70,7 +70,7 @@ const ReviewModal = ({ open, onClose, product, existing, onSubmit, isDarkMode })
   return (
     <AnimatePresence>
       <motion.div
-        className={`${styles.overlay} ${isDarkMode ? styles.dark : ""}`}
+        className={styles.overlay}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
