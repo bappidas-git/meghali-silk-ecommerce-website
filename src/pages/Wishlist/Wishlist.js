@@ -1,16 +1,16 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTheme } from "../../context/ThemeContext";
 import { useWishlist } from "../../context/WishlistContext";
 import { useCart } from "../../hooks/useCart";
 import { useAuth } from "../../hooks/useAuth";
+import apiService from "../../services/api";
+import { ProductCard, RelatedProducts } from "../../components/storefront";
 import {
-  formatCurrency,
   getProductMinPrice,
   getDefaultCartVariant,
   buildCartItem,
-  productPath,
 } from "../../utils/helpers";
 import styles from "./Wishlist.module.css";
 
@@ -22,36 +22,83 @@ const SORT_OPTIONS = [
   { value: "ratingHigh", label: "Highest Rated" },
 ];
 
-const StarRating = ({ rating, count }) => {
-  const fullStars = Math.floor(rating || 0);
-  const hasHalf = (rating || 0) - fullStars >= 0.5;
-  const emptyStars = 5 - fullStars - (hasHalf ? 1 : 0);
-
-  return (
-    <div className={styles.starRating}>
-      {[...Array(fullStars)].map((_, i) => (
-        <span key={`full-${i}`} className={styles.starFull}>&#9733;</span>
-      ))}
-      {hasHalf && <span className={styles.starHalf}>&#9733;</span>}
-      {[...Array(emptyStars)].map((_, i) => (
-        <span key={`empty-${i}`} className={styles.starEmpty}>&#9733;</span>
-      ))}
-      {count !== undefined && (
-        <span className={styles.reviewCount}>({count?.toLocaleString() || 0})</span>
-      )}
-    </div>
-  );
-};
+// How many "You May Also Like" cards to show in the rail.
+const REC_LIMIT = 10;
 
 const Wishlist = () => {
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
-  const { wishlistItems, isLoading, removeFromWishlist, clearWishlist } = useWishlist();
+  const {
+    wishlistItems,
+    isLoading,
+    removeFromWishlist,
+    clearWishlist,
+    toggleWishlist,
+    isInWishlist,
+  } = useWishlist();
   const { addToCart } = useCart();
   const { user, isLoading: authLoading, openAuthModal } = useAuth();
 
   const [sortBy, setSortBy] = useState("dateDesc");
   const [removingId, setRemovingId] = useState(null);
+
+  // ── "You May Also Like" rail — REAL related/featured products only ────────
+  const [recs, setRecs] = useState([]);
+  const [recsLoading, setRecsLoading] = useState(true);
+
+  // Seed the rail with the most recently saved item; fall back to featured when
+  // the wishlist is empty (or related resolves to nothing). Memoised so the
+  // fetch effect only re-runs when the seed product actually changes.
+  const recSeedId = useMemo(() => {
+    if (!wishlistItems.length) return null;
+    return [...wishlistItems].sort(
+      (a, b) => new Date(b.addedAt || 0) - new Date(a.addedAt || 0)
+    )[0].productId;
+  }, [wishlistItems]);
+
+  // Set of product ids already saved, so recommendations never duplicate the grid.
+  const wishlistIdSet = useMemo(
+    () => new Set(wishlistItems.map((item) => String(item.productId))),
+    [wishlistItems]
+  );
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      setRecsLoading(true);
+      try {
+        const seed = wishlistItems.find(
+          (item) => item.productId === recSeedId
+        );
+        // Over-fetch a little so dedup against the wishlist still leaves a full rail.
+        const fetchLimit = REC_LIMIT + wishlistIdSet.size + 2;
+        let list = [];
+        if (seed) {
+          // getRelated keys off product.id; wishlist rows store it as productId.
+          list = await apiService.products.getRelated(
+            { ...seed, id: seed.productId },
+            fetchLimit
+          );
+        }
+        if (!Array.isArray(list) || list.length === 0) {
+          list = await apiService.products.getFeatured(fetchLimit);
+        }
+        const deduped = (Array.isArray(list) ? list : [])
+          .filter((p) => p && !wishlistIdSet.has(String(p.id)))
+          .slice(0, REC_LIMIT);
+        if (!cancelled) setRecs(deduped);
+      } catch (error) {
+        console.error("Error loading recommendations:", error);
+        if (!cancelled) setRecs([]);
+      } finally {
+        if (!cancelled) setRecsLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // recSeedId + wishlistIdSet capture every change that affects the rail.
+  }, [recSeedId, wishlistIdSet, wishlistItems]);
 
   const getSortedItems = () => {
     const items = [...wishlistItems];
@@ -75,49 +122,42 @@ const Wishlist = () => {
     }
   };
 
-  const handleRemove = async (e, productId) => {
-    e.stopPropagation();
+  // Filled-heart toggle on the card removes the item. The brief delay lets the
+  // card's exit animation play before the row leaves the wishlist.
+  const handleHeartRemove = (productId) => {
     setRemovingId(productId);
-    // Small delay to let exit animation play
     setTimeout(() => {
       removeFromWishlist(productId);
       setRemovingId(null);
     }, 300);
   };
 
-  const handleAddToCart = (e, item) => {
-    e.stopPropagation();
-    // Same normalized line shape as card/PDP quick-adds (same default variant
-    // and id scheme) so a wishlist add merges into the existing cart line. The
-    // wishlist row's product id lives in `productId`, not `id`.
+  // Add to cart WITHOUT removing from the wishlist. Same normalized line shape
+  // as card/PDP quick-adds (same default variant + id scheme) so it merges into
+  // the existing cart line. The wishlist row's product id lives in `productId`.
+  const handleAddToCart = (item) => {
     addToCart(buildCartItem({ ...item, id: item.productId }), 1);
   };
 
-  const handleMoveToCart = async (e, item) => {
+  // Move to cart: add, then silently remove from the wishlist (keeps the
+  // "Added to Cart" toast on screen instead of replacing it with a "Removed" one).
+  const handleMoveToCart = (e, item) => {
     e.stopPropagation();
-    handleAddToCart(e, item);
+    handleAddToCart(item);
     setRemovingId(item.productId);
     setTimeout(() => {
-      // Silent: keeps the "Added to Cart" toast on screen instead of
-      // replacing it with a "Removed" toast mid-move.
       removeFromWishlist(item.productId, { silent: true });
       setRemovingId(null);
     }, 300);
   };
 
-  const handleProductClick = (item) => {
-    // Wishlist rows carry the slug (with a productId fallback) so the link is
-    // canonical; productPath resolves whichever is present.
-    navigate(productPath(item));
-  };
-
   const sortedItems = getSortedItems();
 
-  // Guests keep a fully working wishlist (saved on this device) — the same
-  // open access as the heart toggles on cards/PDP. This banner is the single
-  // login entry point and opens the global AuthModal (there is no /login
-  // route); on login the local items merge into the account's wishlist.
-  // Hidden while the session restore is pending so it doesn't flash on reload.
+  // Guests keep a fully working wishlist (saved on this device) — the same open
+  // access as the heart toggles on cards/PDP. This banner is the single login
+  // entry point and opens the global AuthModal (there is no /login route); on
+  // login the local items merge into the account's wishlist. Hidden while the
+  // session restore is pending so it doesn't flash on reload.
   const guestBanner = !user && !authLoading && (
     <motion.div
       className={styles.guestBanner}
@@ -141,13 +181,41 @@ const Wishlist = () => {
     </motion.div>
   );
 
-  // Loading state
+  // "You May Also Like" rail — skeletons while loading, RealtedProducts (which
+  // renders nothing for an empty set) once resolved. Never shows filler.
+  const recommendations = recsLoading ? (
+    <section className={styles.recsSection} aria-label="You May Also Like">
+      <h2 className={styles.recsTitle}>You May Also Like</h2>
+      <div className={styles.recsSkeletonRail}>
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className={styles.skeletonCard}>
+            <div className={styles.skeletonImage} />
+            <div className={styles.skeletonBody}>
+              <div className={styles.skeletonLine} style={{ width: "70%" }} />
+              <div className={styles.skeletonLine} style={{ width: "45%" }} />
+              <div className={styles.skeletonLine} style={{ width: "30%" }} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  ) : (
+    <RelatedProducts
+      title="You May Also Like"
+      products={recs}
+      onAddToCart={(cartItem) => addToCart(cartItem)}
+      onToggleWishlist={(p) => toggleWishlist(p)}
+      isInWishlist={isInWishlist}
+    />
+  );
+
+  // Loading state — skeleton grid only.
   if (isLoading) {
     return (
       <div className={`${styles.page} ${isDarkMode ? styles.dark : ""}`}>
         <div className={styles.container}>
           <div className={styles.header}>
-            <h1 className={styles.title}>My Wishlist</h1>
+            <h1 className={styles.title}>Wishlist</h1>
           </div>
           <div className={styles.grid}>
             {[...Array(8)].map((_, i) => (
@@ -167,7 +235,7 @@ const Wishlist = () => {
     );
   }
 
-  // Empty wishlist
+  // Empty wishlist — honest empty state, but still useful via the rail below.
   if (!wishlistItems || wishlistItems.length === 0) {
     return (
       <div className={`${styles.page} ${isDarkMode ? styles.dark : ""}`}>
@@ -175,8 +243,8 @@ const Wishlist = () => {
           {guestBanner}
           <div className={styles.header}>
             <div className={styles.headerLeft}>
-              <h1 className={styles.title}>My Wishlist</h1>
-              <span className={styles.itemCount}>(0 items)</span>
+              <h1 className={styles.title}>Wishlist</h1>
+              <span className={styles.itemCount}>0 items</span>
             </div>
           </div>
           <motion.div
@@ -192,15 +260,17 @@ const Wishlist = () => {
             </div>
             <h2 className={styles.emptyTitle}>Your wishlist is empty</h2>
             <p className={styles.emptyText}>
-              Save the items you love to come back to them later.
+              Save the silks you love to come back to them later.
             </p>
             <button
               className={styles.shopButton}
               onClick={() => navigate("/products")}
             >
-              Start Shopping
+              Shop the Collection
             </button>
           </motion.div>
+
+          {recommendations}
         </div>
       </div>
     );
@@ -219,9 +289,9 @@ const Wishlist = () => {
           transition={{ duration: 0.4 }}
         >
           <div className={styles.headerLeft}>
-            <h1 className={styles.title}>My Wishlist</h1>
+            <h1 className={styles.title}>Wishlist</h1>
             <span className={styles.itemCount}>
-              ({wishlistItems.length} {wishlistItems.length === 1 ? "item" : "items"})
+              {wishlistItems.length} {wishlistItems.length === 1 ? "item" : "items"}
             </span>
           </div>
           <div className={styles.headerActions}>
@@ -257,13 +327,11 @@ const Wishlist = () => {
           </div>
         </motion.div>
 
-        {/* Product Grid */}
+        {/* Product Grid — shared ProductCard so the wishlist matches the catalogue. */}
         <div className={styles.grid}>
           <AnimatePresence mode="popLayout">
             {sortedItems.map((item, index) => {
-              const priceInfo = getProductMinPrice(item);
-              const hasDiscount = priceInfo.discount > 0;
-              // Stock of what "Add to Cart" would add: the default (cheapest)
+              // Stock of what "Move to Cart" would add: the default (cheapest)
               // variant when the product has variants, else the product itself.
               // Unknown stock (older saved rows) is treated as in-stock.
               const defaultVariant = getDefaultCartVariant(item);
@@ -274,108 +342,39 @@ const Wishlist = () => {
               return (
                 <motion.div
                   key={item.productId}
-                  className={`${styles.card} ${removingId === item.productId ? styles.cardRemoving : ""}`}
+                  className={`${styles.cardCell} ${removingId === item.productId ? styles.cardRemoving : ""}`}
                   layout
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.85, y: 20 }}
                   transition={{ duration: 0.3, delay: index * 0.03 }}
-                  onClick={() => handleProductClick(item)}
                 >
-                  {/* Image Section */}
-                  <div className={styles.imageWrapper}>
-                    <img
-                      src={item.image}
-                      alt={item.name}
-                      className={styles.productImage}
-                      loading="lazy"
-                    />
-
-                    {/* Discount Badge */}
-                    {hasDiscount && (
-                      <span className={styles.discountBadge}>
-                        -{priceInfo.discount}%
-                      </span>
-                    )}
-
-                    {/* Remove / Heart Toggle */}
-                    <button
-                      className={styles.removeBtn}
-                      onClick={(e) => handleRemove(e, item.productId)}
-                      aria-label="Remove from wishlist"
-                      title="Remove from wishlist"
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="18" y1="6" x2="6" y2="18" />
-                        <line x1="6" y1="6" x2="18" y2="18" />
-                      </svg>
-                    </button>
-                  </div>
-
-                  {/* Info Section */}
-                  <div className={styles.cardBody}>
-                    {/* Brand */}
-                    {item.brand && (
-                      <span className={styles.brand}>{item.brand}</span>
-                    )}
-
-                    {/* Name */}
-                    <h3 className={styles.productName}>{item.name}</h3>
-
-                    {/* Rating */}
-                    {item.rating > 0 && (
-                      <StarRating rating={item.rating} count={item.totalReviews} />
-                    )}
-
-                    {/* Price */}
-                    <div className={styles.priceRow}>
-                      <span className={styles.salePrice}>
-                        {formatCurrency(priceInfo.sellingPrice, "INR")}
-                      </span>
-                      {hasDiscount && (
-                        <span className={styles.originalPrice}>
-                          {formatCurrency(priceInfo.originalPrice, "INR")}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Stock Status */}
-                    <div className={styles.stockStatus}>
-                      {inStock ? (
-                        <span className={styles.inStock}>In Stock</span>
-                      ) : (
-                        <span className={styles.outOfStock}>Out of Stock</span>
-                      )}
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className={styles.cardActions}>
-                      <button
-                        className={styles.addToCartBtn}
-                        onClick={(e) => handleAddToCart(e, item)}
-                        disabled={!inStock}
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <circle cx="9" cy="21" r="1" />
-                          <circle cx="20" cy="21" r="1" />
-                          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-                        </svg>
-                        Add to Cart
-                      </button>
-                      <button
-                        className={styles.moveToCartBtn}
-                        onClick={(e) => handleMoveToCart(e, item)}
-                        disabled={!inStock}
-                      >
-                        Move to Cart
-                      </button>
-                    </div>
-                  </div>
+                  <ProductCard
+                    product={{ ...item, id: item.productId }}
+                    onAddToCart={(cartItem) => addToCart(cartItem)}
+                    onToggleWishlist={() => handleHeartRemove(item.productId)}
+                    isWishlisted
+                  />
+                  {/* Per-item Move to Cart (add + remove from wishlist). */}
+                  <button
+                    className={styles.moveToCartBtn}
+                    onClick={(e) => handleMoveToCart(e, item)}
+                    disabled={!inStock}
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <circle cx="9" cy="21" r="1" />
+                      <circle cx="20" cy="21" r="1" />
+                      <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
+                    </svg>
+                    Move to Cart
+                  </button>
                 </motion.div>
               );
             })}
           </AnimatePresence>
         </div>
+
+        {recommendations}
       </div>
     </div>
   );
