@@ -31,6 +31,64 @@
   z-index: 1;
 }
 
+/* ── Trust strip (under hero) ───────────────────────────────────────────────
+   Teal/green reassurance band sourced from TRUST_BADGES (constants.js).
+   Built from storefront tokens — coherent in light & dark. */
+
+.trustStrip {
+  margin-top: var(--sf-space-4);
+  background: linear-gradient(
+    90deg,
+    var(--sf-color-brand-green) 0%,
+    var(--sf-color-brand-green-deep) 100%
+  );
+  border-top: 1px solid var(--sf-color-border-strong);
+  border-bottom: 1px solid var(--sf-color-border-strong);
+}
+
+.trustStripInner {
+  max-width: var(--sf-container-max);
+  margin: 0 auto;
+  padding: var(--sf-space-3) var(--sf-space-4);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-around;
+  gap: var(--sf-space-3) var(--sf-space-5);
+}
+
+.trustStripItem {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-2);
+  min-height: var(--sf-tap-target);
+  color: var(--sf-color-primary-contrast);
+}
+
+.trustStripIcon {
+  font-size: 1.5rem;
+  color: var(--sf-color-gold-light);
+  flex-shrink: 0;
+}
+
+.trustStripText {
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-semibold);
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .trustStripInner {
+    justify-content: flex-start;
+    gap: var(--sf-space-3) var(--sf-space-4);
+  }
+
+  .trustStripItem {
+    flex: 1 1 40%;
+  }
+}
+
 /* ── Section Header ────────────────────────────────────────────────────────── */
 
 .sectionHeader {

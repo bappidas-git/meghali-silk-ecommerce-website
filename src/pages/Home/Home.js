@@ -8,7 +8,7 @@ import { useWishlist } from "../../context/WishlistContext";
 import apiService from "../../services/api";
 import { categoryParam } from "../../utils/categories";
 import HeroSection from "../../components/HeroSection/HeroSection";
-import { APP_NAME, WHY_CHOOSE_US } from "../../utils/constants";
+import { APP_NAME, WHY_CHOOSE_US, TRUST_BADGES } from "../../utils/constants";
 import {
   formatCurrency,
   getProductMinPrice,
@@ -25,6 +25,15 @@ import styles from "./Home.module.css";
 // Must match the key written by ProductDetails.js so viewing a product
 // populates this list end-to-end.
 const RECENTLY_VIEWED_KEY = "recentlyViewed";
+
+// Icons for the under-hero trust strip, keyed to the TRUST_BADGES copy
+// (centralized in constants.js). Falls back to a check mark if copy changes.
+const TRUST_BADGE_ICONS = {
+  "7-Day Easy Returns": "mdi:backup-restore",
+  "100% Money Back": "mdi:cash-refund",
+  "Free Shipping": "mdi:truck-fast-outline",
+  "Authentic Silk": "mdi:certificate-outline",
+};
 
 const getRecentlyViewed = () => {
   try {
@@ -404,7 +413,23 @@ const Home = () => {
         <HeroSection />
       </section>
 
-      {/* 2. Flash Deals */}
+      {/* 2. Trust strip — owner-attested policy statements (TRUST_BADGES) */}
+      <section className={styles.trustStrip} aria-label="Our promises">
+        <div className={styles.trustStripInner}>
+          {TRUST_BADGES.map((badge) => (
+            <div className={styles.trustStripItem} key={badge}>
+              <Icon
+                className={styles.trustStripIcon}
+                icon={TRUST_BADGE_ICONS[badge] || "mdi:check-decagram"}
+                aria-hidden="true"
+              />
+              <span className={styles.trustStripText}>{badge}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 3. Flash Deals */}
       {flashDeals.length > 0 && (
         <section className={styles.section}>
           <div className={styles.container}>
