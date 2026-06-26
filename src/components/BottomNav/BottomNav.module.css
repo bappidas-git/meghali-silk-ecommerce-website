@@ -1,248 +1,227 @@
-/* ===== Bottom Navigation ===== */
+/* =============================================================================
+ * Bottom Navigation — Meghali's Silk mobile dock
+ * Dark glass surface, gold/emerald active state, emphasized center Search.
+ * Token-driven only (storefront-tokens.css) — no hardcoded hex.
+ * ========================================================================== */
 .bottomNav {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 1200;
+  left: var(--sf-space-3);
+  right: var(--sf-space-3);
+  bottom: var(--sf-space-2);
+  z-index: var(--sf-z-sticky);
+  border-radius: var(--sf-radius-xl);
+  border: 1px solid var(--sf-color-border);
+  background: var(--sf-color-surface);
+  box-shadow: var(--sf-shadow-lg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  font-family: var(--sf-font-family);
   padding-bottom: env(safe-area-inset-bottom);
-  transition: transform 0.3s ease;
-  border-top: 1px solid;
+  transition: transform var(--sf-transition);
+  overflow: visible;
 }
 
-/* Only visible on mobile */
+/* Both themes read from tokens; dark mode resolves the same vars to dark values.
+   Keep explicit hooks for any future per-theme tweaks. */
+.bottomNav.light,
+.bottomNav.dark {
+  background: var(--sf-color-surface);
+  border-color: var(--sf-color-border);
+}
+
+/* Mobile-only — hidden on desktop via media query (matches existing breakpoint). */
 @media (min-width: 769px) {
   .bottomNav {
     display: none;
   }
 }
 
-/* Visibility states */
+/* ===== Visibility (hide-on-scroll-down / show-on-scroll-up) ===== */
 .visible {
   transform: translateY(0);
 }
 
 .hidden {
-  transform: translateY(100%);
+  transform: translateY(calc(100% + var(--sf-space-4)));
 }
 
-/* Light theme */
-.bottomNav.light {
-  background: rgba(255, 255, 255, 0.96);
-  border-color: #e5e7eb;
-  box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.06);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+@media (prefers-reduced-motion: reduce) {
+  .bottomNav {
+    transition: none;
+  }
 }
 
-/* Dark theme */
-.bottomNav.dark {
-  background: rgba(15, 17, 23, 0.96);
-  border-color: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 -2px 16px rgba(0, 0, 0, 0.3);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-}
-
-/* ===== Nav Items Container ===== */
+/* ===== Nav items container ===== */
 .navItems {
   display: flex;
-  justify-content: space-around;
-  align-items: center;
-  padding: 6px 4px;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: var(--sf-space-1);
+  padding: var(--sf-space-2) var(--sf-space-2);
 }
 
-/* ===== Individual Nav Item ===== */
+/* ===== Individual tab (NavLink <a> or Search <button>) ===== */
 .navItem {
+  flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 2px;
-  padding: 6px 12px;
-  min-width: 56px;
+  min-width: 0;
+  min-height: var(--sf-tap-target);
+  padding: var(--sf-space-1) var(--sf-space-1);
   border: none;
   background: transparent;
+  color: var(--sf-color-text-muted);
+  text-decoration: none;
   cursor: pointer;
-  border-radius: 12px;
-  transition: all 0.2s ease;
-  position: relative;
+  border-radius: var(--sf-radius-lg);
+  transition: color var(--sf-transition-fast),
+    background var(--sf-transition-fast), transform var(--sf-transition-fast);
   -webkit-tap-highlight-color: transparent;
 }
 
-.light .navItem {
-  color: #94a3b8;
-}
-
-.dark .navItem {
-  color: rgba(255, 255, 255, 0.45);
-}
-
-/* Active state */
+/* Active state — gold/emerald highlight + tinted pill behind icon. */
 .navItem.active {
-  padding: 8px 16px;
+  color: var(--sf-color-gold);
 }
 
-.light .navItem.active {
-  color: #6366f1;
-  background: rgba(99, 102, 241, 0.08);
+.navItem.active .iconWrap {
+  background: var(--sf-color-primary-soft);
 }
 
-.dark .navItem.active {
-  color: #818cf8;
-  background: rgba(99, 102, 241, 0.12);
+/* Hover / press */
+@media (hover: hover) {
+  .navItem:hover {
+    background: var(--sf-color-surface-hover);
+    color: var(--sf-color-text-secondary);
+  }
+
+  .navItem.active:hover {
+    color: var(--sf-color-gold);
+  }
 }
 
-/* ===== Icon Wrap ===== */
-.iconWrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-}
-
-.iconWrap .icon {
-  font-size: 22px;
-}
-
-.icon {
-  line-height: 1;
-  transition: transform 0.2s ease;
-}
-
-.navItem.active .icon {
-  transform: scale(1.1);
-}
-
-/* ===== Wishlist Badge ===== */
-.badge {
-  position: absolute;
-  top: -4px;
-  right: -8px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
-  border-radius: 9px;
-  font-size: 0.65rem;
-  font-weight: 700;
-  line-height: 18px;
-  text-align: center;
-  background: #ef4444;
-  color: #ffffff;
-  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
-}
-
-/* ===== Label ===== */
-.label {
-  font-size: 0.65rem;
-  font-weight: 500;
-  letter-spacing: 0.2px;
-  white-space: nowrap;
-  transition: opacity 0.2s ease;
-}
-
-.navItem.active .label {
-  font-weight: 600;
-}
-
-/* ===== Tap feedback ===== */
 .navItem:active {
-  transform: scale(0.92);
+  transform: scale(0.94);
 }
 
-.navItem:active .icon {
-  transform: scale(0.95);
-}
-
-/* ===== Accessibility ===== */
+/* Focus-visible ring */
 .navItem:focus {
   outline: none;
 }
 
 .navItem:focus-visible {
-  outline: 2px solid;
-  outline-offset: 2px;
+  outline: none;
+  box-shadow: var(--sf-shadow-focus);
 }
 
-.light .navItem:focus-visible {
-  outline-color: #6366f1;
+/* ===== Icon wrap ===== */
+.iconWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: var(--sf-radius-pill);
+  transition: background var(--sf-transition-fast),
+    transform var(--sf-transition-fast);
 }
 
-.dark .navItem:focus-visible {
-  outline-color: #818cf8;
+.icon {
+  font-size: 24px !important;
+  line-height: 1;
+}
+
+.navItem.active .icon {
+  transform: scale(1.05);
+}
+
+/* ===== Center emphasized Search action ===== */
+.navItem.center {
+  flex: 0 0 auto;
+  justify-content: flex-end;
+  gap: var(--sf-space-1);
+  color: var(--sf-color-text-secondary);
+}
+
+.navItem.center .iconWrap {
+  width: 52px;
+  height: 52px;
+  margin-top: -22px;
+  border-radius: var(--sf-radius-pill);
+  background: var(--sf-gradient-gold);
+  color: var(--sf-color-emerald-contrast);
+  box-shadow: var(--sf-shadow-md);
+  border: 3px solid var(--sf-color-surface);
+}
+
+.navItem.center .icon {
+  font-size: 26px !important;
+  color: var(--sf-color-emerald-contrast);
+}
+
+@media (hover: hover) {
+  .navItem.center:hover {
+    background: transparent;
+    color: var(--sf-color-gold);
+  }
+
+  .navItem.center:hover .iconWrap {
+    background: var(--sf-gradient-primary-hover);
+  }
+}
+
+.navItem.center:focus-visible {
+  box-shadow: none;
+}
+
+.navItem.center:focus-visible .iconWrap {
+  box-shadow: var(--sf-shadow-md), var(--sf-shadow-focus);
+}
+
+/* ===== Wishlist badge ===== */
+.badge {
+  position: absolute;
+  top: -2px;
+  right: -4px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: var(--sf-radius-pill);
+  font-size: 0.625rem;
+  font-weight: var(--sf-font-bold);
+  line-height: 18px;
+  text-align: center;
+  background: var(--sf-color-discount);
+  color: var(--sf-color-primary-contrast);
+  border: 2px solid var(--sf-color-surface);
+}
+
+/* ===== Label ===== */
+.label {
+  max-width: 100%;
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.navItem.active .label {
+  font-weight: var(--sf-font-semibold);
 }
 
 /* ===== Small phones ===== */
 @media (max-width: 360px) {
-  .navItems {
-    padding: 4px 2px;
-  }
-
-  .navItem {
-    padding: 5px 8px;
-    min-width: 48px;
-    border-radius: 10px;
-  }
-
-  .navItem.active {
-    padding: 6px 12px;
-  }
-
-  .iconWrap .icon {
-    font-size: 20px;
-  }
-
   .label {
-    font-size: 0.6rem;
-  }
-}
-
-/* ===== Regular phones ===== */
-@media (min-width: 361px) and (max-width: 480px) {
-  .navItems {
-    padding: 6px 6px;
+    font-size: 0.625rem;
   }
 
-  .navItem {
-    padding: 6px 10px;
-    min-width: 52px;
-  }
-
-  .navItem.active {
-    padding: 8px 14px;
-  }
-}
-
-/* ===== Large phones / small tablets ===== */
-@media (min-width: 481px) and (max-width: 768px) {
-  .navItems {
-    padding: 8px 12px;
-  }
-
-  .navItem {
-    padding: 8px 16px;
-    min-width: 64px;
-    border-radius: 14px;
-  }
-
-  .navItem.active {
-    padding: 10px 20px;
-  }
-
-  .iconWrap .icon {
-    font-size: 24px;
-  }
-
-  .label {
-    font-size: 0.7rem;
-  }
-}
-
-/* ===== iOS Safari safe area ===== */
-@supports (padding-bottom: env(safe-area-inset-bottom)) {
-  .bottomNav {
-    padding-bottom: env(safe-area-inset-bottom);
+  .icon {
+    font-size: 22px !important;
   }
 }
