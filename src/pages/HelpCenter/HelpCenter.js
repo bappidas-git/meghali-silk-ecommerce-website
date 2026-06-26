@@ -1,8 +1,14 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
+import { Icon } from "@iconify/react";
 import { useTheme } from "../../context/ThemeContext";
-import { FAQ_ITEMS, SUPPORT_EMAIL, SUPPORT_PHONE } from "../../utils/constants";
+import {
+  FAQ_ITEMS,
+  SUPPORT_EMAIL,
+  SUPPORT_PHONE,
+  SUPPORT_HOURS,
+} from "../../utils/constants";
 import styles from "./HelpCenter.module.css";
 
 const HelpCenter = () => {
@@ -10,13 +16,15 @@ const HelpCenter = () => {
   const [openFaq, setOpenFaq] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Each topic carries an Iconify glyph and a category accent token so the icon
+  // tiles stay on-brand without any hardcoded colour. Links resolve to real routes.
   const helpTopics = [
-    { icon: "&#128230;", title: "Orders & Shipping", desc: "Track orders, delivery times, shipping info", link: "/orders" },
-    { icon: "&#128257;", title: "Returns & Refunds", desc: "Return policy, refund process, exchanges", link: "/refund" },
-    { icon: "&#128179;", title: "Payments", desc: "Payment methods, billing, invoices", link: "/support" },
-    { icon: "&#128100;", title: "Account & Settings", desc: "Profile, password, login issues", link: "/profile" },
-    { icon: "&#127873;", title: "Deals & Offers", desc: "Coupons, special offers, rewards", link: "/special-offers" },
-    { icon: "&#128274;", title: "Privacy & Security", desc: "Data protection, account security", link: "/privacy" },
+    { icon: "mdi:truck-fast-outline", accent: "var(--sf-cat-blue)", title: "Orders & Shipping", desc: "Track orders, delivery times, shipping info", link: "/orders" },
+    { icon: "mdi:cash-refund", accent: "var(--sf-cat-teal)", title: "Returns & Refunds", desc: "Return policy, refund process, exchanges", link: "/refund" },
+    { icon: "mdi:credit-card-outline", accent: "var(--sf-cat-purple)", title: "Payments", desc: "Payment methods, billing, invoices", link: "/support" },
+    { icon: "mdi:account-cog-outline", accent: "var(--sf-cat-orange)", title: "Account & Settings", desc: "Profile, password, login issues", link: "/profile" },
+    { icon: "mdi:tag-heart-outline", accent: "var(--sf-cat-pink)", title: "Deals & Offers", desc: "Coupons, special offers, rewards", link: "/special-offers" },
+    { icon: "mdi:shield-lock-outline", accent: "var(--sf-cat-red)", title: "Privacy & Security", desc: "Data protection, account security", link: "/privacy" },
   ];
 
   const filteredFaqs = searchQuery
@@ -28,19 +36,28 @@ const HelpCenter = () => {
       <div className={styles.breadcrumb}><Link to="/">Home</Link> <span>/</span> <span>Help Center</span></div>
 
       <motion.div className={styles.header} initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-        <h1>Help Center</h1>
-        <p>Find answers to common questions or reach out to our support team.</p>
+        <h1 className={styles.title}>Help Center</h1>
+        <p className={styles.lede}>Find answers to common questions or reach out to our silk experts.</p>
         <div className={styles.searchBox}>
-          <input type="text" placeholder="Search for help..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} />
+          <Icon icon="mdi:magnify" className={styles.searchIcon} aria-hidden="true" />
+          <input
+            type="search"
+            placeholder="Search for help..."
+            aria-label="Search help articles"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
         </div>
       </motion.div>
 
       <motion.section className={styles.topics} initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}>
-        <h2>Browse Help Topics</h2>
+        <h2 className={styles.sectionTitle}>Browse Help Topics</h2>
         <div className={styles.topicGrid}>
           {helpTopics.map((topic, i) => (
-            <Link to={topic.link} key={i} className={styles.topicCard}>
-              <span className={styles.topicIcon} dangerouslySetInnerHTML={{ __html: topic.icon }} />
+            <Link to={topic.link} key={i} className={styles.topicCard} style={{ "--topic-accent": topic.accent }}>
+              <span className={styles.topicIcon}>
+                <Icon icon={topic.icon} aria-hidden="true" />
+              </span>
               <h3>{topic.title}</h3>
               <p>{topic.desc}</p>
             </Link>
@@ -49,7 +66,7 @@ const HelpCenter = () => {
       </motion.section>
 
       <motion.section className={styles.faqSection} initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
-        <h2>Frequently Asked Questions</h2>
+        <h2 className={styles.sectionTitle}>Frequently Asked Questions</h2>
         <div className={styles.faqList}>
           {filteredFaqs.length === 0 ? (
             <p className={styles.noResults}>No FAQs match your search. <Link to="/support">Contact us</Link> for help.</p>
@@ -86,11 +103,11 @@ const HelpCenter = () => {
 
       <div className={styles.contactBanner}>
         <h3>Still need help?</h3>
-        <p>Our support team is available Mon-Sat, 9am-8pm IST</p>
+        <p>Our support team is available {SUPPORT_HOURS}</p>
         <div className={styles.contactMeta}>
-          <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>
+          <a href={`mailto:${SUPPORT_EMAIL}`}><Icon icon="mdi:email-outline" aria-hidden="true" /> {SUPPORT_EMAIL}</a>
           <span aria-hidden="true">•</span>
-          <a href={`tel:${SUPPORT_PHONE.replace(/\s/g, "")}`}>{SUPPORT_PHONE}</a>
+          <a href={`tel:${SUPPORT_PHONE.replace(/\s/g, "")}`}><Icon icon="mdi:phone-outline" aria-hidden="true" /> {SUPPORT_PHONE}</a>
         </div>
         <div className={styles.contactActions}>
           <Link to="/support" className={styles.primaryBtn}>Contact Support</Link>

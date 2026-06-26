@@ -132,15 +132,15 @@ export const POLICY_LAST_UPDATED = "June 1, 2026";
 export const FAQ_ITEMS = [
   {
     id: 1,
-    question: "How long does delivery take?",
+    question: "How long does delivery take, and is shipping free?",
     answer:
-      "Standard delivery takes 5-7 business days. Express delivery is available in 2-3 business days. Same-day delivery is available in select cities.",
+      "Standard delivery takes 5-7 business days, and shipping is free on all orders above ₹999. Express delivery is available in 2-3 business days, with same-day delivery in select metro cities. Every silk piece is carefully packed to reach you in perfect condition.",
   },
   {
     id: 2,
     question: "What is your return policy?",
     answer:
-      "We offer a 7-day hassle-free return policy. If you're not satisfied with your purchase, you can request a return within 7 days of delivery. Refunds are processed within 5-7 business days.",
+      "We offer a 7-day hassle-free return policy. If your silk saree or outfit isn't quite right, you can request a return within 7 days of delivery as long as it's unworn, unwashed and has its original tags intact. Refunds are processed within 5-7 business days of inspection.",
   },
   {
     id: 3,

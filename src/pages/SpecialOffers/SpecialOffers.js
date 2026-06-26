@@ -196,7 +196,9 @@ const CategoryTabs = ({ categories, activeTab, onChange }) => {
 
 // ── Product Card ─────────────────────────────────────────────────────────────
 
-const ProductCard = ({ product, categoryName, onAddToCart, onToggleWishlist, isWishlisted, index }) => {
+// forwardRef so AnimatePresence's popLayout child (PopChild) can attach its
+// measurement ref without a React warning.
+const ProductCard = React.forwardRef(({ product, categoryName, onAddToCart, onToggleWishlist, isWishlisted, index }, ref) => {
   const navigate = useNavigate();
   const minPrice = getProductMinPrice(product);
   const maxDiscount = getProductMaxDiscount(product);
@@ -213,6 +215,7 @@ const ProductCard = ({ product, categoryName, onAddToCart, onToggleWishlist, isW
 
   return (
     <motion.div
+      ref={ref}
       className={styles.productCard}
       initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
@@ -277,7 +280,8 @@ const ProductCard = ({ product, categoryName, onAddToCart, onToggleWishlist, isW
       </div>
     </motion.div>
   );
-};
+});
+ProductCard.displayName = "ProductCard";
 
 // ── Skeleton Loaders ─────────────────────────────────────────────────────────
 
