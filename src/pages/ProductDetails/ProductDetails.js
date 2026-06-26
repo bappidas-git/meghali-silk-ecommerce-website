@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useTheme } from "../../context/ThemeContext";
 import { useCart } from "../../hooks/useCart";
 import { useWishlist } from "../../context/WishlistContext";
 import apiService from "../../services/api";
 import { categoryParam } from "../../utils/categories";
 import { STOREFRONT_CONFIG } from "../../theme/tokens";
+import { FAQ_ITEMS } from "../../utils/constants";
 import {
   ProductGallery,
   SocialProof,
@@ -130,6 +131,163 @@ const deriveKeyFeatures = (product) => {
   return bullets;
 };
 
+// ─── Specifications / Fabric & Craft / FAQ assembly (REAL data only) ──────────
+// The PDP owns all data assembly; the panels below are pure render. Every helper
+// here returns ONLY real values and OMITS anything missing — nothing is invented.
+
+// The silk spec rows, in the order the design shows them.
+const SILK_SPEC_LABELS = [
+  "Warp Yarn",
+  "Weft Yarn",
+  "Design",
+  "Saree Length",
+  "Blouse Length",
+  "Border Width",
+  "Blouse Width",
+  "Weave Type",
+  "Origin",
+  "Occasion",
+  "Craft Time",
+];
+
+const normalizeSpecKey = (k) => String(k).toLowerCase().replace(/[^a-z0-9]/g, "");
+
+// Merge the structured spec sources (specifications → specs → attributes) into a
+// single normalized-key map. Earlier sources win; empty values are dropped.
+const collectSpecSources = (product) => {
+  const merged = {};
+  [product?.specifications, product?.specs, product?.attributes].forEach((src) => {
+    if (src && typeof src === "object" && !Array.isArray(src)) {
+      Object.entries(src).forEach(([k, v]) => {
+        const nk = normalizeSpecKey(k);
+        if (merged[nk] === undefined && v != null && String(v).trim() !== "") {
+          merged[nk] = v;
+        }
+      });
+    }
+  });
+  return merged;
+};
+
+const cleanSpecValue = (v) => {
+  if (v == null) return "";
+  if (Array.isArray(v)) return v.filter((x) => x != null && x !== "").join(", ");
+  return String(v).trim();
+};
+
+// Distinct fabrics across the real variants — a genuine yarn hint when the
+// product carries no explicit warp/weft spec.
+const variantFabrics = (product) => [
+  ...new Set(
+    (product?.variants || [])
+      .map((v) => v?.attributes?.Fabric)
+      .filter((f) => f != null && f !== "")
+  ),
+];
+
+// Build the silk spec table rows. Returns [] unless the product carries at least
+// one EXPLICIT silk spec field (specifications/specs/attributes) — the variant
+// fabric / occasion fallbacks only enrich an already-silk product, they never
+// fabricate a silk table on their own.
+const deriveSilkSpecRows = (product) => {
+  const map = collectSpecSources(product);
+  const hasExplicit = SILK_SPEC_LABELS.some((l) =>
+    cleanSpecValue(map[normalizeSpecKey(l)])
+  );
+  if (!hasExplicit) return [];
+
+  const fabrics = variantFabrics(product);
+  const singleFabric = fabrics.length === 1 ? fabrics[0] : null;
+  const fallbacks = {
+    "Warp Yarn": singleFabric,
+    "Weave Type": product?.weaveType,
+    Origin: product?.origin || product?.originRegion,
+    "Craft Time": product?.craftTime,
+    Occasion: product?.occasion || product?.occasions,
+  };
+
+  const rows = [];
+  SILK_SPEC_LABELS.forEach((label) => {
+    let value = map[normalizeSpecKey(label)];
+    if (value == null || value === "") value = fallbacks[label];
+    const text = cleanSpecValue(value);
+    if (text) rows.push({ label, value: text });
+  });
+  return rows;
+};
+
+// Generic spec fallback (Brand/SKU/Weight/Dimensions/Category/Tags) — used only
+// when no silk-specific data is present. Still real-data-only.
+const deriveGenericSpecRows = (product, category, sku) => {
+  const rows = [];
+  if (product?.brand) rows.push({ label: "Brand", value: product.brand });
+  if (sku) rows.push({ label: "SKU", value: sku });
+  if (product?.weight != null && product.weight !== "") {
+    rows.push({ label: "Weight", value: `${product.weight} kg` });
+  }
+  const d = product?.dimensions;
+  if (d) {
+    const dims =
+      typeof d === "object"
+        ? [d.length, d.width, d.height]
+            .filter((v) => v != null && v !== "")
+            .join(" × ")
+        : String(d);
+    if (dims) rows.push({ label: "Dimensions", value: `${dims} cm` });
+  }
+  if (category?.name) rows.push({ label: "Category", value: category.name });
+  if (Array.isArray(product?.tags) && product.tags.length > 0) {
+    rows.push({ label: "Tags", value: product.tags.join(", ") });
+  }
+  return rows;
+};
+
+// Fabric & Craft narrative. Returns null (→ tab hidden) unless there is genuine
+// craft-specific content: an explicit story field, OR a real weave/origin/craft
+// fact. Fabric alone (already shown elsewhere) never triggers the tab.
+const deriveFabricCraft = (product) => {
+  const map = collectSpecSources(product);
+  const get = (label) => cleanSpecValue(map[normalizeSpecKey(label)]);
+  const story = cleanSpecValue(product?.fabricAndCraft || product?.craftStory);
+
+  const facts = [];
+  const fabrics = variantFabrics(product);
+  const fabricVal = fabrics.length ? fabrics.join(", ") : get("Fabric");
+  if (fabricVal) facts.push({ label: "Fabric", value: fabricVal });
+
+  const weave = get("Weave Type") || cleanSpecValue(product?.weaveType);
+  if (weave) facts.push({ label: "Weave Type", value: weave });
+  const origin =
+    get("Origin") || cleanSpecValue(product?.origin || product?.originRegion);
+  if (origin) facts.push({ label: "Origin", value: origin });
+  const craftTime = get("Craft Time") || cleanSpecValue(product?.craftTime);
+  if (craftTime) facts.push({ label: "Craft Time", value: craftTime });
+
+  const craftFacts = facts.filter((f) => f.label !== "Fabric");
+  if (!story && craftFacts.length === 0) return null;
+  return { story, facts };
+};
+
+// FAQs — product-specific first, then the shared brand FAQs, de-duped by
+// question. Each entry is normalized to { question, answer }.
+const buildFaqs = (product) => {
+  const productFaqs = Array.isArray(product?.faqs) ? product.faqs : [];
+  const normalize = (f) => ({
+    question: cleanSpecValue(f?.question || f?.q),
+    answer: cleanSpecValue(f?.answer || f?.a),
+  });
+  const seen = new Set();
+  return [...productFaqs, ...FAQ_ITEMS]
+    .map(normalize)
+    .filter((f) => f.question && f.answer)
+    .filter((f) => {
+      const key = f.question.toLowerCase();
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+};
+
 // ═══════════════════════════════════════════════════════════════════════════
 const ProductDetails = () => {
   // Route is /products/:slug (slug canonical; legacy numeric id still resolves).
@@ -138,7 +296,9 @@ const ProductDetails = () => {
   const { isDarkMode } = useTheme();
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
+  const prefersReducedMotion = useReducedMotion();
   const tabsRef = useRef(null);
+  const tabRefs = useRef([]); // roving focus across the tablist
   const buyBoxRef = useRef(null); // anchor for the sticky mobile Add-to-Cart bar
 
   // ── State ──────────────────────────────────────────────────────────────
@@ -148,6 +308,7 @@ const ProductDetails = () => {
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState("description");
+  const [openFaq, setOpenFaq] = useState(null);
   const [added, setAdded] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
@@ -383,6 +544,48 @@ const ProductDetails = () => {
   const premium = isPremiumProduct(product);
   const keyFeatures = deriveKeyFeatures(product);
   const categoryLabel = category?.name || product.brand;
+
+  // ── Below-the-fold panel data (assembled here; panels just render it) ─────
+  const silkSpecRows = deriveSilkSpecRows(product);
+  const specRows =
+    silkSpecRows.length > 0
+      ? silkSpecRows
+      : deriveGenericSpecRows(product, category, currentSku);
+  const fabricCraft = deriveFabricCraft(product);
+  const faqs = buildFaqs(product);
+
+  // Tabs in the design order; Fabric & Craft / FAQs appear only with real data.
+  const tabs = [
+    { id: "description", label: "Description" },
+    { id: "specifications", label: "Specifications" },
+    ...(fabricCraft ? [{ id: "fabric", label: "Fabric & Craft" }] : []),
+    { id: "reviews", label: `Reviews (${reviews.length})` },
+    ...(faqs.length > 0 ? [{ id: "faqs", label: "FAQs" }] : []),
+  ];
+
+  // Roving keyboard navigation across the tablist (Left/Right/Home/End).
+  const handleTabKeyDown = (e, idx) => {
+    const keys = ["ArrowRight", "ArrowLeft", "Home", "End"];
+    if (!keys.includes(e.key)) return;
+    e.preventDefault();
+    const last = tabs.length - 1;
+    let next = idx;
+    if (e.key === "ArrowRight") next = idx === last ? 0 : idx + 1;
+    else if (e.key === "ArrowLeft") next = idx === 0 ? last : idx - 1;
+    else if (e.key === "Home") next = 0;
+    else if (e.key === "End") next = last;
+    setActiveTab(tabs[next].id);
+    tabRefs.current[next]?.focus();
+  };
+
+  // Framer Motion panel transition — disabled under reduced-motion.
+  const panelMotion = prefersReducedMotion
+    ? {}
+    : {
+        initial: { opacity: 0, y: 10 },
+        animate: { opacity: 1, y: 0 },
+        transition: { duration: 0.25 },
+      };
 
   // 4-card trust row — owner-attested promises. The free-shipping line resolves
   // its threshold from LIVE shipping data, so any number shown is never invented.
@@ -640,101 +843,106 @@ const ProductDetails = () => {
           ))}
         </ul>
 
-        {/* ── Below the fold: tabs ──────────────────────────────────────── */}
+        {/* ── Below the fold: brand tabbed section (5 tabs, accessible) ──── */}
         <div className={styles.tabsSection} ref={tabsRef}>
           <div className={styles.tabNav} role="tablist" aria-label="Product information">
-            <button
-              role="tab"
-              aria-selected={activeTab === "description"}
-              className={`${styles.tabButton} ${activeTab === "description" ? styles.tabButtonActive : ""}`}
-              onClick={() => setActiveTab("description")}
-            >
-              Description
-            </button>
-            <button
-              role="tab"
-              aria-selected={activeTab === "reviews"}
-              className={`${styles.tabButton} ${activeTab === "reviews" ? styles.tabButtonActive : ""}`}
-              onClick={() => setActiveTab("reviews")}
-            >
-              Reviews ({reviews.length})
-            </button>
+            {tabs.map((tab, idx) => {
+              const isActive = activeTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  ref={(el) => (tabRefs.current[idx] = el)}
+                  type="button"
+                  role="tab"
+                  id={`pdp-tab-${tab.id}`}
+                  aria-selected={isActive}
+                  aria-controls={`pdp-panel-${tab.id}`}
+                  tabIndex={isActive ? 0 : -1}
+                  className={`${styles.tabButton} ${isActive ? styles.tabButtonActive : ""}`}
+                  onClick={() => setActiveTab(tab.id)}
+                  onKeyDown={(e) => handleTabKeyDown(e, idx)}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
           </div>
 
           <div className={styles.tabContent}>
+            {/* Description */}
             {activeTab === "description" && (
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.25 }}
-                className={styles.descriptionTab}
+                {...panelMotion}
+                role="tabpanel"
+                id="pdp-panel-description"
+                aria-labelledby="pdp-tab-description"
+                className={styles.descriptionPanel}
               >
-                <div className={styles.fullDescription}>
-                  <h3>Product Description</h3>
-                  <p>{product.description || "No description available."}</p>
-                </div>
-
-                <div className={styles.specTable}>
-                  <h3>Specifications</h3>
-                  <table>
-                    <tbody>
-                      {product.brand && (
-                        <tr>
-                          <td className={styles.specLabel}>Brand</td>
-                          <td className={styles.specValue}>{product.brand}</td>
-                        </tr>
-                      )}
-                      {currentSku && (
-                        <tr>
-                          <td className={styles.specLabel}>SKU</td>
-                          <td className={styles.specValue}>{currentSku}</td>
-                        </tr>
-                      )}
-                      {product.weight && (
-                        <tr>
-                          <td className={styles.specLabel}>Weight</td>
-                          <td className={styles.specValue}>{product.weight}</td>
-                        </tr>
-                      )}
-                      {product.dimensions && (
-                        <tr>
-                          <td className={styles.specLabel}>Dimensions</td>
-                          <td className={styles.specValue}>
-                            {typeof product.dimensions === "object"
-                              ? [
-                                  product.dimensions.length,
-                                  product.dimensions.width,
-                                  product.dimensions.height,
-                                ]
-                                  .filter((v) => v != null && v !== "")
-                                  .join(" × ")
-                              : product.dimensions}
-                          </td>
-                        </tr>
-                      )}
-                      {category?.name && (
-                        <tr>
-                          <td className={styles.specLabel}>Category</td>
-                          <td className={styles.specValue}>{category.name}</td>
-                        </tr>
-                      )}
-                      {product.tags && product.tags.length > 0 && (
-                        <tr>
-                          <td className={styles.specLabel}>Tags</td>
-                          <td className={styles.specValue}>{product.tags.join(", ")}</td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
+                <h3 className={styles.panelTitle}>Product Description</h3>
+                <p className={styles.prose}>
+                  {product.description || "No description available."}
+                </p>
               </motion.div>
             )}
 
+            {/* Specifications — silk spec table (real data, missing rows omitted) */}
+            {activeTab === "specifications" && (
+              <motion.div
+                {...panelMotion}
+                role="tabpanel"
+                id="pdp-panel-specifications"
+                aria-labelledby="pdp-tab-specifications"
+                className={styles.specPanel}
+              >
+                <h3 className={styles.panelTitle}>Product Specification</h3>
+                {specRows.length > 0 ? (
+                  <dl className={styles.specGrid}>
+                    {specRows.map((row) => (
+                      <div className={styles.specPair} key={row.label}>
+                        <dt className={styles.specLabel}>{row.label}</dt>
+                        <dd className={styles.specValue}>{row.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                ) : (
+                  <p className={styles.specNote}>Full specifications coming soon.</p>
+                )}
+              </motion.div>
+            )}
+
+            {/* Fabric & Craft — only rendered when the tab exists (real data) */}
+            {activeTab === "fabric" && fabricCraft && (
+              <motion.div
+                {...panelMotion}
+                role="tabpanel"
+                id="pdp-panel-fabric"
+                aria-labelledby="pdp-tab-fabric"
+                className={styles.fabricPanel}
+              >
+                <h3 className={styles.panelTitle}>Fabric &amp; Craft</h3>
+                {fabricCraft.story && (
+                  <p className={styles.prose}>{fabricCraft.story}</p>
+                )}
+                {fabricCraft.facts.length > 0 && (
+                  <dl className={styles.craftFacts}>
+                    {fabricCraft.facts.map((f) => (
+                      <div className={styles.craftFact} key={f.label}>
+                        <dt className={styles.specLabel}>{f.label}</dt>
+                        <dd className={styles.specValue}>{f.value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                )}
+              </motion.div>
+            )}
+
+            {/* Reviews */}
             {activeTab === "reviews" && (
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.25 }}
+                {...panelMotion}
+                role="tabpanel"
+                id="pdp-panel-reviews"
+                aria-labelledby="pdp-tab-reviews"
               >
                 <ReviewsSection
                   reviews={reviews}
@@ -744,6 +952,62 @@ const ProductDetails = () => {
                   error={reviewsError}
                   onRetry={fetchReviews}
                 />
+              </motion.div>
+            )}
+
+            {/* FAQs — accessible accordion */}
+            {activeTab === "faqs" && faqs.length > 0 && (
+              <motion.div
+                {...panelMotion}
+                role="tabpanel"
+                id="pdp-panel-faqs"
+                aria-labelledby="pdp-tab-faqs"
+                className={styles.faqPanel}
+              >
+                <h3 className={styles.panelTitle}>Frequently Asked Questions</h3>
+                <div className={styles.faqList}>
+                  {faqs.map((faq, i) => {
+                    const isOpen = openFaq === i;
+                    return (
+                      <div className={styles.faqItem} key={i}>
+                        <button
+                          type="button"
+                          className={styles.faqQuestion}
+                          aria-expanded={isOpen}
+                          aria-controls={`pdp-faq-answer-${i}`}
+                          id={`pdp-faq-question-${i}`}
+                          onClick={() => setOpenFaq(isOpen ? null : i)}
+                        >
+                          <span>{faq.question}</span>
+                          <svg
+                            className={`${styles.faqIcon} ${isOpen ? styles.faqIconOpen : ""}`}
+                            viewBox="0 0 24 24"
+                            width="18"
+                            height="18"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2.2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            aria-hidden="true"
+                          >
+                            <polyline points="6 9 12 15 18 9" />
+                          </svg>
+                        </button>
+                        {isOpen && (
+                          <div
+                            className={styles.faqAnswer}
+                            id={`pdp-faq-answer-${i}`}
+                            role="region"
+                            aria-labelledby={`pdp-faq-question-${i}`}
+                          >
+                            {faq.answer}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
               </motion.div>
             )}
           </div>
@@ -758,7 +1022,7 @@ const ProductDetails = () => {
         />
 
         <RelatedProducts
-          title="You may also like"
+          title="You May Also Like"
           products={relatedProducts}
           onAddToCart={addToCart}
           onToggleWishlist={toggleWishlist}

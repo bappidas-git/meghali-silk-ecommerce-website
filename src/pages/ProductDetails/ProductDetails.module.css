@@ -368,25 +368,36 @@
 
 /* ── Tabs ────────────────────────────────────────────────────────────────── */
 .tabsSection {
-  margin-top: var(--sf-space-8);
+  margin-top: var(--sf-space-10);
   scroll-margin-top: 90px;
 }
 
+/* Tab bar — scrolls horizontally on mobile; gold active state. */
 .tabNav {
   display: flex;
-  gap: var(--sf-space-2);
+  gap: var(--sf-space-1);
   border-bottom: 1px solid var(--sf-color-border);
   margin-bottom: var(--sf-space-6);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tabNav::-webkit-scrollbar {
+  display: none;
 }
 
 .tabButton {
   position: relative;
+  flex-shrink: 0;
+  min-height: var(--sf-tap-target);
   padding: var(--sf-space-3) var(--sf-space-5);
   border: none;
   background: none;
   font-size: var(--sf-text-base);
   font-weight: var(--sf-font-medium);
-  color: var(--sf-color-text-muted);
+  white-space: nowrap;
+  color: var(--sf-color-text-secondary);
   cursor: pointer;
   transition: color var(--sf-transition-fast);
 }
@@ -396,17 +407,18 @@
 }
 
 .tabButtonActive {
-  color: var(--sf-color-primary);
+  color: var(--sf-color-gold);
+  font-weight: var(--sf-font-semibold);
 }
 
 .tabButtonActive::after {
   content: "";
   position: absolute;
-  left: 0;
-  right: 0;
+  left: var(--sf-space-3);
+  right: var(--sf-space-3);
   bottom: -1px;
   height: 2px;
-  background: var(--sf-color-primary);
+  background: var(--sf-color-gold);
   border-radius: var(--sf-radius-pill);
 }
 
@@ -416,45 +428,173 @@
   border-radius: var(--sf-radius-sm);
 }
 
-.descriptionTab {
-  display: grid;
-  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-  gap: var(--sf-space-8);
-}
-
-.fullDescription h3,
-.specTable h3 {
-  margin: 0 0 var(--sf-space-3);
-  font-size: var(--sf-text-lg);
-  font-weight: var(--sf-font-semibold);
+/* ── Tab panels ──────────────────────────────────────────────────────────── */
+.panelTitle {
+  margin: 0 0 var(--sf-space-4);
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-xl);
+  font-weight: var(--sf-font-bold);
   color: var(--sf-color-text);
 }
 
-.fullDescription p {
+.prose {
   margin: 0;
+  max-width: 70ch;
   line-height: var(--sf-leading-normal);
   color: var(--sf-color-text-secondary);
+  white-space: pre-line;
 }
 
-.specTable table {
-  width: 100%;
-  border-collapse: collapse;
+.descriptionPanel,
+.fabricPanel,
+.faqPanel {
+  max-width: 880px;
 }
 
-.specTable td {
-  padding: var(--sf-space-3);
+/* ── Specifications — silk spec table ───────────────────────────────────── */
+.specPanel {
+  padding: var(--sf-space-5) var(--sf-space-6);
+  border: 1px solid var(--sf-color-border);
+  border-radius: var(--sf-radius-lg);
+  background: var(--sf-color-surface);
+}
+
+.specGrid {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid var(--sf-color-border);
+  border-radius: var(--sf-radius-md);
+  overflow: hidden;
+  background: var(--sf-color-surface);
+}
+
+.specPair {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+  gap: var(--sf-space-2);
+  align-items: baseline;
+  padding: var(--sf-space-3) var(--sf-space-4);
   border-bottom: 1px solid var(--sf-color-border);
-  font-size: var(--sf-text-sm);
+  border-right: 1px solid var(--sf-color-border);
 }
 
 .specLabel {
-  color: var(--sf-color-text-muted);
-  width: 40%;
+  margin: 0;
+  font-size: var(--sf-text-sm);
+  color: var(--sf-color-text-secondary);
 }
 
 .specValue {
+  margin: 0;
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-semibold);
   color: var(--sf-color-text);
+  overflow-wrap: anywhere;
+}
+
+/* Zebra striping by visual row (3 columns → bands of 3). */
+.specGrid .specPair:nth-child(6n + 4),
+.specGrid .specPair:nth-child(6n + 5),
+.specGrid .specPair:nth-child(6n + 6) {
+  background: var(--sf-color-surface-2);
+}
+
+.specNote {
+  margin: 0;
+  color: var(--sf-color-text-muted);
+  font-style: italic;
+}
+
+/* ── Fabric & Craft ──────────────────────────────────────────────────────── */
+.fabricPanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-5);
+}
+
+.craftFacts {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--sf-space-3);
+}
+
+.craftFact {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: var(--sf-space-3) var(--sf-space-4);
+  border: 1px solid var(--sf-color-border);
+  border-left: 3px solid var(--sf-color-gold);
+  border-radius: var(--sf-radius-md);
+  background: var(--sf-color-surface);
+}
+
+.craftFact .specLabel {
+  font-size: var(--sf-text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--sf-color-gold-deep);
+}
+
+/* ── FAQ accordion ───────────────────────────────────────────────────────── */
+.faqList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-2);
+}
+
+.faqItem {
+  border: 1px solid var(--sf-color-border);
+  border-radius: var(--sf-radius-md);
+  background: var(--sf-color-surface);
+  overflow: hidden;
+}
+
+.faqQuestion {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sf-space-3);
+  min-height: var(--sf-tap-target);
+  padding: var(--sf-space-3) var(--sf-space-4);
+  border: none;
+  background: none;
+  text-align: left;
+  font-size: var(--sf-text-base);
   font-weight: var(--sf-font-medium);
+  color: var(--sf-color-text);
+  cursor: pointer;
+  transition: color var(--sf-transition-fast);
+}
+
+.faqQuestion:hover {
+  color: var(--sf-color-gold);
+}
+
+.faqQuestion:focus-visible {
+  outline: none;
+  box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
+}
+
+.faqIcon {
+  flex-shrink: 0;
+  color: var(--sf-color-gold-deep);
+  transition: transform var(--sf-transition-fast);
+}
+
+.faqIconOpen {
+  transform: rotate(180deg);
+}
+
+.faqAnswer {
+  padding: 0 var(--sf-space-4) var(--sf-space-4);
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-secondary);
 }
 
 /* ── Skeleton ────────────────────────────────────────────────────────────── */
@@ -561,12 +701,22 @@
   .trustRow {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-  .descriptionTab {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--sf-space-6);
-  }
   .skeletonLayout {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Spec table → 2 columns of pairs; re-stripe in bands of 2. */
+  .specGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .specGrid .specPair:nth-child(6n + 4),
+  .specGrid .specPair:nth-child(6n + 5),
+  .specGrid .specPair:nth-child(6n + 6) {
+    background: transparent;
+  }
+  .specGrid .specPair:nth-child(4n + 3),
+  .specGrid .specPair:nth-child(4n + 4) {
+    background: var(--sf-color-surface-2);
   }
 }
 
@@ -589,10 +739,34 @@
     order: 1;
     width: 100%;
   }
+
+  /* Spec table → single column of pairs; stripe every other row. */
+  .specPanel {
+    padding: var(--sf-space-4);
+  }
+  .specGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .specGrid .specPair {
+    border-right: none;
+  }
+  .specGrid .specPair:nth-child(4n + 3),
+  .specGrid .specPair:nth-child(4n + 4) {
+    background: transparent;
+  }
+  .specGrid .specPair:nth-child(even) {
+    background: var(--sf-color-surface-2);
+  }
 }
 
 @media (max-width: 520px) {
   .trustRow {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Narrowest: stack label above value for readability. */
+  .specPair {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
   }
 }
