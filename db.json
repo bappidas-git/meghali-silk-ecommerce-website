@@ -298,1217 +298,1483 @@
   "products": [
     {
       "id": 1,
-      "name": "ProBook Ultra Laptop 15\"",
-      "slug": "probook-ultra-laptop-15",
-      "sku": "LAP-PBU-15-001",
-      "shortDescription": "Powerful 15-inch laptop with Intel Core i7 processor and 16GB RAM",
-      "description": "The ProBook Ultra Laptop 15\" is engineered for professionals who demand performance. Equipped with the latest Intel Core i7 processor, 16GB DDR5 RAM, and a 512GB NVMe SSD, this laptop handles everything from intensive multitasking to creative workloads with ease. The stunning 15.6-inch FHD IPS display delivers vivid colors and sharp details for an immersive visual experience.",
-      "categoryId": 6,
-      "brand": "ProBook",
-      "images": [
-        "https://placehold.co/600x400/1a1a2e/FFFFFF?text=ProBook+Laptop",
-        "https://placehold.co/600x400/16213e/FFFFFF?text=ProBook+Side",
-        "https://placehold.co/600x400/0f3460/FFFFFF?text=ProBook+Open"
-      ],
-      "price": 74999,
-      "comparePrice": 89999,
-      "costPrice": 55000,
-      "stock": 45,
-      "lowStockThreshold": 10,
-      "weight": 1.8,
-      "dimensions": {
-        "length": 35.7,
-        "width": 23.5,
-        "height": 1.9
-      },
-      "variants": [
-        {
-          "id": "v1",
-          "name": "8GB RAM / 256GB SSD",
-          "price": 64999,
-          "stock": 20,
-          "sku": "LAP-PBU-15-8-256",
-          "attributes": {
-            "Configuration": "8GB · 256GB SSD"
-          }
-        },
-        {
-          "id": "v2",
-          "name": "16GB RAM / 512GB SSD",
-          "price": 74999,
-          "stock": 15,
-          "sku": "LAP-PBU-15-16-512",
-          "attributes": {
-            "Configuration": "16GB · 512GB SSD"
-          }
-        },
-        {
-          "id": "v3",
-          "name": "32GB RAM / 1TB SSD",
-          "price": 94999,
-          "stock": 10,
-          "sku": "LAP-PBU-15-32-1TB",
-          "attributes": {
-            "Configuration": "32GB · 1TB SSD"
-          }
-        }
-      ],
-      "tags": [
-        "laptop",
-        "intel",
-        "i7",
-        "ultrabook",
-        "work",
-        "productivity"
-      ],
-      "featured": true,
-      "trending": true,
-      "hot": false,
-      "isActive": true,
-      "rating": 4.6,
-      "totalReviews": 128,
-      "metaTitle": "ProBook Ultra Laptop 15\" - Intel Core i7 | Best Price",
-      "metaDescription": "Buy ProBook Ultra Laptop 15\" with Intel Core i7, 16GB RAM, 512GB SSD. Free shipping available.",
-      "createdAt": "2025-01-10T00:00:00.000Z",
-      "updatedAt": "2025-03-01T00:00:00.000Z",
-      "frequentlyBoughtTogetherIds": [
-        4,
-        6
-      ],
-      "relatedProductIds": [
-        13,
-        3,
-        16,
-        4,
-        6
-      ]
-    },
-    {
-      "id": 2,
-      "name": "SoundWave Pro Wireless Earbuds",
-      "slug": "soundwave-pro-wireless-earbuds",
-      "sku": "AUD-SWP-TWS-001",
-      "shortDescription": "Premium true wireless earbuds with active noise cancellation",
-      "description": "Experience audio like never before with SoundWave Pro Wireless Earbuds. Featuring advanced Active Noise Cancellation (ANC) technology, 30-hour total battery life, and premium sound quality. The ergonomic design ensures a secure, comfortable fit for all-day wear. IPX5 water resistance makes them perfect for workouts and outdoor activities.",
+      "name": "Royal Banarasi Silk Saree — Deep Maroon",
+      "slug": "royal-banarasi-silk-saree-deep-maroon",
+      "sku": "SAR-BAN-001",
+      "shortDescription": "Handwoven Banarasi silk saree with rich gold zari brocade and a contrast pallu.",
+      "description": "Woven on traditional handlooms by master artisans in the Banaras-to-Bengal weaving tradition, this pure silk saree carries dense gold zari brocade across the body and an opulent contrast pallu. The deep maroon ground is dyed for richness and the zari catches light beautifully under evening wear. Comes with an unstitched matching blouse piece. Dry clean only; store wrapped in muslin.",
       "categoryId": 7,
-      "brand": "SoundWave",
+      "brand": "Meghali's Silk",
       "images": [
-        "https://placehold.co/600x400/1a1a2e/FFFFFF?text=SoundWave+Earbuds",
-        "https://placehold.co/600x400/16213e/FFFFFF?text=SoundWave+Case"
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Banarasi+Silk",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Pallu+Detail",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Border+Zari",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Drape"
       ],
-      "price": 8999,
-      "comparePrice": 12999,
-      "costPrice": 5500,
-      "stock": 120,
-      "lowStockThreshold": 20,
-      "weight": 0.065,
-      "dimensions": {
-        "length": 6.5,
-        "width": 4.2,
-        "height": 2.8
-      },
-      "variants": [
-        {
-          "id": "v1",
-          "name": "Midnight Black",
-          "price": 8999,
-          "stock": 50,
-          "sku": "AUD-SWP-TWS-BLK",
-          "attributes": {
-            "Color": "Midnight Black"
-          },
-          "swatchHex": "#1a1a2e"
-        },
-        {
-          "id": "v2",
-          "name": "Pearl White",
-          "price": 8999,
-          "stock": 40,
-          "sku": "AUD-SWP-TWS-WHT",
-          "attributes": {
-            "Color": "Pearl White"
-          },
-          "swatchHex": "#f3f1ea"
-        },
-        {
-          "id": "v3",
-          "name": "Navy Blue",
-          "price": 8999,
-          "stock": 30,
-          "sku": "AUD-SWP-TWS-NVY",
-          "attributes": {
-            "Color": "Navy Blue"
-          },
-          "swatchHex": "#1e3a5f"
-        }
-      ],
-      "tags": [
-        "earbuds",
-        "wireless",
-        "anc",
-        "bluetooth",
-        "audio",
-        "tws"
-      ],
-      "featured": true,
-      "trending": true,
-      "hot": true,
-      "isActive": true,
-      "rating": 4.8,
-      "totalReviews": 342,
-      "metaTitle": "SoundWave Pro Wireless Earbuds - ANC | True Wireless",
-      "metaDescription": "Shop SoundWave Pro Wireless Earbuds with Active Noise Cancellation, 30hr battery, IPX5 rating.",
-      "createdAt": "2025-01-15T00:00:00.000Z",
-      "updatedAt": "2025-02-20T00:00:00.000Z",
-      "relatedProductIds": [
-        10,
-        4,
-        3
-      ]
-    },
-    {
-      "id": 3,
-      "name": "FitPulse Smartwatch Series 5",
-      "slug": "fitpulse-smartwatch-series-5",
-      "sku": "ELC-FPS-SW5-001",
-      "shortDescription": "Advanced health tracking smartwatch with GPS and AMOLED display",
-      "description": "The FitPulse Smartwatch Series 5 is your ultimate health and fitness companion. Track your heart rate, SpO2, sleep quality, and stress levels with clinical-grade accuracy. Built-in GPS for precise route tracking, 7-day battery life, and 100+ workout modes. The always-on AMOLED display looks stunning in any lighting condition.",
-      "categoryId": 1,
-      "brand": "FitPulse",
-      "images": [
-        "https://placehold.co/600x400/0f3460/FFFFFF?text=FitPulse+Watch",
-        "https://placehold.co/600x400/533483/FFFFFF?text=FitPulse+Side"
-      ],
-      "price": 14999,
-      "comparePrice": 19999,
-      "costPrice": 9000,
-      "stock": 75,
-      "lowStockThreshold": 15,
-      "weight": 0.045,
-      "dimensions": {
-        "length": 4.5,
-        "width": 3.8,
-        "height": 1
-      },
-      "variants": [
-        {
-          "id": "v1",
-          "name": "Black / Rubber Band",
-          "price": 14999,
-          "stock": 30,
-          "sku": "ELC-FPS-SW5-BLK-R"
-        },
-        {
-          "id": "v2",
-          "name": "Silver / Metal Band",
-          "price": 16999,
-          "stock": 25,
-          "sku": "ELC-FPS-SW5-SLV-M"
-        },
-        {
-          "id": "v3",
-          "name": "Gold / Leather Band",
-          "price": 18999,
-          "stock": 20,
-          "sku": "ELC-FPS-SW5-GLD-L"
-        }
-      ],
-      "tags": [
-        "smartwatch",
-        "fitness",
-        "gps",
-        "health",
-        "amoled",
-        "wearable"
-      ],
-      "featured": true,
-      "trending": false,
-      "hot": true,
-      "isActive": true,
-      "rating": 4.5,
-      "totalReviews": 215,
-      "metaTitle": "FitPulse Smartwatch Series 5 - Health & Fitness Tracker",
-      "metaDescription": "Buy FitPulse Smartwatch Series 5 with GPS, heart rate monitor, SpO2 tracking and 7-day battery.",
-      "createdAt": "2025-01-20T00:00:00.000Z",
-      "updatedAt": "2025-02-15T00:00:00.000Z"
-    },
-    {
-      "id": 4,
-      "name": "MechKey RGB Gaming Keyboard",
-      "slug": "mechkey-rgb-gaming-keyboard",
-      "sku": "ELC-MKB-RGB-001",
-      "shortDescription": "Mechanical gaming keyboard with per-key RGB backlight and tactile switches",
-      "description": "Dominate your game with the MechKey RGB Gaming Keyboard. Features genuine mechanical switches rated for 100 million keystrokes, full per-key RGB customization with 16 million colors, and a durable aircraft-grade aluminum frame. Anti-ghosting with N-key rollover ensures every keystroke is registered, even in the most intense gaming sessions.",
-      "categoryId": 1,
-      "brand": "MechKey",
-      "images": [
-        "https://placehold.co/600x400/1a1a2e/FFFFFF?text=MechKey+Keyboard",
-        "https://placehold.co/600x400/16213e/FFFFFF?text=MechKey+RGB"
-      ],
-      "price": 6499,
-      "comparePrice": 8999,
-      "costPrice": 3800,
-      "stock": 60,
-      "lowStockThreshold": 12,
-      "weight": 1.2,
-      "dimensions": {
-        "length": 44,
-        "width": 13.5,
-        "height": 3.8
-      },
-      "variants": [
-        {
-          "id": "v1",
-          "name": "Blue Switches (Clicky)",
-          "price": 6499,
-          "stock": 25,
-          "sku": "ELC-MKB-RGB-BLU"
-        },
-        {
-          "id": "v2",
-          "name": "Red Switches (Linear)",
-          "price": 6499,
-          "stock": 20,
-          "sku": "ELC-MKB-RGB-RED"
-        },
-        {
-          "id": "v3",
-          "name": "Brown Switches (Tactile)",
-          "price": 6499,
-          "stock": 15,
-          "sku": "ELC-MKB-RGB-BRN"
-        }
-      ],
-      "tags": [
-        "keyboard",
-        "mechanical",
-        "gaming",
-        "rgb",
-        "tactile"
-      ],
-      "featured": false,
-      "trending": true,
-      "hot": true,
-      "isActive": true,
-      "rating": 4.7,
-      "totalReviews": 189,
-      "metaTitle": "MechKey RGB Gaming Keyboard - Mechanical Switches",
-      "metaDescription": "Buy MechKey RGB Mechanical Gaming Keyboard with per-key RGB, aluminum frame, N-key rollover.",
-      "createdAt": "2025-02-01T00:00:00.000Z",
-      "updatedAt": "2025-02-28T00:00:00.000Z",
-      "frequentlyBoughtTogetherIds": [
-        1,
-        6
-      ],
-      "relatedProductIds": [
-        3,
-        16,
-        13
-      ]
-    },
-    {
-      "id": 5,
-      "name": "Urban Classic Cotton T-Shirt",
-      "slug": "urban-classic-cotton-t-shirt",
-      "sku": "CLT-UCT-CRW-001",
-      "shortDescription": "Premium 100% organic cotton crew neck t-shirt",
-      "description": "Made from 100% GOTS-certified organic cotton, the Urban Classic T-Shirt is the foundation of any wardrobe. The relaxed, slightly oversized fit offers comfort without compromising style. Pre-shrunk fabric ensures it maintains its shape wash after wash. Available in a range of versatile colors.",
-      "categoryId": 2,
-      "brand": "Urban Threads",
-      "images": [
-        "https://placehold.co/600x400/764ba2/FFFFFF?text=Urban+T-Shirt",
-        "https://placehold.co/600x400/533483/FFFFFF?text=Urban+Back"
-      ],
-      "price": 899,
-      "comparePrice": 1299,
-      "costPrice": 400,
-      "stock": 250,
-      "lowStockThreshold": 30,
-      "weight": 0.18,
-      "dimensions": {
-        "length": 30,
-        "width": 25,
-        "height": 0.5
-      },
-      "variants": [
-        {
-          "id": "v1",
-          "name": "S / White",
-          "price": 899,
-          "stock": 50,
-          "sku": "CLT-UCT-CRW-S-WHT",
-          "attributes": {
-            "Size": "S",
-            "Color": "White"
-          },
-          "swatchHex": "#ffffff"
-        },
-        {
-          "id": "v2",
-          "name": "M / White",
-          "price": 899,
-          "stock": 60,
-          "sku": "CLT-UCT-CRW-M-WHT",
-          "attributes": {
-            "Size": "M",
-            "Color": "White"
-          },
-          "swatchHex": "#ffffff"
-        },
-        {
-          "id": "v3",
-          "name": "L / White",
-          "price": 899,
-          "stock": 55,
-          "sku": "CLT-UCT-CRW-L-WHT",
-          "attributes": {
-            "Size": "L",
-            "Color": "White"
-          },
-          "swatchHex": "#ffffff"
-        },
-        {
-          "id": "v4",
-          "name": "XL / White",
-          "price": 899,
-          "stock": 40,
-          "sku": "CLT-UCT-CRW-XL-WHT",
-          "attributes": {
-            "Size": "XL",
-            "Color": "White"
-          },
-          "swatchHex": "#ffffff"
-        },
-        {
-          "id": "v5",
-          "name": "S / Black",
-          "price": 899,
-          "stock": 45,
-          "sku": "CLT-UCT-CRW-S-BLK",
-          "attributes": {
-            "Size": "S",
-            "Color": "Black"
-          },
-          "swatchHex": "#1a1a1a"
-        }
-      ],
-      "tags": [
-        "tshirt",
-        "cotton",
-        "organic",
-        "casual",
-        "unisex",
-        "basics"
-      ],
-      "featured": false,
-      "trending": false,
-      "hot": false,
-      "isActive": true,
-      "rating": 4.3,
-      "totalReviews": 567,
-      "metaTitle": "Urban Classic Cotton T-Shirt - Organic | Sustainable Fashion",
-      "metaDescription": "Shop Urban Classic 100% organic cotton t-shirts. Comfortable, sustainable and stylish.",
-      "createdAt": "2025-02-10T00:00:00.000Z",
-      "updatedAt": "2025-03-05T00:00:00.000Z"
-    },
-    {
-      "id": 6,
-      "name": "ZenPro USB-C 7-in-1 Hub",
-      "slug": "zenpro-usb-c-7-in-1-hub",
-      "sku": "ELC-ZPH-7C1-001",
-      "shortDescription": "Compact 7-in-1 USB-C hub with 4K HDMI, 100W PD charging and SD card reader",
-      "description": "The ZenPro USB-C 7-in-1 Hub transforms your single USB-C port into a productivity powerhouse. Connects up to 7 devices simultaneously: 4K@60Hz HDMI, 100W Power Delivery pass-through, 2x USB-A 3.0, USB-C data, SD and microSD card readers. The slim, pocket-friendly design makes it perfect for on-the-go professionals.",
-      "categoryId": 1,
-      "brand": "ZenPro",
-      "images": [
-        "https://placehold.co/600x400/2196f3/FFFFFF?text=ZenPro+Hub",
-        "https://placehold.co/600x400/1976d2/FFFFFF?text=ZenPro+Ports"
-      ],
-      "price": 3499,
-      "comparePrice": 4999,
-      "costPrice": 1800,
-      "stock": 90,
-      "lowStockThreshold": 15,
-      "weight": 0.095,
-      "dimensions": {
-        "length": 11.5,
-        "width": 3.5,
-        "height": 1.4
-      },
-      "variants": [
-        {
-          "id": "v1",
-          "name": "Space Gray",
-          "price": 3499,
-          "stock": 50,
-          "sku": "ELC-ZPH-7C1-GRY"
-        },
-        {
-          "id": "v2",
-          "name": "Silver",
-          "price": 3499,
-          "stock": 40,
-          "sku": "ELC-ZPH-7C1-SLV"
-        }
-      ],
-      "tags": [
-        "usb-c",
-        "hub",
-        "docking",
-        "4k",
-        "hdmi",
-        "productivity"
-      ],
-      "featured": false,
-      "trending": true,
-      "hot": false,
-      "isActive": true,
-      "rating": 4.5,
-      "totalReviews": 98,
-      "metaTitle": "ZenPro USB-C 7-in-1 Hub - 4K HDMI, 100W PD | Best Dock",
-      "metaDescription": "Buy ZenPro 7-in-1 USB-C Hub with 4K HDMI, 100W Power Delivery, USB 3.0 and SD card readers.",
-      "createdAt": "2025-02-20T00:00:00.000Z",
-      "updatedAt": "2025-03-10T00:00:00.000Z"
-    },
-    {
-      "id": 7,
-      "name": "Banarasi Silk Saree",
-      "slug": "banarasi-silk-saree",
-      "sku": "SAR-BNR-SLK-001",
-      "shortDescription": "Handwoven Banarasi silk saree with rich zari work",
-      "description": "This exquisite Banarasi silk saree is handwoven by master artisans of Varanasi. Featuring intricate gold zari work with traditional motifs, it comes with an unstitched blouse piece. The rich texture and luxurious feel make it perfect for weddings, festivals, and special occasions.",
-      "categoryId": 14,
-      "brand": "WeaveKraft",
-      "images": [
-        "https://placehold.co/600x400/c2185b/FFFFFF?text=Banarasi+Saree",
-        "https://placehold.co/600x400/d81b60/FFFFFF?text=Saree+Detail",
-        "https://placehold.co/600x400/e91e63/FFFFFF?text=Saree+Pallu"
-      ],
-      "price": 5999,
-      "comparePrice": 8999,
-      "costPrice": 3500,
-      "stock": 30,
+      "price": 18500,
+      "comparePrice": 24000,
+      "costPrice": 12000,
+      "stock": 24,
       "lowStockThreshold": 5,
-      "weight": 0.6,
+      "weight": 0.8,
       "dimensions": {
-        "length": 30,
+        "length": 35,
         "width": 25,
         "height": 5
       },
       "variants": [
         {
           "id": "v1",
-          "name": "Maroon & Gold",
-          "price": 5999,
-          "stock": 10,
-          "sku": "SAR-BNR-SLK-MRN"
+          "name": "Deep Maroon",
+          "price": 18500,
+          "stock": 8,
+          "sku": "SAR-BAN-001-MRN",
+          "attributes": {
+            "Fabric": "Banarasi Silk",
+            "Color": "Deep Maroon"
+          },
+          "swatchHex": "#7B1E2B"
         },
         {
           "id": "v2",
-          "name": "Royal Blue & Gold",
-          "price": 5999,
-          "stock": 10,
-          "sku": "SAR-BNR-SLK-BLU"
+          "name": "Royal Blue",
+          "price": 18500,
+          "stock": 8,
+          "sku": "SAR-BAN-001-BLU",
+          "attributes": {
+            "Fabric": "Banarasi Silk",
+            "Color": "Royal Blue"
+          },
+          "swatchHex": "#1E3A8A"
         },
         {
           "id": "v3",
-          "name": "Green & Gold",
-          "price": 6499,
-          "stock": 10,
-          "sku": "SAR-BNR-SLK-GRN"
+          "name": "Emerald Green",
+          "price": 18900,
+          "stock": 8,
+          "sku": "SAR-BAN-001-GRN",
+          "attributes": {
+            "Fabric": "Banarasi Silk",
+            "Color": "Emerald Green"
+          },
+          "swatchHex": "#0B6B4F"
         }
       ],
       "tags": [
         "saree",
-        "silk",
         "banarasi",
+        "silk",
         "wedding",
-        "ethnic",
-        "traditional"
+        "zari",
+        "festive",
+        "bestseller"
+      ],
+      "featured": true,
+      "trending": true,
+      "hot": false,
+      "isActive": true,
+      "rating": 4.7,
+      "totalReviews": 86,
+      "metaTitle": "Royal Banarasi Silk Saree — Deep Maroon | Meghali's Silk",
+      "metaDescription": "Handwoven Banarasi silk saree with gold zari. Pure silk, authentic handloom. Shop Meghali's Silk.",
+      "createdAt": "2025-02-01T00:00:00.000Z",
+      "updatedAt": "2025-05-01T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        19,
+        24
+      ],
+      "relatedProductIds": [
+        2,
+        3,
+        7,
+        16
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Banarasi Katan Silk Saree — Ivory Gold",
+      "slug": "banarasi-katan-silk-saree-ivory-gold",
+      "sku": "SAR-BAN-002",
+      "shortDescription": "Pure Katan silk Banarasi saree in ivory with all-over gold zari buti and a broad border.",
+      "description": "Handwoven in pure Katan silk by Banarasi weavers, this ivory saree is patterned with delicate all-over gold zari buti and finished with a broad ornamental border and a richly woven pallu. Katan's tightly twisted silk yarn gives the drape its crisp body and lasting sheen, making it a timeless choice for weddings and receptions. Includes an unstitched matching blouse piece. Dry clean only; rest the saree between wears and store wrapped in muslin.",
+      "categoryId": 7,
+      "brand": "Meghali's Silk",
+      "images": [
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Katan+Silk",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Zari+Buti",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Border",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Pallu"
+      ],
+      "price": 15900,
+      "comparePrice": 21000,
+      "costPrice": 10200,
+      "stock": 20,
+      "lowStockThreshold": 5,
+      "weight": 0.85,
+      "dimensions": {
+        "length": 35,
+        "width": 25,
+        "height": 5
+      },
+      "variants": [
+        {
+          "id": "v1",
+          "name": "Ivory Gold",
+          "price": 15900,
+          "stock": 10,
+          "sku": "SAR-BAN-002-IVY",
+          "attributes": {
+            "Fabric": "Banarasi Katan Silk",
+            "Color": "Ivory Gold"
+          },
+          "swatchHex": "#EFE6CC"
+        },
+        {
+          "id": "v2",
+          "name": "Rani Pink",
+          "price": 16200,
+          "stock": 10,
+          "sku": "SAR-BAN-002-RNP",
+          "attributes": {
+            "Fabric": "Banarasi Katan Silk",
+            "Color": "Rani Pink"
+          },
+          "swatchHex": "#C2185B"
+        }
+      ],
+      "tags": [
+        "saree",
+        "banarasi",
+        "katan",
+        "silk",
+        "wedding",
+        "zari",
+        "bridal",
+        "bestseller"
+      ],
+      "featured": true,
+      "trending": false,
+      "hot": true,
+      "isActive": true,
+      "rating": 4.6,
+      "totalReviews": 64,
+      "metaTitle": "Banarasi Katan Silk Saree — Ivory Gold | Meghali's Silk",
+      "metaDescription": "Pure Katan silk Banarasi saree in ivory with gold zari buti. Authentic handloom from Meghali's Silk.",
+      "createdAt": "2025-02-10T00:00:00.000Z",
+      "updatedAt": "2025-04-15T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        20,
+        25
+      ],
+      "relatedProductIds": [
+        1,
+        3,
+        7
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Banarasi Georgette Silk Saree — Wine",
+      "slug": "banarasi-georgette-silk-saree-wine",
+      "sku": "SAR-BAN-003",
+      "shortDescription": "Lightweight Banarasi georgette silk saree in wine with scattered zari motifs.",
+      "description": "Woven on Banarasi handlooms in soft georgette silk, this wine saree drapes light and fluid while keeping the city's signature zari craft across scattered floral motifs and a woven border. The georgette base makes it an easy, graceful choice for evening functions and festive gatherings where you want shine without weight. Comes with an unstitched matching blouse piece. Dry clean recommended.",
+      "categoryId": 7,
+      "brand": "Meghali's Silk",
+      "images": [
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Georgette+Silk",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Zari+Motif",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Border",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Drape"
+      ],
+      "price": 9800,
+      "comparePrice": 13500,
+      "costPrice": 6300,
+      "stock": 28,
+      "lowStockThreshold": 6,
+      "weight": 0.6,
+      "dimensions": {
+        "length": 34,
+        "width": 24,
+        "height": 5
+      },
+      "variants": [
+        {
+          "id": "v1",
+          "name": "Wine",
+          "price": 9800,
+          "stock": 14,
+          "sku": "SAR-BAN-003-WIN",
+          "attributes": {
+            "Fabric": "Banarasi Georgette Silk",
+            "Color": "Wine"
+          },
+          "swatchHex": "#5E2233"
+        },
+        {
+          "id": "v2",
+          "name": "Teal",
+          "price": 9800,
+          "stock": 14,
+          "sku": "SAR-BAN-003-TEL",
+          "attributes": {
+            "Fabric": "Banarasi Georgette Silk",
+            "Color": "Teal"
+          },
+          "swatchHex": "#0F6E6E"
+        }
+      ],
+      "tags": [
+        "saree",
+        "banarasi",
+        "georgette",
+        "silk",
+        "festive",
+        "zari"
+      ],
+      "featured": false,
+      "trending": true,
+      "hot": false,
+      "isActive": true,
+      "rating": 4.4,
+      "totalReviews": 38,
+      "metaTitle": "Banarasi Georgette Silk Saree — Wine | Meghali's Silk",
+      "metaDescription": "Lightweight Banarasi georgette silk saree in wine with zari motifs. Authentic handloom from Meghali's Silk.",
+      "createdAt": "2025-04-05T00:00:00.000Z",
+      "updatedAt": "2025-06-01T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        21
+      ],
+      "relatedProductIds": [
+        1,
+        2,
+        4
+      ]
+    },
+    {
+      "id": 4,
+      "name": "Handwoven Tussar Silk Saree — Natural Gold",
+      "slug": "handwoven-tussar-silk-saree-natural-gold",
+      "sku": "SAR-TUS-004",
+      "shortDescription": "Textured wild Tussar (Kosa) silk saree with a natural golden sheen and hand-block pallu.",
+      "description": "Handwoven in eastern India from wild Tussar (Kosa) silk, this saree has the fabric's signature slubby texture and warm golden lustre. The pallu carries a subtle hand-block motif and the border is finished with a fine zari line. A versatile drape for day functions and the festive season. Includes an unstitched blouse piece. Dry clean recommended.",
+      "categoryId": 9,
+      "brand": "Meghali's Silk",
+      "images": [
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Tussar+Silk",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Texture",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Pallu",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Border"
+      ],
+      "price": 7900,
+      "comparePrice": 10500,
+      "costPrice": 5200,
+      "stock": 30,
+      "lowStockThreshold": 6,
+      "weight": 0.7,
+      "dimensions": {
+        "length": 34,
+        "width": 24,
+        "height": 5
+      },
+      "variants": [
+        {
+          "id": "v1",
+          "name": "Natural Gold",
+          "price": 7900,
+          "stock": 12,
+          "sku": "SAR-TUS-004-GLD",
+          "attributes": {
+            "Fabric": "Tussar Silk",
+            "Color": "Natural Gold"
+          },
+          "swatchHex": "#C9A24B"
+        },
+        {
+          "id": "v2",
+          "name": "Rust",
+          "price": 7900,
+          "stock": 10,
+          "sku": "SAR-TUS-004-RST",
+          "attributes": {
+            "Fabric": "Tussar Silk",
+            "Color": "Rust"
+          },
+          "swatchHex": "#9C4A21"
+        },
+        {
+          "id": "v3",
+          "name": "Olive",
+          "price": 8200,
+          "stock": 8,
+          "sku": "SAR-TUS-004-OLV",
+          "attributes": {
+            "Fabric": "Tussar Silk",
+            "Color": "Olive"
+          },
+          "swatchHex": "#6B6B23"
+        }
+      ],
+      "tags": [
+        "saree",
+        "tussar",
+        "kosa",
+        "silk",
+        "handloom",
+        "festive"
+      ],
+      "featured": false,
+      "trending": true,
+      "hot": false,
+      "isActive": true,
+      "rating": 4.5,
+      "totalReviews": 41,
+      "metaTitle": "Handwoven Tussar Silk Saree — Natural Gold | Meghali's Silk",
+      "metaDescription": "Pure wild Tussar (Kosa) silk saree, handwoven with a golden sheen. Authentic handloom from Meghali's Silk.",
+      "createdAt": "2025-03-12T00:00:00.000Z",
+      "updatedAt": "2025-06-01T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [],
+      "relatedProductIds": [
+        1,
+        7,
+        9
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Tussar Ghicha Silk Saree — Ochre",
+      "slug": "tussar-ghicha-silk-saree-ochre",
+      "sku": "SAR-TUS-005",
+      "shortDescription": "Tussar Ghicha silk saree in ochre with a coarse, organic texture and temple-line border.",
+      "description": "Woven from Ghicha yarn — spun from the broken filaments of Tussar cocoons — this ochre saree has a wonderfully coarse, organic texture that sets it apart from smoother silks. Artisans in eastern India finish it with a fine temple-line border and a textured pallu. An understated handloom drape for daytime celebrations and office-festive wear. Includes an unstitched blouse piece. Dry clean recommended.",
+      "categoryId": 9,
+      "brand": "Meghali's Silk",
+      "images": [
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Ghicha+Silk",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Texture",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Border",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Pallu"
+      ],
+      "price": 6500,
+      "comparePrice": 8900,
+      "costPrice": 4100,
+      "stock": 26,
+      "lowStockThreshold": 5,
+      "weight": 0.7,
+      "dimensions": {
+        "length": 34,
+        "width": 24,
+        "height": 5
+      },
+      "variants": [
+        {
+          "id": "v1",
+          "name": "Ochre",
+          "price": 6500,
+          "stock": 14,
+          "sku": "SAR-TUS-005-OCH",
+          "attributes": {
+            "Fabric": "Tussar Ghicha Silk",
+            "Color": "Ochre"
+          },
+          "swatchHex": "#CC7722"
+        },
+        {
+          "id": "v2",
+          "name": "Maroon",
+          "price": 6500,
+          "stock": 12,
+          "sku": "SAR-TUS-005-MRN",
+          "attributes": {
+            "Fabric": "Tussar Ghicha Silk",
+            "Color": "Maroon"
+          },
+          "swatchHex": "#6E1F2A"
+        }
+      ],
+      "tags": [
+        "saree",
+        "tussar",
+        "ghicha",
+        "silk",
+        "handloom"
+      ],
+      "featured": false,
+      "trending": false,
+      "hot": false,
+      "isActive": true,
+      "rating": 4.3,
+      "totalReviews": 22,
+      "metaTitle": "Tussar Ghicha Silk Saree — Ochre | Meghali's Silk",
+      "metaDescription": "Textured Tussar Ghicha silk saree in ochre, handwoven in eastern India. Authentic handloom from Meghali's Silk.",
+      "createdAt": "2025-05-20T00:00:00.000Z",
+      "updatedAt": "2025-06-10T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        22
+      ],
+      "relatedProductIds": [
+        4,
+        6,
+        9
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Pure Tussar Silk Saree — Indigo Block Print",
+      "slug": "pure-tussar-silk-saree-indigo-block-print",
+      "sku": "SAR-TUS-006",
+      "shortDescription": "Pure Tussar silk saree with hand block-printed indigo motifs and a natural sheen.",
+      "description": "This pure Tussar silk saree pairs the fabric's warm natural sheen with hand block-printed indigo motifs, each impression carrying the gentle irregularity of artisan printing. The grounding indigo against Tussar's golden base makes for a striking, contemporary handloom drape. Light to carry and easy to style for festive afternoons. Includes an unstitched blouse piece. Dry clean recommended; first wash may release minor natural-dye colour.",
+      "categoryId": 9,
+      "brand": "Meghali's Silk",
+      "images": [
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Tussar+Indigo",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Block+Print",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Pallu",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Border"
+      ],
+      "price": 8400,
+      "comparePrice": 11000,
+      "costPrice": 5400,
+      "stock": 22,
+      "lowStockThreshold": 5,
+      "weight": 0.7,
+      "dimensions": {
+        "length": 34,
+        "width": 24,
+        "height": 5
+      },
+      "variants": [
+        {
+          "id": "v1",
+          "name": "Indigo",
+          "price": 8400,
+          "stock": 12,
+          "sku": "SAR-TUS-006-IND",
+          "attributes": {
+            "Fabric": "Tussar Silk",
+            "Color": "Indigo"
+          },
+          "swatchHex": "#3B3B6D"
+        },
+        {
+          "id": "v2",
+          "name": "Mustard",
+          "price": 8400,
+          "stock": 10,
+          "sku": "SAR-TUS-006-MUS",
+          "attributes": {
+            "Fabric": "Tussar Silk",
+            "Color": "Mustard"
+          },
+          "swatchHex": "#C9A227"
+        }
+      ],
+      "tags": [
+        "saree",
+        "tussar",
+        "silk",
+        "handloom",
+        "blockprint",
+        "festive"
+      ],
+      "featured": false,
+      "trending": false,
+      "hot": true,
+      "isActive": true,
+      "rating": 4.4,
+      "totalReviews": 29,
+      "metaTitle": "Pure Tussar Silk Saree — Indigo Block Print | Meghali's Silk",
+      "metaDescription": "Pure Tussar silk saree with hand block-printed indigo motifs. Authentic handloom from Meghali's Silk.",
+      "createdAt": "2025-07-08T00:00:00.000Z",
+      "updatedAt": "2025-09-01T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        23
+      ],
+      "relatedProductIds": [
+        4,
+        5,
+        12
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Kanjivaram Pure Silk Saree — Peacock Blue",
+      "slug": "kanjivaram-pure-silk-saree-peacock-blue",
+      "sku": "SAR-KAN-007",
+      "shortDescription": "Pure Kanjivaram silk saree in peacock blue with a contrast mustard border and zari pallu.",
+      "description": "Handwoven in the South Indian Kanjivaram tradition from pure mulberry silk and tested zari, this saree sets a lustrous peacock-blue body against a contrast mustard border woven in the characteristic interlocked-weft technique that gives Kanjivaram its weight and durability. The pallu carries a temple-and-floral zari composition meant to be passed down generations. A heirloom-grade drape for weddings and grand occasions. Includes an unstitched matching blouse piece. Dry clean only; store wrapped in muslin.",
+      "categoryId": 8,
+      "brand": "Meghali's Silk",
+      "images": [
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Kanjivaram+Silk",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Contrast+Border",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Zari+Pallu",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Drape"
+      ],
+      "price": 22500,
+      "comparePrice": 29000,
+      "costPrice": 14500,
+      "stock": 18,
+      "lowStockThreshold": 4,
+      "weight": 1,
+      "dimensions": {
+        "length": 36,
+        "width": 26,
+        "height": 6
+      },
+      "variants": [
+        {
+          "id": "v1",
+          "name": "Peacock Blue",
+          "price": 22500,
+          "stock": 9,
+          "sku": "SAR-KAN-007-PCB",
+          "attributes": {
+            "Fabric": "Kanjivaram Silk",
+            "Color": "Peacock Blue"
+          },
+          "swatchHex": "#1C6E8C"
+        },
+        {
+          "id": "v2",
+          "name": "Mustard",
+          "price": 22900,
+          "stock": 9,
+          "sku": "SAR-KAN-007-MUS",
+          "attributes": {
+            "Fabric": "Kanjivaram Silk",
+            "Color": "Mustard"
+          },
+          "swatchHex": "#C9A227"
+        }
+      ],
+      "tags": [
+        "saree",
+        "kanjivaram",
+        "silk",
+        "wedding",
+        "zari",
+        "festive",
+        "bestseller"
       ],
       "featured": true,
       "trending": true,
       "hot": false,
       "isActive": true,
       "rating": 4.8,
-      "totalReviews": 215,
-      "metaTitle": "Banarasi Silk Saree - Handwoven Zari Work | Best Price",
-      "metaDescription": "Buy authentic Banarasi silk saree with intricate zari work. Perfect for weddings and festivals.",
-      "createdAt": "2025-01-15T00:00:00.000Z",
-      "updatedAt": "2025-03-01T00:00:00.000Z"
+      "totalReviews": 102,
+      "metaTitle": "Kanjivaram Pure Silk Saree — Peacock Blue | Meghali's Silk",
+      "metaDescription": "Pure Kanjivaram silk saree in peacock blue with contrast border and zari pallu. Authentic handloom from Meghali's Silk.",
+      "createdAt": "2025-01-20T00:00:00.000Z",
+      "updatedAt": "2025-04-01T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        24,
+        19
+      ],
+      "relatedProductIds": [
+        8,
+        9,
+        1
+      ]
     },
     {
       "id": 8,
-      "name": "Designer Anarkali Kurta Set",
-      "slug": "designer-anarkali-kurta-set",
-      "sku": "KRT-ANK-DSG-001",
-      "shortDescription": "Embroidered Anarkali kurta with dupatta and palazzo",
-      "description": "Stunning designer Anarkali kurta set featuring delicate chikankari embroidery on premium georgette fabric. Comes with matching palazzo pants and a net dupatta with lace border. Flattering flared silhouette suitable for festivities and celebrations.",
-      "categoryId": 15,
-      "brand": "EthnicVogue",
+      "name": "Kanjivaram Bridal Silk Saree — Rani Pink",
+      "slug": "kanjivaram-bridal-silk-saree-rani-pink",
+      "sku": "SAR-KAN-008",
+      "shortDescription": "Bridal Kanjivaram silk saree in rani pink with a wide contrast red zari border and grand pallu.",
+      "description": "A bridal-grade Kanjivaram handwoven from pure mulberry silk, this rani pink saree carries a wide contrast red border and a grand zari pallu dense with temple and peacock motifs. The interlocked korvai border and heavy zari give it the heirloom weight brides look for, and the colour is dyed deep for the mandap and the camera alike. Includes an unstitched matching blouse piece. Dry clean only; store flat, wrapped in muslin, and refold along new lines periodically.",
+      "categoryId": 6,
+      "brand": "Meghali's Silk",
       "images": [
-        "https://placehold.co/600x400/ad1457/FFFFFF?text=Anarkali+Kurta",
-        "https://placehold.co/600x400/c2185b/FFFFFF?text=Kurta+Back",
-        "https://placehold.co/600x400/d81b60/FFFFFF?text=Kurta+Detail"
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Bridal+Kanjivaram",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Red+Border",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Grand+Pallu",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Bridal+Drape"
       ],
-      "price": 3499,
-      "comparePrice": 4999,
-      "costPrice": 2000,
-      "stock": 50,
-      "lowStockThreshold": 8,
-      "weight": 0.5,
+      "price": 31500,
+      "comparePrice": 39000,
+      "costPrice": 21000,
+      "stock": 12,
+      "lowStockThreshold": 3,
+      "weight": 1.1,
       "dimensions": {
-        "length": 28,
-        "width": 22,
-        "height": 4
+        "length": 36,
+        "width": 26,
+        "height": 6
       },
       "variants": [
         {
           "id": "v1",
-          "name": "S",
-          "price": 3499,
-          "stock": 12,
-          "sku": "KRT-ANK-DSG-S"
+          "name": "Rani Pink",
+          "price": 31500,
+          "stock": 6,
+          "sku": "SAR-KAN-008-RNP",
+          "attributes": {
+            "Fabric": "Kanjivaram Silk",
+            "Color": "Rani Pink"
+          },
+          "swatchHex": "#C2185B"
         },
         {
           "id": "v2",
-          "name": "M",
-          "price": 3499,
-          "stock": 15,
-          "sku": "KRT-ANK-DSG-M"
-        },
-        {
-          "id": "v3",
-          "name": "L",
-          "price": 3499,
-          "stock": 13,
-          "sku": "KRT-ANK-DSG-L"
-        },
-        {
-          "id": "v4",
-          "name": "XL",
-          "price": 3499,
-          "stock": 10,
-          "sku": "KRT-ANK-DSG-XL"
+          "name": "Bridal Red",
+          "price": 31900,
+          "stock": 6,
+          "sku": "SAR-KAN-008-RED",
+          "attributes": {
+            "Fabric": "Kanjivaram Silk",
+            "Color": "Bridal Red"
+          },
+          "swatchHex": "#9B1B30"
         }
       ],
       "tags": [
-        "kurta",
-        "anarkali",
-        "ethnic",
-        "embroidery",
-        "festive",
-        "women"
+        "saree",
+        "kanjivaram",
+        "silk",
+        "bridal",
+        "wedding",
+        "zari",
+        "bestseller"
       ],
       "featured": true,
       "trending": false,
       "hot": true,
       "isActive": true,
-      "rating": 4.5,
-      "totalReviews": 143,
-      "metaTitle": "Designer Anarkali Kurta Set - Chikankari Embroidery",
-      "metaDescription": "Buy designer Anarkali kurta set with chikankari embroidery. Includes palazzo and dupatta.",
-      "createdAt": "2025-01-20T00:00:00.000Z",
-      "updatedAt": "2025-03-05T00:00:00.000Z"
+      "rating": 4.9,
+      "totalReviews": 73,
+      "metaTitle": "Kanjivaram Bridal Silk Saree — Rani Pink | Meghali's Silk",
+      "metaDescription": "Bridal Kanjivaram silk saree in rani pink with contrast red zari border. Authentic handloom from Meghali's Silk.",
+      "createdAt": "2025-01-25T00:00:00.000Z",
+      "updatedAt": "2025-03-15T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        25,
+        26
+      ],
+      "relatedProductIds": [
+        7,
+        9,
+        1
+      ]
     },
     {
       "id": 9,
-      "name": "AirStride Running Shoes",
-      "slug": "airstride-running-shoes",
-      "sku": "FTW-ASR-RUN-001",
-      "shortDescription": "Lightweight running shoes with responsive cushioning",
-      "description": "AirStride running shoes are engineered for performance. Featuring a breathable knit upper, responsive foam midsole, and durable rubber outsole with multi-directional grip. Perfect for daily runs, gym workouts, and casual wear. Ultra-lightweight at just 250g per shoe.",
-      "categoryId": 12,
-      "brand": "AirStride",
+      "name": "Kanjivaram Temple Border Saree — Mustard",
+      "slug": "kanjivaram-temple-border-saree-mustard",
+      "sku": "SAR-KAN-009",
+      "shortDescription": "Kanjivaram silk saree in mustard with a classic zari temple (gopuram) border and green pallu.",
+      "description": "This mustard Kanjivaram is handwoven in pure silk with the classic gopuram-inspired temple border in gold zari that gives South Indian sarees their devotional character, set against a contrast green pallu. The body's fine zari checks and the firm Kanjivaram drape make it equally at home at temple ceremonies and festive evenings. Includes an unstitched matching blouse piece. Dry clean only; store wrapped in muslin.",
+      "categoryId": 8,
+      "brand": "Meghali's Silk",
       "images": [
-        "https://placehold.co/600x400/607d8b/FFFFFF?text=Running+Shoes",
-        "https://placehold.co/600x400/546e7a/FFFFFF?text=Shoes+Side",
-        "https://placehold.co/600x400/455a64/FFFFFF?text=Shoes+Sole"
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Temple+Border",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Gopuram+Zari",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Green+Pallu",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Drape"
       ],
-      "price": 3999,
-      "comparePrice": 5999,
-      "costPrice": 2200,
-      "stock": 80,
-      "lowStockThreshold": 15,
-      "weight": 0.5,
+      "price": 19800,
+      "comparePrice": 26000,
+      "costPrice": 12800,
+      "stock": 16,
+      "lowStockThreshold": 4,
+      "weight": 1,
       "dimensions": {
-        "length": 32,
-        "width": 12,
-        "height": 12
+        "length": 36,
+        "width": 26,
+        "height": 6
       },
       "variants": [
         {
           "id": "v1",
-          "name": "UK 7 - Black",
-          "price": 3999,
-          "stock": 20,
-          "sku": "FTW-ASR-7-BLK",
+          "name": "Mustard",
+          "price": 19800,
+          "stock": 8,
+          "sku": "SAR-KAN-009-MUS",
           "attributes": {
-            "Size": "UK 7",
-            "Color": "Black"
+            "Fabric": "Kanjivaram Silk",
+            "Color": "Mustard"
           },
-          "swatchHex": "#1a1a1a"
+          "swatchHex": "#C9A227"
         },
         {
           "id": "v2",
-          "name": "UK 8 - Black",
-          "price": 3999,
-          "stock": 20,
-          "sku": "FTW-ASR-8-BLK",
+          "name": "Bottle Green",
+          "price": 20200,
+          "stock": 8,
+          "sku": "SAR-KAN-009-GRN",
           "attributes": {
-            "Size": "UK 8",
-            "Color": "Black"
+            "Fabric": "Kanjivaram Silk",
+            "Color": "Bottle Green"
           },
-          "swatchHex": "#1a1a1a"
-        },
-        {
-          "id": "v3",
-          "name": "UK 9 - Blue",
-          "price": 3999,
-          "stock": 20,
-          "sku": "FTW-ASR-9-BLU",
-          "attributes": {
-            "Size": "UK 9",
-            "Color": "Blue"
-          },
-          "swatchHex": "#1e3a5f"
-        },
-        {
-          "id": "v4",
-          "name": "UK 10 - Blue",
-          "price": 3999,
-          "stock": 20,
-          "sku": "FTW-ASR-10-BLU",
-          "attributes": {
-            "Size": "UK 10",
-            "Color": "Blue"
-          },
-          "swatchHex": "#1e3a5f"
+          "swatchHex": "#0B5E3B"
         }
       ],
       "tags": [
-        "shoes",
-        "running",
-        "sports",
-        "fitness",
-        "lightweight",
-        "sneakers"
+        "saree",
+        "kanjivaram",
+        "silk",
+        "temple",
+        "zari",
+        "festive"
       ],
-      "featured": true,
+      "featured": false,
       "trending": true,
       "hot": false,
       "isActive": true,
-      "rating": 4.4,
-      "totalReviews": 312,
-      "metaTitle": "AirStride Running Shoes - Lightweight & Responsive",
-      "metaDescription": "Buy AirStride running shoes with responsive cushioning. Breathable, lightweight, and durable.",
-      "createdAt": "2025-02-01T00:00:00.000Z",
-      "updatedAt": "2025-03-10T00:00:00.000Z",
+      "rating": 4.6,
+      "totalReviews": 47,
+      "metaTitle": "Kanjivaram Temple Border Saree — Mustard | Meghali's Silk",
+      "metaDescription": "Kanjivaram silk saree in mustard with zari temple border. Authentic handloom from Meghali's Silk.",
+      "createdAt": "2025-08-14T00:00:00.000Z",
+      "updatedAt": "2025-10-01T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        24
+      ],
       "relatedProductIds": [
-        12,
-        19
+        7,
+        8,
+        16
       ]
     },
     {
       "id": 10,
-      "name": "BassBox Bluetooth Speaker",
-      "slug": "bassbox-bluetooth-speaker",
-      "sku": "AUD-BBX-SPK-001",
-      "shortDescription": "Portable waterproof Bluetooth speaker with deep bass",
-      "description": "BassBox delivers room-filling sound in a compact, portable design. IPX7 waterproof rating means it can handle rain, pool splashes, and showers. 24-hour battery life, built-in microphone for calls, and TWS pairing to connect two speakers for stereo sound.",
-      "categoryId": 7,
-      "brand": "BassBox",
+      "name": "Mulberry Silk Saree — Classic Red",
+      "slug": "mulberry-silk-saree-classic-red",
+      "sku": "SAR-MUL-010",
+      "shortDescription": "Pure mulberry silk saree in classic red with a smooth lustrous finish and zari border.",
+      "description": "Woven from pure mulberry silk — the finest and most lustrous of cultivated silks — this classic red saree has a smooth, fluid drape and a soft natural shine that needs little ornament. A slim gold zari border and a lightly woven pallu keep it elegant and versatile, equally suited to pujas, family functions and festive evenings. Includes an unstitched matching blouse piece. Dry clean recommended; store wrapped in muslin.",
+      "categoryId": 10,
+      "brand": "Meghali's Silk",
       "images": [
-        "https://placehold.co/600x400/9c27b0/FFFFFF?text=Bluetooth+Speaker",
-        "https://placehold.co/600x400/7b1fa2/FFFFFF?text=Speaker+Side"
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Mulberry+Silk",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Zari+Border",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Pallu",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Drape"
       ],
-      "price": 2999,
-      "comparePrice": 4499,
-      "costPrice": 1500,
-      "stock": 100,
-      "lowStockThreshold": 20,
-      "weight": 0.45,
+      "price": 6900,
+      "comparePrice": 9500,
+      "costPrice": 4400,
+      "stock": 32,
+      "lowStockThreshold": 6,
+      "weight": 0.65,
       "dimensions": {
-        "length": 18,
-        "width": 7,
-        "height": 7
+        "length": 34,
+        "width": 24,
+        "height": 5
       },
       "variants": [
         {
           "id": "v1",
-          "name": "Midnight Black",
-          "price": 2999,
-          "stock": 40,
-          "sku": "AUD-BBX-SPK-BLK"
+          "name": "Classic Red",
+          "price": 6900,
+          "stock": 12,
+          "sku": "SAR-MUL-010-RED",
+          "attributes": {
+            "Fabric": "Mulberry Silk",
+            "Color": "Classic Red"
+          },
+          "swatchHex": "#B11226"
         },
         {
           "id": "v2",
-          "name": "Ocean Blue",
-          "price": 2999,
-          "stock": 30,
-          "sku": "AUD-BBX-SPK-BLU"
+          "name": "Black",
+          "price": 6900,
+          "stock": 10,
+          "sku": "SAR-MUL-010-BLK",
+          "attributes": {
+            "Fabric": "Mulberry Silk",
+            "Color": "Black"
+          },
+          "swatchHex": "#1B1B1B"
         },
         {
           "id": "v3",
-          "name": "Olive Green",
-          "price": 2999,
-          "stock": 30,
-          "sku": "AUD-BBX-SPK-GRN"
-        }
-      ],
-      "tags": [
-        "speaker",
-        "bluetooth",
-        "portable",
-        "waterproof",
-        "bass",
-        "wireless"
-      ],
-      "featured": false,
-      "trending": true,
-      "hot": true,
-      "isActive": true,
-      "rating": 4.3,
-      "totalReviews": 189,
-      "metaTitle": "BassBox Bluetooth Speaker - IPX7 Waterproof, 24hr Battery",
-      "metaDescription": "Buy BassBox portable Bluetooth speaker with deep bass and IPX7 waterproof rating.",
-      "createdAt": "2025-01-25T00:00:00.000Z",
-      "updatedAt": "2025-03-08T00:00:00.000Z"
-    },
-    {
-      "id": 11,
-      "name": "Ceramic Dinner Set - 24 Piece",
-      "slug": "ceramic-dinner-set-24-piece",
-      "sku": "KIT-CDS-24P-001",
-      "shortDescription": "Premium bone china dinner set with elegant floral design",
-      "description": "Elevate your dining experience with this 24-piece premium bone china dinner set. Includes 6 dinner plates, 6 quarter plates, 6 bowls, 2 serving bowls, 2 serving plates, and 2 spoons. Microwave and dishwasher safe with chip-resistant design and lead-free glaze.",
-      "categoryId": 11,
-      "brand": "CeraHome",
-      "images": [
-        "https://placehold.co/600x400/795548/FFFFFF?text=Dinner+Set",
-        "https://placehold.co/600x400/6d4c41/FFFFFF?text=Plate+Detail",
-        "https://placehold.co/600x400/5d4037/FFFFFF?text=Full+Set"
-      ],
-      "price": 4999,
-      "comparePrice": 7499,
-      "costPrice": 2800,
-      "stock": 25,
-      "lowStockThreshold": 5,
-      "weight": 8.5,
-      "dimensions": {
-        "length": 45,
-        "width": 40,
-        "height": 25
-      },
-      "variants": [
-        {
-          "id": "v1",
-          "name": "Royal Floral",
-          "price": 4999,
+          "name": "Teal",
+          "price": 7200,
           "stock": 10,
-          "sku": "KIT-CDS-24P-FLR"
-        },
-        {
-          "id": "v2",
-          "name": "Classic White",
-          "price": 4499,
-          "stock": 15,
-          "sku": "KIT-CDS-24P-WHT"
+          "sku": "SAR-MUL-010-TEL",
+          "attributes": {
+            "Fabric": "Mulberry Silk",
+            "Color": "Teal"
+          },
+          "swatchHex": "#0F6E6E"
         }
       ],
       "tags": [
-        "dinner set",
-        "bone china",
-        "kitchen",
-        "dining",
-        "crockery",
-        "housewarming"
+        "saree",
+        "mulberry",
+        "silk",
+        "festive",
+        "zari",
+        "bestseller"
       ],
       "featured": true,
       "trending": false,
       "hot": false,
       "isActive": true,
-      "rating": 4.6,
-      "totalReviews": 87,
-      "metaTitle": "24-Piece Ceramic Dinner Set - Premium Bone China",
-      "metaDescription": "Buy premium 24-piece bone china dinner set. Microwave safe, dishwasher safe, elegant design.",
-      "createdAt": "2025-02-10T00:00:00.000Z",
-      "updatedAt": "2025-03-05T00:00:00.000Z"
+      "rating": 4.5,
+      "totalReviews": 58,
+      "metaTitle": "Mulberry Silk Saree — Classic Red | Meghali's Silk",
+      "metaDescription": "Pure mulberry silk saree in classic red with a lustrous finish and zari border. Authentic handloom from Meghali's Silk.",
+      "createdAt": "2025-03-01T00:00:00.000Z",
+      "updatedAt": "2025-05-15T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        20
+      ],
+      "relatedProductIds": [
+        11,
+        4,
+        12
+      ]
     },
     {
-      "id": 12,
-      "name": "ProFlex Yoga Mat",
-      "slug": "proflex-yoga-mat",
-      "sku": "SPT-PFX-YGA-001",
-      "shortDescription": "Extra thick non-slip yoga mat with alignment lines",
-      "description": "ProFlex yoga mat is designed for all levels of practice. 6mm thick TPE material provides excellent cushioning for joints while maintaining stability. Laser-etched alignment lines help perfect your form. Comes with a carrying strap. Eco-friendly, non-toxic, and free from PVC, latex, and heavy metals.",
-      "categoryId": 4,
-      "brand": "ProFlex",
+      "id": 11,
+      "name": "Mulberry Silk Saree — Pastel Mint",
+      "slug": "mulberry-silk-saree-pastel-mint",
+      "sku": "SAR-MUL-011",
+      "shortDescription": "Pure mulberry silk saree in pastel mint with a fine silver-zari border for daytime elegance.",
+      "description": "A softer take on pure mulberry silk, this pastel mint saree pairs the fabric's natural sheen with a calm, contemporary palette and a fine silver-zari border. The fluid drape and muted tone make it an elegant choice for daytime weddings, mehendi mornings and brunch receptions. Includes an unstitched matching blouse piece. Dry clean recommended; store wrapped in muslin away from direct light.",
+      "categoryId": 10,
+      "brand": "Meghali's Silk",
       "images": [
-        "https://placehold.co/600x400/ff9800/FFFFFF?text=Yoga+Mat",
-        "https://placehold.co/600x400/f57c00/FFFFFF?text=Mat+Rolled"
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Mulberry+Mint",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Silver+Border",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Pallu",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Drape"
       ],
-      "price": 1499,
-      "comparePrice": 2499,
-      "costPrice": 700,
-      "stock": 60,
-      "lowStockThreshold": 10,
-      "weight": 1.2,
+      "price": 5800,
+      "comparePrice": 7900,
+      "costPrice": 3700,
+      "stock": 28,
+      "lowStockThreshold": 6,
+      "weight": 0.6,
       "dimensions": {
-        "length": 183,
-        "width": 61,
-        "height": 0.6
+        "length": 34,
+        "width": 24,
+        "height": 5
       },
       "variants": [
         {
           "id": "v1",
-          "name": "Purple",
-          "price": 1499,
-          "stock": 20,
-          "sku": "SPT-PFX-YGA-PRP"
+          "name": "Pastel Mint",
+          "price": 5800,
+          "stock": 15,
+          "sku": "SAR-MUL-011-MNT",
+          "attributes": {
+            "Fabric": "Mulberry Silk",
+            "Color": "Pastel Mint"
+          },
+          "swatchHex": "#A7D7C5"
         },
         {
           "id": "v2",
-          "name": "Teal",
-          "price": 1499,
-          "stock": 20,
-          "sku": "SPT-PFX-YGA-TEL"
-        },
-        {
-          "id": "v3",
-          "name": "Grey",
-          "price": 1499,
-          "stock": 20,
-          "sku": "SPT-PFX-YGA-GRY"
+          "name": "Lavender",
+          "price": 5800,
+          "stock": 13,
+          "sku": "SAR-MUL-011-LAV",
+          "attributes": {
+            "Fabric": "Mulberry Silk",
+            "Color": "Lavender"
+          },
+          "swatchHex": "#B5A0D6"
         }
       ],
       "tags": [
-        "yoga",
-        "mat",
-        "fitness",
-        "exercise",
-        "non-slip",
-        "eco-friendly"
+        "saree",
+        "mulberry",
+        "silk",
+        "pastel",
+        "daywear"
+      ],
+      "featured": false,
+      "trending": false,
+      "hot": false,
+      "isActive": true,
+      "rating": 4.3,
+      "totalReviews": 19,
+      "metaTitle": "Mulberry Silk Saree — Pastel Mint | Meghali's Silk",
+      "metaDescription": "Pure mulberry silk saree in pastel mint with a silver-zari border. Authentic handloom from Meghali's Silk.",
+      "createdAt": "2025-09-10T00:00:00.000Z",
+      "updatedAt": "2025-11-01T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        21
+      ],
+      "relatedProductIds": [
+        10,
+        12,
+        13
+      ]
+    },
+    {
+      "id": 12,
+      "name": "Eri Silk Saree — Earthy Beige",
+      "slug": "eri-silk-saree-earthy-beige",
+      "sku": "SAR-ERI-012",
+      "shortDescription": "Handwoven Eri (Ahimsa) silk saree in earthy beige with a soft, warm matte texture.",
+      "description": "Handwoven from Eri silk — known as Ahimsa or peace silk because it is harvested without harming the silkworm — this earthy beige saree has a soft, warm, almost wool-like matte texture rather than a high gloss. Naturally insulating and exceptionally comfortable, it is an honest, sustainable handloom drape for everyday festivity and the cooler months. Includes an unstitched matching blouse piece. Dry clean or gentle hand wash recommended.",
+      "categoryId": 11,
+      "brand": "Meghali's Silk",
+      "images": [
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Eri+Silk",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Matte+Texture",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Border",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Pallu"
+      ],
+      "price": 5200,
+      "comparePrice": 7200,
+      "costPrice": 3300,
+      "stock": 30,
+      "lowStockThreshold": 6,
+      "weight": 0.75,
+      "dimensions": {
+        "length": 34,
+        "width": 24,
+        "height": 5
+      },
+      "variants": [
+        {
+          "id": "v1",
+          "name": "Earthy Beige",
+          "price": 5200,
+          "stock": 16,
+          "sku": "SAR-ERI-012-BGE",
+          "attributes": {
+            "Fabric": "Eri Silk",
+            "Color": "Earthy Beige"
+          },
+          "swatchHex": "#C8B79B"
+        },
+        {
+          "id": "v2",
+          "name": "Walnut Brown",
+          "price": 5200,
+          "stock": 14,
+          "sku": "SAR-ERI-012-BRN",
+          "attributes": {
+            "Fabric": "Eri Silk",
+            "Color": "Walnut Brown"
+          },
+          "swatchHex": "#6F4E37"
+        }
+      ],
+      "tags": [
+        "saree",
+        "eri",
+        "ahimsa",
+        "silk",
+        "handloom",
+        "sustainable"
+      ],
+      "featured": false,
+      "trending": true,
+      "hot": false,
+      "isActive": true,
+      "rating": 4.4,
+      "totalReviews": 26,
+      "metaTitle": "Eri Silk Saree — Earthy Beige | Meghali's Silk",
+      "metaDescription": "Handwoven Eri (Ahimsa) silk saree in earthy beige with a soft matte texture. Authentic handloom from Meghali's Silk.",
+      "createdAt": "2025-06-18T00:00:00.000Z",
+      "updatedAt": "2025-08-01T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        22
+      ],
+      "relatedProductIds": [
+        13,
+        11,
+        4
+      ]
+    },
+    {
+      "id": 13,
+      "name": "Eri Silk Saree — Charcoal Stripe",
+      "slug": "eri-silk-saree-charcoal-stripe",
+      "sku": "SAR-ERI-013",
+      "shortDescription": "Eri silk saree in charcoal with woven olive stripes and a soft, matte handloom feel.",
+      "description": "This charcoal Eri silk saree is handwoven with subtle olive stripes along the body and pallu, the muted palette letting the fabric's natural matte texture lead. Like all Eri, it is soft, warm and breathable — an understated, contemporary handloom drape for work-festive days and cooler evenings. Includes an unstitched matching blouse piece. Dry clean or gentle hand wash recommended.",
+      "categoryId": 11,
+      "brand": "Meghali's Silk",
+      "images": [
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Eri+Charcoal",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Olive+Stripe",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Pallu",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Border"
+      ],
+      "price": 4800,
+      "comparePrice": 6500,
+      "costPrice": 3000,
+      "stock": 26,
+      "lowStockThreshold": 5,
+      "weight": 0.75,
+      "dimensions": {
+        "length": 34,
+        "width": 24,
+        "height": 5
+      },
+      "variants": [
+        {
+          "id": "v1",
+          "name": "Charcoal",
+          "price": 4800,
+          "stock": 14,
+          "sku": "SAR-ERI-013-CHR",
+          "attributes": {
+            "Fabric": "Eri Silk",
+            "Color": "Charcoal"
+          },
+          "swatchHex": "#36454F"
+        },
+        {
+          "id": "v2",
+          "name": "Olive",
+          "price": 4800,
+          "stock": 12,
+          "sku": "SAR-ERI-013-OLV",
+          "attributes": {
+            "Fabric": "Eri Silk",
+            "Color": "Olive"
+          },
+          "swatchHex": "#6B6B23"
+        }
+      ],
+      "tags": [
+        "saree",
+        "eri",
+        "silk",
+        "handloom",
+        "daywear"
+      ],
+      "featured": false,
+      "trending": false,
+      "hot": false,
+      "isActive": true,
+      "rating": 4.2,
+      "totalReviews": 14,
+      "metaTitle": "Eri Silk Saree — Charcoal Stripe | Meghali's Silk",
+      "metaDescription": "Handwoven Eri silk saree in charcoal with woven olive stripes. Authentic handloom from Meghali's Silk.",
+      "createdAt": "2025-10-22T00:00:00.000Z",
+      "updatedAt": "2025-12-01T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        23
+      ],
+      "relatedProductIds": [
+        12,
+        11,
+        5
+      ]
+    },
+    {
+      "id": 14,
+      "name": "Muga Silk Saree — Assam Golden",
+      "slug": "muga-silk-saree-assam-golden",
+      "sku": "SAR-MUG-014",
+      "shortDescription": "Rare Assam Muga silk saree with the fabric's natural, untreated golden glow.",
+      "description": "Handwoven in Assam from rare Muga silk, this saree carries the fibre's famous natural golden glow — a lustre that is never dyed and is said to deepen with every wash and year. Prized for its strength and sheen, Muga is among the most exclusive silks in the world and is woven here in the traditional Assamese idiom with a fine zari border. An heirloom drape for the most special occasions. Includes an unstitched matching blouse piece. Dry clean only; store wrapped in muslin.",
+      "categoryId": 12,
+      "brand": "Meghali's Silk",
+      "images": [
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Muga+Silk",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Golden+Glow",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Zari+Border",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Pallu"
+      ],
+      "price": 28500,
+      "comparePrice": 35000,
+      "costPrice": 19000,
+      "stock": 12,
+      "lowStockThreshold": 3,
+      "weight": 0.9,
+      "dimensions": {
+        "length": 36,
+        "width": 26,
+        "height": 6
+      },
+      "variants": [
+        {
+          "id": "v1",
+          "name": "Natural Golden",
+          "price": 28500,
+          "stock": 7,
+          "sku": "SAR-MUG-014-GLD",
+          "attributes": {
+            "Fabric": "Muga Silk",
+            "Color": "Natural Golden"
+          },
+          "swatchHex": "#C8A23A"
+        },
+        {
+          "id": "v2",
+          "name": "Golden with Maroon Border",
+          "price": 28900,
+          "stock": 5,
+          "sku": "SAR-MUG-014-MRN",
+          "attributes": {
+            "Fabric": "Muga Silk",
+            "Color": "Golden / Maroon Border"
+          },
+          "swatchHex": "#8A6D1F"
+        }
+      ],
+      "tags": [
+        "saree",
+        "muga",
+        "silk",
+        "assam",
+        "wedding",
+        "bestseller"
+      ],
+      "featured": true,
+      "trending": false,
+      "hot": true,
+      "isActive": true,
+      "rating": 4.9,
+      "totalReviews": 61,
+      "metaTitle": "Muga Silk Saree — Assam Golden | Meghali's Silk",
+      "metaDescription": "Rare Assam Muga silk saree with a natural golden glow. Authentic handloom from Meghali's Silk.",
+      "createdAt": "2025-02-14T00:00:00.000Z",
+      "updatedAt": "2025-04-20T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        26,
+        19
+      ],
+      "relatedProductIds": [
+        15,
+        7,
+        16
+      ]
+    },
+    {
+      "id": 15,
+      "name": "Muga Silk Saree — Golden with Red Border",
+      "slug": "muga-silk-saree-golden-red-border",
+      "sku": "SAR-MUG-015",
+      "shortDescription": "Assam Muga silk saree in natural gold with a striking woven red border and pallu.",
+      "description": "This Assam Muga silk saree sets the fibre's untreated golden lustre against a striking woven red border and a matching pallu, a classic Assamese pairing that reads rich and celebratory. Muga's renowned durability and growing sheen make it a true keep-forever piece, handwoven by Assam's weaving families. Ideal for weddings, Bihu and grand festive occasions. Includes an unstitched matching blouse piece. Dry clean only; store wrapped in muslin.",
+      "categoryId": 12,
+      "brand": "Meghali's Silk",
+      "images": [
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Muga+Red+Border",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Golden+Body",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Red+Pallu",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Drape"
+      ],
+      "price": 26500,
+      "comparePrice": 33000,
+      "costPrice": 17500,
+      "stock": 13,
+      "lowStockThreshold": 3,
+      "weight": 0.9,
+      "dimensions": {
+        "length": 36,
+        "width": 26,
+        "height": 6
+      },
+      "variants": [
+        {
+          "id": "v1",
+          "name": "Golden / Red Border",
+          "price": 26500,
+          "stock": 7,
+          "sku": "SAR-MUG-015-RED",
+          "attributes": {
+            "Fabric": "Muga Silk",
+            "Color": "Golden / Red Border"
+          },
+          "swatchHex": "#9B1B30"
+        },
+        {
+          "id": "v2",
+          "name": "Golden / Green Border",
+          "price": 26900,
+          "stock": 6,
+          "sku": "SAR-MUG-015-GRN",
+          "attributes": {
+            "Fabric": "Muga Silk",
+            "Color": "Golden / Green Border"
+          },
+          "swatchHex": "#0B5E3B"
+        }
+      ],
+      "tags": [
+        "saree",
+        "muga",
+        "silk",
+        "assam",
+        "festive",
+        "wedding"
       ],
       "featured": false,
       "trending": true,
       "hot": false,
       "isActive": true,
       "rating": 4.7,
-      "totalReviews": 256,
-      "metaTitle": "ProFlex Yoga Mat - 6mm Thick, Non-Slip with Alignment Lines",
-      "metaDescription": "Buy ProFlex eco-friendly yoga mat with alignment lines. Extra thick, non-slip, with carrying strap.",
-      "createdAt": "2025-02-15T00:00:00.000Z",
-      "updatedAt": "2025-03-12T00:00:00.000Z"
+      "totalReviews": 33,
+      "metaTitle": "Muga Silk Saree — Golden with Red Border | Meghali's Silk",
+      "metaDescription": "Assam Muga silk saree in natural gold with a woven red border. Authentic handloom from Meghali's Silk.",
+      "createdAt": "2025-11-05T00:00:00.000Z",
+      "updatedAt": "2026-01-10T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        26
+      ],
+      "relatedProductIds": [
+        14,
+        7,
+        9
+      ]
     },
     {
-      "id": 13,
-      "name": "VisionX 55\" Smart LED TV",
-      "slug": "visionx-55-smart-led-tv",
-      "sku": "ELC-VXN-55-001",
-      "shortDescription": "55-inch 4K Ultra HD Smart LED TV with Dolby Vision",
-      "description": "VisionX 55\" Smart LED TV delivers breathtaking picture quality with 4K Ultra HD resolution and Dolby Vision HDR. Built-in smart OS gives you access to all major streaming apps. Features 20W stereo speakers with Dolby Atmos, 3 HDMI ports, and screen mirroring. Ultra-slim bezel design.",
-      "categoryId": 1,
-      "brand": "VisionX",
+      "id": 16,
+      "name": "Baluchari Silk Saree — Maroon Narrative Pallu",
+      "slug": "baluchari-silk-saree-maroon-narrative-pallu",
+      "sku": "SAR-BAL-016",
+      "shortDescription": "Bengal Baluchari silk saree in maroon with a narrative figured pallu of woven mythological scenes.",
+      "description": "Handwoven in the Baluchari tradition of Bengal, this maroon saree is distinguished by its narrative pallu — panels of figured silk depicting mythological and courtly scenes rendered entirely in the weave, a craft once centred at Murshidabad and revived in Bishnupur. The contrast cream pallu and intricate borders make it a connoisseur's drape for cultural evenings and weddings. Includes an unstitched matching blouse piece. Dry clean only; store wrapped in muslin.",
+      "categoryId": 13,
+      "brand": "Meghali's Silk",
       "images": [
-        "https://placehold.co/600x400/1a1a2e/FFFFFF?text=Smart+TV+55",
-        "https://placehold.co/600x400/16213e/FFFFFF?text=TV+Side+View",
-        "https://placehold.co/600x400/0f3460/FFFFFF?text=TV+Remote"
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Baluchari+Silk",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Narrative+Pallu",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Figured+Weave",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Border"
       ],
-      "price": 34999,
-      "comparePrice": 49999,
-      "costPrice": 24000,
-      "stock": 15,
-      "lowStockThreshold": 3,
-      "weight": 12.5,
-      "dimensions": {
-        "length": 124,
-        "width": 72,
-        "height": 8
-      },
-      "variants": [],
-      "tags": [
-        "tv",
-        "smart tv",
-        "4k",
-        "led",
-        "dolby",
-        "entertainment",
-        "electronics"
-      ],
-      "featured": true,
-      "trending": true,
-      "hot": true,
-      "isActive": true,
-      "rating": 4.5,
-      "totalReviews": 174,
-      "metaTitle": "VisionX 55\" 4K Smart LED TV - Dolby Vision & Atmos",
-      "metaDescription": "Buy VisionX 55\" 4K Smart LED TV with Dolby Vision HDR and Dolby Atmos sound.",
-      "createdAt": "2025-01-05T00:00:00.000Z",
-      "updatedAt": "2025-03-15T00:00:00.000Z"
-    },
-    {
-      "id": 14,
-      "name": "Cotton Bedsheet Set - King Size",
-      "slug": "cotton-bedsheet-set-king-size",
-      "sku": "HOM-CBS-KNG-001",
-      "shortDescription": "300 TC pure cotton bedsheet with 2 pillow covers",
-      "description": "Luxuriously soft 300 thread count pure cotton bedsheet set in king size. Includes one bedsheet (108x108 inches) and 2 pillow covers (18x28 inches). Reactive printed with vibrant colors that won't fade. Pre-shrunk fabric ensures long-lasting fit. Machine washable.",
-      "categoryId": 3,
-      "brand": "SleepNest",
-      "images": [
-        "https://placehold.co/600x400/4caf50/FFFFFF?text=Bedsheet+Set",
-        "https://placehold.co/600x400/388e3c/FFFFFF?text=Bedsheet+Pattern"
-      ],
-      "price": 1299,
-      "comparePrice": 1999,
-      "costPrice": 650,
-      "stock": 70,
-      "lowStockThreshold": 15,
-      "weight": 1,
+      "price": 16500,
+      "comparePrice": 22000,
+      "costPrice": 10800,
+      "stock": 16,
+      "lowStockThreshold": 4,
+      "weight": 0.85,
       "dimensions": {
         "length": 35,
-        "width": 30,
-        "height": 8
+        "width": 25,
+        "height": 5
       },
       "variants": [
         {
           "id": "v1",
-          "name": "Floral Blue",
-          "price": 1299,
-          "stock": 25,
-          "sku": "HOM-CBS-KNG-FBL"
+          "name": "Maroon",
+          "price": 16500,
+          "stock": 8,
+          "sku": "SAR-BAL-016-MRN",
+          "attributes": {
+            "Fabric": "Baluchari Silk",
+            "Color": "Maroon"
+          },
+          "swatchHex": "#7B1E2B"
         },
         {
           "id": "v2",
-          "name": "Geometric Grey",
-          "price": 1299,
-          "stock": 25,
-          "sku": "HOM-CBS-KNG-GGR"
-        },
-        {
-          "id": "v3",
-          "name": "Paisley Maroon",
-          "price": 1399,
-          "stock": 20,
-          "sku": "HOM-CBS-KNG-PMR"
+          "name": "Cream",
+          "price": 16500,
+          "stock": 8,
+          "sku": "SAR-BAL-016-CRM",
+          "attributes": {
+            "Fabric": "Baluchari Silk",
+            "Color": "Cream"
+          },
+          "swatchHex": "#EFE6CC"
         }
       ],
       "tags": [
-        "bedsheet",
-        "cotton",
-        "king size",
-        "bedroom",
-        "home",
-        "pillow cover"
+        "saree",
+        "baluchari",
+        "silk",
+        "bengal",
+        "handloom",
+        "festive",
+        "bestseller"
       ],
-      "featured": false,
-      "trending": false,
-      "hot": false,
-      "isActive": true,
-      "rating": 4.3,
-      "totalReviews": 198,
-      "metaTitle": "King Size Cotton Bedsheet Set - 300 TC with Pillow Covers",
-      "metaDescription": "Buy premium 300 TC cotton bedsheet with 2 pillow covers. Reactive printed, pre-shrunk, machine washable.",
-      "createdAt": "2025-02-05T00:00:00.000Z",
-      "updatedAt": "2025-03-08T00:00:00.000Z"
-    },
-    {
-      "id": 15,
-      "name": "ProStrike Cricket Bat - English Willow",
-      "slug": "prostrike-cricket-bat-english-willow",
-      "sku": "SPT-PSK-CKT-001",
-      "shortDescription": "Grade A English willow cricket bat with premium grip",
-      "description": "ProStrike cricket bat crafted from Grade A English willow for superior stroke play. Features a thick edge profile for maximum power and a mid-to-low sweet spot ideal for front-foot play. Comes with premium octopus grip and padded toe guard. Full size (SH). Knocked-in and ready to play.",
-      "categoryId": 4,
-      "brand": "ProStrike",
-      "images": [
-        "https://placehold.co/600x400/ff9800/FFFFFF?text=Cricket+Bat",
-        "https://placehold.co/600x400/f57c00/FFFFFF?text=Bat+Profile"
-      ],
-      "price": 6999,
-      "comparePrice": 9999,
-      "costPrice": 4200,
-      "stock": 20,
-      "lowStockThreshold": 5,
-      "weight": 1.2,
-      "dimensions": {
-        "length": 86,
-        "width": 11,
-        "height": 6
-      },
-      "variants": [],
-      "tags": [
-        "cricket",
-        "bat",
-        "english willow",
-        "sports",
-        "outdoor",
-        "game"
-      ],
-      "featured": false,
+      "featured": true,
       "trending": true,
       "hot": false,
       "isActive": true,
-      "rating": 4.6,
-      "totalReviews": 92,
-      "metaTitle": "ProStrike Cricket Bat - Grade A English Willow",
-      "metaDescription": "Buy ProStrike English willow cricket bat. Grade A, thick edge, ready to play.",
-      "createdAt": "2025-01-30T00:00:00.000Z",
-      "updatedAt": "2025-03-10T00:00:00.000Z"
+      "rating": 4.7,
+      "totalReviews": 44,
+      "metaTitle": "Baluchari Silk Saree — Maroon Narrative Pallu | Meghali's Silk",
+      "metaDescription": "Bengal Baluchari silk saree in maroon with a narrative figured pallu. Authentic handloom from Meghali's Silk.",
+      "createdAt": "2025-03-28T00:00:00.000Z",
+      "updatedAt": "2025-06-15T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        24,
+        20
+      ],
+      "relatedProductIds": [
+        17,
+        1,
+        8
+      ]
     },
     {
       "id": 17,
-      "name": "Men's Premium Formal Shirt",
-      "slug": "mens-premium-formal-shirt",
-      "sku": "CLT-MFS-PRM-001",
-      "shortDescription": "Slim fit cotton formal shirt with wrinkle-free finish",
-      "description": "Elevate your professional wardrobe with this premium formal shirt. Made from 100% Egyptian cotton with a wrinkle-free finish that keeps you looking sharp all day. Features a semi-spread collar, single-button barrel cuffs, and a tailored slim fit. Available in classic solid colors.",
-      "categoryId": 9,
-      "brand": "UrbanEdge",
+      "name": "Baluchari Silk Saree — Midnight Blue",
+      "slug": "baluchari-silk-saree-midnight-blue",
+      "sku": "SAR-BAL-017",
+      "shortDescription": "Bengal Baluchari silk saree in midnight blue with gold-toned figured motifs and pallu.",
+      "description": "This midnight blue Baluchari is handwoven in Bengal with gold-toned figured motifs across the border and a richly storied pallu, the deep blue ground giving the woven artwork a luminous, jewel-like contrast. Carrying forward the Bishnupur revival of this once-royal craft, it is a refined drape for soirees, cultural functions and festive evenings. Includes an unstitched matching blouse piece. Dry clean only; store wrapped in muslin.",
+      "categoryId": 13,
+      "brand": "Meghali's Silk",
       "images": [
-        "https://placehold.co/600x400/3f51b5/FFFFFF?text=Formal+Shirt",
-        "https://placehold.co/600x400/303f9f/FFFFFF?text=Shirt+Detail"
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Baluchari+Blue",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Figured+Pallu",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Gold+Motif",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Border"
       ],
-      "price": 1999,
-      "comparePrice": 2999,
-      "costPrice": 900,
-      "stock": 90,
-      "lowStockThreshold": 15,
-      "weight": 0.3,
+      "price": 14900,
+      "comparePrice": 19500,
+      "costPrice": 9600,
+      "stock": 15,
+      "lowStockThreshold": 4,
+      "weight": 0.85,
       "dimensions": {
-        "length": 30,
-        "width": 22,
-        "height": 3
+        "length": 35,
+        "width": 25,
+        "height": 5
       },
       "variants": [
         {
           "id": "v1",
-          "name": "S - White",
-          "price": 1999,
-          "stock": 20,
-          "sku": "CLT-MFS-S-WHT",
+          "name": "Midnight Blue",
+          "price": 14900,
+          "stock": 8,
+          "sku": "SAR-BAL-017-BLU",
           "attributes": {
-            "Size": "S",
-            "Color": "White"
+            "Fabric": "Baluchari Silk",
+            "Color": "Midnight Blue"
           },
-          "swatchHex": "#ffffff"
+          "swatchHex": "#1A2A52"
         },
         {
           "id": "v2",
-          "name": "M - White",
-          "price": 1999,
-          "stock": 25,
-          "sku": "CLT-MFS-M-WHT",
+          "name": "Antique Gold",
+          "price": 15200,
+          "stock": 7,
+          "sku": "SAR-BAL-017-GLD",
           "attributes": {
-            "Size": "M",
-            "Color": "White"
+            "Fabric": "Baluchari Silk",
+            "Color": "Antique Gold"
           },
-          "swatchHex": "#ffffff"
-        },
-        {
-          "id": "v3",
-          "name": "L - Light Blue",
-          "price": 1999,
-          "stock": 25,
-          "sku": "CLT-MFS-L-BLU",
-          "attributes": {
-            "Size": "L",
-            "Color": "Light Blue"
-          },
-          "swatchHex": "#cfe2f3"
-        },
-        {
-          "id": "v4",
-          "name": "XL - Light Blue",
-          "price": 1999,
-          "stock": 20,
-          "sku": "CLT-MFS-XL-BLU",
-          "attributes": {
-            "Size": "XL",
-            "Color": "Light Blue"
-          },
-          "swatchHex": "#cfe2f3"
+          "swatchHex": "#B8902E"
         }
       ],
       "tags": [
-        "shirt",
-        "formal",
-        "cotton",
-        "slim fit",
-        "men",
-        "office",
-        "professional"
+        "saree",
+        "baluchari",
+        "silk",
+        "bengal",
+        "handloom",
+        "festive"
       ],
-      "featured": true,
+      "featured": false,
       "trending": false,
       "hot": false,
       "isActive": true,
-      "rating": 4.4,
-      "totalReviews": 167,
-      "metaTitle": "Men's Premium Formal Shirt - Egyptian Cotton, Slim Fit",
-      "metaDescription": "Buy premium slim fit formal shirt. 100% Egyptian cotton, wrinkle-free finish.",
-      "createdAt": "2025-02-12T00:00:00.000Z",
-      "updatedAt": "2025-03-10T00:00:00.000Z"
+      "rating": 4.5,
+      "totalReviews": 21,
+      "metaTitle": "Baluchari Silk Saree — Midnight Blue | Meghali's Silk",
+      "metaDescription": "Bengal Baluchari silk saree in midnight blue with gold-toned figured motifs. Authentic handloom from Meghali's Silk.",
+      "createdAt": "2025-12-12T00:00:00.000Z",
+      "updatedAt": "2026-02-01T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        25
+      ],
+      "relatedProductIds": [
+        16,
+        1,
+        7
+      ]
     },
     {
       "id": 18,
-      "name": "Abstract Wall Art Canvas - Set of 3",
-      "slug": "abstract-wall-art-canvas-set-3",
-      "sku": "HOM-WAC-ABS-001",
-      "shortDescription": "Modern abstract art canvas prints for living room decor",
-      "description": "Transform your living space with this set of 3 abstract canvas prints. Gallery-quality giclée printing on premium cotton canvas, stretched over solid wood frames. Ready to hang with pre-installed hardware. Each panel: 16x24 inches. UV-resistant inks ensure vibrant colors for years.",
-      "categoryId": 3,
-      "brand": "ArtNova",
+      "name": "Bengal Handloom Silk Saree — Dhakai Jamdani",
+      "slug": "bengal-handloom-silk-saree-dhakai-jamdani",
+      "sku": "SAR-BEN-018",
+      "shortDescription": "Bengal handloom silk-blend saree in the Dhakai Jamdani tradition with airy woven motifs.",
+      "description": "Handwoven in the Dhakai Jamdani tradition shared across Bengal, this lightweight silk-blend saree carries the technique's hallmark — discontinuous supplementary-weft motifs that appear to float on a sheer, breathable ground, each one inlaid by hand at the loom. An everyday-festive drape that is feather-light to wear and endlessly versatile. Includes an unstitched matching blouse piece. Gentle hand wash or dry clean; line dry in shade.",
+      "categoryId": 1,
+      "brand": "Meghali's Silk",
       "images": [
-        "https://placehold.co/600x400/4caf50/FFFFFF?text=Wall+Art+Set",
-        "https://placehold.co/600x400/388e3c/FFFFFF?text=Art+Detail"
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Dhakai+Jamdani",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Woven+Motif",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Pallu",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Border"
       ],
-      "price": 2499,
-      "comparePrice": 3999,
-      "costPrice": 1200,
-      "stock": 35,
-      "lowStockThreshold": 5,
-      "weight": 3,
+      "price": 3900,
+      "comparePrice": 5500,
+      "costPrice": 2400,
+      "stock": 36,
+      "lowStockThreshold": 8,
+      "weight": 0.55,
       "dimensions": {
-        "length": 62,
-        "width": 42,
+        "length": 33,
+        "width": 24,
         "height": 4
       },
       "variants": [
         {
           "id": "v1",
-          "name": "Blue & Gold",
-          "price": 2499,
-          "stock": 15,
-          "sku": "HOM-WAC-ABS-BGD"
+          "name": "White / Red",
+          "price": 3900,
+          "stock": 12,
+          "sku": "SAR-BEN-018-WHR",
+          "attributes": {
+            "Fabric": "Silk-Cotton Jamdani",
+            "Color": "White / Red"
+          },
+          "swatchHex": "#F2EFE9"
         },
         {
           "id": "v2",
-          "name": "Earthy Tones",
-          "price": 2499,
-          "stock": 20,
-          "sku": "HOM-WAC-ABS-ETH"
+          "name": "Sky / Navy",
+          "price": 3900,
+          "stock": 12,
+          "sku": "SAR-BEN-018-SKN",
+          "attributes": {
+            "Fabric": "Silk-Cotton Jamdani",
+            "Color": "Sky / Navy"
+          },
+          "swatchHex": "#7FB3D5"
+        },
+        {
+          "id": "v3",
+          "name": "Off White / Black",
+          "price": 4100,
+          "stock": 12,
+          "sku": "SAR-BEN-018-OWB",
+          "attributes": {
+            "Fabric": "Silk-Cotton Jamdani",
+            "Color": "Off White / Black"
+          },
+          "swatchHex": "#E8E4DA"
         }
       ],
       "tags": [
-        "wall art",
-        "canvas",
-        "abstract",
-        "decor",
-        "living room",
-        "modern art"
+        "saree",
+        "jamdani",
+        "dhakai",
+        "bengal",
+        "handloom",
+        "silk",
+        "daywear"
       ],
       "featured": false,
-      "trending": false,
-      "hot": false,
+      "trending": true,
+      "hot": true,
       "isActive": true,
-      "rating": 4.5,
-      "totalReviews": 73,
-      "metaTitle": "Abstract Wall Art Canvas Set of 3 - Modern Decor",
-      "metaDescription": "Buy set of 3 abstract canvas prints for living room. Gallery-quality, ready to hang.",
-      "createdAt": "2025-02-08T00:00:00.000Z",
-      "updatedAt": "2025-03-05T00:00:00.000Z"
+      "rating": 4.3,
+      "totalReviews": 12,
+      "metaTitle": "Bengal Handloom Silk Saree — Dhakai Jamdani | Meghali's Silk",
+      "metaDescription": "Bengal handloom Dhakai Jamdani silk-blend saree with airy woven motifs. Authentic handloom from Meghali's Silk.",
+      "createdAt": "2026-05-01T00:00:00.000Z",
+      "updatedAt": "2026-06-10T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        21,
+        22
+      ],
+      "relatedProductIds": [
+        4,
+        5,
+        3
+      ]
     },
     {
       "id": 19,
