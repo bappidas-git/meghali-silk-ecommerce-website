@@ -1778,113 +1778,1395 @@
     },
     {
       "id": 19,
-      "name": "HydroFlask Insulated Water Bottle",
-      "slug": "hydroflask-insulated-water-bottle",
-      "sku": "SPT-HFL-WTR-001",
-      "shortDescription": "1L stainless steel vacuum insulated bottle - keeps cold 24hrs",
-      "description": "HydroFlask double-wall vacuum insulated water bottle keeps drinks ice cold for 24 hours or hot for 12 hours. Made from 18/8 food-grade stainless steel with BPA-free lid. Wide mouth opening fits ice cubes easily. Powder-coated finish for a secure grip. Leak-proof and sweat-free design.",
-      "categoryId": 4,
-      "brand": "HydroFlask",
+      "name": "Pure Silk Unstitched Suit Set — Wine Floral",
+      "slug": "pure-silk-unstitched-suit-set-wine-floral",
+      "sku": "SUT-SLK-019",
+      "shortDescription": "Three-piece pure silk suit set with a printed dupatta — unstitched, ready to tailor.",
+      "description": "A three-piece silk suit set in a deep wine tone with a delicate floral print, woven and finished in our Kolkata atelier. Includes top fabric, matching bottom and a soft silk dupatta. Unstitched so you can tailor it to your fit. Dry clean recommended for lasting sheen.",
+      "categoryId": 2,
+      "brand": "Meghali's Silk",
       "images": [
-        "https://placehold.co/600x400/ff9800/FFFFFF?text=Water+Bottle",
-        "https://placehold.co/600x400/f57c00/FFFFFF?text=Bottle+Open"
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Silk+Suit",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Dupatta",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Fabric+Detail"
       ],
-      "price": 1299,
-      "comparePrice": 1899,
-      "costPrice": 550,
-      "stock": 150,
-      "lowStockThreshold": 25,
-      "weight": 0.4,
+      "price": 4200,
+      "comparePrice": 5800,
+      "costPrice": 2600,
+      "stock": 28,
+      "lowStockThreshold": 8,
+      "weight": 0.6,
       "dimensions": {
-        "length": 28,
-        "width": 8,
-        "height": 8
+        "length": 32,
+        "width": 24,
+        "height": 5
       },
       "variants": [
         {
           "id": "v1",
-          "name": "Pacific Blue",
-          "price": 1299,
-          "stock": 50,
-          "sku": "SPT-HFL-WTR-BLU"
+          "name": "Wine / Free Size",
+          "price": 4200,
+          "stock": 14,
+          "sku": "SUT-SLK-019-WIN-FS",
+          "attributes": {
+            "Fabric": "Mulberry Silk",
+            "Color": "Wine",
+            "Size": "Free Size"
+          },
+          "swatchHex": "#6E1A2C"
         },
         {
           "id": "v2",
-          "name": "Charcoal Black",
-          "price": 1299,
-          "stock": 50,
-          "sku": "SPT-HFL-WTR-BLK"
-        },
-        {
-          "id": "v3",
-          "name": "Coral Pink",
-          "price": 1299,
-          "stock": 50,
-          "sku": "SPT-HFL-WTR-PNK"
+          "name": "Teal / Free Size",
+          "price": 4200,
+          "stock": 14,
+          "sku": "SUT-SLK-019-TEA-FS",
+          "attributes": {
+            "Fabric": "Mulberry Silk",
+            "Color": "Teal",
+            "Size": "Free Size"
+          },
+          "swatchHex": "#0E6B6B"
         }
       ],
       "tags": [
-        "water bottle",
-        "insulated",
-        "stainless steel",
-        "sports",
-        "gym",
-        "hydration"
+        "suit",
+        "salwar",
+        "silk",
+        "unstitched",
+        "festive"
+      ],
+      "featured": true,
+      "trending": false,
+      "hot": false,
+      "isActive": true,
+      "rating": 4.4,
+      "totalReviews": 27,
+      "metaTitle": "Pure Silk Unstitched Suit Set — Wine Floral | Meghali's Silk",
+      "metaDescription": "Three-piece pure silk suit set with printed dupatta, unstitched. Authentic silk from Meghali's Silk.",
+      "createdAt": "2025-04-05T00:00:00.000Z",
+      "updatedAt": "2025-06-10T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        25
+      ],
+      "relatedProductIds": [
+        20,
+        21,
+        26
+      ]
+    },
+    {
+      "id": 20,
+      "name": "Silk Salwar Kameez — Mustard Chikankari",
+      "slug": "silk-salwar-kameez-mustard-chikankari",
+      "sku": "SUT-SLK-020",
+      "shortDescription": "Ready-to-wear silk salwar kameez in mustard with delicate chikankari hand-embroidery.",
+      "description": "A graceful silk salwar kameez in a warm mustard tone, accented with fine chikankari hand-embroidery by our karigars. The set pairs a flowing silk kameez with a comfortable salwar and a matching dupatta. Tailored in Kolkata for everyday elegance and festive days alike. Dry clean to preserve the embroidery.",
+      "categoryId": 2,
+      "brand": "Meghali's Silk",
+      "images": [
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Salwar+Kameez",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Chikankari",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Dupatta",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Embroidery+Detail"
+      ],
+      "price": 6500,
+      "comparePrice": 8500,
+      "costPrice": 3900,
+      "stock": 32,
+      "lowStockThreshold": 8,
+      "weight": 0.7,
+      "dimensions": {
+        "length": 32,
+        "width": 24,
+        "height": 5
+      },
+      "variants": [
+        {
+          "id": "v1",
+          "name": "Mustard / S",
+          "price": 6500,
+          "stock": 9,
+          "sku": "SUT-SLK-020-MUS-S",
+          "attributes": {
+            "Fabric": "Pure Silk",
+            "Color": "Mustard",
+            "Size": "S"
+          },
+          "swatchHex": "#C9971B"
+        },
+        {
+          "id": "v2",
+          "name": "Mustard / M",
+          "price": 6500,
+          "stock": 9,
+          "sku": "SUT-SLK-020-MUS-M",
+          "attributes": {
+            "Fabric": "Pure Silk",
+            "Color": "Mustard",
+            "Size": "M"
+          },
+          "swatchHex": "#C9971B"
+        },
+        {
+          "id": "v3",
+          "name": "Mustard / L",
+          "price": 6500,
+          "stock": 8,
+          "sku": "SUT-SLK-020-MUS-L",
+          "attributes": {
+            "Fabric": "Pure Silk",
+            "Color": "Mustard",
+            "Size": "L"
+          },
+          "swatchHex": "#C9971B"
+        },
+        {
+          "id": "v4",
+          "name": "Sky Blue / M",
+          "price": 6700,
+          "stock": 6,
+          "sku": "SUT-SLK-020-SKY-M",
+          "attributes": {
+            "Fabric": "Pure Silk",
+            "Color": "Sky Blue",
+            "Size": "M"
+          },
+          "swatchHex": "#6FAEDB"
+        }
+      ],
+      "tags": [
+        "suit",
+        "salwar",
+        "silk",
+        "chikankari",
+        "festive",
+        "handloom"
+      ],
+      "featured": false,
+      "trending": true,
+      "hot": false,
+      "isActive": true,
+      "rating": 4.5,
+      "totalReviews": 41,
+      "metaTitle": "Silk Salwar Kameez — Mustard Chikankari | Meghali's Silk",
+      "metaDescription": "Ready silk salwar kameez in mustard with chikankari embroidery and matching dupatta. Meghali's Silk.",
+      "createdAt": "2025-04-18T00:00:00.000Z",
+      "updatedAt": "2025-06-12T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        26
+      ],
+      "relatedProductIds": [
+        19,
+        21,
+        29
+      ]
+    },
+    {
+      "id": 21,
+      "name": "Tussar Silk Suit Set — Ivory Print",
+      "slug": "tussar-silk-suit-set-ivory-print",
+      "sku": "SUT-TUS-021",
+      "shortDescription": "Unstitched Tussar silk suit set in ivory with a natural hand-printed motif.",
+      "description": "An unstitched Tussar silk suit set in a soft ivory ground, hand-printed with an earthy botanical motif true to Bengal's craft. Tussar's natural slub texture gives the fabric a rich, organic feel. Includes top, bottom and dupatta fabric to tailor to your fit. Dry clean only.",
+      "categoryId": 2,
+      "brand": "Meghali's Silk",
+      "images": [
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Tussar+Suit",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Ivory+Print",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Dupatta"
+      ],
+      "price": 5400,
+      "comparePrice": 7200,
+      "costPrice": 3200,
+      "stock": 22,
+      "lowStockThreshold": 6,
+      "weight": 0.6,
+      "dimensions": {
+        "length": 32,
+        "width": 24,
+        "height": 5
+      },
+      "variants": [
+        {
+          "id": "v1",
+          "name": "Ivory / Free Size",
+          "price": 5400,
+          "stock": 11,
+          "sku": "SUT-TUS-021-IVO-FS",
+          "attributes": {
+            "Fabric": "Tussar Silk",
+            "Color": "Ivory",
+            "Size": "Free Size"
+          },
+          "swatchHex": "#F3E9D2"
+        },
+        {
+          "id": "v2",
+          "name": "Rust / Free Size",
+          "price": 5400,
+          "stock": 11,
+          "sku": "SUT-TUS-021-RST-FS",
+          "attributes": {
+            "Fabric": "Tussar Silk",
+            "Color": "Rust",
+            "Size": "Free Size"
+          },
+          "swatchHex": "#9C4A26"
+        }
+      ],
+      "tags": [
+        "suit",
+        "salwar",
+        "silk",
+        "tussar",
+        "unstitched",
+        "handloom"
+      ],
+      "featured": false,
+      "trending": false,
+      "hot": true,
+      "isActive": true,
+      "rating": 4.3,
+      "totalReviews": 18,
+      "metaTitle": "Tussar Silk Suit Set — Ivory Print | Meghali's Silk",
+      "metaDescription": "Unstitched Tussar silk suit set in ivory with hand-printed motif. Authentic Bengal silk, Meghali's Silk.",
+      "createdAt": "2025-05-02T00:00:00.000Z",
+      "updatedAt": "2025-06-08T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        27
+      ],
+      "relatedProductIds": [
+        19,
+        20,
+        28
+      ]
+    },
+    {
+      "id": 22,
+      "name": "Bridal Silk Lehenga — Crimson Zardozi",
+      "slug": "bridal-silk-lehenga-crimson-zardozi",
+      "sku": "LEH-SLK-022",
+      "shortDescription": "Hand-embroidered silk bridal lehenga in crimson with zardozi and a matching dupatta.",
+      "description": "A statement bridal lehenga in pure silk, hand-embroidered with zardozi and resham across the flared skirt and blouse, finished with a scalloped silk dupatta. Crafted over weeks by our karigars. Semi-stitched blouse with adjustable margins. Professional dry clean only.",
+      "categoryId": 6,
+      "brand": "Meghali's Silk",
+      "images": [
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Bridal+Lehenga",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Zardozi",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Dupatta",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Skirt+Flare"
+      ],
+      "price": 38500,
+      "comparePrice": 47000,
+      "costPrice": 24000,
+      "stock": 12,
+      "lowStockThreshold": 3,
+      "weight": 2.4,
+      "dimensions": {
+        "length": 40,
+        "width": 32,
+        "height": 10
+      },
+      "variants": [
+        {
+          "id": "v1",
+          "name": "Crimson / M",
+          "price": 38500,
+          "stock": 4,
+          "sku": "LEH-SLK-022-CRM-M",
+          "attributes": {
+            "Fabric": "Pure Silk",
+            "Color": "Crimson",
+            "Size": "M"
+          },
+          "swatchHex": "#9B1B2E"
+        },
+        {
+          "id": "v2",
+          "name": "Crimson / L",
+          "price": 38500,
+          "stock": 4,
+          "sku": "LEH-SLK-022-CRM-L",
+          "attributes": {
+            "Fabric": "Pure Silk",
+            "Color": "Crimson",
+            "Size": "L"
+          },
+          "swatchHex": "#9B1B2E"
+        },
+        {
+          "id": "v3",
+          "name": "Maroon / M",
+          "price": 39500,
+          "stock": 4,
+          "sku": "LEH-SLK-022-MRN-M",
+          "attributes": {
+            "Fabric": "Pure Silk",
+            "Color": "Maroon",
+            "Size": "M"
+          },
+          "swatchHex": "#5C1320"
+        }
+      ],
+      "tags": [
+        "lehenga",
+        "bridal",
+        "silk",
+        "wedding",
+        "zardozi",
+        "handwork"
+      ],
+      "featured": true,
+      "trending": true,
+      "hot": true,
+      "isActive": true,
+      "rating": 4.8,
+      "totalReviews": 19,
+      "metaTitle": "Bridal Silk Lehenga — Crimson Zardozi | Meghali's Silk",
+      "metaDescription": "Hand-embroidered pure silk bridal lehenga with zardozi and matching dupatta. Meghali's Silk.",
+      "createdAt": "2025-05-20T00:00:00.000Z",
+      "updatedAt": "2025-06-15T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        25,
+        30
+      ],
+      "relatedProductIds": [
+        23,
+        24,
+        8
+      ]
+    },
+    {
+      "id": 23,
+      "name": "Banarasi Silk Lehenga — Rani Pink",
+      "slug": "banarasi-silk-lehenga-rani-pink",
+      "sku": "LEH-BAN-023",
+      "shortDescription": "Banarasi silk lehenga in rani pink with gold zari brocade and a flared skirt.",
+      "description": "A festive Banarasi silk lehenga in vivid rani pink, woven with gold zari brocade in the Banaras-to-Bengal tradition. The richly flared skirt pairs with a zari-worked blouse and a Banarasi dupatta. Semi-stitched for a flexible fit. Dry clean only; store wrapped in muslin.",
+      "categoryId": 3,
+      "brand": "Meghali's Silk",
+      "images": [
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Banarasi+Lehenga",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Zari+Brocade",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Dupatta",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Skirt+Detail"
+      ],
+      "price": 24500,
+      "comparePrice": 31000,
+      "costPrice": 15000,
+      "stock": 14,
+      "lowStockThreshold": 4,
+      "weight": 2.2,
+      "dimensions": {
+        "length": 40,
+        "width": 32,
+        "height": 9
+      },
+      "variants": [
+        {
+          "id": "v1",
+          "name": "Rani Pink / M",
+          "price": 24500,
+          "stock": 5,
+          "sku": "LEH-BAN-023-RAN-M",
+          "attributes": {
+            "Fabric": "Banarasi Silk",
+            "Color": "Rani Pink",
+            "Size": "M"
+          },
+          "swatchHex": "#C2185B"
+        },
+        {
+          "id": "v2",
+          "name": "Rani Pink / L",
+          "price": 24500,
+          "stock": 5,
+          "sku": "LEH-BAN-023-RAN-L",
+          "attributes": {
+            "Fabric": "Banarasi Silk",
+            "Color": "Rani Pink",
+            "Size": "L"
+          },
+          "swatchHex": "#C2185B"
+        },
+        {
+          "id": "v3",
+          "name": "Red / M",
+          "price": 25200,
+          "stock": 4,
+          "sku": "LEH-BAN-023-RED-M",
+          "attributes": {
+            "Fabric": "Banarasi Silk",
+            "Color": "Red",
+            "Size": "M"
+          },
+          "swatchHex": "#B11722"
+        }
+      ],
+      "tags": [
+        "lehenga",
+        "banarasi",
+        "silk",
+        "wedding",
+        "zari",
+        "festive"
+      ],
+      "featured": true,
+      "trending": false,
+      "hot": false,
+      "isActive": true,
+      "rating": 4.6,
+      "totalReviews": 33,
+      "metaTitle": "Banarasi Silk Lehenga — Rani Pink | Meghali's Silk",
+      "metaDescription": "Banarasi silk lehenga in rani pink with gold zari brocade and matching dupatta. Meghali's Silk.",
+      "createdAt": "2025-03-15T00:00:00.000Z",
+      "updatedAt": "2025-05-30T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        30,
+        25
+      ],
+      "relatedProductIds": [
+        22,
+        24,
+        8
+      ]
+    },
+    {
+      "id": 24,
+      "name": "Silk Lehenga — Emerald Resham",
+      "slug": "silk-lehenga-emerald-resham",
+      "sku": "LEH-SLK-024",
+      "shortDescription": "Pure silk lehenga in emerald with delicate resham thread-work across the skirt.",
+      "description": "A refined pure silk lehenga in deep emerald, embellished with delicate resham thread-work along the skirt and blouse. Lightweight enough to dance in, with a graceful flare and a soft silk dupatta. Semi-stitched blouse with adjustable margins. Professional dry clean only.",
+      "categoryId": 3,
+      "brand": "Meghali's Silk",
+      "images": [
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Emerald+Lehenga",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Resham+Work",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Dupatta",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Flare+Detail"
+      ],
+      "price": 18900,
+      "comparePrice": 24500,
+      "costPrice": 11500,
+      "stock": 16,
+      "lowStockThreshold": 4,
+      "weight": 2,
+      "dimensions": {
+        "length": 40,
+        "width": 32,
+        "height": 9
+      },
+      "variants": [
+        {
+          "id": "v1",
+          "name": "Emerald / S",
+          "price": 18900,
+          "stock": 4,
+          "sku": "LEH-SLK-024-EMR-S",
+          "attributes": {
+            "Fabric": "Pure Silk",
+            "Color": "Emerald",
+            "Size": "S"
+          },
+          "swatchHex": "#0B6B4F"
+        },
+        {
+          "id": "v2",
+          "name": "Emerald / M",
+          "price": 18900,
+          "stock": 4,
+          "sku": "LEH-SLK-024-EMR-M",
+          "attributes": {
+            "Fabric": "Pure Silk",
+            "Color": "Emerald",
+            "Size": "M"
+          },
+          "swatchHex": "#0B6B4F"
+        },
+        {
+          "id": "v3",
+          "name": "Emerald / L",
+          "price": 18900,
+          "stock": 4,
+          "sku": "LEH-SLK-024-EMR-L",
+          "attributes": {
+            "Fabric": "Pure Silk",
+            "Color": "Emerald",
+            "Size": "L"
+          },
+          "swatchHex": "#0B6B4F"
+        },
+        {
+          "id": "v4",
+          "name": "Navy / M",
+          "price": 19500,
+          "stock": 4,
+          "sku": "LEH-SLK-024-NVY-M",
+          "attributes": {
+            "Fabric": "Pure Silk",
+            "Color": "Navy",
+            "Size": "M"
+          },
+          "swatchHex": "#1B2A4A"
+        }
+      ],
+      "tags": [
+        "lehenga",
+        "silk",
+        "wedding",
+        "resham",
+        "festive"
+      ],
+      "featured": false,
+      "trending": true,
+      "hot": false,
+      "isActive": true,
+      "rating": 4.5,
+      "totalReviews": 22,
+      "metaTitle": "Silk Lehenga — Emerald Resham | Meghali's Silk",
+      "metaDescription": "Pure silk lehenga in emerald with resham thread-work and matching dupatta. Meghali's Silk.",
+      "createdAt": "2025-06-01T00:00:00.000Z",
+      "updatedAt": "2025-06-18T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        30,
+        29
+      ],
+      "relatedProductIds": [
+        22,
+        23,
+        8
+      ]
+    },
+    {
+      "id": 25,
+      "name": "Pure Silk Dupatta — Gold Zari Border",
+      "slug": "pure-silk-dupatta-gold-zari-border",
+      "sku": "DUP-SLK-025",
+      "shortDescription": "Pure silk dupatta with a woven gold zari border — a versatile festive staple.",
+      "description": "A versatile pure silk dupatta finished with a woven gold zari border, made to lift a plain suit or kurta into festive territory. Soft, light and easy to drape, woven in our Kolkata workrooms. A wardrobe staple that pairs across colours. Dry clean recommended.",
+      "categoryId": 4,
+      "brand": "Meghali's Silk",
+      "images": [
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Silk+Dupatta",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Zari+Border",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Drape+Detail"
+      ],
+      "price": 1900,
+      "comparePrice": 2800,
+      "costPrice": 1000,
+      "stock": 60,
+      "lowStockThreshold": 12,
+      "weight": 0.25,
+      "dimensions": {
+        "length": 30,
+        "width": 22,
+        "height": 3
+      },
+      "variants": [
+        {
+          "id": "v1",
+          "name": "Red",
+          "price": 1900,
+          "stock": 22,
+          "sku": "DUP-SLK-025-RED",
+          "attributes": {
+            "Fabric": "Pure Silk",
+            "Color": "Red"
+          },
+          "swatchHex": "#B11722"
+        },
+        {
+          "id": "v2",
+          "name": "Ivory",
+          "price": 1900,
+          "stock": 20,
+          "sku": "DUP-SLK-025-IVO",
+          "attributes": {
+            "Fabric": "Pure Silk",
+            "Color": "Ivory"
+          },
+          "swatchHex": "#F3E9D2"
+        },
+        {
+          "id": "v3",
+          "name": "Black",
+          "price": 1900,
+          "stock": 18,
+          "sku": "DUP-SLK-025-BLK",
+          "attributes": {
+            "Fabric": "Pure Silk",
+            "Color": "Black"
+          },
+          "swatchHex": "#1A1A1A"
+        }
+      ],
+      "tags": [
+        "dupatta",
+        "silk",
+        "zari",
+        "festive",
+        "bestseller",
+        "handloom"
+      ],
+      "featured": true,
+      "trending": true,
+      "hot": false,
+      "isActive": true,
+      "rating": 4.7,
+      "totalReviews": 64,
+      "metaTitle": "Pure Silk Dupatta — Gold Zari Border | Meghali's Silk",
+      "metaDescription": "Pure silk dupatta with woven gold zari border. Versatile festive staple from Meghali's Silk.",
+      "createdAt": "2025-02-25T00:00:00.000Z",
+      "updatedAt": "2025-05-20T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        19
+      ],
+      "relatedProductIds": [
+        26,
+        27,
+        28
+      ]
+    },
+    {
+      "id": 26,
+      "name": "Banarasi Silk Dupatta — Peacock Blue",
+      "slug": "banarasi-silk-dupatta-peacock-blue",
+      "sku": "DUP-BAN-026",
+      "shortDescription": "Banarasi silk dupatta in peacock blue with gold zari motifs across the body.",
+      "description": "A Banarasi silk dupatta in lustrous peacock blue, woven with gold zari motifs and a brocade border in the Banaras tradition. Drapes beautifully over a suit or saree blouse for festive occasions. Handwoven and finished in Kolkata. Dry clean only.",
+      "categoryId": 4,
+      "brand": "Meghali's Silk",
+      "images": [
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Banarasi+Dupatta",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Zari+Motif",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Border+Detail"
+      ],
+      "price": 2400,
+      "comparePrice": 3400,
+      "costPrice": 1300,
+      "stock": 44,
+      "lowStockThreshold": 10,
+      "weight": 0.28,
+      "dimensions": {
+        "length": 30,
+        "width": 22,
+        "height": 3
+      },
+      "variants": [
+        {
+          "id": "v1",
+          "name": "Peacock Blue",
+          "price": 2400,
+          "stock": 24,
+          "sku": "DUP-BAN-026-PCK",
+          "attributes": {
+            "Fabric": "Banarasi Silk",
+            "Color": "Peacock Blue"
+          },
+          "swatchHex": "#14708A"
+        },
+        {
+          "id": "v2",
+          "name": "Wine",
+          "price": 2400,
+          "stock": 20,
+          "sku": "DUP-BAN-026-WIN",
+          "attributes": {
+            "Fabric": "Banarasi Silk",
+            "Color": "Wine"
+          },
+          "swatchHex": "#6E1A2C"
+        }
+      ],
+      "tags": [
+        "dupatta",
+        "banarasi",
+        "silk",
+        "zari",
+        "festive"
+      ],
+      "featured": false,
+      "trending": false,
+      "hot": false,
+      "isActive": true,
+      "rating": 4.4,
+      "totalReviews": 29,
+      "metaTitle": "Banarasi Silk Dupatta — Peacock Blue | Meghali's Silk",
+      "metaDescription": "Banarasi silk dupatta in peacock blue with gold zari motifs. Authentic handloom, Meghali's Silk.",
+      "createdAt": "2025-03-28T00:00:00.000Z",
+      "updatedAt": "2025-06-05T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        2
+      ],
+      "relatedProductIds": [
+        25,
+        27,
+        29
+      ]
+    },
+    {
+      "id": 27,
+      "name": "Tussar Silk Dupatta — Hand Block",
+      "slug": "tussar-silk-dupatta-hand-block",
+      "sku": "DUP-TUS-027",
+      "shortDescription": "Tussar silk dupatta with traditional hand-block printing and natural slub texture.",
+      "description": "A Tussar silk dupatta carrying traditional hand-block prints over its natural slub texture, true to Bengal's craft heritage. Earthy, breathable and easy to style with both silk and cotton suits. Block-printed by hand in small batches. Gentle dry clean to preserve the dye.",
+      "categoryId": 4,
+      "brand": "Meghali's Silk",
+      "images": [
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Tussar+Dupatta",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Hand+Block",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Texture+Detail"
+      ],
+      "price": 1500,
+      "comparePrice": 2200,
+      "costPrice": 800,
+      "stock": 38,
+      "lowStockThreshold": 8,
+      "weight": 0.24,
+      "dimensions": {
+        "length": 30,
+        "width": 22,
+        "height": 3
+      },
+      "variants": [
+        {
+          "id": "v1",
+          "name": "Ochre",
+          "price": 1500,
+          "stock": 20,
+          "sku": "DUP-TUS-027-OCH",
+          "attributes": {
+            "Fabric": "Tussar Silk",
+            "Color": "Ochre"
+          },
+          "swatchHex": "#C57B2C"
+        },
+        {
+          "id": "v2",
+          "name": "Indigo",
+          "price": 1500,
+          "stock": 18,
+          "sku": "DUP-TUS-027-IND",
+          "attributes": {
+            "Fabric": "Tussar Silk",
+            "Color": "Indigo"
+          },
+          "swatchHex": "#34495E"
+        }
+      ],
+      "tags": [
+        "dupatta",
+        "tussar",
+        "silk",
+        "handblock",
+        "handloom"
+      ],
+      "featured": false,
+      "trending": false,
+      "hot": true,
+      "isActive": true,
+      "rating": 4.3,
+      "totalReviews": 15,
+      "metaTitle": "Tussar Silk Dupatta — Hand Block | Meghali's Silk",
+      "metaDescription": "Tussar silk dupatta with traditional hand-block print and natural texture. Meghali's Silk.",
+      "createdAt": "2025-07-10T00:00:00.000Z",
+      "updatedAt": "2025-09-01T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        21
+      ],
+      "relatedProductIds": [
+        25,
+        26,
+        28
+      ]
+    },
+    {
+      "id": 28,
+      "name": "Eri Silk Stole — Earthy Natural",
+      "slug": "eri-silk-stole-earthy-natural",
+      "sku": "STO-ERI-028",
+      "shortDescription": "Soft Eri silk stole in earthy natural tones — warm, light and everyday-elegant.",
+      "description": "A soft Eri silk stole in earthy natural tones, prized for its warmth and matte, cottony feel. Often called 'peace silk', Eri is spun without harming the silkworm. Light enough to layer year-round and easy to throw over any outfit. Handwoven in the North-East tradition. Gentle hand wash or dry clean.",
+      "categoryId": 4,
+      "brand": "Meghali's Silk",
+      "images": [
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Eri+Stole",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Natural+Tone",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Weave+Detail"
+      ],
+      "price": 1200,
+      "comparePrice": 1800,
+      "costPrice": 650,
+      "stock": 42,
+      "lowStockThreshold": 8,
+      "weight": 0.2,
+      "dimensions": {
+        "length": 28,
+        "width": 20,
+        "height": 3
+      },
+      "variants": [
+        {
+          "id": "v1",
+          "name": "Beige",
+          "price": 1200,
+          "stock": 22,
+          "sku": "STO-ERI-028-BGE",
+          "attributes": {
+            "Fabric": "Eri Silk",
+            "Color": "Beige"
+          },
+          "swatchHex": "#CBB99A"
+        },
+        {
+          "id": "v2",
+          "name": "Charcoal",
+          "price": 1200,
+          "stock": 20,
+          "sku": "STO-ERI-028-CHR",
+          "attributes": {
+            "Fabric": "Eri Silk",
+            "Color": "Charcoal"
+          },
+          "swatchHex": "#36454F"
+        }
+      ],
+      "tags": [
+        "stole",
+        "eri",
+        "silk",
+        "handloom",
+        "everyday"
       ],
       "featured": false,
       "trending": true,
       "hot": false,
       "isActive": true,
       "rating": 4.6,
-      "totalReviews": 328,
-      "metaTitle": "HydroFlask 1L Insulated Water Bottle - 24hr Cold",
-      "metaDescription": "Buy HydroFlask vacuum insulated water bottle. Keeps cold 24hrs, hot 12hrs. BPA-free.",
-      "createdAt": "2025-01-18T00:00:00.000Z",
-      "updatedAt": "2025-03-12T00:00:00.000Z"
+      "totalReviews": 24,
+      "metaTitle": "Eri Silk Stole — Earthy Natural | Meghali's Silk",
+      "metaDescription": "Soft Eri silk stole in earthy natural tones. Warm, light, handwoven peace silk. Meghali's Silk.",
+      "createdAt": "2025-08-05T00:00:00.000Z",
+      "updatedAt": "2025-10-12T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        12
+      ],
+      "relatedProductIds": [
+        29,
+        25,
+        27
+      ]
     },
     {
-      "id": 20,
-      "name": "Creative Kids Building Blocks - 500 Pieces",
-      "slug": "creative-kids-building-blocks-500",
-      "sku": "TOY-CKB-500-001",
-      "shortDescription": "STEM learning building blocks set with storage box",
-      "description": "Spark creativity and learning with this 500-piece building blocks set. Compatible with all major brands. Includes bricks, wheels, doors, windows, trees, and minifigures. Comes in a sturdy storage box with sorting compartments. Made from non-toxic ABS plastic, safe for children 3+ years. Great for developing motor skills and imagination.",
-      "categoryId": 5,
-      "brand": "BrainBrix",
+      "id": 29,
+      "name": "Mulberry Silk Stole — Pastel Set",
+      "slug": "mulberry-silk-stole-pastel-set",
+      "sku": "STO-MUL-029",
+      "shortDescription": "Lightweight Mulberry silk stole in soft pastels — a smooth, lustrous everyday layer.",
+      "description": "A lightweight Mulberry silk stole in soft pastel shades, with the smooth lustre Mulberry is known for. An easy finishing layer for office or evening, it folds away to nothing and drapes with a gentle sheen. Woven and dyed in Kolkata. Gentle hand wash or dry clean.",
+      "categoryId": 4,
+      "brand": "Meghali's Silk",
       "images": [
-        "https://placehold.co/600x400/e91e63/FFFFFF?text=Building+Blocks",
-        "https://placehold.co/600x400/c2185b/FFFFFF?text=Blocks+Castle"
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Mulberry+Stole",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Pastel+Shades",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Sheen+Detail"
       ],
-      "price": 1999,
-      "comparePrice": 2999,
-      "costPrice": 900,
-      "stock": 5,
-      "lowStockThreshold": 8,
-      "weight": 2.5,
+      "price": 990,
+      "comparePrice": 1500,
+      "costPrice": 520,
+      "stock": 50,
+      "lowStockThreshold": 10,
+      "weight": 0.18,
       "dimensions": {
-        "length": 40,
-        "width": 30,
-        "height": 15
+        "length": 28,
+        "width": 20,
+        "height": 3
       },
-      "variants": [],
+      "variants": [
+        {
+          "id": "v1",
+          "name": "Mint",
+          "price": 990,
+          "stock": 18,
+          "sku": "STO-MUL-029-MNT",
+          "attributes": {
+            "Fabric": "Mulberry Silk",
+            "Color": "Mint"
+          },
+          "swatchHex": "#BFE3D0"
+        },
+        {
+          "id": "v2",
+          "name": "Lavender",
+          "price": 990,
+          "stock": 16,
+          "sku": "STO-MUL-029-LAV",
+          "attributes": {
+            "Fabric": "Mulberry Silk",
+            "Color": "Lavender"
+          },
+          "swatchHex": "#C9B6E4"
+        },
+        {
+          "id": "v3",
+          "name": "Peach",
+          "price": 990,
+          "stock": 16,
+          "sku": "STO-MUL-029-PCH",
+          "attributes": {
+            "Fabric": "Mulberry Silk",
+            "Color": "Peach"
+          },
+          "swatchHex": "#F4C2A1"
+        }
+      ],
       "tags": [
-        "building blocks",
-        "kids",
-        "toys",
-        "STEM",
-        "educational",
-        "creative"
+        "stole",
+        "mulberry",
+        "silk",
+        "pastel",
+        "everyday"
+      ],
+      "featured": false,
+      "trending": false,
+      "hot": false,
+      "isActive": true,
+      "rating": 4.2,
+      "totalReviews": 11,
+      "metaTitle": "Mulberry Silk Stole — Pastel Set | Meghali's Silk",
+      "metaDescription": "Lightweight Mulberry silk stole in soft pastels. Smooth, lustrous everyday layer. Meghali's Silk.",
+      "createdAt": "2025-09-20T00:00:00.000Z",
+      "updatedAt": "2025-11-15T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        19
+      ],
+      "relatedProductIds": [
+        28,
+        25,
+        26
+      ]
+    },
+    {
+      "id": 30,
+      "name": "Ready Silk Blouse — Gold Brocade",
+      "slug": "ready-silk-blouse-gold-brocade",
+      "sku": "BLO-SLK-030",
+      "shortDescription": "Ready-to-wear silk blouse in gold brocade — the perfect partner for a festive saree.",
+      "description": "A ready-to-wear silk blouse in gold brocade, cut to partner a festive Banarasi or Kanjivaram saree. Fully stitched with a neat back closure and princess-cut darts for a flattering fit. Woven and tailored in Kolkata. Dry clean only.",
+      "categoryId": 5,
+      "brand": "Meghali's Silk",
+      "images": [
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Silk+Blouse",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Gold+Brocade",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Back+Detail"
+      ],
+      "price": 1600,
+      "comparePrice": 2400,
+      "costPrice": 850,
+      "stock": 48,
+      "lowStockThreshold": 10,
+      "weight": 0.2,
+      "dimensions": {
+        "length": 26,
+        "width": 20,
+        "height": 3
+      },
+      "variants": [
+        {
+          "id": "v1",
+          "name": "Gold / S",
+          "price": 1600,
+          "stock": 12,
+          "sku": "BLO-SLK-030-GLD-S",
+          "attributes": {
+            "Fabric": "Brocade Silk",
+            "Color": "Gold",
+            "Size": "S"
+          },
+          "swatchHex": "#CBA35A"
+        },
+        {
+          "id": "v2",
+          "name": "Gold / M",
+          "price": 1600,
+          "stock": 14,
+          "sku": "BLO-SLK-030-GLD-M",
+          "attributes": {
+            "Fabric": "Brocade Silk",
+            "Color": "Gold",
+            "Size": "M"
+          },
+          "swatchHex": "#CBA35A"
+        },
+        {
+          "id": "v3",
+          "name": "Gold / L",
+          "price": 1600,
+          "stock": 12,
+          "sku": "BLO-SLK-030-GLD-L",
+          "attributes": {
+            "Fabric": "Brocade Silk",
+            "Color": "Gold",
+            "Size": "L"
+          },
+          "swatchHex": "#CBA35A"
+        },
+        {
+          "id": "v4",
+          "name": "Maroon / M",
+          "price": 1700,
+          "stock": 10,
+          "sku": "BLO-SLK-030-MRN-M",
+          "attributes": {
+            "Fabric": "Brocade Silk",
+            "Color": "Maroon",
+            "Size": "M"
+          },
+          "swatchHex": "#5C1320"
+        }
+      ],
+      "tags": [
+        "blouse",
+        "silk",
+        "brocade",
+        "festive",
+        "bestseller"
       ],
       "featured": true,
       "trending": false,
+      "hot": false,
+      "isActive": true,
+      "rating": 4.5,
+      "totalReviews": 52,
+      "metaTitle": "Ready Silk Blouse — Gold Brocade | Meghali's Silk",
+      "metaDescription": "Ready-to-wear gold brocade silk blouse to pair with a festive saree. Stitched in Kolkata, Meghali's Silk.",
+      "createdAt": "2025-02-15T00:00:00.000Z",
+      "updatedAt": "2025-05-10T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        1
+      ],
+      "relatedProductIds": [
+        31,
+        32,
+        33
+      ]
+    },
+    {
+      "id": 31,
+      "name": "Kanjivaram Silk Blouse — Contrast Border",
+      "slug": "kanjivaram-silk-blouse-contrast-border",
+      "sku": "BLO-KAN-031",
+      "shortDescription": "Kanjivaram silk blouse with a contrast zari border — made to match a temple-border saree.",
+      "description": "A Kanjivaram silk blouse with a contrast zari border, tailored to complement a Kanjivaram temple-border saree. Fully stitched in lustrous mulberry-Kanjivaram silk with a secure back closure. Crafted in our Kolkata atelier. Dry clean only.",
+      "categoryId": 5,
+      "brand": "Meghali's Silk",
+      "images": [
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Kanjivaram+Blouse",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Contrast+Border",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Zari+Detail"
+      ],
+      "price": 1900,
+      "comparePrice": 2800,
+      "costPrice": 1000,
+      "stock": 40,
+      "lowStockThreshold": 8,
+      "weight": 0.22,
+      "dimensions": {
+        "length": 26,
+        "width": 20,
+        "height": 3
+      },
+      "variants": [
+        {
+          "id": "v1",
+          "name": "Mustard / S",
+          "price": 1900,
+          "stock": 10,
+          "sku": "BLO-KAN-031-MUS-S",
+          "attributes": {
+            "Fabric": "Kanjivaram Silk",
+            "Color": "Mustard",
+            "Size": "S"
+          },
+          "swatchHex": "#C9971B"
+        },
+        {
+          "id": "v2",
+          "name": "Mustard / M",
+          "price": 1900,
+          "stock": 12,
+          "sku": "BLO-KAN-031-MUS-M",
+          "attributes": {
+            "Fabric": "Kanjivaram Silk",
+            "Color": "Mustard",
+            "Size": "M"
+          },
+          "swatchHex": "#C9971B"
+        },
+        {
+          "id": "v3",
+          "name": "Mustard / L",
+          "price": 1900,
+          "stock": 10,
+          "sku": "BLO-KAN-031-MUS-L",
+          "attributes": {
+            "Fabric": "Kanjivaram Silk",
+            "Color": "Mustard",
+            "Size": "L"
+          },
+          "swatchHex": "#C9971B"
+        },
+        {
+          "id": "v4",
+          "name": "Green / M",
+          "price": 2000,
+          "stock": 8,
+          "sku": "BLO-KAN-031-GRN-M",
+          "attributes": {
+            "Fabric": "Kanjivaram Silk",
+            "Color": "Green",
+            "Size": "M"
+          },
+          "swatchHex": "#2E6B4F"
+        }
+      ],
+      "tags": [
+        "blouse",
+        "kanjivaram",
+        "silk",
+        "zari",
+        "festive"
+      ],
+      "featured": false,
+      "trending": true,
+      "hot": false,
+      "isActive": true,
+      "rating": 4.4,
+      "totalReviews": 30,
+      "metaTitle": "Kanjivaram Silk Blouse — Contrast Border | Meghali's Silk",
+      "metaDescription": "Kanjivaram silk blouse with contrast zari border to match a temple-border saree. Meghali's Silk.",
+      "createdAt": "2025-04-22T00:00:00.000Z",
+      "updatedAt": "2025-06-14T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        7
+      ],
+      "relatedProductIds": [
+        30,
+        32,
+        33
+      ]
+    },
+    {
+      "id": 32,
+      "name": "Designer Silk Blouse — Embroidered Black",
+      "slug": "designer-silk-blouse-embroidered-black",
+      "sku": "BLO-SLK-032",
+      "shortDescription": "Designer silk blouse in black with hand-embroidery — a striking partner for any saree.",
+      "description": "A designer silk blouse in deep black, hand-embroidered with fine thread-work across the yoke and sleeves. Fully stitched with a sculpted fit and a concealed back closure, made to elevate a plain or richly woven saree alike. Tailored in Kolkata by our karigars. Dry clean only.",
+      "categoryId": 5,
+      "brand": "Meghali's Silk",
+      "images": [
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Designer+Blouse",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Embroidery",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Sleeve+Detail"
+      ],
+      "price": 2200,
+      "comparePrice": 3200,
+      "costPrice": 1200,
+      "stock": 34,
+      "lowStockThreshold": 7,
+      "weight": 0.24,
+      "dimensions": {
+        "length": 26,
+        "width": 20,
+        "height": 3
+      },
+      "variants": [
+        {
+          "id": "v1",
+          "name": "Black / S",
+          "price": 2200,
+          "stock": 9,
+          "sku": "BLO-SLK-032-BLK-S",
+          "attributes": {
+            "Fabric": "Pure Silk",
+            "Color": "Black",
+            "Size": "S"
+          },
+          "swatchHex": "#1A1A1A"
+        },
+        {
+          "id": "v2",
+          "name": "Black / M",
+          "price": 2200,
+          "stock": 10,
+          "sku": "BLO-SLK-032-BLK-M",
+          "attributes": {
+            "Fabric": "Pure Silk",
+            "Color": "Black",
+            "Size": "M"
+          },
+          "swatchHex": "#1A1A1A"
+        },
+        {
+          "id": "v3",
+          "name": "Black / L",
+          "price": 2200,
+          "stock": 8,
+          "sku": "BLO-SLK-032-BLK-L",
+          "attributes": {
+            "Fabric": "Pure Silk",
+            "Color": "Black",
+            "Size": "L"
+          },
+          "swatchHex": "#1A1A1A"
+        },
+        {
+          "id": "v4",
+          "name": "Wine / M",
+          "price": 2300,
+          "stock": 7,
+          "sku": "BLO-SLK-032-WIN-M",
+          "attributes": {
+            "Fabric": "Pure Silk",
+            "Color": "Wine",
+            "Size": "M"
+          },
+          "swatchHex": "#6E1A2C"
+        }
+      ],
+      "tags": [
+        "blouse",
+        "silk",
+        "designer",
+        "embroidered",
+        "festive"
+      ],
+      "featured": false,
+      "trending": false,
       "hot": true,
       "isActive": true,
-      "rating": 4.7,
-      "totalReviews": 156,
-      "metaTitle": "500-Piece Building Blocks Set - STEM Learning for Kids",
-      "metaDescription": "Buy 500-piece building blocks set with storage box. Safe, non-toxic, compatible with major brands.",
-      "createdAt": "2025-02-22T00:00:00.000Z",
-      "updatedAt": "2026-06-12T06:57:43.733Z"
+      "rating": 4.6,
+      "totalReviews": 21,
+      "metaTitle": "Designer Silk Blouse — Embroidered Black | Meghali's Silk",
+      "metaDescription": "Designer black silk blouse with hand-embroidery to elevate any saree. Tailored in Kolkata, Meghali's Silk.",
+      "createdAt": "2025-10-08T00:00:00.000Z",
+      "updatedAt": "2026-01-20T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        16
+      ],
+      "relatedProductIds": [
+        30,
+        31,
+        33
+      ]
+    },
+    {
+      "id": 33,
+      "name": "Plain Silk Blouse — Basics Set",
+      "slug": "plain-silk-blouse-basics-set",
+      "sku": "BLO-SLK-033",
+      "shortDescription": "Everyday plain silk blouse in essential colours — a smooth-fitting saree basic.",
+      "description": "An everyday plain silk blouse in essential colours, cut for a clean, smooth fit under any saree. Fully stitched in soft mulberry silk with a simple back closure and standard margins for minor alterations. A practical wardrobe basic from our Kolkata atelier. Dry clean or gentle hand wash.",
+      "categoryId": 5,
+      "brand": "Meghali's Silk",
+      "images": [
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Plain+Blouse",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Colour+Set",
+        "https://placehold.co/600x800/0B3B2E/CBA35A?text=Fit+Detail"
+      ],
+      "price": 850,
+      "comparePrice": 1300,
+      "costPrice": 430,
+      "stock": 70,
+      "lowStockThreshold": 14,
+      "weight": 0.18,
+      "dimensions": {
+        "length": 26,
+        "width": 20,
+        "height": 3
+      },
+      "variants": [
+        {
+          "id": "v1",
+          "name": "Red / S",
+          "price": 850,
+          "stock": 18,
+          "sku": "BLO-SLK-033-RED-S",
+          "attributes": {
+            "Fabric": "Mulberry Silk",
+            "Color": "Red",
+            "Size": "S"
+          },
+          "swatchHex": "#B11722"
+        },
+        {
+          "id": "v2",
+          "name": "Red / M",
+          "price": 850,
+          "stock": 18,
+          "sku": "BLO-SLK-033-RED-M",
+          "attributes": {
+            "Fabric": "Mulberry Silk",
+            "Color": "Red",
+            "Size": "M"
+          },
+          "swatchHex": "#B11722"
+        },
+        {
+          "id": "v3",
+          "name": "Black / M",
+          "price": 850,
+          "stock": 18,
+          "sku": "BLO-SLK-033-BLK-M",
+          "attributes": {
+            "Fabric": "Mulberry Silk",
+            "Color": "Black",
+            "Size": "M"
+          },
+          "swatchHex": "#1A1A1A"
+        },
+        {
+          "id": "v4",
+          "name": "Cream / L",
+          "price": 850,
+          "stock": 16,
+          "sku": "BLO-SLK-033-CRM-L",
+          "attributes": {
+            "Fabric": "Mulberry Silk",
+            "Color": "Cream",
+            "Size": "L"
+          },
+          "swatchHex": "#EFE6D3"
+        }
+      ],
+      "tags": [
+        "blouse",
+        "silk",
+        "basics",
+        "everyday"
+      ],
+      "featured": false,
+      "trending": false,
+      "hot": false,
+      "isActive": true,
+      "rating": 4.3,
+      "totalReviews": 0,
+      "metaTitle": "Plain Silk Blouse — Basics Set | Meghali's Silk",
+      "metaDescription": "Everyday plain silk blouse in essential colours. A smooth-fitting saree basic from Meghali's Silk.",
+      "createdAt": "2026-01-15T00:00:00.000Z",
+      "updatedAt": "2026-03-10T00:00:00.000Z",
+      "frequentlyBoughtTogetherIds": [
+        10
+      ],
+      "relatedProductIds": [
+        30,
+        31,
+        32
+      ]
     }
   ],
   "cart": [],
