@@ -1,23 +1,18 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { motion, useReducedMotion } from "framer-motion";
 import { Icon } from "@iconify/react";
 import { useTheme } from "../../context/ThemeContext";
 import { useCart } from "../../hooks/useCart";
 import { useWishlist } from "../../context/WishlistContext";
+import { useDealsConfig } from "../../context/DealsConfigContext";
 import apiService from "../../services/api";
 import { categoryParam } from "../../utils/categories";
+import { resolveCountdownTarget, diffToParts } from "../../utils/dealsConfig";
 import HeroSection from "../../components/HeroSection/HeroSection";
-import { APP_NAME, WHY_CHOOSE_US, TRUST_BADGES } from "../../utils/constants";
-import {
-  formatCurrency,
-  getProductMinPrice,
-  truncateText,
-  buildCartItem,
-  productPath,
-  PLACEHOLDER_IMG,
-  onImageError,
-} from "../../utils/helpers";
+import ProductCard from "../../components/storefront/ProductCard";
+import { TRUST_BADGES } from "../../utils/constants";
+import { getProductMinPrice, onImageError } from "../../utils/helpers";
 import styles from "./Home.module.css";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -35,6 +30,47 @@ const TRUST_BADGE_ICONS = {
   "Authentic Silk": "mdi:certificate-outline",
 };
 
+// "Shop with Confidence" — owner-attested policy statements (NOT live stats),
+// each given one category-dot accent token for its icon chip / top border.
+const CONFIDENCE_CARDS = [
+  {
+    icon: "mdi:backup-restore",
+    title: "7-Day Returns",
+    text: "Changed your mind? Return any piece within 7 days.",
+    accent: "var(--sf-cat-pink)",
+  },
+  {
+    icon: "mdi:cash-refund",
+    title: "100% Money Back",
+    text: "Full refund if your order isn't right — no questions asked.",
+    accent: "var(--sf-cat-purple)",
+  },
+  {
+    icon: "mdi:truck-fast-outline",
+    title: "Free Shipping",
+    text: "Complimentary delivery across India on every order.",
+    accent: "var(--sf-cat-orange)",
+  },
+  {
+    icon: "mdi:certificate-outline",
+    title: "Authentic Silk",
+    text: "Genuine handloom silk, woven by master artisans.",
+    accent: "var(--sf-cat-blue)",
+  },
+  {
+    icon: "mdi:shield-check-outline",
+    title: "Secure Payment",
+    text: "Every transaction protected with SSL encryption.",
+    accent: "var(--sf-cat-teal)",
+  },
+  {
+    icon: "mdi:headset",
+    title: "Expert Support",
+    text: "Our team is here to help you choose with confidence.",
+    accent: "var(--sf-cat-red)",
+  },
+];
+
 const getRecentlyViewed = () => {
   try {
     const stored = localStorage.getItem(RECENTLY_VIEWED_KEY);
@@ -44,139 +80,7 @@ const getRecentlyViewed = () => {
   }
 };
 
-const StarRating = ({ rating = 0, reviewCount = 0 }) => {
-  const stars = [];
-  const fullStars = Math.floor(rating);
-  const hasHalf = rating - fullStars >= 0.5;
-
-  for (let i = 0; i < 5; i++) {
-    if (i < fullStars) {
-      stars.push(
-        <span key={i} className={styles.starFull}>
-          &#9733;
-        </span>
-      );
-    } else if (i === fullStars && hasHalf) {
-      stars.push(
-        <span key={i} className={styles.starHalf}>
-          &#9733;
-        </span>
-      );
-    } else {
-      stars.push(
-        <span key={i} className={styles.starEmpty}>
-          &#9733;
-        </span>
-      );
-    }
-  }
-
-  return (
-    <span className={styles.ratingWrap}>
-      <span className={styles.stars}>{stars}</span>
-      {reviewCount > 0 && (
-        <span className={styles.reviewCount}>({reviewCount})</span>
-      )}
-    </span>
-  );
-};
-
-// ── Product Card ─────────────────────────────────────────────────────────────
-
-const ProductCard = ({ product, onAddToCart, onToggleWishlist, isWishlisted }) => {
-  const navigate = useNavigate();
-  const { sellingPrice, originalPrice, discount } = getProductMinPrice(product);
-  const image = product.images?.[0] || product.image || PLACEHOLDER_IMG;
-  const name = product.name || "Untitled Product";
-
-  const handleCardClick = () => {
-    navigate(productPath(product));
-  };
-
-  const handleAddToCart = (e) => {
-    e.stopPropagation();
-    onAddToCart(product);
-  };
-
-  const handleWishlist = (e) => {
-    e.stopPropagation();
-    onToggleWishlist(product);
-  };
-
-  return (
-    <motion.div
-      className={styles.productCard}
-      whileHover={{ y: -6 }}
-      transition={{ duration: 0.25 }}
-      onClick={handleCardClick}
-    >
-      {/* Image container */}
-      <div className={styles.productImageWrap}>
-        <img
-          src={image}
-          alt={name}
-          className={styles.productImage}
-          loading="lazy"
-          onError={onImageError}
-        />
-        <div className={styles.productImageOverlay}>
-          <button
-            className={styles.quickViewBtn}
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(productPath(product));
-            }}
-          >
-            Quick View
-          </button>
-        </div>
-        {/* Wishlist heart */}
-        <button
-          className={`${styles.wishlistBtn} ${isWishlisted ? styles.wishlisted : ""}`}
-          onClick={handleWishlist}
-          aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-        >
-          {isWishlisted ? "\u2764" : "\u2661"}
-        </button>
-        {/* Discount badge */}
-        {discount > 0 && (
-          <span className={styles.discountBadge}>-{discount}%</span>
-        )}
-      </div>
-
-      {/* Info */}
-      <div className={styles.productInfo}>
-        {product.brand && (
-          <p className={styles.productBrand}>{product.brand}</p>
-        )}
-        <h3 className={styles.productName}>{truncateText(name, 48)}</h3>
-
-        <StarRating
-          rating={product.rating || 0}
-          reviewCount={product.totalReviews || 0}
-        />
-
-        <div className={styles.priceRow}>
-          <span className={styles.salePrice}>{formatCurrency(sellingPrice)}</span>
-          {discount > 0 && (
-            <>
-              <span className={styles.originalPrice}>
-                {formatCurrency(originalPrice)}
-              </span>
-              <span className={styles.discountPercent}>{discount}% off</span>
-            </>
-          )}
-        </div>
-
-        <button className={styles.addToCartBtn} onClick={handleAddToCart}>
-          Add to Cart
-        </button>
-      </div>
-    </motion.div>
-  );
-};
-
-// ── Horizontal Scroll Buttons ────────────────────────────────────────────────
+// ── Horizontal Scroll Row ────────────────────────────────────────────────────
 
 const ScrollRow = ({ children, scrollRef }) => {
   const scroll = (direction) => {
@@ -191,6 +95,7 @@ const ScrollRow = ({ children, scrollRef }) => {
   return (
     <div className={styles.scrollContainer}>
       <button
+        type="button"
         className={`${styles.scrollBtn} ${styles.scrollBtnLeft}`}
         onClick={() => scroll("left")}
         aria-label="Scroll left"
@@ -201,6 +106,7 @@ const ScrollRow = ({ children, scrollRef }) => {
         {children}
       </div>
       <button
+        type="button"
         className={`${styles.scrollBtn} ${styles.scrollBtnRight}`}
         onClick={() => scroll("right")}
         aria-label="Scroll right"
@@ -212,36 +118,23 @@ const ScrollRow = ({ children, scrollRef }) => {
 };
 
 // ── Countdown Timer ──────────────────────────────────────────────────────────
+// Honest countdown: driven by a real target Date resolved from the admin deals
+// timer. Renders nothing on its own — the caller decides whether to mount it.
 
-const CountdownTimer = () => {
-  const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 });
+const CountdownTimer = ({ target }) => {
+  const [timeLeft, setTimeLeft] = useState(() => diffToParts(target));
 
   useEffect(() => {
-    const getEndOfDay = () => {
-      const end = new Date();
-      end.setHours(23, 59, 59, 999);
-      return end;
-    };
-
-    const update = () => {
-      const now = new Date();
-      const diff = Math.max(0, getEndOfDay() - now);
-      setTimeLeft({
-        hours: Math.floor(diff / 3600000),
-        minutes: Math.floor((diff % 3600000) / 60000),
-        seconds: Math.floor((diff % 60000) / 1000),
-      });
-    };
-
+    const update = () => setTimeLeft(diffToParts(target));
     update();
     const id = setInterval(update, 1000);
     return () => clearInterval(id);
-  }, []);
+  }, [target]);
 
   const pad = (n) => String(n).padStart(2, "0");
 
   return (
-    <div className={styles.countdown}>
+    <div className={styles.countdown} aria-label="Time left for today's deals">
       <span className={styles.countdownBlock}>
         <strong>{pad(timeLeft.hours)}</strong>
         <small>Hrs</small>
@@ -262,10 +155,12 @@ const CountdownTimer = () => {
 
 // ── Section Header ───────────────────────────────────────────────────────────
 
-const SectionHeader = ({ title, subtitle, linkText, linkTo }) => (
+const SectionHeader = ({ title, titleId, subtitle, linkText, linkTo }) => (
   <div className={styles.sectionHeader}>
     <div>
-      <h2 className={styles.sectionTitle}>{title}</h2>
+      <h2 id={titleId} className={styles.sectionTitle}>
+        {title}
+      </h2>
       {subtitle && <p className={styles.sectionSubtitle}>{subtitle}</p>}
     </div>
     {linkText && linkTo && (
@@ -284,6 +179,8 @@ const Home = () => {
   const { isDarkMode } = useTheme();
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
+  const { config: dealsConfig } = useDealsConfig();
+  const prefersReducedMotion = useReducedMotion();
 
   const [categories, setCategories] = useState([]);
   const [featuredProducts, setFeaturedProducts] = useState([]);
@@ -311,13 +208,15 @@ const Home = () => {
         setFeaturedProducts(Array.isArray(featured) ? featured.slice(0, 8) : []);
         setTrendingProducts(Array.isArray(trending) ? trending.slice(0, 8) : []);
 
-        // Flash deals: combine and pick products with discounts
-        const allProducts = [...(featured || []), ...(trending || [])];
-        const deals = allProducts
-          .filter((p) => {
-            const { discount } = getProductMinPrice(p);
-            return discount > 0;
-          })
+        // Flash deals: ONLY products with a real comparePrice discount. De-dupe
+        // by id across the featured + trending pools, then keep real discounts.
+        const pool = [...(featured || []), ...(trending || [])];
+        const byId = new Map();
+        pool.forEach((p) => {
+          if (p && !byId.has(p.id)) byId.set(p.id, p);
+        });
+        const deals = [...byId.values()]
+          .filter((p) => getProductMinPrice(p).discount > 0)
           .slice(0, 12);
         setFlashDeals(deals);
       } catch (err) {
@@ -333,11 +232,11 @@ const Home = () => {
 
   // ── Handlers ─────────────────────────────────────────────────────────────
 
+  // The shared ProductCard calls onAddToCart(buildCartItem(product)) internally,
+  // so this receives a ready cart item — do NOT rebuild it.
   const handleAddToCart = useCallback(
-    (product) => {
-      // Variant-aware line whose id/price match the product page (see
-      // buildCartItem) so quick-adds merge instead of duplicating.
-      addToCart(buildCartItem(product), 1);
+    (cartItem) => {
+      addToCart(cartItem, 1);
     },
     [addToCart]
   );
@@ -351,12 +250,23 @@ const Home = () => {
     [toggleWishlist]
   );
 
+  // ── Reduced-motion-safe reveal props ──────────────────────────────────────
+  const reveal = (i = 0) =>
+    prefersReducedMotion
+      ? {}
+      : {
+          initial: { opacity: 0, y: 20 },
+          whileInView: { opacity: 1, y: 0 },
+          viewport: { once: true, amount: 0.2 },
+          transition: { delay: i * 0.05, duration: 0.35 },
+        };
+
   // ── Skeleton loader ──────────────────────────────────────────────────────
 
   const ProductSkeleton = () => (
-    <div className={styles.productCard}>
-      <div className={`${styles.productImageWrap} ${styles.skeleton}`} />
-      <div className={styles.productInfo}>
+    <div className={styles.skeletonCard}>
+      <div className={`${styles.skeletonMedia} ${styles.skeleton}`} />
+      <div className={styles.skeletonBody}>
         <div className={`${styles.skeletonLine} ${styles.skeletonW80}`} />
         <div className={`${styles.skeletonLine} ${styles.skeletonW50}`} />
         <div className={`${styles.skeletonLine} ${styles.skeletonW60}`} />
@@ -380,13 +290,7 @@ const Home = () => {
     return (
       <div className={styles.productGrid}>
         {products.map((product, i) => (
-          <motion.div
-            key={product.id || i}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: i * 0.05, duration: 0.35 }}
-          >
+          <motion.div key={product.id || i} {...reveal(i)}>
             <ProductCard
               product={product}
               onAddToCart={handleAddToCart}
@@ -399,21 +303,29 @@ const Home = () => {
     );
   };
 
+  // ── Honest deals countdown — only when the real admin timer is enabled ─────
+  const countdown = resolveCountdownTarget(dealsConfig?.timer);
+  const showCountdown = countdown.active && !!countdown.target;
+
+  // After load, only render product sections that actually have content.
+  const showFeatured = loading || featuredProducts.length > 0;
+  const showTrending = loading || trendingProducts.length > 0;
+
   // ── Render ───────────────────────────────────────────────────────────────
 
   return (
     <motion.div
       className={`${styles.homePage} ${isDarkMode ? styles.dark : ""}`}
-      initial={{ opacity: 0 }}
+      initial={prefersReducedMotion ? false : { opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
     >
-      {/* 1. Hero Section */}
+      {/* Hero (out of scope here — owned by the hero prompt) */}
       <section className={styles.heroSection}>
         <HeroSection />
       </section>
 
-      {/* 2. Trust strip — owner-attested policy statements (TRUST_BADGES) */}
+      {/* Trust strip — owner-attested policy statements (TRUST_BADGES) */}
       <section className={styles.trustStrip} aria-label="Our promises">
         <div className={styles.trustStripInner}>
           {TRUST_BADGES.map((badge) => (
@@ -429,18 +341,25 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 3. Flash Deals */}
+      {/* Flash Deals — ONLY real-discount products; omitted entirely if none. */}
       {flashDeals.length > 0 && (
-        <section className={styles.section}>
+        <section className={styles.section} aria-labelledby="flash-deals-heading">
           <div className={styles.container}>
             <div className={styles.flashHeader}>
-              <SectionHeader
-                title="Flash Deals"
-                subtitle="Grab them before they're gone!"
-                linkText="View All"
-                linkTo="/products?sort=sale"
-              />
-              <CountdownTimer />
+              <div className={styles.flashTitleWrap}>
+                <h2 id="flash-deals-heading" className={styles.sectionTitle}>
+                  Flash Deals
+                </h2>
+                <p className={styles.sectionSubtitle}>
+                  Genuine markdowns on handpicked silks
+                </p>
+              </div>
+              <div className={styles.flashMeta}>
+                {showCountdown && <CountdownTimer target={countdown.target} />}
+                <Link to="/products?sort=sale" className={styles.viewAllLink}>
+                  View All &rarr;
+                </Link>
+              </div>
             </div>
             <ScrollRow scrollRef={flashScrollRef}>
               {flashDeals.map((product, i) => (
@@ -458,29 +377,29 @@ const Home = () => {
         </section>
       )}
 
-      {/* 3. Shop by Category */}
-      <section className={`${styles.section} ${styles.categorySection}`}>
+      {/* Shop by Category — the larger browse-categories tile grid. */}
+      <section
+        className={`${styles.section} ${styles.categorySection}`}
+        aria-labelledby="categories-heading"
+      >
         <div className={styles.container}>
           <SectionHeader
             title="Shop by Category"
-            subtitle="Browse our wide selection of categories"
+            titleId="categories-heading"
+            subtitle="Browse our handloom silk collections"
             linkText="All Categories"
             linkTo="/products"
           />
           <div className={styles.categoryGrid}>
             {loading
               ? Array.from({ length: 6 }).map((_, i) => (
-                  <div key={i} className={`${styles.categoryCard} ${styles.skeleton}`} />
+                  <div
+                    key={i}
+                    className={`${styles.categoryCard} ${styles.skeleton}`}
+                  />
                 ))
               : categories.map((cat, i) => (
-                  <motion.div
-                    key={cat.id || i}
-                    initial={{ opacity: 0, scale: 0.92 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: i * 0.06 }}
-                    whileHover={{ y: -4 }}
-                  >
+                  <motion.div key={cat.id || i} {...reveal(i)}>
                     <Link
                       to={`/products?category=${categoryParam(cat)}`}
                       className={styles.categoryCard}
@@ -509,105 +428,107 @@ const Home = () => {
         </div>
       </section>
 
-      {/* 4. Featured Products */}
-      <section className={styles.section}>
-        <div className={styles.container}>
-          <SectionHeader
-            title="Featured Products"
-            subtitle="Handpicked just for you"
-            linkText="View All"
-            linkTo="/products?sort=featured"
-          />
-          {renderProductGrid(featuredProducts, 4)}
-        </div>
-      </section>
-
-      {/* 5. Promotional Banner */}
-      <section className={styles.promoBanner}>
-        <div className={styles.container}>
-          <div className={styles.promoBannerInner}>
-            <motion.div
-              className={styles.promoContent}
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-            >
-              <span className={styles.promoTag}>Limited Time Offer</span>
-              <h2 className={styles.promoTitle}>
-                Up to 50% Off on Top Brands
-              </h2>
-              <p className={styles.promoText}>
-                Shop the season's best deals on electronics, fashion, home decor
-                and more. Don't miss out on incredible savings!
-              </p>
-              <Link to="/products?sort=sale" className={styles.promoCta}>
-                Shop Now
-              </Link>
-            </motion.div>
-            <motion.div
-              className={styles.promoGraphic}
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.15 }}
-            >
-              <div className={styles.promoCircle}>
-                <span className={styles.promoPercent}>50%</span>
-                <span className={styles.promoOff}>OFF</span>
-              </div>
-            </motion.div>
+      {/* Featured Products — omitted when empty after load. */}
+      {showFeatured && (
+        <section className={styles.section} aria-labelledby="featured-heading">
+          <div className={styles.container}>
+            <SectionHeader
+              title="Featured Products"
+              titleId="featured-heading"
+              subtitle="Handpicked just for you"
+              linkText="View All"
+              linkTo="/products?sort=featured"
+            />
+            {renderProductGrid(featuredProducts, 4)}
           </div>
+        </section>
+      )}
+
+      {/* Heritage / Luxury banner — decorative, single CTA, no fake discounts. */}
+      <section className={styles.heritageBanner} aria-labelledby="heritage-heading">
+        <div className={styles.container}>
+          <motion.div
+            className={styles.heritageInner}
+            {...(prefersReducedMotion
+              ? {}
+              : {
+                  initial: { opacity: 0, y: 24 },
+                  whileInView: { opacity: 1, y: 0 },
+                  viewport: { once: true, amount: 0.3 },
+                  transition: { duration: 0.5 },
+                })}
+          >
+            <span className={styles.heritageTag}>Galleria Producer Company</span>
+            <h2 id="heritage-heading" className={styles.heritageTitle}>
+              Heritage Meets Luxury
+            </h2>
+            <p className={styles.heritageText}>
+              Each weave carries generations of craftsmanship — pure silk,
+              dyed and handloomed by master artisans of Bengal.
+            </p>
+            <Link to="/about" className={styles.heritageCta}>
+              Discover Our Story
+            </Link>
+          </motion.div>
         </div>
       </section>
 
-      {/* 6. Trending Products */}
-      <section className={styles.section}>
-        <div className={styles.container}>
-          <SectionHeader
-            title="Trending Now"
-            subtitle="See what everyone is buying"
-            linkText="View All"
-            linkTo="/products?sort=trending"
-          />
-          {renderProductGrid(trendingProducts, 4)}
-        </div>
-      </section>
+      {/* Trending Now — omitted when empty after load. */}
+      {showTrending && (
+        <section className={styles.section} aria-labelledby="trending-heading">
+          <div className={styles.container}>
+            <SectionHeader
+              title="Trending Now"
+              titleId="trending-heading"
+              subtitle="See what everyone is loving"
+              linkText="View All"
+              linkTo="/products?sort=trending"
+            />
+            {renderProductGrid(trendingProducts, 4)}
+          </div>
+        </section>
+      )}
 
-      {/* 7. Why Choose Us */}
-      <section className={`${styles.section} ${styles.trustSection}`}>
+      {/* Shop with Confidence — 6 token-driven colored feature cards. */}
+      <section
+        className={`${styles.section} ${styles.confidenceSection}`}
+        aria-labelledby="confidence-heading"
+      >
         <div className={styles.container}>
-          <SectionHeader
-            title={`Why Choose ${APP_NAME}`}
-            subtitle="We put our customers first"
-          />
-          <div className={styles.trustGrid}>
-            {WHY_CHOOSE_US.map((item, i) => (
+          <div className={styles.sectionHeaderCentered}>
+            <h2 id="confidence-heading" className={styles.sectionTitle}>
+              Shop with Confidence
+            </h2>
+            <p className={styles.sectionSubtitle}>
+              Every order backed by our promises
+            </p>
+          </div>
+          <div className={styles.confidenceGrid}>
+            {CONFIDENCE_CARDS.map((card, i) => (
               <motion.div
-                key={item.id || i}
-                className={styles.trustCard}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
+                key={card.title}
+                className={styles.confidenceCard}
+                style={{ "--card-accent": card.accent }}
+                {...reveal(i)}
               >
-                <div className={styles.trustIcon}>
-                  <Icon icon={item.icon} />
-                </div>
-                <h4 className={styles.trustTitle}>{item.title}</h4>
-                <p className={styles.trustDesc}>{item.description}</p>
+                <span className={styles.confidenceIcon} aria-hidden="true">
+                  <Icon icon={card.icon} />
+                </span>
+                <h3 className={styles.confidenceTitle}>{card.title}</h3>
+                <p className={styles.confidenceText}>{card.text}</p>
               </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* 8. Recently Viewed */}
+      {/* Recently Viewed — renders only when localStorage has items. */}
       {recentlyViewed.length > 0 && (
-        <section className={styles.section}>
+        <section className={styles.section} aria-labelledby="recent-heading">
           <div className={styles.container}>
             <SectionHeader
               title="Recently Viewed"
+              titleId="recent-heading"
               subtitle="Continue where you left off"
             />
             <ScrollRow scrollRef={recentScrollRef}>
