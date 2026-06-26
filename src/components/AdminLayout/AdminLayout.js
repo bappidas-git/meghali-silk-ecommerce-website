@@ -36,7 +36,7 @@ import useAdminBodyClass from "../../hooks/useAdminBodyClass";
 import apiService from "../../services/api";
 import Swal from "sweetalert2";
 
-const LOGO = "https://placehold.co/160x40/4f46e5/ffffff?text=LOGO";
+const LOGO = "https://res.cloudinary.com/dn9gyaiik/image/upload/v1782451315/Logo_gpxble.png";
 
 const drawerWidth = 260;
 
@@ -332,11 +332,24 @@ const AdminLayout = () => {
           justifyContent: "center",
         }}
       >
-        <img
-          src={LOGO}
-          alt={process.env.REACT_APP_NAME || "Admin Panel"}
-          style={{ height: 32, width: "auto" }}
-        />
+        <Box
+          sx={{
+            backgroundColor: "#0B3B2E",
+            borderRadius: 2,
+            px: 1.5,
+            py: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "100%",
+          }}
+        >
+          <img
+            src={LOGO}
+            alt={process.env.REACT_APP_NAME || "Meghali's Silk Admin"}
+            style={{ height: 36, width: "auto", maxWidth: "100%", display: "block" }}
+          />
+        </Box>
       </Box>
 
       <Divider />

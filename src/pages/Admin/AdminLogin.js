@@ -18,7 +18,7 @@ import { useTheme } from "../../context/ThemeContext";
 import buildAdminTheme from "../../theme/adminTheme";
 import useAdminBodyClass from "../../hooks/useAdminBodyClass";
 
-const LOGO = "https://placehold.co/210x70/4f46e5/ffffff?text=LOGO";
+const LOGO = "https://res.cloudinary.com/dn9gyaiik/image/upload/v1782451315/Logo_gpxble.png";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const AdminLogin = () => {
@@ -133,11 +133,24 @@ const AdminLogin = () => {
                 mb: 2,
               }}
             >
-              <img
-                src={LOGO}
-                alt={process.env.REACT_APP_NAME || "Admin"}
-                style={{ height: 56, width: "auto" }}
-              />
+              <Box
+                sx={{
+                  backgroundColor: "#0B3B2E",
+                  borderRadius: 2,
+                  px: 2,
+                  py: 1.5,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  mx: "auto",
+                }}
+              >
+                <img
+                  src={LOGO}
+                  alt={process.env.REACT_APP_NAME || "Meghali's Silk Admin"}
+                  style={{ height: 60, width: "auto", maxWidth: "100%", display: "block" }}
+                />
+              </Box>
             </Box>
             <Typography variant="h6" sx={{ fontWeight: 700 }}>
               Admin Console
