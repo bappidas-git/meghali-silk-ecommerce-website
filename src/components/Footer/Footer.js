@@ -5,14 +5,21 @@ import { useDealsConfig } from "../../context/DealsConfigContext";
 import apiService from "../../services/api";
 import {
   APP_NAME,
+  APP_TAGLINE,
   SUPPORT_EMAIL,
   SUPPORT_PHONE,
   SUPPORT_ADDRESS,
   SUPPORT_HOURS,
   SOCIAL_LINKS,
+  POLICY_LAST_UPDATED,
 } from "../../utils/constants";
 import { isEmailValid } from "../../utils/helpers";
 import styles from "./Footer.module.css";
+
+// The brand logo PNG ships with its own deep-green background, so it must always
+// sit on a panel filled with that same green (var(--brand-logo-bg)).
+const LOGO_SRC =
+  "https://res.cloudinary.com/dn9gyaiik/image/upload/v1782451315/Logo_gpxble.png";
 
 const Footer = () => {
   const { isDarkMode } = useTheme();
@@ -53,27 +60,39 @@ const Footer = () => {
   };
 
   // Every target below resolves to a real route in App.js — no path here hits
-  // the catch-all redirect to "/". "Deals" shares the Special Offers hub (that
-  // page is titled "Special Offers & Deals"); New Arrivals / Best Sellers are
-  // sort deep-links the Products page understands (newest / popular).
-  const quickLinks = [
-    { label: "Products", path: "/products" },
+  // the catch-all redirect to "/". "Deals" / "Special Offers" share the deals
+  // hub and are dropped when the admin disables it; New Arrivals / Best Sellers
+  // are sort deep-links the Products page understands (newest / popular).
+  const shopLinks = [
+    { label: "All Products", path: "/products" },
     { label: "New Arrivals", path: "/products?sort=newest" },
-    // "Deals" / "Special Offers" point at the deals page — dropped when the
-    // admin disables it so the footer never shows a dead link.
-    { label: "Deals", path: "/special-offers", deals: true },
     { label: "Best Sellers", path: "/products?sort=popular" },
-    { label: "Special Offers", path: "/special-offers", deals: true },
+    { label: "Deals", path: "/special-offers", deals: true },
   ].filter((link) => dealsEnabled || !link.deals);
 
-  // Shipping Info and FAQs both live in the Help Center (it covers shipping
-  // topics and the FAQ accordion); Returns maps to the Refund Policy page.
-  const customerServiceLinks = [
-    { label: "My Account", path: "/profile" },
+  // Company column — Our Story is the About page; Special Offers is deals-gated.
+  const companyLinks = [
+    { label: "Our Story", path: "/about" },
+    { label: "Special Offers", path: "/special-offers", deals: true },
+    { label: "Wishlist", path: "/wishlist" },
+  ].filter((link) => dealsEnabled || !link.deals);
+
+  // Support column — Help Center covers shipping/FAQ topics; Returns maps to the
+  // Refund Policy page. All paths exist in App.js.
+  const supportLinks = [
+    { label: "Support", path: "/support" },
+    { label: "Help Center", path: "/help" },
     { label: "Order Tracking", path: "/orders" },
-    { label: "Shipping Info", path: "/help" },
+    { label: "My Account", path: "/profile" },
     { label: "Returns & Exchange", path: "/refund" },
-    { label: "FAQs", path: "/help" },
+  ];
+
+  // Legal column — exact paths that all resolve in App.js.
+  const legalColumnLinks = [
+    { label: "Privacy Policy", path: "/privacy" },
+    { label: "Terms of Service", path: "/terms" },
+    { label: "Cookie Policy", path: "/cookies" },
+    { label: "Refund Policy", path: "/refund" },
   ];
 
   // Social links are sourced from constants (SOCIAL_LINKS) so a new store
@@ -103,133 +122,128 @@ const Footer = () => {
 
   const currentYear = new Date().getFullYear();
 
+  const linkColumns = [
+    { title: "Shop", links: shopLinks },
+    { title: "Company", links: companyLinks },
+    { title: "Support", links: supportLinks },
+    { title: "Legal", links: legalColumnLinks },
+  ];
+
   return (
     <footer
       className={styles.footer}
       data-theme={isDarkMode ? "dark" : "light"}
     >
-      {/* Newsletter Section */}
-      <section className={styles.newsletter}>
-        <div className={styles.container}>
-          <div className={styles.newsletterInner}>
-            <div className={styles.newsletterText}>
-              <h3 className={styles.newsletterTitle}>
-                Subscribe to our newsletter
-              </h3>
-              <p className={styles.newsletterDesc}>
-                Get the latest deals, new arrivals, and exclusive offers
-                delivered to your inbox.
-              </p>
-            </div>
-            <form onSubmit={handleSubscribe} className={styles.newsletterForm} noValidate>
-              <div className={styles.inputGroup}>
-                <input
-                  type="email"
-                  placeholder={
-                    subscribeStatus === "success"
-                      ? "Subscribed successfully!"
-                      : "Enter your email address"
-                  }
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
-                    if (subscribeStatus === "error") setSubscribeStatus("idle");
-                  }}
-                  className={`${styles.emailInput} ${
-                    subscribeStatus === "error" ? styles.emailInputError : ""
-                  }`}
-                  disabled={isSubmitting || subscribeStatus === "success"}
-                  aria-label="Email address"
-                  aria-invalid={subscribeStatus === "error"}
-                />
-                <button
-                  type="submit"
-                  className={styles.subscribeBtn}
-                  disabled={isSubmitting || subscribeStatus === "success"}
-                >
-                  {isSubmitting
-                    ? "Subscribing..."
-                    : subscribeStatus === "success"
-                    ? "Subscribed"
-                    : "Subscribe"}
-                </button>
-              </div>
-              {subscribeStatus === "error" && (
-                <p className={styles.newsletterError} role="alert">
-                  {errorMsg}
-                </p>
-              )}
-              {subscribeStatus === "success" && (
-                <p className={styles.newsletterSuccess} role="status">
-                  Thanks for subscribing! Check your inbox for exclusive deals.
-                </p>
-              )}
-            </form>
-          </div>
-        </div>
-      </section>
-
       {/* Main Footer */}
       <div className={styles.mainFooter}>
         <div className={styles.container}>
           <div className={styles.footerGrid}>
-            {/* Column 1: About */}
-            <div className={styles.footerCol}>
-              <h4 className={styles.brandName}>{APP_NAME}</h4>
-              <p className={styles.aboutText}>
-                Your one-stop destination for quality products at unbeatable
-                prices. We are committed to delivering the best online shopping
-                experience with fast shipping and excellent customer service.
-              </p>
-              <div className={styles.socialIcons}>
-                {socialLinks.map((social) => (
-                  <a
-                    key={social.label}
-                    href={social.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className={styles.socialLink}
-                    aria-label={social.label}
-                  >
-                    <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
-                      <path d={social.path} />
-                    </svg>
-                  </a>
-                ))}
+            {/* Brand column */}
+            <div className={styles.brandCol}>
+              <div className={styles.logoPanel}>
+                <img
+                  className={styles.logoImg}
+                  src={LOGO_SRC}
+                  alt={APP_NAME}
+                  width={150}
+                  height={52}
+                  loading="lazy"
+                />
               </div>
+              <p className={styles.tagline}>{APP_TAGLINE}</p>
+
+              {socialLinks.length > 0 && (
+                <div className={styles.socialIcons}>
+                  {socialLinks.map((social) => (
+                    <a
+                      key={social.label}
+                      href={social.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className={styles.socialLink}
+                      aria-label={social.label}
+                    >
+                      <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20">
+                        <path d={social.path} />
+                      </svg>
+                    </a>
+                  ))}
+                </div>
+              )}
             </div>
 
-            {/* Column 2: Quick Links */}
-            <div className={styles.footerCol}>
-              <h4 className={styles.colTitle}>Quick Links</h4>
-              <ul className={styles.linkList}>
-                {quickLinks.map((link) => (
-                  <li key={link.label}>
-                    <Link to={link.path} className={styles.footerLink}>
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {/* Link columns */}
+            {linkColumns.map((col) => (
+              <div className={styles.footerCol} key={col.title}>
+                <h4 className={styles.colTitle}>{col.title}</h4>
+                <ul className={styles.linkList}>
+                  {col.links.map((link) => (
+                    <li key={link.label}>
+                      <Link to={link.path} className={styles.footerLink}>
+                        {link.label}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
 
-            {/* Column 3: Customer Service */}
-            <div className={styles.footerCol}>
-              <h4 className={styles.colTitle}>Customer Service</h4>
-              <ul className={styles.linkList}>
-                {customerServiceLinks.map((link) => (
-                  <li key={link.label}>
-                    <Link to={link.path} className={styles.footerLink}>
-                      {link.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+            {/* Newsletter + Contact column */}
+            <div className={styles.newsletterCol}>
+              <h4 className={styles.colTitle}>Stay in the loop</h4>
+              <p className={styles.newsletterDesc}>
+                New arrivals, weave stories and exclusive offers — straight to
+                your inbox.
+              </p>
+              <form
+                onSubmit={handleSubscribe}
+                className={styles.newsletterForm}
+                noValidate
+              >
+                <div className={styles.inputGroup}>
+                  <input
+                    type="email"
+                    placeholder={
+                      subscribeStatus === "success"
+                        ? "Subscribed successfully!"
+                        : "Enter your email address"
+                    }
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      if (subscribeStatus === "error") setSubscribeStatus("idle");
+                    }}
+                    className={`${styles.emailInput} ${
+                      subscribeStatus === "error" ? styles.emailInputError : ""
+                    }`}
+                    disabled={isSubmitting || subscribeStatus === "success"}
+                    aria-label="Email address"
+                    aria-invalid={subscribeStatus === "error"}
+                  />
+                  <button
+                    type="submit"
+                    className={`sf-btn sf-btn--emerald ${styles.subscribeBtn}`}
+                    disabled={isSubmitting || subscribeStatus === "success"}
+                  >
+                    {isSubmitting
+                      ? "Subscribing..."
+                      : subscribeStatus === "success"
+                      ? "Subscribed"
+                      : "Subscribe"}
+                  </button>
+                </div>
+                {subscribeStatus === "error" && (
+                  <p className={styles.newsletterError} role="alert">
+                    {errorMsg}
+                  </p>
+                )}
+                {subscribeStatus === "success" && (
+                  <p className={styles.newsletterSuccess} role="status">
+                    Thanks for subscribing! Check your inbox for exclusive deals.
+                  </p>
+                )}
+              </form>
 
-            {/* Column 4: Contact Us */}
-            <div className={styles.footerCol}>
-              <h4 className={styles.colTitle}>Contact Us</h4>
               <ul className={styles.contactList}>
                 <li className={styles.contactItem}>
                   <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18" className={styles.contactIcon}>
@@ -339,6 +353,10 @@ const Footer = () => {
           <div className={styles.bottomBarInner}>
             <p className={styles.copyright}>
               &copy; {currentYear} {APP_NAME}. All rights reserved.
+              <span className={styles.policyDate}>
+                {" "}
+                Policies last updated {POLICY_LAST_UPDATED}.
+              </span>
             </p>
             <div className={styles.legalLinks}>
               <Link to="/terms" className={styles.legalLink}>
