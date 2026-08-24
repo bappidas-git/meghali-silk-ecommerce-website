@@ -1,28 +1,5 @@
 {
   "short_name": "Meghali's Silk",
   "name": "Meghali's Silk",
-  "icons": [
-    {
-      "src": "favicon.svg",
-      "type": "image/svg+xml",
-      "sizes": "any",
-      "purpose": "any"
-    },
-    {
-      "src": "logo192.png",
-      "type": "image/png",
-      "sizes": "192x192",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "logo512.png",
-      "type": "image/png",
-      "sizes": "512x512",
-      "purpose": "any maskable"
-    }
-  ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#0B3B2E",
-  "background_color": "#0B0C0B"
+  "icons": []
 }
