@@ -21,11 +21,13 @@ import styles from "./Home.module.css";
 // populates this list end-to-end.
 const RECENTLY_VIEWED_KEY = "recentlyViewed";
 
-// Icons for the under-hero trust strip, keyed to the TRUST_BADGES copy
-// (centralized in constants.js). Falls back to a check mark if copy changes.
+// Icons for the under-hero promises line, keyed to the TRUST_BADGES copy
+// (centralized in constants.js). Thin outline glyphs, matched to the ones the
+// shared <TrustStrip> uses so both promises lines read as one device. Falls
+// back to a check mark if the copy changes.
 const TRUST_BADGE_ICONS = {
-  "7-Day Easy Returns": "mdi:backup-restore",
-  "100% Money Back": "mdi:cash-refund",
+  "7-Day Easy Returns": "mdi:autorenew",
+  "100% Money Back": "mdi:shield-check-outline",
   "Free Shipping": "mdi:truck-fast-outline",
   "Authentic Silk": "mdi:certificate-outline",
 };
@@ -320,25 +322,27 @@ const Home = () => {
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
     >
-      {/* Hero (out of scope here — owned by the hero prompt) */}
+      {/* Hero — full-bleed cinematic opening. It escapes nothing: .main-content
+          and .homePage set no max-width, so the section spans the viewport. */}
       <section className={styles.heroSection}>
         <HeroSection />
       </section>
 
-      {/* Trust strip — owner-attested policy statements (TRUST_BADGES) */}
+      {/* Promises — one hairline line of owner-attested policy (TRUST_BADGES).
+          Not a band, not cards: thin gold glyphs and tracked labels. */}
       <section className={styles.trustStrip} aria-label="Our promises">
-        <div className={styles.trustStripInner}>
+        <ul className={styles.trustStripInner}>
           {TRUST_BADGES.map((badge) => (
-            <div className={styles.trustStripItem} key={badge}>
+            <li className={styles.trustStripItem} key={badge}>
               <Icon
                 className={styles.trustStripIcon}
                 icon={TRUST_BADGE_ICONS[badge] || "mdi:check-decagram"}
                 aria-hidden="true"
               />
               <span className={styles.trustStripText}>{badge}</span>
-            </div>
+            </li>
           ))}
-        </div>
+        </ul>
       </section>
 
       {/* Flash Deals — ONLY real-discount products; omitted entirely if none. */}
