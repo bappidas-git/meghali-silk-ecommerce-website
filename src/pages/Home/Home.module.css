@@ -22,65 +22,72 @@
   padding: var(--sf-space-16) 0;
 }
 
+/* The hero is full-bleed: neither .main-content nor .homePage constrains its
+   width, and the section adds no container of its own. HeroSection owns its
+   internal max-width; everything below here uses .container. */
 .heroSection {
   position: relative;
   z-index: 1;
 }
 
-/* ── Trust strip (under hero) ───────────────────────────────────────────────
-   Deep bottle-green reassurance band sourced from TRUST_BADGES (constants.js). */
+/* ── Promises line (under the hero) ─────────────────────────────────────────
+   The band is gone. Four store-attested policies from TRUST_BADGES
+   (constants.js) set as one quiet hairline row — thin gold glyphs, tracked
+   uppercase labels, no ground of its own beyond the page ivory. Same idiom as
+   the shared <TrustStrip> under the masthead. */
 
 .trustStrip {
-  margin-top: var(--sf-space-4);
-  background: linear-gradient(
-    90deg,
-    var(--sf-color-brand-green) 0%,
-    var(--sf-color-brand-green-deep) 100%
-  );
-  border-top: 1px solid var(--sf-color-border-strong);
-  border-bottom: 1px solid var(--sf-color-border-strong);
+  background: var(--sf-color-bg);
+  border-bottom: 1px solid var(--sf-color-border);
 }
 
 .trustStripInner {
   max-width: var(--sf-container-max);
   margin: 0 auto;
-  padding: var(--sf-space-3) var(--sf-space-4);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-around;
+  padding: var(--sf-space-4) var(--sf-space-6);
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   gap: var(--sf-space-3) var(--sf-space-5);
+  list-style: none;
 }
 
 .trustStripItem {
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: var(--sf-space-2);
-  min-height: var(--sf-tap-target);
-  color: var(--sf-color-primary-contrast);
+  min-width: 0;
+  text-align: center;
 }
 
 .trustStripIcon {
-  font-size: 1.5rem;
-  color: var(--sf-color-gold-light);
-  flex-shrink: 0;
+  flex: none;
+  font-size: var(--sf-text-lg);
+  color: var(--sf-color-gold-deep);
 }
 
 .trustStripText {
   font-family: var(--sf-font-family);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-  white-space: nowrap;
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wider);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text-secondary);
 }
 
+/* Phones: 2×2, tighter tracking, and the label may wrap rather than be
+   ellipsised — a policy the customer is meant to read. */
 @media (max-width: 640px) {
   .trustStripInner {
-    justify-content: flex-start;
-    gap: var(--sf-space-3) var(--sf-space-4);
+    grid-template-columns: repeat(2, 1fr);
+    padding: var(--sf-space-4);
   }
 
-  .trustStripItem {
-    flex: 1 1 40%;
+  .trustStripText {
+    font-size: 0.6875rem;
+    letter-spacing: var(--sf-tracking-wide);
+    overflow-wrap: anywhere;
   }
 }
 
