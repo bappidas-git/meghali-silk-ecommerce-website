@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
 import { Icon } from "@iconify/react";
-import { useTheme } from "../../context/ThemeContext";
 import { useCart } from "../../hooks/useCart";
 import { useWishlist } from "../../context/WishlistContext";
 import { useDealsConfig } from "../../context/DealsConfigContext";
@@ -15,63 +14,74 @@ import { TRUST_BADGES } from "../../utils/constants";
 import { getProductMinPrice, onImageError } from "../../utils/helpers";
 import styles from "./Home.module.css";
 
+// =============================================================================
+// HOME — the storefront read as a magazine
+// =============================================================================
+// Below the Prompt 12 hero the page is no longer a stack of marketplace rails.
+// It is a sequence of few, large, well-spaced spreads:
+//
+//   1. WHERE TO BEGIN   collection stories (categories.getAll)
+//   2. THE EDIT         featured, staggered editorial grid (products.getFeatured)
+//   3. ON OFFER         the deals rail + one tracked countdown line   [conditional]
+//   4. OUR CRAFT        full-bleed heritage interlude
+//   5. TRENDING         a rail (products.getTrending)
+//   6. RECENTLY VIEWED  a compact rail off localStorage               [conditional]
+//   7. PROMISES         one hairline row of store-attested policy
+//
+// Cadence comes from alternating a contained spread against a full-bleed band,
+// and from the three rails each sitting in a different frame (sunken band /
+// plain / compact footnote) so no two sections read the same.
+//
+// Every data contract is unchanged: same three API calls, the same deals pool
+// derivation (real discounts only, capped 12), the same admin countdown
+// resolution, the same recently-viewed key, the same card handlers.
+// =============================================================================
+
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 // Must match the key written by ProductDetails.js so viewing a product
 // populates this list end-to-end.
 const RECENTLY_VIEWED_KEY = "recentlyViewed";
 
-// Icons for the under-hero promises line, keyed to the TRUST_BADGES copy
-// (centralized in constants.js). Thin outline glyphs, matched to the ones the
-// shared <TrustStrip> uses so both promises lines read as one device. Falls
-// back to a check mark if the copy changes.
-const TRUST_BADGE_ICONS = {
-  "7-Day Easy Returns": "mdi:autorenew",
-  "100% Money Back": "mdi:shield-check-outline",
-  "Free Shipping": "mdi:truck-fast-outline",
-  "Authentic Silk": "mdi:certificate-outline",
+// How many category "stories" open the page. The rest of the collections stay
+// one click away in the hero's index line, the header menu and the listing
+// facets — this section is a statement, not a directory.
+const COLLECTION_STORIES = 3;
+
+// The promises row. Titles come from TRUST_BADGES (constants.js) so the store's
+// four policies are stated from one source — the same four the header strip
+// carries — and each is expanded here with the owner-attested line the retired
+// "Shop with Confidence" cards used to carry. Keyed by badge copy, with a
+// fallback so a copy edit degrades to a bare label rather than breaking.
+const PROMISE_DETAIL = {
+  "7-Day Easy Returns": {
+    icon: "mdi:backup-restore",
+    text: "Changed your mind? Return any piece within seven days.",
+  },
+  "100% Money Back": {
+    icon: "mdi:cash-refund",
+    text: "A full refund if your order isn't right — no questions asked.",
+  },
+  "Free Shipping": {
+    icon: "mdi:truck-fast-outline",
+    text: "Complimentary delivery across India, on every order.",
+  },
+  "Authentic Silk": {
+    icon: "mdi:certificate-outline",
+    text: "Genuine handloom silk, woven by master artisans.",
+  },
 };
 
-// "Shop with Confidence" — owner-attested policy statements (NOT live stats),
-// each given one category-dot accent token for its icon chip / top border.
-const CONFIDENCE_CARDS = [
-  {
-    icon: "mdi:backup-restore",
-    title: "7-Day Returns",
-    text: "Changed your mind? Return any piece within 7 days.",
-    accent: "var(--sf-cat-pink)",
-  },
-  {
-    icon: "mdi:cash-refund",
-    title: "100% Money Back",
-    text: "Full refund if your order isn't right — no questions asked.",
-    accent: "var(--sf-cat-purple)",
-  },
-  {
-    icon: "mdi:truck-fast-outline",
-    title: "Free Shipping",
-    text: "Complimentary delivery across India on every order.",
-    accent: "var(--sf-cat-orange)",
-  },
-  {
-    icon: "mdi:certificate-outline",
-    title: "Authentic Silk",
-    text: "Genuine handloom silk, woven by master artisans.",
-    accent: "var(--sf-cat-blue)",
-  },
-  {
-    icon: "mdi:shield-check-outline",
-    title: "Secure Payment",
-    text: "Every transaction protected with SSL encryption.",
-    accent: "var(--sf-cat-teal)",
-  },
-  {
-    icon: "mdi:headset",
-    title: "Expert Support",
-    text: "Our team is here to help you choose with confidence.",
-    accent: "var(--sf-cat-red)",
-  },
-];
+// Where the section "View all" links go. NOTE (verified against
+// `normalizeSort` / `SORT_ALIASES` in src/pages/Products/Products.js): the
+// listing understands relevance | price-low | price-high | newest | rating |
+// popularity plus a small alias table. `sort=featured`, `sort=trending` and
+// `sort=sale` are NOT in it — they silently fall back to relevance — so this
+// page links only to sorts that actually resolve, and sends the offers rail to
+// the real Special Offers page instead of a dead `?sort=sale`. If Prompt 14
+// adds those aliases to the listing, these two constants are the only edit.
+const ALL_PRODUCTS_LINK = "/products";
+const TRENDING_LINK = "/products?sort=popularity";
 
 const getRecentlyViewed = () => {
   try {
@@ -82,46 +92,105 @@ const getRecentlyViewed = () => {
   }
 };
 
-// ── Horizontal Scroll Row ────────────────────────────────────────────────────
+const pad = (n) => String(n).padStart(2, "0");
 
-const ScrollRow = ({ children, scrollRef }) => {
-  const scroll = (direction) => {
-    if (!scrollRef.current) return;
-    const amount = scrollRef.current.offsetWidth * 0.75;
-    scrollRef.current.scrollBy({
-      left: direction === "left" ? -amount : amount,
-      behavior: "smooth",
+// ── Rail plumbing ────────────────────────────────────────────────────────────
+// One hook drives a horizontal rail so its track and its (separately placed)
+// controls stay in sync: the controls live up in the section header beside the
+// "View all" link rather than floating over the cards, which keeps them in
+// reading order and off the photographs.
+
+const useRail = (itemCount = 0) => {
+  const ref = useRef(null);
+  const [edges, setEdges] = useState({ atStart: true, atEnd: true });
+
+  const sync = useCallback(() => {
+    const el = ref.current;
+    if (!el) return;
+    const max = el.scrollWidth - el.clientWidth;
+    // A few pixels of slack: the track is padded so a card's focus ring is not
+    // clipped, and scroll-snap parks the first card a hair off zero.
+    setEdges({
+      atStart: el.scrollLeft <= 8,
+      atEnd: max <= 8 || el.scrollLeft >= max - 8,
     });
-  };
+  }, []);
 
-  return (
-    <div className={styles.scrollContainer}>
-      <button
-        type="button"
-        className={`${styles.scrollBtn} ${styles.scrollBtnLeft}`}
-        onClick={() => scroll("left")}
-        aria-label="Scroll left"
-      >
-        &#8249;
-      </button>
-      <div className={styles.scrollTrack} ref={scrollRef}>
-        {children}
-      </div>
-      <button
-        type="button"
-        className={`${styles.scrollBtn} ${styles.scrollBtnRight}`}
-        onClick={() => scroll("right")}
-        aria-label="Scroll right"
-      >
-        &#8250;
-      </button>
-    </div>
-  );
+  // Re-measure when the rail is filled (data arrives) and when it is resized.
+  // Both listeners earn their keep: the observer catches the container changing
+  // width on its own (a drawer opening), the window event catches the viewport
+  // and fires even where observer callbacks are starved.
+  useEffect(() => {
+    sync();
+    window.addEventListener("resize", sync);
+    const el = ref.current;
+    const observer =
+      el && typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(sync)
+        : null;
+    if (observer) observer.observe(el);
+    return () => {
+      window.removeEventListener("resize", sync);
+      if (observer) observer.disconnect();
+    };
+  }, [sync, itemCount]);
+
+  const nudge = useCallback((direction, smooth = true) => {
+    const el = ref.current;
+    if (!el) return;
+    el.scrollBy({
+      left: direction * el.clientWidth * 0.8,
+      behavior: smooth ? "smooth" : "auto",
+    });
+  }, []);
+
+  return { ref, edges, sync, nudge };
 };
 
-// ── Countdown Timer ──────────────────────────────────────────────────────────
-// Honest countdown: driven by a real target Date resolved from the admin deals
-// timer. Renders nothing on its own — the caller decides whether to mount it.
+// The track. Focusable so a keyboard user can reach and arrow-scroll the
+// overflow region itself, not only the cards inside it.
+const ScrollRow = ({ rail, label, compact = false, children }) => (
+  <div
+    className={`${styles.railTrack} ${compact ? styles.railTrackCompact : ""}`}
+    ref={rail.ref}
+    onScroll={rail.sync}
+    tabIndex={0}
+    role="group"
+    aria-label={label}
+  >
+    {children}
+  </div>
+);
+
+// Two hairline arrows, disabled at the ends of the travel.
+const RailControls = ({ rail, label, reduced }) => (
+  <div className={styles.railControls}>
+    <button
+      type="button"
+      className={styles.railBtn}
+      onClick={() => rail.nudge(-1, !reduced)}
+      disabled={rail.edges.atStart}
+      aria-label={`Scroll ${label} backwards`}
+    >
+      &#8249;
+    </button>
+    <button
+      type="button"
+      className={styles.railBtn}
+      onClick={() => rail.nudge(1, !reduced)}
+      disabled={rail.edges.atEnd}
+      aria-label={`Scroll ${label} forwards`}
+    >
+      &#8250;
+    </button>
+  </div>
+);
+
+// ── Countdown ────────────────────────────────────────────────────────────────
+// Honest countdown, now one tracked line instead of a bank of digit blocks. The
+// target is still resolved from the admin's deals timer; the caller decides
+// whether to mount it at all. role="timer" carries an implicit aria-live="off",
+// so the accessible name is available on demand and never announced each tick.
 
 const CountdownTimer = ({ target }) => {
   const [timeLeft, setTimeLeft] = useState(() => diffToParts(target));
@@ -133,42 +202,52 @@ const CountdownTimer = ({ target }) => {
     return () => clearInterval(id);
   }, [target]);
 
-  const pad = (n) => String(n).padStart(2, "0");
-
   return (
-    <div className={styles.countdown} aria-label="Time left for today's deals">
-      <span className={styles.countdownBlock}>
-        <strong>{pad(timeLeft.hours)}</strong>
-        <small>Hrs</small>
+    <p
+      className={styles.countdown}
+      role="timer"
+      aria-label={`Offers end in ${timeLeft.hours} hours ${timeLeft.minutes} minutes`}
+    >
+      <span className={styles.countdownLabel}>Ends in</span>
+      <span className={styles.countdownValue} aria-hidden="true">
+        {pad(timeLeft.hours)}:{pad(timeLeft.minutes)}:{pad(timeLeft.seconds)}
       </span>
-      <span className={styles.countdownSep}>:</span>
-      <span className={styles.countdownBlock}>
-        <strong>{pad(timeLeft.minutes)}</strong>
-        <small>Min</small>
-      </span>
-      <span className={styles.countdownSep}>:</span>
-      <span className={styles.countdownBlock}>
-        <strong>{pad(timeLeft.seconds)}</strong>
-        <small>Sec</small>
-      </span>
-    </div>
+    </p>
   );
 };
 
-// ── Section Header ───────────────────────────────────────────────────────────
+// ── Section header ───────────────────────────────────────────────────────────
+// The Prompt 12 convention: a tracked eyebrow opened by a short gold rule, a
+// serif title under it, an optional lede — and, on the far side, whatever the
+// section needs (a countdown, rail arrows) followed by the quiet "View all".
 
-const SectionHeader = ({ title, titleId, subtitle, linkText, linkTo }) => (
-  <div className={styles.sectionHeader}>
-    <div>
+const SectionHeader = ({
+  eyebrow,
+  title,
+  titleId,
+  lede,
+  linkText,
+  linkTo,
+  aside,
+  quiet = false,
+}) => (
+  <div className={`${styles.sectionHead} ${quiet ? styles.sectionHeadQuiet : ""}`}>
+    <div className={styles.sectionHeadText}>
+      {eyebrow && <p className={styles.eyebrow}>{eyebrow}</p>}
       <h2 id={titleId} className={styles.sectionTitle}>
         {title}
       </h2>
-      {subtitle && <p className={styles.sectionSubtitle}>{subtitle}</p>}
+      {lede && <p className={styles.sectionLede}>{lede}</p>}
     </div>
-    {linkText && linkTo && (
-      <Link to={linkTo} className={styles.viewAllLink}>
-        {linkText} &rarr;
-      </Link>
+    {(aside || (linkText && linkTo)) && (
+      <div className={styles.sectionHeadAside}>
+        {aside}
+        {linkText && linkTo && (
+          <Link to={linkTo} className={styles.viewAllLink}>
+            {linkText}
+          </Link>
+        )}
+      </div>
     )}
   </div>
 );
@@ -178,10 +257,9 @@ const SectionHeader = ({ title, titleId, subtitle, linkText, linkTo }) => (
 // ══════════════════════════════════════════════════════════════════════════════
 
 const Home = () => {
-  const { isDarkMode } = useTheme();
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
-  const { config: dealsConfig } = useDealsConfig();
+  const { config: dealsConfig, enabled: dealsEnabled } = useDealsConfig();
   const prefersReducedMotion = useReducedMotion();
 
   const [categories, setCategories] = useState([]);
@@ -190,9 +268,6 @@ const Home = () => {
   const [flashDeals, setFlashDeals] = useState([]);
   const [recentlyViewed, setRecentlyViewed] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const flashScrollRef = useRef(null);
-  const recentScrollRef = useRef(null);
 
   // ── Data fetching ────────────────────────────────────────────────────────
 
@@ -232,6 +307,12 @@ const Home = () => {
     setRecentlyViewed(getRecentlyViewed());
   }, []);
 
+  // ── Rails ─────────────────────────────────────────────────────────────────
+
+  const dealsRail = useRail(flashDeals.length);
+  const trendingRail = useRail(trendingProducts.length);
+  const recentRail = useRail(recentlyViewed.length);
+
   // ── Handlers ─────────────────────────────────────────────────────────────
 
   // The shared ProductCard calls onAddToCart(buildCartItem(product)) internally,
@@ -257,123 +338,218 @@ const Home = () => {
     prefersReducedMotion
       ? {}
       : {
-          initial: { opacity: 0, y: 20 },
+          initial: { opacity: 0, y: 18 },
           whileInView: { opacity: 1, y: 0 },
-          viewport: { once: true, amount: 0.2 },
-          transition: { delay: i * 0.05, duration: 0.35 },
+          viewport: { once: true, amount: 0.1 },
+          transition: { delay: Math.min(i, 7) * 0.05, duration: 0.5 },
         };
 
-  // ── Skeleton loader ──────────────────────────────────────────────────────
+  // ── Skeletons — the sf-skeleton primitive, shaped like the editorial card ──
 
   const ProductSkeleton = () => (
-    <div className={styles.skeletonCard}>
-      <div className={`${styles.skeletonMedia} ${styles.skeleton}`} />
-      <div className={styles.skeletonBody}>
-        <div className={`${styles.skeletonLine} ${styles.skeletonW80}`} />
-        <div className={`${styles.skeletonLine} ${styles.skeletonW50}`} />
-        <div className={`${styles.skeletonLine} ${styles.skeletonW60}`} />
+    <div className={styles.skelCard} aria-hidden="true">
+      <div className={`sf-skeleton ${styles.skelMedia}`} />
+      <div className={styles.skelLines}>
+        <div className={`sf-skeleton sf-skeleton--text ${styles.skelW40}`} />
+        <div className={`sf-skeleton sf-skeleton--text ${styles.skelW80}`} />
+        <div className={`sf-skeleton sf-skeleton--text ${styles.skelW50}`} />
       </div>
     </div>
   );
 
-  const renderProductGrid = (products, fallbackCount = 4) => {
-    if (loading) {
-      return (
-        <div className={styles.productGrid}>
-          {Array.from({ length: fallbackCount }).map((_, i) => (
-            <ProductSkeleton key={i} />
-          ))}
-        </div>
-      );
-    }
-
-    if (!products || products.length === 0) return null;
-
-    return (
-      <div className={styles.productGrid}>
-        {products.map((product, i) => (
-          <motion.div key={product.id || i} {...reveal(i)}>
-            <ProductCard
-              product={product}
-              onAddToCart={handleAddToCart}
-              onToggleWishlist={handleToggleWishlist}
-              isWishlisted={isInWishlist(product.id)}
-            />
-          </motion.div>
-        ))}
-      </div>
-    );
-  };
+  const renderCard = (product) => (
+    <ProductCard
+      product={product}
+      onAddToCart={handleAddToCart}
+      onToggleWishlist={handleToggleWishlist}
+      isWishlisted={isInWishlist(product.id)}
+    />
+  );
 
   // ── Honest deals countdown — only when the real admin timer is enabled ─────
   const countdown = resolveCountdownTarget(dealsConfig?.timer);
   const showCountdown = countdown.active && !!countdown.target;
+  // Never point the rail at the Special Offers page while the admin has it
+  // switched off — that lands on its "no deals right now" state.
+  const offersLink = dealsEnabled ? "/special-offers" : ALL_PRODUCTS_LINK;
 
-  // After load, only render product sections that actually have content.
+  // After load, only render sections that actually have content.
+  const collectionStories = categories
+    .filter((c) => !c.parentId)
+    .slice(0, COLLECTION_STORIES);
+  const showCollections = loading || collectionStories.length > 0;
   const showFeatured = loading || featuredProducts.length > 0;
   const showTrending = loading || trendingProducts.length > 0;
 
   // ── Render ───────────────────────────────────────────────────────────────
 
   return (
+    // No `dark` class hook: this stylesheet is entirely token-driven and the
+    // tokens already flip under body.dark, so there is nothing left for a
+    // mode-specific selector to say.
     <motion.div
-      className={`${styles.homePage} ${isDarkMode ? styles.dark : ""}`}
+      className={styles.homePage}
       initial={prefersReducedMotion ? false : { opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
     >
       {/* Hero — full-bleed cinematic opening. It escapes nothing: .main-content
-          and .homePage set no max-width, so the section spans the viewport. */}
+          and .homePage set no max-width, so the section spans the viewport.
+          The old promises strip that sat here is gone: the header already
+          states the same four policies, and the page now closes on them. */}
       <section className={styles.heroSection}>
         <HeroSection />
       </section>
 
-      {/* Promises — one hairline line of owner-attested policy (TRUST_BADGES).
-          Not a band, not cards: thin gold glyphs and tracked labels. */}
-      <section className={styles.trustStrip} aria-label="Our promises">
-        <ul className={styles.trustStripInner}>
-          {TRUST_BADGES.map((badge) => (
-            <li className={styles.trustStripItem} key={badge}>
-              <Icon
-                className={styles.trustStripIcon}
-                icon={TRUST_BADGE_ICONS[badge] || "mdi:check-decagram"}
-                aria-hidden="true"
-              />
-              <span className={styles.trustStripText}>{badge}</span>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      {/* Flash Deals — ONLY real-discount products; omitted entirely if none. */}
-      {flashDeals.length > 0 && (
-        <section className={styles.section} aria-labelledby="flash-deals-heading">
+      {/* ── 1. WHERE TO BEGIN — the collections, told as stories ──────────── */}
+      {showCollections && (
+        <section
+          className={styles.section}
+          aria-labelledby="collections-heading"
+        >
           <div className={styles.container}>
-            <div className={styles.flashHeader}>
-              <div className={styles.flashTitleWrap}>
-                <h2 id="flash-deals-heading" className={styles.sectionTitle}>
-                  Flash Deals
-                </h2>
-                <p className={styles.sectionSubtitle}>
-                  Genuine markdowns on handpicked silks
-                </p>
-              </div>
-              <div className={styles.flashMeta}>
-                {showCountdown && <CountdownTimer target={countdown.target} />}
-                <Link to="/products?sort=sale" className={styles.viewAllLink}>
-                  View All &rarr;
-                </Link>
-              </div>
+            <SectionHeader
+              eyebrow="Collections"
+              title="Where to begin"
+              titleId="collections-heading"
+              lede="From everyday Eri to heirloom Muga — start with the drape that suits the day."
+              linkText="All collections"
+              linkTo={ALL_PRODUCTS_LINK}
+            />
+
+            <div className={styles.collections}>
+              {loading
+                ? Array.from({ length: COLLECTION_STORIES }).map((_, i) => (
+                    <div
+                      key={i}
+                      className={`${styles.story} ${
+                        i === 0 ? styles.storyLead : ""
+                      }`}
+                      aria-hidden="true"
+                    >
+                      <div className={`sf-skeleton ${styles.storyMedia}`} />
+                    </div>
+                  ))
+                : collectionStories.map((cat, i) => (
+                    <motion.article
+                      key={cat.id || i}
+                      className={`${styles.story} ${
+                        i === 0 ? styles.storyLead : ""
+                      }`}
+                      {...reveal(i)}
+                    >
+                      <div className={styles.storyMedia}>
+                        {cat.image && (
+                          <img
+                            src={cat.image}
+                            alt=""
+                            className={styles.storyImg}
+                            loading="lazy"
+                            onError={onImageError}
+                          />
+                        )}
+                      </div>
+                      <div className={styles.storyBody}>
+                        <span className={styles.storyIndex} aria-hidden="true">
+                          {pad(i + 1)}
+                        </span>
+                        <h3 className={styles.storyName}>
+                          {/* The link covers the whole tile (see .storyLink
+                              ::after) so the story is one tab stop named by
+                              the collection. */}
+                          <Link
+                            to={`/products?category=${categoryParam(cat)}`}
+                            className={styles.storyLink}
+                          >
+                            {cat.name}
+                          </Link>
+                        </h3>
+                        {cat.description && (
+                          <p className={styles.storyText}>{cat.description}</p>
+                        )}
+                        {cat.productCount !== undefined && (
+                          <p className={styles.storyMeta}>
+                            {cat.productCount} pieces
+                          </p>
+                        )}
+                        <span className={styles.storyCta} aria-hidden="true">
+                          Explore
+                        </span>
+                      </div>
+                    </motion.article>
+                  ))}
             </div>
-            <ScrollRow scrollRef={flashScrollRef}>
-              {flashDeals.map((product, i) => (
-                <div className={styles.scrollCard} key={product.id || i}>
-                  <ProductCard
-                    product={product}
-                    onAddToCart={handleAddToCart}
-                    onToggleWishlist={handleToggleWishlist}
-                    isWishlisted={isInWishlist(product.id)}
+          </div>
+        </section>
+      )}
+
+      {/* ── 2. THE EDIT — featured, on a staggered editorial baseline ─────── */}
+      {showFeatured && (
+        <section
+          className={`${styles.section} ${styles.ruled}`}
+          aria-labelledby="edit-heading"
+        >
+          <div className={styles.container}>
+            <SectionHeader
+              eyebrow="The Edit"
+              title="Chosen this season"
+              titleId="edit-heading"
+              lede="A short list from the loom — the pieces we would reach for first."
+              linkText="View all"
+              linkTo={ALL_PRODUCTS_LINK}
+            />
+
+            <div className={styles.editGrid}>
+              {loading
+                ? Array.from({ length: 4 }).map((_, i) => (
+                    <div className={styles.editCell} key={i}>
+                      <ProductSkeleton />
+                    </div>
+                  ))
+                : featuredProducts.map((product, i) => (
+                    <motion.div
+                      className={styles.editCell}
+                      key={product.id || i}
+                      {...reveal(i)}
+                    >
+                      {renderCard(product)}
+                    </motion.div>
+                  ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── 3. ON OFFER — real markdowns only; the section is absent when the
+             catalogue has none. Sunken full-bleed band, one tracked timer. */}
+      {flashDeals.length > 0 && (
+        <section
+          className={`${styles.band} ${styles.bandSunken}`}
+          aria-labelledby="offers-heading"
+        >
+          <div className={styles.container}>
+            <SectionHeader
+              eyebrow="On offer"
+              title="Marked down, honestly"
+              titleId="offers-heading"
+              lede="Genuine reductions on pieces already in the collection — the price you see is the price you pay."
+              linkText="All offers"
+              linkTo={offersLink}
+              aside={
+                <>
+                  {showCountdown && <CountdownTimer target={countdown.target} />}
+                  <RailControls
+                    rail={dealsRail}
+                    label="offers"
+                    reduced={prefersReducedMotion}
                   />
+                </>
+              }
+            />
+            <ScrollRow rail={dealsRail} label="Offers">
+              {flashDeals.map((product, i) => (
+                <div className={styles.railCard} key={product.id || i}>
+                  {renderCard(product)}
                 </div>
               ))}
             </ScrollRow>
@@ -381,175 +557,149 @@ const Home = () => {
         </section>
       )}
 
-      {/* Shop by Category — the larger browse-categories tile grid. */}
+      {/* ── 4. OUR CRAFT — the heritage interlude, full-bleed ─────────────── */}
       <section
-        className={`${styles.section} ${styles.categorySection}`}
-        aria-labelledby="categories-heading"
+        className={`${styles.band} ${styles.heritage}`}
+        aria-labelledby="heritage-heading"
       >
-        <div className={styles.container}>
-          <SectionHeader
-            title="Shop by Category"
-            titleId="categories-heading"
-            subtitle="Browse our handloom silk collections"
-            linkText="All Categories"
-            linkTo="/products"
-          />
-          <div className={styles.categoryGrid}>
-            {loading
-              ? Array.from({ length: 6 }).map((_, i) => (
-                  <div
-                    key={i}
-                    className={`${styles.categoryCard} ${styles.skeleton}`}
-                  />
-                ))
-              : categories.map((cat, i) => (
-                  <motion.div key={cat.id || i} {...reveal(i)}>
-                    <Link
-                      to={`/products?category=${categoryParam(cat)}`}
-                      className={styles.categoryCard}
-                    >
-                      {cat.image && (
-                        <img
-                          src={cat.image}
-                          alt={cat.name}
-                          className={styles.categoryImage}
-                          loading="lazy"
-                          onError={onImageError}
-                        />
-                      )}
-                      <div className={styles.categoryOverlay}>
-                        <h3 className={styles.categoryName}>{cat.name}</h3>
-                        {cat.productCount !== undefined && (
-                          <span className={styles.categoryCount}>
-                            {cat.productCount} Products
-                          </span>
-                        )}
-                      </div>
-                    </Link>
-                  </motion.div>
-                ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Featured Products — omitted when empty after load. */}
-      {showFeatured && (
-        <section className={styles.section} aria-labelledby="featured-heading">
-          <div className={styles.container}>
-            <SectionHeader
-              title="Featured Products"
-              titleId="featured-heading"
-              subtitle="Handpicked just for you"
-              linkText="View All"
-              linkTo="/products?sort=featured"
-            />
-            {renderProductGrid(featuredProducts, 4)}
-          </div>
-        </section>
-      )}
-
-      {/* Heritage / Luxury banner — decorative, single CTA, no fake discounts. */}
-      <section className={styles.heritageBanner} aria-labelledby="heritage-heading">
+        <div className={styles.heritageWeave} aria-hidden="true" />
         <div className={styles.container}>
           <motion.div
             className={styles.heritageInner}
             {...(prefersReducedMotion
               ? {}
               : {
-                  initial: { opacity: 0, y: 24 },
+                  initial: { opacity: 0, y: 20 },
                   whileInView: { opacity: 1, y: 0 },
-                  viewport: { once: true, amount: 0.3 },
-                  transition: { duration: 0.5 },
+                  viewport: { once: true, amount: 0.15 },
+                  transition: { duration: 0.6 },
                 })}
           >
-            <span className={styles.heritageTag}>Galleria Producer Company</span>
-            <h2 id="heritage-heading" className={styles.heritageTitle}>
-              Heritage Meets Luxury
-            </h2>
-            <p className={styles.heritageText}>
-              Each weave carries generations of craftsmanship — pure silk,
-              dyed and handloomed by master artisans of Bengal.
-            </p>
-            <Link to="/about" className={styles.heritageCta}>
-              Discover Our Story
-            </Link>
+            <div className={styles.heritageLead}>
+              <p className={`${styles.eyebrow} ${styles.eyebrowInk}`}>
+                Our craft
+              </p>
+              <h2 id="heritage-heading" className={styles.heritagePull}>
+                Muga is reared nowhere else on earth. We weave it a metre a day.
+              </h2>
+            </div>
+            <div className={styles.heritageAside}>
+              <p className={styles.heritageText}>
+                Every drape here leaves a handloom in Sualkuchi, Assam's silk
+                village — Muga, Pat, Eri and Nuni, thrown by hand and finished
+                by hand, by weavers who learned the loom from their mothers.
+              </p>
+              <Link
+                to="/about"
+                className={`sf-btn sf-btn--lg ${styles.heritageCta}`}
+              >
+                Our story
+              </Link>
+            </div>
           </motion.div>
         </div>
       </section>
 
-      {/* Trending Now — omitted when empty after load. */}
+      {/* ── 5. TRENDING — a plain contained rail ──────────────────────────── */}
       {showTrending && (
         <section className={styles.section} aria-labelledby="trending-heading">
           <div className={styles.container}>
             <SectionHeader
-              title="Trending Now"
+              eyebrow="Trending"
+              title="On the shortlist"
               titleId="trending-heading"
-              subtitle="See what everyone is loving"
-              linkText="View All"
-              linkTo="/products?sort=trending"
+              lede="Flagged by the studio as the pieces to see right now."
+              linkText="View all"
+              linkTo={TRENDING_LINK}
+              aside={
+                <RailControls
+                  rail={trendingRail}
+                  label="trending pieces"
+                  reduced={prefersReducedMotion}
+                />
+              }
             />
-            {renderProductGrid(trendingProducts, 4)}
+            {loading ? (
+              <div className={styles.editGrid}>
+                {Array.from({ length: 4 }).map((_, i) => (
+                  <div className={styles.editCell} key={i}>
+                    <ProductSkeleton />
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <ScrollRow rail={trendingRail} label="Trending pieces">
+                {trendingProducts.map((product, i) => (
+                  <div className={styles.railCard} key={product.id || i}>
+                    {renderCard(product)}
+                  </div>
+                ))}
+              </ScrollRow>
+            )}
           </div>
         </section>
       )}
 
-      {/* Shop with Confidence — 6 token-driven colored feature cards. */}
-      <section
-        className={`${styles.section} ${styles.confidenceSection}`}
-        aria-labelledby="confidence-heading"
-      >
-        <div className={styles.container}>
-          <div className={styles.sectionHeaderCentered}>
-            <h2 id="confidence-heading" className={styles.sectionTitle}>
-              Shop with Confidence
-            </h2>
-            <p className={styles.sectionSubtitle}>
-              Every order backed by our promises
-            </p>
-          </div>
-          <div className={styles.confidenceGrid}>
-            {CONFIDENCE_CARDS.map((card, i) => (
-              <motion.div
-                key={card.title}
-                className={styles.confidenceCard}
-                style={{ "--card-accent": card.accent }}
-                {...reveal(i)}
-              >
-                <span className={styles.confidenceIcon} aria-hidden="true">
-                  <Icon icon={card.icon} />
-                </span>
-                <h3 className={styles.confidenceTitle}>{card.title}</h3>
-                <p className={styles.confidenceText}>{card.text}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Recently Viewed — renders only when localStorage has items. */}
+      {/* ── 6. RECENTLY VIEWED — the footnote rail, from localStorage ─────── */}
       {recentlyViewed.length > 0 && (
-        <section className={styles.section} aria-labelledby="recent-heading">
+        <section
+          className={`${styles.section} ${styles.ruled} ${styles.sectionTight}`}
+          aria-labelledby="recent-heading"
+        >
           <div className={styles.container}>
             <SectionHeader
-              title="Recently Viewed"
+              eyebrow="Recently viewed"
+              title="Where you left off"
               titleId="recent-heading"
-              subtitle="Continue where you left off"
+              quiet
+              aside={
+                <RailControls
+                  rail={recentRail}
+                  label="recently viewed pieces"
+                  reduced={prefersReducedMotion}
+                />
+              }
             />
-            <ScrollRow scrollRef={recentScrollRef}>
+            <ScrollRow rail={recentRail} label="Recently viewed pieces" compact>
               {recentlyViewed.map((product, i) => (
-                <div className={styles.scrollCard} key={product.id || i}>
-                  <ProductCard
-                    product={product}
-                    onAddToCart={handleAddToCart}
-                    onToggleWishlist={handleToggleWishlist}
-                    isWishlisted={isInWishlist(product.id)}
-                  />
+                <div
+                  className={`${styles.railCard} ${styles.railCardCompact}`}
+                  key={product.id || i}
+                >
+                  {renderCard(product)}
                 </div>
               ))}
             </ScrollRow>
           </div>
         </section>
       )}
+
+      {/* ── 7. PROMISES — one hairline row, store-attested, no accent cards ─ */}
+      <section
+        className={`${styles.section} ${styles.ruled} ${styles.promises}`}
+        aria-label="Our promises"
+      >
+        <div className={styles.container}>
+          <ul className={styles.promisesRow}>
+            {TRUST_BADGES.map((badge, i) => {
+              const detail = PROMISE_DETAIL[badge];
+              return (
+                <motion.li className={styles.promise} key={badge} {...reveal(i)}>
+                  <Icon
+                    className={styles.promiseIcon}
+                    icon={detail?.icon || "mdi:check-decagram"}
+                    aria-hidden="true"
+                  />
+                  <span className={styles.promiseTitle}>{badge}</span>
+                  {detail?.text && (
+                    <span className={styles.promiseText}>{detail.text}</span>
+                  )}
+                </motion.li>
+              );
+            })}
+          </ul>
+        </div>
+      </section>
     </motion.div>
   );
 };
