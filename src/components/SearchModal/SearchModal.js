@@ -1,33 +1,35 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import { useTheme } from "../../context/ThemeContext";
+import { Link, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import apiService from "../../services/api";
 import { formatCurrency, getProductMinPrice, productPath } from "../../utils/helpers";
+import StarRating from "../storefront/StarRating";
 import styles from "./SearchModal.module.css";
 
 // ---------------------------------------------------------------------------
 // Static config
 // ---------------------------------------------------------------------------
-// Owner/brand-curated phrases — NOT fabricated data and NOT an "AI answer".
-// Each one simply seeds a normal product query (see handleChipSearch), so the
-// real search engine still produces the real result count. Labelled clearly in
-// the UI as "AI Suggestions" curated picks.
-const AI_SUGGESTIONS = [
-  "Elegant silk sarees for wedding",
-  "Luxury bridal collection",
-  "Premium festive wear",
+// Owner-curated starting points. These are NOT generated, ranked or personalised
+// — each one simply seeds a normal query (see handleTermSearch), so the real
+// search engine still produces the real result set. Labelled plainly as
+// "Suggestions" in the UI: no "AI", no claim the code cannot back. Keep every
+// phrase to something the catalogue actually answers.
+const CURATED_SUGGESTIONS = [
+  "Muga Mekhela Chador",
+  "Pat silk saree",
+  "Eri shawl",
+  "Bridal Muga",
 ];
 
-// Curated trending silk searches (clearly a curated list). The trend-up icon is
-// decorative — we never show fabricated trend percentages or counts. If real
-// trending data is available it overrides this list (see the load effect).
+// Fallback for the Trending block, used only when the trending endpoint returns
+// nothing (see the load effect). Curated search terms, not fabricated metrics —
+// we never show a trend count or percentage we do not have.
 const CURATED_TRENDING = [
-  "Designer Silk Sarees",
-  "Premium Wedding Collection",
-  "Gold Border Saree",
-  "Festive Collection",
-  "Traditional Handloom",
+  "Sualkuchi",
+  "Muga silk",
+  "Pat silk",
+  "Eri silk",
+  "Gamosa",
 ];
 
 // Category filter chips (and the slugs each one matches) are derived at runtime
@@ -40,16 +42,26 @@ const MAX_RESULTS = 12;
 const MAX_TRENDING = 5;
 const DEBOUNCE_MS = 300;
 
+// framer-motion needs JS values, so the Prompt 01 motion tokens are mirrored
+// here: EASE is --sf-ease and the durations sit on the --sf-transition tier.
+// Keep in sync with storefront-tokens.css if the curve is ever retuned.
+const EASE = [0.22, 1, 0.36, 1];
+const STAGGER_STEP = 0.03; // per the editorial motion brief — barely perceptible
+const STAGGER_MAX = 0.24; // cap so the twelfth result never trails off
+
 // Inline SVG fallback (no external host) shown if a product image fails to load.
+// A data URI cannot read var(), so these two literals mirror the light-mode
+// tokens by hand: --sf-color-surface-2 (#F2ECE1) and --sf-color-text-muted
+// (#6E665A). If either token changes in storefront-tokens.css, change them here.
 const FALLBACK_IMAGE =
   "data:image/svg+xml;charset=UTF-8," +
   encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="120" viewBox="0 0 120 120">' +
-      '<rect width="120" height="120" fill="#F4EFE6"/>' +
-      '<g fill="none" stroke="#7A837E" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">' +
-      '<rect x="30" y="34" width="60" height="52" rx="6"/>' +
-      '<circle cx="48" cy="52" r="7"/>' +
-      '<path d="M34 80l20-18 16 14 10-8 16 14"/>' +
+    '<svg xmlns="http://www.w3.org/2000/svg" width="120" height="160" viewBox="0 0 120 160">' +
+      '<rect width="120" height="160" fill="#F2ECE1"/>' +
+      '<g fill="none" stroke="#6E665A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">' +
+      '<rect x="28" y="52" width="64" height="56" rx="2"/>' +
+      '<circle cx="47" cy="72" r="6"/>' +
+      '<path d="M32 102l19-17 15 13 10-8 16 12"/>' +
       "</g></svg>"
   );
 
@@ -107,6 +119,20 @@ const saveRecentSearch = (query) => {
   }
 };
 
+// Drop a single term — the per-row remove affordance. Same storage shape and the
+// same cap as saveRecentSearch, so the two stay interchangeable.
+const removeRecentSearch = (query) => {
+  try {
+    const updated = getRecentSearches()
+      .filter((s) => s.toLowerCase() !== query.toLowerCase())
+      .slice(0, MAX_RECENT_SEARCHES);
+    localStorage.setItem(RECENT_SEARCHES_KEY, JSON.stringify(updated));
+    return updated;
+  } catch {
+    return getRecentSearches();
+  }
+};
+
 const clearRecentSearches = () => {
   try {
     localStorage.removeItem(RECENT_SEARCHES_KEY);
@@ -134,8 +160,9 @@ const buildCategoryMap = (categories) => {
 // Build the storefront filter chips straight from the live category tree, so
 // adding / renaming / removing a category in the admin is reflected here with no
 // code change. One chip per active top-level category; each chip matches that
-// category's slug AND all of its descendants' slugs (so a "Women's Ethnic Wear"
-// chip still surfaces Sarees / Kurtas products). Returns { chips, groups }.
+// category's slug AND all of its descendants' slugs (so a "Mekhela Chador" chip
+// still surfaces the Muga / Pat / Eri products beneath it). Returns
+// { chips, groups }.
 const buildCategoryNav = (categories) => {
   const list = (Array.isArray(categories) ? categories : []).filter(
     (c) => c && c.isActive !== false
@@ -236,84 +263,28 @@ const scoreProduct = (product, lowerQuery, catInfo) => {
 };
 
 // ---------------------------------------------------------------------------
-// Inline SVG icons (match the SVG icon set used across the storefront instead
-// of inconsistent emoji/Unicode glyphs). Stroke colour inherits via
-// currentColor so the icons are token-driven from their CSS context.
+// Inline SVG icons. Deliberately few: an editorial overlay is typography, not
+// glyphs. Stroke colour inherits via currentColor, so they stay token-driven.
 // ---------------------------------------------------------------------------
 const Icon = {
   Search: (props) => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <circle cx="11" cy="11" r="8" />
-      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <circle cx="11" cy="11" r="7.5" />
+      <line x1="21" y1="21" x2="16.8" y2="16.8" />
     </svg>
   ),
   Close: (props) => (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
       <line x1="18" y1="6" x2="6" y2="18" />
       <line x1="6" y1="6" x2="18" y2="18" />
     </svg>
   ),
-  Clock: (props) => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <circle cx="12" cy="12" r="9" />
-      <polyline points="12 7 12 12 15 14" />
-    </svg>
-  ),
-  Trending: (props) => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
-      <polyline points="17 6 23 6 23 12" />
-    </svg>
-  ),
-  // Sparkle / "AutoAwesome" — labels the curated AI Suggestions section.
-  Sparkle: (props) => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none" {...props}>
-      <path d="M12 2l1.8 5.2L19 9l-5.2 1.8L12 16l-1.8-5.2L5 9l5.2-1.8L12 2z" />
-      <path d="M19 14l.9 2.6L22.5 17.5l-2.6.9L19 21l-.9-2.6L15.5 17.5l2.6-.9L19 14z" opacity="0.7" />
-    </svg>
-  ),
   Arrow: (props) => (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <line x1="5" y1="12" x2="19" y2="12" />
-      <polyline points="12 5 19 12 12 19" />
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <line x1="4" y1="12" x2="19" y2="12" />
+      <polyline points="13 6 19 12 13 18" />
     </svg>
   ),
-  Empty: (props) => (
-    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" {...props}>
-      <circle cx="11" cy="11" r="7" />
-      <line x1="21" y1="21" x2="16.65" y2="16.65" />
-      <line x1="8" y1="11" x2="14" y2="11" />
-    </svg>
-  ),
-};
-
-// Star rating rendered with inline SVG (filled / half / empty), matching the
-// Products page. Colour comes from currentColor (the .stars wrapper sets it to
-// --sf-color-star), so no hex is hardcoded. A unique gradient id per product
-// avoids cross-card collisions.
-const StarRating = ({ rating = 0, idKey }) => {
-  const r = Math.round((Number(rating) || 0) * 2) / 2;
-  const gradId = `searchStarHalf-${idKey}`;
-  return (
-    <span className={styles.stars} aria-label={`Rated ${rating} out of 5`}>
-      <svg className={styles.starDefs} aria-hidden="true" focusable="false">
-        <defs>
-          <linearGradient id={gradId} x1="0" x2="1" y1="0" y2="0">
-            <stop offset="50%" stopColor="currentColor" />
-            <stop offset="50%" stopColor="transparent" />
-          </linearGradient>
-        </defs>
-      </svg>
-      {[1, 2, 3, 4, 5].map((i) => {
-        const fill = i <= Math.floor(r) ? "currentColor" : i - 0.5 === r ? `url(#${gradId})` : "none";
-        return (
-          <svg key={i} width="13" height="13" viewBox="0 0 24 24" fill={fill} stroke="currentColor" strokeWidth="1.5" aria-hidden="true">
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-          </svg>
-        );
-      })}
-    </span>
-  );
 };
 
 // ---------------------------------------------------------------------------
@@ -321,7 +292,7 @@ const StarRating = ({ rating = 0, idKey }) => {
 // ---------------------------------------------------------------------------
 const SearchModal = ({ open, onClose }) => {
   const navigate = useNavigate();
-  const { isDarkMode } = useTheme();
+  const reduceMotion = useReducedMotion();
   const inputRef = useRef(null);
   const modalRef = useRef(null);
   const triggerRef = useRef(null);
@@ -334,9 +305,10 @@ const SearchModal = ({ open, onClose }) => {
   const [categoryNav, setCategoryNav] = useState({ chips: ["All"], groups: {} });
   const [results, setResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
+  const [dataReady, setDataReady] = useState(false);
   const [activeCategory, setActiveCategory] = useState("All");
   const [recentSearches, setRecentSearches] = useState([]);
-  const [trendingTerms, setTrendingTerms] = useState(CURATED_TRENDING);
+  const [trendingProducts, setTrendingProducts] = useState([]);
 
   // Keep a ref of the active category so the debounced query effect always uses
   // the latest value without re-subscribing on every chip change.
@@ -388,22 +360,24 @@ const SearchModal = ({ open, onClose }) => {
         setAllProducts(data.products);
         setCategoryMap(buildCategoryMap(data.categories));
         setCategoryNav(buildCategoryNav(data.categories));
+        setDataReady(true);
       })
       .catch((err) => {
-        if (active) console.error("Failed to load search data:", err);
+        if (!active) return;
+        console.error("Failed to load search data:", err);
+        // Settled, just empty-handed: flip the flag anyway so a failed fetch
+        // resolves to the empty state instead of a permanent "Searching…".
+        setDataReady(true);
       });
 
-    // Optionally derive Trending from real data; fall back to the curated list
-    // on error / empty. The labels seed normal queries — no fabricated metrics.
+    // Trending is real product data, shown as a small rail. On error / empty we
+    // fall back to the curated terms above — never to invented products.
     apiService.products
       .getTrending(MAX_TRENDING)
       .then((list) => {
         if (!active) return;
-        const labels = (Array.isArray(list) ? list : [])
-          .map((p) => p && p.name)
-          .filter(Boolean)
-          .slice(0, MAX_TRENDING);
-        if (labels.length) setTrendingTerms(labels);
+        const items = (Array.isArray(list) ? list : []).filter(Boolean).slice(0, MAX_TRENDING);
+        if (items.length) setTrendingProducts(items);
       })
       .catch(() => {
         /* keep the curated fallback */
@@ -526,11 +500,15 @@ const SearchModal = ({ open, onClose }) => {
     navigate(productPath(product));
   };
 
-  // Seed the query with a curated phrase / recent / trending term so the real
-  // debounced search runs. Returns focus to the input for continued typing.
-  const handleChipSearch = (term) => {
+  // Seed the query with a curated / recent / trending term so the real debounced
+  // search runs. Returns focus to the input for continued typing.
+  const handleTermSearch = (term) => {
     setQuery(term);
     inputRef.current?.focus();
+  };
+
+  const handleRemoveRecent = (term) => {
+    setRecentSearches(removeRecentSearch(term));
   };
 
   const handleClearRecent = () => {
@@ -555,18 +533,54 @@ const SearchModal = ({ open, onClose }) => {
   const trimmedQuery = query.trim();
   const showResultsView = trimmedQuery.length > 0;
   const cappedResults = results.slice(0, MAX_RESULTS);
-  const themeAttr = isDarkMode ? "dark" : "light";
+  // Busy while the debounce is pending OR while the catalogue is still in
+  // flight — on a slow connection the first keystroke must not read "nothing".
+  const isBusy = showResultsView && (isSearching || !dataReady);
+
+  const overlayFade = { duration: reduceMotion ? 0 : 0.3, ease: EASE };
+  const sheetSlide = { duration: reduceMotion ? 0 : 0.45, ease: EASE };
+  const sheetExit = { duration: reduceMotion ? 0 : 0.3, ease: EASE };
+
+  // Quiet ruled rows — used for Suggestions and for the curated Trending
+  // fallback. Each row simply seeds the input with a real query.
+  const renderTermRows = (terms) => (
+    <ul className={styles.rows}>
+      {terms.map((term) => (
+        <li key={term} className={styles.rowItem}>
+          <button type="button" className={styles.row} onClick={() => handleTermSearch(term)}>
+            <span className={styles.rowText}>{term}</span>
+            <span className={styles.rowArrow} aria-hidden="true">
+              <Icon.Arrow />
+            </span>
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+
+  const renderThumbImage = (product, className) => (
+    <img
+      src={product.images?.[0] || product.image || FALLBACK_IMAGE}
+      alt={product.name}
+      className={className}
+      loading="lazy"
+      onError={(e) => {
+        if (e.currentTarget.dataset.fallback) return;
+        e.currentTarget.dataset.fallback = "1";
+        e.currentTarget.src = FALLBACK_IMAGE;
+      }}
+    />
+  );
 
   return (
     <AnimatePresence>
       {open && (
         <motion.div
           className={styles.overlay}
-          data-theme={themeAttr}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
+          transition={overlayFade}
           onClick={onClose}
           role="dialog"
           aria-modal="true"
@@ -574,240 +588,246 @@ const SearchModal = ({ open, onClose }) => {
         >
           <motion.div
             ref={modalRef}
-            className={styles.modal}
-            initial={{ opacity: 0, y: -24 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -24 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
+            className={styles.sheet}
+            initial={{ opacity: 0, y: reduceMotion ? 0 : -28 }}
+            animate={{ opacity: 1, y: 0, transition: sheetSlide }}
+            exit={{ opacity: 0, y: reduceMotion ? 0 : -20, transition: sheetExit }}
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Search Header */}
-            <div className={styles.header}>
-              <form className={styles.searchBar} onSubmit={handleSubmit}>
-                <span className={styles.searchIcon}>
-                  <Icon.Search />
-                </span>
-                <input
-                  ref={inputRef}
-                  type="text"
-                  className={styles.searchInput}
-                  placeholder="Search for silk sarees..."
-                  value={query}
-                  onChange={handleInputChange}
-                  autoComplete="off"
-                  aria-label="Search for silk sarees"
-                />
-                {query && (
+            {/* ---- Masthead: label, close mark, the input line, the chips ---- */}
+            <div className={styles.head}>
+              <div className={styles.inner}>
+                <div className={styles.topRow}>
+                  <span className={styles.eyebrow}>Search the house</span>
                   <button
                     type="button"
-                    className={styles.clearBtn}
-                    onClick={handleClear}
-                    aria-label="Clear search"
+                    className={styles.closeBtn}
+                    onClick={onClose}
+                    aria-label="Close search"
                   >
-                    <Icon.Close width="14" height="14" />
+                    <span className={styles.closeText}>Close</span>
+                    <Icon.Close width="18" height="18" />
                   </button>
-                )}
-              </form>
-              <button
-                type="button"
-                className={styles.closeBtn}
-                onClick={onClose}
-                aria-label="Close search"
-              >
-                <Icon.Close width="20" height="20" />
-              </button>
-            </div>
+                </div>
 
-            {/* Category Filter Chips */}
-            <div className={styles.categoryFilters}>
-              {categoryNav.chips.map((cat) => (
-                <button
-                  key={cat}
-                  type="button"
-                  className={`sf-chip ${styles.categoryChip} ${
-                    activeCategory === cat ? "sf-chip--active" : ""
-                  }`}
-                  onClick={() => handleCategoryClick(cat)}
+                <form
+                  className={styles.field}
+                  onSubmit={handleSubmit}
+                  role="search"
+                  data-busy={isBusy ? "true" : "false"}
                 >
-                  {cat}
-                </button>
-              ))}
+                  <span className={styles.fieldIcon} aria-hidden="true">
+                    <Icon.Search />
+                  </span>
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    className={styles.input}
+                    placeholder="Search Muga, Eri, Mekhela Chador…"
+                    value={query}
+                    onChange={handleInputChange}
+                    autoComplete="off"
+                    aria-label="Search Meghali's Silk"
+                  />
+                  {query && (
+                    <button
+                      type="button"
+                      className={styles.clearBtn}
+                      onClick={handleClear}
+                      aria-label="Clear search"
+                    >
+                      <Icon.Close width="14" height="14" />
+                    </button>
+                  )}
+                </form>
+
+                <div className={styles.chipRow} role="group" aria-label="Filter by category">
+                  {categoryNav.chips.map((cat) => (
+                    <button
+                      key={cat}
+                      type="button"
+                      className={`sf-chip ${styles.chip} ${
+                        activeCategory === cat ? "sf-chip--active" : ""
+                      }`}
+                      aria-pressed={activeCategory === cat}
+                      onClick={() => handleCategoryClick(cat)}
+                    >
+                      {cat}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
 
-            {/* Content Area */}
-            <div className={styles.content}>
-              {showResultsView ? (
-                <div className={styles.resultsSection}>
-                  {isSearching && results.length === 0 ? (
-                    <div className={styles.loadingState}>
-                      <div className={styles.spinner} />
-                      <span>Searching…</span>
-                    </div>
+            {/* ---- Body ------------------------------------------------------ */}
+            <div className={styles.body}>
+              <div className={styles.inner}>
+                {/* Announce the outcome to screen readers without a visual echo. */}
+                <p className={styles.srOnly} role="status" aria-live="polite">
+                  {!showResultsView
+                    ? ""
+                    : isBusy
+                    ? "Searching"
+                    : `${results.length} ${results.length === 1 ? "piece" : "pieces"} found`}
+                </p>
+
+                {showResultsView ? (
+                  isBusy && results.length === 0 ? (
+                    <p className={styles.searching}>Searching the collection…</p>
                   ) : results.length === 0 ? (
-                    <div className={styles.emptyState}>
-                      <span className={styles.emptyIcon}>
-                        <Icon.Empty />
-                      </span>
-                      <p className={styles.emptyTitle}>No products found for “{trimmedQuery}”</p>
+                    <div className={styles.empty}>
+                      <p className={styles.emptyTitle}>Nothing yet for “{trimmedQuery}”</p>
                       <p className={styles.emptyHint}>
-                        Try a different term or browse the trending searches.
+                        Try another weave — Muga, Pat or Eri — or browse the whole collection.
                       </p>
+                      <Link to="/products" className={styles.emptyLink} onClick={onClose}>
+                        View all pieces
+                        <Icon.Arrow />
+                      </Link>
                     </div>
                   ) : (
                     <>
-                      <div className={styles.resultsHeader}>
-                        <span className={styles.resultsCount}>
-                          {results.length} result{results.length !== 1 ? "s" : ""} for “{trimmedQuery}”
-                        </span>
-                        <button type="button" className={styles.viewAllBtn} onClick={handleSubmit}>
-                          View all results <Icon.Arrow />
+                      <div className={styles.blockHead}>
+                        <h2 className={styles.blockLabel}>
+                          {results.length} {results.length === 1 ? "piece" : "pieces"} for “
+                          {trimmedQuery}”
+                        </h2>
+                        <button type="button" className={styles.textLink} onClick={handleSubmit}>
+                          View all
+                          <Icon.Arrow />
                         </button>
                       </div>
 
-                      <div className={styles.resultsGrid}>
+                      <div className={styles.grid}>
                         {cappedResults.map((product, idx) => (
                           <motion.button
                             key={product.id}
                             type="button"
-                            className={styles.productCard}
-                            initial={{ opacity: 0, y: 12 }}
+                            className={styles.card}
+                            initial={{ opacity: 0, y: reduceMotion ? 0 : 10 }}
                             animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.2, delay: Math.min(idx * 0.03, 0.3) }}
+                            transition={{
+                              duration: reduceMotion ? 0 : 0.35,
+                              ease: EASE,
+                              delay: reduceMotion ? 0 : Math.min(idx * STAGGER_STEP, STAGGER_MAX),
+                            }}
                             onClick={() => handleProductClick(product)}
                           >
-                            <div className={styles.productImageWrap}>
-                              <img
-                                src={product.images?.[0] || product.image || FALLBACK_IMAGE}
-                                alt={product.name}
-                                className={styles.productImage}
-                                loading="lazy"
-                                onError={(e) => {
-                                  if (e.currentTarget.dataset.fallback) return;
-                                  e.currentTarget.dataset.fallback = "1";
-                                  e.currentTarget.src = FALLBACK_IMAGE;
-                                }}
-                              />
-                            </div>
-                            <div className={styles.productInfo}>
-                              <h4 className={styles.productName}>{product.name}</h4>
-                              {product._catName && (
-                                <span className={styles.productCategory}>{product._catName}</span>
+                            <span className={styles.thumb}>
+                              {renderThumbImage(product, styles.thumbImg)}
+                            </span>
+                            <span className={styles.cardName}>{product.name}</span>
+                            {product._catName && (
+                              <span className={styles.cardCat}>{product._catName}</span>
+                            )}
+                            <span className={styles.cardPrice}>
+                              {formatCurrency(getPrice(product))}
+                            </span>
+                            <span className={styles.cardStars}>
+                              {product.rating ? (
+                                <>
+                                  <StarRating rating={product.rating} size={11} />
+                                  <span className={styles.ratingNum}>
+                                    {Number(product.rating).toFixed(1)}
+                                  </span>
+                                </>
+                              ) : (
+                                <span className={styles.ratingNum}>New in</span>
                               )}
-                              <span className={styles.productPrice}>
-                                {formatCurrency(getPrice(product))}
-                              </span>
-                              <div className={styles.productMeta}>
-                                <StarRating rating={product.rating} idKey={product.id} />
-                                <span className={styles.ratingNum}>
-                                  {product.rating ? Number(product.rating).toFixed(1) : "New"}
-                                </span>
-                              </div>
-                            </div>
+                            </span>
                           </motion.button>
                         ))}
                       </div>
 
                       {results.length > MAX_RESULTS && (
-                        <div className={styles.moreResults}>
-                          <button type="button" className={styles.viewAllBtn} onClick={handleSubmit}>
-                            View all {results.length} results <Icon.Arrow />
+                        <div className={styles.moreRow}>
+                          <button type="button" className={styles.textLink} onClick={handleSubmit}>
+                            View all {results.length} pieces
+                            <Icon.Arrow />
                           </button>
                         </div>
                       )}
                     </>
-                  )}
-                </div>
-              ) : (
-                <div className={styles.defaultContent}>
-                  {/* AI Suggestions — curated phrases that seed a real query */}
-                  <div className={styles.section}>
-                    <h3 className={styles.sectionTitle}>
-                      <span className={styles.titleIcon}>
-                        <Icon.Sparkle />
-                      </span>
-                      AI Suggestions
-                    </h3>
-                    <div className={styles.suggestionList}>
-                      {AI_SUGGESTIONS.map((phrase) => (
-                        <button
-                          key={phrase}
-                          type="button"
-                          className={styles.suggestionRow}
-                          onClick={() => handleChipSearch(phrase)}
-                        >
-                          <span className={styles.suggestionDot}>
-                            <Icon.Sparkle width="13" height="13" />
-                          </span>
-                          <span className={styles.suggestionText}>{phrase}</span>
-                          <span className={styles.suggestionArrow}>
-                            <Icon.Arrow width="15" height="15" />
-                          </span>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Recent Searches — persisted in localStorage */}
-                  {recentSearches.length > 0 && (
-                    <div className={styles.section}>
-                      <div className={styles.sectionHeader}>
-                        <h3 className={styles.sectionTitle}>
-                          <span className={styles.titleIcon}>
-                            <Icon.Clock />
-                          </span>
-                          Recent Searches
-                        </h3>
-                        <button
-                          type="button"
-                          className={styles.clearRecentBtn}
-                          onClick={handleClearRecent}
-                        >
-                          Clear all
-                        </button>
+                  )
+                ) : (
+                  <div className={styles.idle}>
+                    {/* Suggestions — curated phrases that seed a real query. */}
+                    <section className={styles.block}>
+                      <div className={styles.blockHead}>
+                        <h2 className={styles.blockLabel}>Suggestions</h2>
                       </div>
-                      <div className={styles.chipGroup}>
-                        {recentSearches.map((term) => (
+                      {renderTermRows(CURATED_SUGGESTIONS)}
+                    </section>
+
+                    {/* Recent searches — persisted in localStorage, removable. */}
+                    {recentSearches.length > 0 && (
+                      <section className={styles.block}>
+                        <div className={styles.blockHead}>
+                          <h2 className={styles.blockLabel}>Recent</h2>
                           <button
-                            key={term}
                             type="button"
-                            className={`sf-chip ${styles.recentChip}`}
-                            onClick={() => handleChipSearch(term)}
+                            className={styles.quietBtn}
+                            onClick={handleClearRecent}
                           >
-                            <Icon.Clock width="13" height="13" />
-                            {term}
+                            Clear all
                           </button>
-                        ))}
-                      </div>
-                    </div>
-                  )}
+                        </div>
+                        <ul className={styles.rows}>
+                          {recentSearches.map((term) => (
+                            <li key={term} className={`${styles.rowItem} ${styles.recentItem}`}>
+                              <button
+                                type="button"
+                                className={styles.row}
+                                onClick={() => handleTermSearch(term)}
+                              >
+                                <span className={styles.rowText}>{term}</span>
+                              </button>
+                              <button
+                                type="button"
+                                className={styles.removeBtn}
+                                onClick={() => handleRemoveRecent(term)}
+                                aria-label={`Remove “${term}” from recent searches`}
+                              >
+                                <Icon.Close width="13" height="13" />
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </section>
+                    )}
 
-                  {/* Trending — numbered curated/derived list with trend-up icon */}
-                  <div className={styles.section}>
-                    <h3 className={styles.sectionTitle}>
-                      <span className={styles.titleIcon}>
-                        <Icon.Trending />
-                      </span>
-                      Trending
-                    </h3>
-                    <div className={styles.trendingList}>
-                      {trendingTerms.map((term, idx) => (
-                        <button
-                          key={term}
-                          type="button"
-                          className={styles.trendingRow}
-                          onClick={() => handleChipSearch(term)}
-                        >
-                          <span className={styles.trendingRank}>{idx + 1}</span>
-                          <span className={styles.trendingText}>{term}</span>
-                          <span className={styles.trendingIcon} aria-hidden="true">
-                            <Icon.Trending width="15" height="15" />
-                          </span>
-                        </button>
-                      ))}
-                    </div>
+                    {/* Trending — real products when we have them, curated terms
+                        as the honest fallback when the endpoint gives nothing. */}
+                    <section className={styles.block}>
+                      <div className={styles.blockHead}>
+                        <h2 className={styles.blockLabel}>Trending now</h2>
+                      </div>
+                      {trendingProducts.length > 0 ? (
+                        <div className={styles.rail}>
+                          {trendingProducts.map((product) => (
+                            <button
+                              key={product.id}
+                              type="button"
+                              className={styles.railItem}
+                              onClick={() => handleProductClick(product)}
+                            >
+                              <span className={styles.railThumb}>
+                                {renderThumbImage(product, styles.thumbImg)}
+                              </span>
+                              <span className={styles.railName}>{product.name}</span>
+                              <span className={styles.railPrice}>
+                                {formatCurrency(getPrice(product))}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      ) : (
+                        renderTermRows(CURATED_TRENDING)
+                      )}
+                    </section>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </motion.div>
         </motion.div>
