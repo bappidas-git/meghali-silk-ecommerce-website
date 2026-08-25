@@ -1,32 +1,34 @@
 /* =============================================================================
- * Bottom Navigation — Meghali's Silk mobile dock
- * Dark glass surface, gold/emerald active state, emphasized center Search.
- * Token-driven only (storefront-tokens.css) — no hardcoded hex.
+ * BottomNav — Meghali's Silk mobile bar
+ * =============================================================================
+ * A thin editorial bar, not a floating dock: edge to edge on the page ivory,
+ * separated from the content by a single 1px hairline, thin-stroke glyphs, and
+ * tracked micro-labels. The active tab is ink type plus a small gold dot under
+ * the label — the only colour in the bar.
+ *
+ * Token-driven only (storefront-tokens.css) — no hardcoded hex, no hardcoded
+ * type — so dark mode is re-derived by the body.dark block for free.
  * ========================================================================== */
 .bottomNav {
   position: fixed;
-  left: var(--sf-space-3);
-  right: var(--sf-space-3);
-  bottom: var(--sf-space-2);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  /* Above page content, below drawers and modals (--sf-z-overlay/-modal). */
   z-index: var(--sf-z-sticky);
-  border-radius: var(--sf-radius-xl);
-  border: 1px solid var(--sf-color-border);
-  background: var(--sf-color-surface);
-  box-shadow: var(--sf-shadow-lg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: var(--sf-color-bg);
+  border-top: 1px solid var(--sf-color-border);
   font-family: var(--sf-font-family);
   padding-bottom: env(safe-area-inset-bottom);
   transition: transform var(--sf-transition);
-  overflow: visible;
 }
 
 /* Both themes read from tokens; dark mode resolves the same vars to dark values.
    Keep explicit hooks for any future per-theme tweaks. */
 .bottomNav.light,
 .bottomNav.dark {
-  background: var(--sf-color-surface);
-  border-color: var(--sf-color-border);
+  background: var(--sf-color-bg);
+  border-top-color: var(--sf-color-border);
 }
 
 /* Mobile-only — hidden on desktop via media query (matches existing breakpoint). */
@@ -41,8 +43,10 @@
   transform: translateY(0);
 }
 
+/* The bar is flush to the viewport edge now, so 100% clears it completely —
+   safe-area padding included, since it is part of the element's own height. */
 .hidden {
-  transform: translateY(calc(100% + var(--sf-space-4)));
+  transform: translateY(100%);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -55,157 +59,110 @@
 .navItems {
   display: flex;
   align-items: stretch;
-  justify-content: space-between;
-  gap: var(--sf-space-1);
-  padding: var(--sf-space-2) var(--sf-space-2);
+  width: 100%;
 }
 
 /* ===== Individual tab (NavLink <a> or Search <button>) ===== */
 .navItem {
-  flex: 1;
+  position: relative;
+  flex: 1 1 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 2px;
+  gap: var(--sf-space-1);
   min-width: 0;
+  /* 6 + 24 + 4 + label + 12 ≈ 58px — comfortably past the 44px minimum. */
   min-height: var(--sf-tap-target);
-  padding: var(--sf-space-1) var(--sf-space-1);
+  padding: 6px 2px 12px;
   border: none;
   background: transparent;
   color: var(--sf-color-text-muted);
   text-decoration: none;
   cursor: pointer;
-  border-radius: var(--sf-radius-lg);
-  transition: color var(--sf-transition-fast),
-    background var(--sf-transition-fast), transform var(--sf-transition-fast);
+  transition: color var(--sf-transition-fast);
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Active state — gold/emerald highlight + tinted pill behind icon. */
+/* Active — ink type and a gold dot. No fill, no pill, no tinted plate.
+   The dot marks state, so it takes the text-safe gold (--sf-color-gold-deep,
+   5.12:1 on ivory) rather than the brand gold, which the token file reserves
+   for decorative surfaces at 2.58:1 — under the 3:1 floor for a UI indicator. */
 .navItem.active {
-  color: var(--sf-color-gold);
+  color: var(--sf-color-text);
 }
 
-.navItem.active .iconWrap {
-  background: var(--sf-color-primary-soft);
+.navItem.active::after {
+  content: "";
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: var(--sf-radius-pill);
+  background: var(--sf-color-gold-deep);
 }
 
-/* Hover / press */
 @media (hover: hover) {
   .navItem:hover {
-    background: var(--sf-color-surface-hover);
-    color: var(--sf-color-text-secondary);
-  }
-
-  .navItem.active:hover {
-    color: var(--sf-color-gold);
+    color: var(--sf-color-text);
   }
 }
 
-.navItem:active {
-  transform: scale(0.94);
-}
-
-/* Focus-visible ring */
 .navItem:focus {
   outline: none;
 }
 
 .navItem:focus-visible {
-  outline: none;
+  outline: 2px solid transparent;
+  outline-offset: -4px;
   box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
 }
 
-/* ===== Icon wrap ===== */
+/* ===== Icon ===== */
 .iconWrap {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
-  border-radius: var(--sf-radius-pill);
-  transition: background var(--sf-transition-fast),
-    transform var(--sf-transition-fast);
+  width: 24px;
+  height: 24px;
 }
 
 .icon {
-  font-size: 24px !important;
+  font-size: 22px !important;
   line-height: 1;
 }
 
-.navItem.active .icon {
-  transform: scale(1.05);
-}
-
-/* ===== Center emphasized Search action ===== */
-.navItem.center {
-  flex: 0 0 auto;
-  justify-content: flex-end;
-  gap: var(--sf-space-1);
-  color: var(--sf-color-text-secondary);
-}
-
-.navItem.center .iconWrap {
-  width: 52px;
-  height: 52px;
-  margin-top: -22px;
-  border-radius: var(--sf-radius-pill);
-  background: var(--sf-gradient-gold);
-  color: var(--sf-color-emerald-contrast);
-  box-shadow: var(--sf-shadow-md);
-  border: 3px solid var(--sf-color-surface);
-}
-
-.navItem.center .icon {
-  font-size: 26px !important;
-  color: var(--sf-color-emerald-contrast);
-}
-
-@media (hover: hover) {
-  .navItem.center:hover {
-    background: transparent;
-    color: var(--sf-color-gold);
-  }
-
-  .navItem.center:hover .iconWrap {
-    background: var(--sf-gradient-primary-hover);
-  }
-}
-
-.navItem.center:focus-visible {
-  box-shadow: none;
-}
-
-.navItem.center:focus-visible .iconWrap {
-  box-shadow: var(--sf-shadow-md), var(--sf-shadow-focus);
-}
-
 /* ===== Wishlist badge ===== */
+/* Reads as a count, not an alert: the discount green on the page ground, with a
+   ground-coloured ring so it never smudges into the glyph. */
 .badge {
   position: absolute;
-  top: -2px;
-  right: -4px;
-  min-width: 18px;
-  height: 18px;
-  padding: 0 5px;
+  top: -5px;
+  right: -8px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
   border-radius: var(--sf-radius-pill);
-  font-size: 0.625rem;
-  font-weight: var(--sf-font-bold);
-  line-height: 18px;
+  font-size: 0.5625rem;
+  font-weight: var(--sf-font-semibold);
+  line-height: 16px;
   text-align: center;
   background: var(--sf-color-discount);
   color: var(--sf-color-primary-contrast);
-  border: 2px solid var(--sf-color-surface);
+  border: 2px solid var(--sf-color-bg);
 }
 
 /* ===== Label ===== */
 .label {
   max-width: 100%;
-  font-size: var(--sf-text-xs);
+  font-size: 0.6875rem;
   font-weight: var(--sf-font-medium);
-  letter-spacing: 0.2px;
+  letter-spacing: 0.05em;
+  line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -216,12 +173,15 @@
 }
 
 /* ===== Small phones ===== */
+/* "Categories" is the widest label; at 360px each tab has ~68px of room, so the
+   type steps down rather than ellipsising a nav label. */
 @media (max-width: 360px) {
   .label {
     font-size: 0.625rem;
+    letter-spacing: 0.03em;
   }
 
   .icon {
-    font-size: 22px !important;
+    font-size: 20px !important;
   }
 }
