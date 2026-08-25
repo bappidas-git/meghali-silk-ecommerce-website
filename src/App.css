@@ -1,46 +1,43 @@
-/* Global Styles */
+/* =============================================================================
+ * GLOBAL STYLES  —  Meghali's Silk storefront
+ * =============================================================================
+ * The page ground, the scrollbars, the shared utilities and the SweetAlert2
+ * skin. Everything here reads the design tokens in
+ * `src/theme/storefront-tokens.css` (--sf-*) — no brand hex is hardcoded in this
+ * file. LIGHT IS THE DEFAULT; `body.dark` flips the tokens, so most rules below
+ * need no dark-mode twin.
+ *
+ * ADMIN IS OUT OF SCOPE. The admin panel keeps its flat slate design language:
+ * every `body.admin-area` block below is deliberately preserved, and the
+ * storefront's SweetAlert2 skin is scoped away from `.admin-area` so the
+ * editorial palette cannot bleed into an admin dialog.
+ * ========================================================================== */
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-:root {
-  /* Futuristic color palette */
-  --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  --dark-bg: #0a0e27;
-  --light-bg: #f5f7fa;
-  --glass-bg: rgba(255, 255, 255, 0.1);
-  --glass-border: rgba(255, 255, 255, 0.2);
-  --neon-purple: #a855f7;
-  --neon-pink: #ec4899;
-  --neon-blue: #3b82f6;
-  --text-primary: #1a202c;
-  --text-secondary: #4a5568;
-}
-
 body {
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
-    "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+  font-family: var(--sf-font-family);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
-  transition: background-color 0.3s ease;
+  transition: background-color var(--sf-transition);
 }
 
+/* =============================================================================
+ * PAGE GROUND
+ * The storefront shell only — admin routes render outside .App/.main-content.
+ * ========================================================================== */
 .App {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   position: relative;
-  background-color: #f5f7fa;
-  transition: background-color 0.3s ease;
-}
-
-body.dark .App {
-  background-color: #0a0e27;
+  background-color: var(--sf-color-bg);
+  transition: background-color var(--sf-transition);
 }
 
 .main-content {
@@ -51,65 +48,39 @@ body.dark .App {
      padding-bottom keeps content clear of the fixed mobile BottomNav. */
   padding-bottom: 80px;
   min-height: calc(100vh - 70px);
-  background-color: #f5f7fa;
-  transition: background-color 0.3s ease;
+  background-color: var(--sf-color-bg);
+  transition: background-color var(--sf-transition);
 }
 
-body.dark .main-content {
-  background-color: #0a0e27;
+/* =============================================================================
+ * SCROLLBARS
+ * Quiet and editorial: 8px, the page ground as the track, a warm sand thumb
+ * that settles to muted ink on hover. The tokens flip under body.dark, so one
+ * rule set serves both modes. The admin overrides follow below.
+ * ========================================================================== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
 
-/* Light Theme Explicit Styles */
-body.light .App {
-  background-color: #f5f7fa;
+::-webkit-scrollbar-track {
+  background: var(--sf-color-bg);
 }
 
-body.light .main-content {
-  background-color: #f5f7fa;
+::-webkit-scrollbar-thumb {
+  background: var(--sf-color-border-strong);
+  border-radius: var(--sf-radius-pill);
 }
 
-body.light .glass-effect {
-  background: rgba(255, 255, 255, 0.8);
-  border: 1px solid rgba(102, 126, 234, 0.2);
+::-webkit-scrollbar-thumb:hover {
+  background: var(--sf-color-text-muted);
 }
 
-body.light .neon-glow {
-  box-shadow: 0 0 20px rgba(102, 126, 234, 0.3), 0 0 40px rgba(102, 126, 234, 0.2),
-    0 0 60px rgba(102, 126, 234, 0.1);
-}
-
-body.light .card-hover:hover {
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-}
-
-body.light .loading-spinner {
-  border: 3px solid rgba(102, 126, 234, 0.2);
-  border-top-color: #667eea;
-}
-
-/* Light theme scrollbar */
-body.light::-webkit-scrollbar-track {
-  background: rgba(102, 126, 234, 0.1);
-}
-
-body.light::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-/* Dark theme scrollbar — dark-palette gradient instead of the light one */
-body.dark::-webkit-scrollbar-track,
-body.dark *::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.06);
-}
-
-body.dark::-webkit-scrollbar-thumb,
-body.dark *::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
-}
-
-body.dark::-webkit-scrollbar-thumb:hover,
-body.dark *::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #ec4899 0%, #a855f7 100%);
+/* Firefox equivalent. `scrollbar-*` inherits, so setting it on <body> reaches
+   every scroll container. Storefront only — admin keeps the UA default. */
+body:not(.admin-area) {
+  scrollbar-width: thin;
+  scrollbar-color: var(--sf-color-border-strong) var(--sf-color-bg);
 }
 
 /* Pin the page background to the admin palette while an admin screen is
@@ -155,41 +126,9 @@ body.admin-area.dark *::-webkit-scrollbar-thumb:hover {
   background: #475569;
 }
 
-/* Glassmorphism effect */
-.glass-effect {
-  background: var(--glass-bg);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid var(--glass-border);
-  border-radius: 16px;
-}
-
-/* Neon glow effect */
-.neon-glow {
-  box-shadow: 0 0 20px rgba(168, 85, 247, 0.5), 0 0 40px rgba(168, 85, 247, 0.3),
-    0 0 60px rgba(168, 85, 247, 0.1);
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.1);
-}
-
-::-webkit-scrollbar-thumb {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 4px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
-}
-
-/* Animations */
+/* =============================================================================
+ * ANIMATIONS
+ * ========================================================================== */
 @keyframes float {
   0%,
   100% {
@@ -197,18 +136,6 @@ body.admin-area.dark *::-webkit-scrollbar-thumb:hover {
   }
   50% {
     transform: translateY(-20px);
-  }
-}
-
-@keyframes pulse-glow {
-  0%,
-  100% {
-    opacity: 1;
-    box-shadow: 0 0 20px rgba(168, 85, 247, 0.5);
-  }
-  50% {
-    opacity: 0.8;
-    box-shadow: 0 0 40px rgba(168, 85, 247, 0.8);
   }
 }
 
@@ -224,12 +151,52 @@ body.admin-area.dark *::-webkit-scrollbar-thumb:hover {
   }
 }
 
-.floating {
-  animation: float 6s ease-in-out infinite;
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.pulse-glow {
-  animation: pulse-glow 2s ease-in-out infinite;
+/* =============================================================================
+ * SHARED UTILITIES
+ * Generic, token-driven helpers. The legacy neon skin (.glass-effect,
+ * .neon-glow, .pulse-glow) is gone — nothing under src/ referenced it.
+ * ========================================================================== */
+.container {
+  max-width: var(--sf-container-max);
+  margin: 0 auto;
+  padding: 0 var(--sf-space-5);
+}
+
+/* Gold display type — the one sanctioned gradient, straight from the tokens. */
+.gradient-text {
+  background: var(--sf-gradient-gold);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Editorial lift: a few pixels, slow easing, soft warm shadow — never a glow. */
+.card-hover {
+  transition: transform var(--sf-transition), box-shadow var(--sf-transition),
+    border-color var(--sf-transition);
+}
+
+.card-hover:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--sf-shadow-md);
+}
+
+.hover-scale {
+  transition: transform var(--sf-transition);
+}
+
+.hover-scale:hover {
+  transform: scale(1.02);
+}
+
+.floating {
+  animation: float 6s ease-in-out infinite;
 }
 
 .gradient-animation {
@@ -237,21 +204,60 @@ body.admin-area.dark *::-webkit-scrollbar-thumb:hover {
   animation: gradient-shift 3s ease infinite;
 }
 
-/* Responsive utilities */
-.container {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 0 20px;
+/* Hairline ring with a gold leading edge. */
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--sf-color-border);
+  border-top-color: var(--sf-color-gold-deep);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
 }
 
-/* Mobile styles */
+/* Page transitions */
+.page-transition-enter {
+  opacity: 0;
+  transform: translateY(12px);
+}
+
+.page-transition-enter-active {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity var(--sf-transition), transform var(--sf-transition);
+}
+
+.page-transition-exit {
+  opacity: 1;
+}
+
+.page-transition-exit-active {
+  opacity: 0;
+  transition: opacity var(--sf-transition-fast);
+}
+
+/* Decorative motion only — the spinner keeps turning, it carries state. */
+@media (prefers-reduced-motion: reduce) {
+  .floating,
+  .gradient-animation {
+    animation: none;
+  }
+
+  .card-hover:hover,
+  .hover-scale:hover {
+    transform: none;
+  }
+}
+
+/* =============================================================================
+ * RESPONSIVE UTILITIES
+ * ========================================================================== */
 @media (max-width: 768px) {
   .main-content {
     padding-bottom: 70px;
   }
 
   .container {
-    padding: 0 16px;
+    padding: 0 var(--sf-space-4);
   }
 
   .desktop-only {
@@ -268,72 +274,8 @@ body.admin-area.dark *::-webkit-scrollbar-thumb:hover {
 /* Tablet styles */
 @media (min-width: 769px) and (max-width: 1024px) {
   .container {
-    padding: 0 24px;
+    padding: 0 var(--sf-space-6);
   }
-}
-
-/* Loading animation */
-.loading-spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid rgba(168, 85, 247, 0.2);
-  border-top-color: var(--neon-purple);
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Page transitions */
-.page-transition-enter {
-  opacity: 0;
-  transform: translateY(20px);
-}
-
-.page-transition-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 300ms, transform 300ms;
-}
-
-.page-transition-exit {
-  opacity: 1;
-}
-
-.page-transition-exit-active {
-  opacity: 0;
-  transition: opacity 300ms;
-}
-
-/* Button hover effects */
-.hover-scale {
-  transition: transform 0.3s ease;
-}
-
-.hover-scale:hover {
-  transform: scale(1.05);
-}
-
-/* Text gradient */
-.gradient-text {
-  background: var(--primary-gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Card hover effect */
-.card-hover {
-  transition: all 0.3s ease;
-}
-
-.card-hover:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 /* =====================================================================
@@ -342,56 +284,96 @@ body.admin-area.dark *::-webkit-scrollbar-thumb:hover {
    so it can't inherit the palette. Theme it from the body-level mode
    classes instead: body.light / body.dark (set by ThemeContext) pick the
    storefront palette, and body.admin-area (set while an admin screen is
-   mounted) swaps the playful storefront look for the flat admin design
+   mounted) swaps the editorial storefront look for the flat admin design
    language. Everything is expressed through SweetAlert2's own CSS
    variables so a per-call confirmButtonColor (the destructive reds on
    delete/logout confirms) still wins — Swal sets those as inline
    variables on the button itself.
+
+   The storefront blocks are scoped `:not(.admin-area)` so the editorial
+   ivory/ink/gold cannot reach an admin dialog; the neutral base the admin
+   used to inherit from them is restored verbatim further down.
    ===================================================================== */
-body.light .swal2-popup {
-  --swal2-background: #ffffff;
-  --swal2-color: #1a202c;
-  --swal2-border-radius: 16px;
-  --swal2-confirm-button-background-color: #667eea;
-  --swal2-cancel-button-background-color: #64748b;
-  --swal2-confirm-button-border-radius: 10px;
-  --swal2-cancel-button-border-radius: 10px;
-  --swal2-action-button-focus-box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.4);
-  --swal2-timer-progress-bar-background: rgba(102, 126, 234, 0.5);
+body.light:not(.admin-area) .swal2-popup {
+  --swal2-background: var(--sf-color-surface);
+  --swal2-color: var(--sf-color-text);
+  --swal2-border: 1px solid var(--sf-color-border);
+  --swal2-border-radius: var(--sf-radius-md);
+  /* Restrained gold: the text-safe deep tone under an ivory label — 5.1:1. */
+  --swal2-confirm-button-background-color: var(--sf-color-gold-deep);
+  --swal2-confirm-button-color: var(--sf-color-primary-contrast);
+  --swal2-cancel-button-background-color: var(--sf-color-surface-2);
+  --swal2-cancel-button-color: var(--sf-color-text);
+  --swal2-confirm-button-border-radius: var(--sf-radius-sm);
+  --swal2-cancel-button-border-radius: var(--sf-radius-sm);
+  --swal2-action-button-focus-box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--sf-color-focus-ring) 40%, transparent);
+  --swal2-timer-progress-bar-background: var(--sf-color-gold);
+  --swal2-toast-border: 1px solid var(--sf-color-border);
+  --swal2-toast-box-shadow: var(--sf-shadow-md);
 }
 
 /* secondary text tone for the message body (title inherits popup color) */
-body.light .swal2-html-container {
+body.light:not(.admin-area) .swal2-html-container {
+  color: var(--sf-color-text-secondary);
+}
+
+body.dark:not(.admin-area) .swal2-popup {
+  --swal2-background: var(--sf-color-surface);
+  --swal2-color: var(--sf-color-text);
+  --swal2-border: 1px solid var(--sf-color-border);
+  --swal2-border-radius: var(--sf-radius-md);
+  /* Dark mode lifts the gold, so the label flips to ink. */
+  --swal2-confirm-button-background-color: var(--sf-color-gold-deep);
+  --swal2-confirm-button-color: var(--sf-color-emerald-contrast);
+  --swal2-cancel-button-background-color: var(--sf-color-surface-2);
+  --swal2-cancel-button-color: var(--sf-color-text);
+  --swal2-confirm-button-border-radius: var(--sf-radius-sm);
+  --swal2-cancel-button-border-radius: var(--sf-radius-sm);
+  --swal2-close-button-color: var(--sf-color-text-muted);
+  --swal2-action-button-focus-box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--sf-color-focus-ring) 40%, transparent);
+  --swal2-timer-progress-bar-background: var(--sf-color-gold);
+  --swal2-toast-border: 1px solid var(--sf-color-border);
+  --swal2-toast-box-shadow: var(--sf-shadow-md);
+}
+
+body.dark:not(.admin-area) .swal2-popup:not(.swal2-toast) {
+  box-shadow: var(--sf-shadow-lg);
+}
+
+body.dark:not(.admin-area) .swal2-html-container {
+  color: var(--sf-color-text-secondary);
+}
+
+body.light:not(.admin-area) .swal2-popup.swal2-toast,
+body.dark:not(.admin-area) .swal2-popup.swal2-toast {
+  --swal2-border-radius: var(--sf-radius-sm);
+}
+
+/* Admin base — the neutral slate values these popups used to inherit from the
+   storefront blocks above, restored here now that those are scoped away from
+   .admin-area. Nothing about the admin dialogs changes: the admin delta blocks
+   that follow still win on source order. */
+body.admin-area.light .swal2-popup {
+  --swal2-background: #ffffff;
+  --swal2-color: #1a202c;
+  --swal2-cancel-button-background-color: #64748b;
+}
+
+body.admin-area.light .swal2-html-container {
   color: #4a5568;
 }
 
-body.dark .swal2-popup {
-  --swal2-background: #1a1f3a;
-  --swal2-color: #f5f7fa;
-  --swal2-border: 1px solid rgba(168, 85, 247, 0.25);
-  --swal2-border-radius: 16px;
-  --swal2-confirm-button-background-color: #a855f7;
+body.admin-area.dark .swal2-popup {
   --swal2-cancel-button-background-color: #475569;
-  --swal2-confirm-button-border-radius: 10px;
-  --swal2-cancel-button-border-radius: 10px;
   --swal2-close-button-color: #a0aec0;
-  --swal2-action-button-focus-box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.45);
   --swal2-timer-progress-bar-background: rgba(255, 255, 255, 0.3);
-  --swal2-toast-border: 1px solid rgba(168, 85, 247, 0.25);
   --swal2-toast-box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
-body.dark .swal2-popup:not(.swal2-toast) {
+body.admin-area.dark .swal2-popup:not(.swal2-toast) {
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
-}
-
-body.dark .swal2-html-container {
-  color: #a0aec0;
-}
-
-body.light .swal2-popup.swal2-toast,
-body.dark .swal2-popup.swal2-toast {
-  --swal2-border-radius: 12px;
 }
 
 /* Admin area: flat surfaces, 6-8px radii, slate palette */

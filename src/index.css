@@ -1,19 +1,23 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
-
 /* Storefront design tokens (CSS custom properties). Re-skin a client by editing
-   src/theme/storefront-tokens.css — see STOREFRONT_UX_GUIDELINES.md. */
+   src/theme/storefront-tokens.css — see STOREFRONT_UX_GUIDELINES.md.
+   NB: the webfonts (Cormorant Garamond for display, Inter for UI) are loaded by
+   the <link> in public/index.html. Do NOT @import them here — a second request
+   for the same families only delays first paint. */
 @import "./theme/storefront-tokens.css";
-/* Shared, reusable brand primitives (buttons, badges, cards, skeleton, toast)
-   built on the tokens above. Loaded once, app-wide. See Prompt 02. */
+/* Shared, reusable brand primitives (buttons, chips, cards, skeleton, toast)
+   built on the tokens above. Loaded once, app-wide. Order is load-bearing:
+   tokens must be defined before the primitives that consume them. */
 @import "./theme/storefront-primitives.css";
 
 body {
   margin: 0;
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
-    "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
-    sans-serif;
+  font-family: var(--sf-font-family);
+  color: var(--sf-color-text);
+  background-color: var(--sf-color-bg);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "kern" 1, "liga" 1;
 }
 
 code {
@@ -27,6 +31,14 @@ code {
 
 html {
   scroll-behavior: smooth;
+}
+
+/* Champagne selection — the logo's highlight stop over ink. Storefront only;
+   the admin panel keeps the browser default. */
+body:not(.admin-area)::selection,
+body:not(.admin-area) ::selection {
+  background: var(--sf-color-gold-light);
+  color: var(--sf-color-primary-dark);
 }
 
 /*

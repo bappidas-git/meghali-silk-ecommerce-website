@@ -6,12 +6,18 @@
  * storefront. Every class is prefixed with `sf-` to avoid collisions. Loaded
  * app-wide exactly once via `src/index.css` (right after storefront-tokens.css).
  *
+ * THE LOOK: warm-minimalist editorial. Near-rectangular (2–4px), hairlines over
+ * heavy borders, flat surfaces, uppercase Inter with generous tracking for
+ * actions, gold used as seasoning — never as a large fill. Motion is slow and
+ * decelerating (--sf-transition), never bouncy, never glowing.
+ *
  * RULES
  *   • Consume design tokens by name only (var(--sf-*) / var(--brand-*)). Never
  *     hardcode hex, gradients, shadows, radius, or spacing here.
  *   • Do NOT redefine tokens and do NOT @import fonts (fonts load elsewhere).
  *   • These are the brand PRIMITIVES that later prompts (Header, ProductCard,
- *     pages) compose on top of — the class names are a contract; keep them stable.
+ *     pages) compose on top of — the class names are a contract; keep them
+ *     stable. Restyle in place; never rename.
  * ========================================================================== */
 
 /* =============================================================================
@@ -25,64 +31,69 @@
   min-height: var(--sf-tap-target);
   padding: var(--sf-space-3) var(--sf-space-6);
   border: 1px solid transparent;
-  border-radius: var(--sf-radius-pill);
+  border-radius: var(--sf-radius-sm);
+  background: transparent;
   font-family: var(--sf-font-family);
   font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
+  font-weight: var(--sf-font-medium);
   line-height: var(--sf-leading-tight);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
   text-align: center;
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
   user-select: none;
-  transition: var(--sf-transition);
+  transition: background-color var(--sf-transition),
+    border-color var(--sf-transition), color var(--sf-transition),
+    opacity var(--sf-transition);
 }
 
-.sf-btn:hover {
-  text-decoration: none;
-}
-
-/* Gold primary — luxe headline action */
-.sf-btn--gold {
-  background: var(--sf-gradient-gold);
-  color: var(--sf-color-brand-green-deep);
-  box-shadow: var(--sf-shadow-xs);
-}
-.sf-btn--gold:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--sf-shadow-md);
-}
-
-/* Emerald — primary commerce CTA (Add to Cart, Apply, Proceed) */
+/* Primary — the ink button. Legacy class name (`--emerald`, 188 usages) kept:
+   in this palette the primary CTA is the same near-black as the type, and it
+   warms to deep gold on hover rather than lifting off the page. Both tokens
+   invert under body.dark, so this single pair covers light and dark. */
 .sf-btn--emerald {
-  background: var(--sf-color-emerald);
+  background-color: var(--sf-color-emerald);
   color: var(--sf-color-emerald-contrast);
-  box-shadow: var(--sf-shadow-xs);
+  border-color: var(--sf-color-emerald);
 }
 .sf-btn--emerald:hover {
-  background: var(--sf-color-emerald-hover);
-  transform: translateY(-2px);
-  box-shadow: var(--sf-shadow-md);
+  background-color: var(--sf-color-gold-deep);
+  border-color: var(--sf-color-gold-deep);
 }
 
-/* Ghost — neutral secondary */
-.sf-btn--ghost {
-  background: transparent;
-  border-color: var(--sf-color-border-strong);
-  color: var(--sf-color-text);
+/* Gold fill — reserved for rare hero moments (one per page, at most). */
+.sf-btn--gold {
+  background-image: var(--sf-gradient-gold);
+  color: var(--sf-color-primary-dark);
+  border-color: transparent;
 }
-.sf-btn--ghost:hover {
-  background: var(--sf-color-surface-hover);
+.sf-btn--gold:hover {
+  background-image: none;
+  background-color: var(--sf-color-gold);
 }
 
-/* Outline gold — quiet brand action */
+/* Outline gold — hairline brand action. */
 .sf-btn--outline-gold {
-  background: transparent;
-  border-color: var(--sf-color-gold);
-  color: var(--sf-color-gold);
+  color: var(--sf-color-accent);
+  border-color: color-mix(in srgb, var(--sf-color-accent) 55%, transparent);
 }
 .sf-btn--outline-gold:hover {
-  background: color-mix(in srgb, var(--sf-color-gold) 12%, transparent);
+  border-color: var(--sf-color-accent);
+  background-color: color-mix(in srgb, var(--sf-color-accent) 8%, transparent);
+}
+
+/* Ghost — the quiet text button. No chrome until you reach for it. */
+.sf-btn--ghost {
+  color: var(--sf-color-text);
+  border-color: transparent;
+}
+.sf-btn--ghost:hover {
+  color: var(--sf-color-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 6px;
 }
 
 /* Sizes */
@@ -93,36 +104,41 @@
 }
 .sf-btn--lg {
   min-height: 52px;
-  padding: var(--sf-space-4) var(--sf-space-8);
-  font-size: var(--sf-text-md);
+  padding: var(--sf-space-4) var(--sf-space-10);
+  font-size: var(--sf-text-sm);
 }
 .sf-btn--block {
   display: flex;
   width: 100%;
 }
 
+/* On touch, the compact size still has to clear the 44px target (WCAG 2.5.5). */
+@media (pointer: coarse) {
+  .sf-btn--sm {
+    min-height: var(--sf-tap-target);
+  }
+}
+
 /* Disabled */
 .sf-btn:disabled,
 .sf-btn[aria-disabled="true"] {
-  opacity: 0.55;
+  opacity: 0.45;
   cursor: not-allowed;
   pointer-events: none;
 }
-.sf-btn:disabled:hover,
-.sf-btn[aria-disabled="true"]:hover {
-  transform: none;
-  box-shadow: var(--sf-shadow-xs);
-}
 
-/* Focus — never remove the ring */
+/* Focus — never remove the ring. The token is a two-layer ring (a ground-
+   coloured gap, then the gold), so it reads on every surface. The transparent
+   outline is what Windows High Contrast mode paints instead. */
 .sf-btn:focus-visible {
-  outline: 2px solid var(--sf-color-gold);
+  outline: 2px solid transparent;
   outline-offset: 2px;
   box-shadow: var(--sf-shadow-focus);
 }
 
 /* =============================================================================
  * A2. BADGES / CHIPS / PILLS
+ * Small caps, hairlines and soft tints. These are labels, not stickers.
  * ========================================================================== */
 
 /* Top-left "-NN%" discount badge on cards */
@@ -135,47 +151,51 @@
   color: var(--sf-color-discount);
   font-family: var(--sf-font-family);
   font-size: var(--sf-text-xs);
-  font-weight: var(--sf-font-bold);
+  font-weight: var(--sf-font-semibold);
   line-height: 1;
-  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
   border-radius: var(--sf-radius-sm);
 }
 
-/* Gold "PREMIUM" ribbon — PDP / hero */
+/* Gold "PREMIUM" mark — PDP / hero. Hairline outline over a breath of
+   champagne; the gradient fill would shout on an ivory page. */
 .sf-ribbon-premium {
   display: inline-flex;
   align-items: center;
   gap: var(--sf-space-1);
   padding: var(--sf-space-1) var(--sf-space-3);
-  background: var(--sf-gradient-gold);
-  color: var(--sf-color-brand-green-deep);
+  background: color-mix(in srgb, var(--sf-color-gold) 10%, transparent);
+  color: var(--sf-color-gold-deep);
+  border: 1px solid color-mix(in srgb, var(--sf-color-gold) 45%, transparent);
   font-family: var(--sf-font-family);
   font-size: var(--sf-text-xs);
-  font-weight: var(--sf-font-bold);
+  font-weight: var(--sf-font-semibold);
   text-transform: uppercase;
-  letter-spacing: 0.12em;
+  letter-spacing: var(--sf-tracking-wide);
   line-height: 1;
   border-radius: var(--sf-radius-sm);
-  box-shadow: var(--sf-shadow-xs);
 }
 
-/* Neutral category chip */
+/* Category chip — a filter tab, not a bubble. Sits on the page ground. */
 .sf-chip {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--sf-space-2);
   padding: var(--sf-space-2) var(--sf-space-4);
-  background: var(--sf-color-surface-2);
+  background: transparent;
   color: var(--sf-color-text-secondary);
   border: 1px solid var(--sf-color-border);
-  border-radius: var(--sf-radius-pill);
+  border-radius: var(--sf-radius-sm);
   font-family: var(--sf-font-family);
   font-size: var(--sf-text-sm);
   font-weight: var(--sf-font-medium);
+  letter-spacing: 0.02em;
   line-height: 1;
   cursor: pointer;
-  transition: var(--sf-transition-fast);
+  transition: background-color var(--sf-transition-fast),
+    border-color var(--sf-transition-fast), color var(--sf-transition-fast);
 }
 /* When used as an interactive control, meet the touch-target minimum. */
 button.sf-chip,
@@ -183,68 +203,79 @@ a.sf-chip {
   min-height: var(--sf-tap-target);
 }
 .sf-chip:hover {
-  background: var(--sf-color-surface-hover);
+  color: var(--sf-color-text);
   border-color: var(--sf-color-border-strong);
+  background: var(--sf-color-surface-hover);
 }
 .sf-chip:focus-visible {
-  outline: 2px solid var(--sf-color-gold);
+  outline: 2px solid transparent;
   outline-offset: 2px;
   box-shadow: var(--sf-shadow-focus);
 }
+/* Active = ink fill (ivory fill in dark mode — both tokens invert). */
 .sf-chip--active {
-  background: color-mix(in srgb, var(--sf-color-gold) 14%, transparent);
-  border-color: var(--sf-color-gold);
-  color: var(--sf-color-text);
-  font-weight: var(--sf-font-semibold);
+  background: var(--sf-color-emerald);
+  border-color: var(--sf-color-emerald);
+  color: var(--sf-color-emerald-contrast);
+  font-weight: var(--sf-font-medium);
+}
+.sf-chip--active:hover {
+  background: var(--sf-color-emerald-hover);
+  border-color: var(--sf-color-emerald-hover);
+  color: var(--sf-color-emerald-contrast);
 }
 
-/* "Save ₹X" pill — emerald tint */
+/* "Save ₹X" mark — hairline, so it reads as a note rather than a sticker. */
 .sf-pill-save {
   display: inline-flex;
   align-items: center;
   gap: var(--sf-space-1);
   padding: var(--sf-space-1) var(--sf-space-3);
-  background: var(--sf-color-discount-bg);
+  background: transparent;
   color: var(--sf-color-discount);
-  border-radius: var(--sf-radius-pill);
+  border: 1px solid color-mix(in srgb, var(--sf-color-discount) 40%, transparent);
+  border-radius: var(--sf-radius-sm);
   font-family: var(--sf-font-family);
   font-size: var(--sf-text-xs);
-  font-weight: var(--sf-font-semibold);
+  font-weight: var(--sf-font-medium);
+  letter-spacing: 0.02em;
   line-height: 1;
 }
 
 /* =============================================================================
  * A3. CARD SURFACE
+ * Flat by default — editorial pages sit on the page, they don't float above it.
  * ========================================================================== */
 .sf-card {
   background: var(--sf-color-surface);
   border: 1px solid var(--sf-color-border);
-  border-radius: var(--sf-radius-lg);
-  box-shadow: var(--sf-shadow-sm);
+  border-radius: var(--sf-radius-md);
   overflow: hidden;
-  transition: var(--sf-transition);
+  transition: transform var(--sf-transition), box-shadow var(--sf-transition),
+    border-color var(--sf-transition);
 }
 .sf-card--hover:hover {
   border-color: var(--sf-color-border-strong);
-  box-shadow: var(--sf-shadow-md);
-  transform: translateY(-4px);
+  box-shadow: var(--sf-shadow-sm);
+  transform: translateY(-3px);
 }
 
 /* =============================================================================
  * A4. SKELETON LOADER
+ * Warm sand sweep — the ivory ground breathing, not a grey placeholder.
  * ========================================================================== */
 .sf-skeleton {
   background-color: var(--sf-color-surface-2);
   background-image: linear-gradient(
     90deg,
     var(--sf-color-surface-2) 0%,
-    var(--sf-color-surface-hover) 50%,
+    var(--sf-color-border) 50%,
     var(--sf-color-surface-2) 100%
   );
   background-size: 200% 100%;
   background-repeat: no-repeat;
-  border-radius: var(--sf-radius-md);
-  animation: sf-skeleton-shimmer 1.4s ease-in-out infinite;
+  border-radius: var(--sf-radius-sm);
+  animation: sf-skeleton-shimmer 1.6s ease-in-out infinite;
 }
 .sf-skeleton--text {
   height: 0.75em;
@@ -272,6 +303,9 @@ a.sf-chip {
     background-image: none;
     background-color: var(--sf-color-surface-2);
   }
+  .sf-card--hover:hover {
+    transform: none;
+  }
 }
 
 /* =============================================================================
@@ -285,31 +319,31 @@ a.sf-chip {
   padding: var(--sf-space-4) var(--sf-space-5);
   padding-left: var(--sf-space-6);
   background: var(--sf-color-surface);
-  border: 1px solid var(--sf-color-border-strong);
-  border-radius: var(--sf-radius-lg);
-  box-shadow: var(--sf-shadow-lg);
+  border: 1px solid var(--sf-color-border);
+  border-radius: var(--sf-radius-md);
+  box-shadow: var(--sf-shadow-md);
   font-family: var(--sf-font-family);
   color: var(--sf-color-text);
   overflow: hidden;
 }
-/* Left accent bar */
+/* Left accent rule — a hairline of meaning, 2px wide. */
 .sf-toast::before {
   content: "";
   position: absolute;
   top: 0;
   left: 0;
   bottom: 0;
-  width: var(--sf-space-1);
-  background: var(--sf-color-gold);
+  width: 2px;
+  background: var(--sf-color-gold-deep);
 }
 .sf-toast--success::before {
-  background: var(--sf-color-emerald);
+  background: var(--sf-color-success);
 }
 .sf-toast--error::before {
   background: var(--sf-color-danger);
 }
 .sf-toast--info::before {
-  background: var(--sf-color-gold);
+  background: var(--sf-color-accent);
 }
 .sf-toast__title {
   font-size: var(--sf-text-sm);
