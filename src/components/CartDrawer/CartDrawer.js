@@ -1,12 +1,17 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useCart } from "../../hooks/useCart";
 import { useTheme } from "../../context/ThemeContext";
 import apiService from "../../services/api";
 import {
   formatCurrency,
-  truncateText,
   productPath,
   PLACEHOLDER_IMG,
   onImageError,
@@ -18,6 +23,21 @@ import styles from "./CartDrawer.module.css";
 // flatRate in db.json; the free-shipping cutoff itself comes from the shared
 // FREE_SHIPPING_THRESHOLD constant (same source as Header + Checkout).
 const FLAT_SHIPPING = 99;
+
+// framer-motion needs JS values, so the Prompt 01 motion tokens are mirrored
+// here: EASE is --sf-ease and the durations sit on the --sf-transition tier.
+// Keep in sync with storefront-tokens.css if the curve is ever retuned.
+const EASE = [0.22, 1, 0.36, 1];
+
+// Tab-cycling needs the tray's own focusables. Links, buttons and the promo
+// input are the lot; the panel itself is tabIndex={-1} and is excluded by the
+// [tabindex="-1"] guard.
+const FOCUSABLE_SELECTOR = [
+  "a[href]",
+  "button:not([disabled])",
+  "input:not([disabled])",
+  '[tabindex]:not([tabindex="-1"])',
+].join(",");
 
 // Discount for an applied coupon at the current subtotal. Derived (never
 // stored), so qty changes can't leave a stale amount and re-applying a coupon
@@ -36,6 +56,8 @@ const couponDiscountFor = (coupon, amount) => {
 const CartDrawer = ({ open, onClose }) => {
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
+  const reduceMotion = useReducedMotion();
+  const panelRef = useRef(null);
   const {
     cartItems,
     updateQuantity,
@@ -47,6 +69,14 @@ const CartDrawer = ({ open, onClose }) => {
   const cart = useMemo(() => cartItems || [], [cartItems]);
   const cartCount = getCartItemCount ? getCartItemCount() : 0;
   const cartTotal = getCartTotal ? getCartTotal() : 0;
+
+  // Header hands a fresh arrow function down on every one of its renders, so
+  // the focus effect below reads onClose through a ref — depending on the prop
+  // directly would tear the focus trap down and rebuild it mid-interaction.
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   // ---- Promo code state ----------------------------------------------------
   const [couponCode, setCouponCode] = useState("");
@@ -91,6 +121,51 @@ const CartDrawer = ({ open, onClose }) => {
     };
   }, [open]);
 
+  // Focus management: remember what opened the tray, move focus into the panel,
+  // cycle Tab inside it while it is open, close on Escape, and hand focus back
+  // to the opener (the masthead cart icon) on close.
+  useEffect(() => {
+    if (!open) return undefined;
+    const opener = document.activeElement;
+    const focusTimer = setTimeout(() => panelRef.current?.focus(), 60);
+
+    const onKey = (e) => {
+      if (e.key === "Escape") {
+        onCloseRef.current?.();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const panel = panelRef.current;
+      if (!panel) return;
+      const nodes = Array.from(panel.querySelectorAll(FOCUSABLE_SELECTOR));
+      if (nodes.length === 0) {
+        e.preventDefault();
+        panel.focus();
+        return;
+      }
+      const first = nodes[0];
+      const last = nodes[nodes.length - 1];
+      const active = document.activeElement;
+      // The panel itself holds focus on open, so treat it as "outside" the
+      // ring — the first Tab must land on the first control.
+      const outside = active === panel || !panel.contains(active);
+      if (e.shiftKey && (outside || active === first)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (outside || active === last)) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      clearTimeout(focusTimer);
+      if (opener && typeof opener.focus === "function") opener.focus();
+    };
+  }, [open]);
+
   // A coupon only stays applied while the cart still meets its minimum — drop
   // it (with a note) if the subtotal falls below, mirroring Checkout.
   useEffect(() => {
@@ -117,10 +192,13 @@ const CartDrawer = ({ open, onClose }) => {
     removeFromCart(itemId);
   };
 
-  const handleNavigate = (path) => {
-    onClose();
-    navigate(path);
-  };
+  const handleNavigate = useCallback(
+    (path) => {
+      onClose();
+      navigate(path);
+    },
+    [navigate, onClose]
+  );
 
   const applyCoupon = async () => {
     setCouponError("");
@@ -153,41 +231,92 @@ const CartDrawer = ({ open, onClose }) => {
   const themeClass = isDarkMode ? styles.dark : styles.light;
   const isEmpty = cart.length === 0;
 
+  // ---------------------------------------------------------------------------
+  // MOTION — the tray slides in slowly on the editorial curve; reduced motion
+  // trades the slide for a plain fade and drops every per-row offset.
+  // ---------------------------------------------------------------------------
+  const panelVariants = reduceMotion
+    ? {
+        hidden: { opacity: 0 },
+        visible: { opacity: 1, transition: { duration: 0 } },
+        exit: { opacity: 0, transition: { duration: 0 } },
+      }
+    : {
+        hidden: { x: "100%" },
+        visible: {
+          x: 0,
+          transition: { type: "spring", damping: 36, stiffness: 220, mass: 1 },
+        },
+        exit: { x: "100%", transition: { duration: 0.35, ease: EASE } },
+      };
+
+  // Rows arrive and leave quietly. Height collapses on exit so the list closes
+  // the gap instead of jumping, and `opacity: 0` takes the row's hairline with
+  // it — a border on a zero-height row would otherwise linger for a frame.
+  const lineMotion = reduceMotion
+    ? {
+        initial: { opacity: 0 },
+        animate: { opacity: 1, transition: { duration: 0 } },
+        exit: { opacity: 0, height: 0, transition: { duration: 0 } },
+      }
+    : {
+        initial: { opacity: 0, x: 16 },
+        animate: { opacity: 1, x: 0, transition: { duration: 0.4, ease: EASE } },
+        exit: {
+          opacity: 0,
+          height: 0,
+          paddingTop: 0,
+          paddingBottom: 0,
+          overflow: "hidden",
+          transition: { duration: 0.3, ease: EASE },
+        },
+      };
+
   return (
     <AnimatePresence>
       {open && (
         <>
-          {/* Backdrop overlay */}
+          {/* ===== Scrim — the token overlay, nothing more ===== */}
           <motion.div
-            className={styles.backdrop}
+            className={styles.scrim}
             initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            animate={{
+              opacity: 1,
+              transition: { duration: reduceMotion ? 0 : 0.4, ease: EASE },
+            }}
+            exit={{
+              opacity: 0,
+              transition: { duration: reduceMotion ? 0 : 0.3, ease: EASE },
+            }}
             onClick={onClose}
           />
 
-          {/* Drawer panel */}
+          {/* ===== The tray ===== */}
           <motion.aside
+            ref={panelRef}
             className={`${styles.drawer} ${themeClass}`}
             role="dialog"
             aria-modal="true"
             aria-label="Shopping cart"
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ type: "spring", damping: 30, stiffness: 300 }}
+            tabIndex={-1}
+            variants={panelVariants}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
           >
-            {/* Header */}
+            {/* ---- Masthead row ----------------------------------------- */}
             <div className={styles.header}>
-              <h2 className={styles.title}>
-                Shopping Cart
+              <div className={styles.heading}>
+                <h2 className={styles.title}>Your Cart</h2>
                 {cartCount > 0 && (
-                  <span className={styles.itemCount}>{cartCount}</span>
+                  <span className={styles.count}>
+                    {cartCount} {cartCount === 1 ? "item" : "items"}
+                  </span>
                 )}
-              </h2>
+              </div>
               <button
-                className={styles.closeButton}
+                type="button"
+                className={styles.closeBtn}
                 onClick={onClose}
                 aria-label="Close cart"
               >
@@ -197,9 +326,9 @@ const CartDrawer = ({ open, onClose }) => {
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
-                  strokeWidth="2"
+                  strokeWidth="1.4"
                   strokeLinecap="round"
-                  strokeLinejoin="round"
+                  aria-hidden="true"
                 >
                   <line x1="18" y1="6" x2="6" y2="18" />
                   <line x1="6" y1="6" x2="18" y2="18" />
@@ -208,82 +337,73 @@ const CartDrawer = ({ open, onClose }) => {
             </div>
 
             {isEmpty ? (
-              /* ---- Empty state -------------------------------------------- */
-              <div className={styles.emptyState}>
-                <motion.div
-                  className={styles.emptyStateInner}
-                  initial={{ scale: 0.9, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ duration: 0.4, ease: "easeOut" }}
+              /* ---- Empty state ------------------------------------------ */
+              <div className={styles.empty}>
+                <svg
+                  className={styles.emptyArt}
+                  width="64"
+                  height="72"
+                  viewBox="0 0 64 72"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  aria-hidden="true"
                 >
-                  <svg
-                    className={styles.emptyIcon}
-                    width="80"
-                    height="80"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="9" cy="21" r="1" />
-                    <circle cx="20" cy="21" r="1" />
-                    <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" />
-                  </svg>
-                  <h3 className={styles.emptyTitle}>Your cart is empty</h3>
-                  <p className={styles.emptyText}>
-                    Browse our handloom silk collections to get started.
-                  </p>
-                  <button
-                    className={styles.shopBtn}
-                    onClick={() => handleNavigate("/products")}
-                  >
-                    Shop
-                  </button>
-                </motion.div>
+                  <path d="M9 22h46l-3.6 42.2A4 4 0 0 1 47.4 68H16.6a4 4 0 0 1-4-3.8L9 22Z" />
+                  <path d="M22 29V17a10 10 0 0 1 20 0v12" />
+                  <line x1="9" y1="30" x2="55" y2="30" />
+                </svg>
+                <h3 className={styles.emptyTitle}>Your cart is empty</h3>
+                <p className={styles.emptyText}>
+                  Nothing chosen yet. The looms of Sualkuchi are waiting.
+                </p>
+                <button
+                  type="button"
+                  className="sf-btn sf-btn--outline-gold"
+                  onClick={() => handleNavigate("/products")}
+                >
+                  Explore the collection
+                </button>
               </div>
             ) : (
               <>
-                {/* Free shipping progress bar */}
-                <div className={styles.shippingBanner}>
-                  {amountToFreeShipping > 0 ? (
-                    <p className={styles.shippingText}>
-                      Add{" "}
-                      <strong>{formatCurrency(amountToFreeShipping)}</strong>{" "}
-                      more for <strong>FREE shipping</strong>
-                    </p>
-                  ) : (
-                    <p className={styles.shippingText}>
-                      <svg
-                        className={styles.checkIcon}
-                        width="16"
-                        height="16"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                      You've unlocked <strong>FREE shipping!</strong>
-                    </p>
-                  )}
-                  <div className={styles.progressBarTrack}>
+                {/* ---- Free-shipping meter — one hairline, one honest line */}
+                <div className={styles.meter}>
+                  <p className={styles.meterText}>
+                    {amountToFreeShipping > 0 ? (
+                      <>
+                        <strong>{formatCurrency(amountToFreeShipping)}</strong>{" "}
+                        away from complimentary shipping
+                      </>
+                    ) : (
+                      "Complimentary shipping unlocked"
+                    )}
+                  </p>
+                  <div
+                    className={styles.meterTrack}
+                    role="progressbar"
+                    aria-label="Progress towards complimentary shipping"
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={Math.round(shippingProgress)}
+                  >
                     <motion.div
-                      className={styles.progressBarFill}
+                      className={styles.meterFill}
                       initial={{ width: 0 }}
                       animate={{ width: `${shippingProgress}%` }}
-                      transition={{ duration: 0.6, ease: "easeOut" }}
+                      transition={{
+                        duration: reduceMotion ? 0 : 0.6,
+                        ease: EASE,
+                      }}
                     />
                   </div>
                 </div>
 
-                {/* Scrollable body: items + promo + price details */}
+                {/* ---- Scroll region: lines + promo + summary ------------- */}
                 <div className={styles.body}>
-                  <div className={styles.itemsContainer}>
+                  <ul className={styles.lines}>
                     <AnimatePresence initial={false}>
                       {cart.map((item) => {
                         const hasDiscount =
@@ -295,168 +415,177 @@ const CartDrawer = ({ open, onClose }) => {
                         const productHref = productPath(item);
 
                         return (
-                          <motion.div
+                          <motion.li
                             key={item.id}
-                            className={styles.cartItem}
-                            layout
-                            initial={{ opacity: 0, x: 40 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{
-                              opacity: 0,
-                              x: -40,
-                              height: 0,
-                              marginBottom: 0,
-                              padding: 0,
-                              overflow: "hidden",
-                            }}
-                            transition={{ duration: 0.25 }}
+                            className={styles.line}
+                            layout={!reduceMotion}
+                            {...lineMotion}
                           >
-                            <div
-                              className={styles.itemImage}
-                              onClick={() => handleNavigate(productHref)}
+                            {/* The thumbnail repeats the destination of the
+                                name link beside it, so it is taken out of the
+                                tab ring rather than doubling every stop. */}
+                            <Link
+                              to={productHref}
+                              className={styles.thumb}
+                              onClick={onClose}
+                              tabIndex={-1}
+                              aria-hidden="true"
                             >
                               <img
                                 src={item.image || PLACEHOLDER_IMG}
-                                alt={item.name}
+                                alt=""
                                 loading="lazy"
                                 onError={onImageError}
                               />
-                            </div>
+                            </Link>
 
-                            <div className={styles.itemDetails}>
-                              <div className={styles.itemTop}>
-                                <div className={styles.itemMeta}>
-                                  <h4
-                                    className={styles.itemName}
-                                    onClick={() => handleNavigate(productHref)}
-                                  >
-                                    {truncateText(item.name, 45)}
-                                  </h4>
-                                  {item.variantName && (
-                                    <span className={styles.itemVariant}>
-                                      {item.variantName}
-                                    </span>
-                                  )}
-                                </div>
-                                <button
-                                  className={styles.removeBtn}
-                                  onClick={() => handleRemoveItem(item.id)}
-                                  aria-label="Remove item"
-                                >
-                                  <svg
-                                    width="16"
-                                    height="16"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  >
-                                    <polyline points="3 6 5 6 21 6" />
-                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                                    <line x1="10" y1="11" x2="10" y2="17" />
-                                    <line x1="14" y1="11" x2="14" y2="17" />
-                                  </svg>
-                                </button>
-                              </div>
+                            <div className={styles.lineBody}>
+                              <Link
+                                to={productHref}
+                                className={styles.lineName}
+                                onClick={onClose}
+                              >
+                                {item.name}
+                              </Link>
 
-                              <div className={styles.itemPricing}>
-                                <span className={styles.itemPrice}>
+                              {item.variantName && (
+                                <span className={styles.lineVariant}>
+                                  {item.variantName}
+                                </span>
+                              )}
+
+                              <p className={styles.linePrice}>
+                                <span className={styles.price}>
                                   {formatCurrency(item.price)}
                                 </span>
                                 {hasDiscount && (
-                                  <span className={styles.itemComparePrice}>
+                                  <span className={styles.compare}>
                                     {formatCurrency(item.comparePrice)}
                                   </span>
                                 )}
-                              </div>
+                              </p>
 
-                              <div className={styles.quantityControl}>
-                                <button
-                                  className={styles.quantityBtn}
-                                  onClick={() =>
-                                    handleQuantityChange(
-                                      item.id,
-                                      item.quantity - 1
-                                    )
-                                  }
-                                  disabled={item.quantity <= 1}
-                                  aria-label="Decrease quantity"
-                                >
-                                  <svg
-                                    width="14"
-                                    height="14"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2.5"
+                              <div className={styles.lineFoot}>
+                                <div className={styles.stepper}>
+                                  <button
+                                    type="button"
+                                    className={styles.stepperBtn}
+                                    onClick={() =>
+                                      handleQuantityChange(
+                                        item.id,
+                                        item.quantity - 1
+                                      )
+                                    }
+                                    disabled={item.quantity <= 1}
+                                    aria-label="Decrease quantity"
                                   >
-                                    <line x1="5" y1="12" x2="19" y2="12" />
-                                  </svg>
-                                </button>
-                                <span className={styles.quantityValue}>
-                                  {item.quantity}
-                                </span>
-                                <button
-                                  className={styles.quantityBtn}
-                                  onClick={() =>
-                                    handleQuantityChange(
-                                      item.id,
-                                      item.quantity + 1
-                                    )
-                                  }
-                                  disabled={atStockLimit}
-                                  title={
-                                    atStockLimit
-                                      ? "No more stock available"
-                                      : undefined
-                                  }
-                                  aria-label="Increase quantity"
-                                >
-                                  <svg
-                                    width="14"
-                                    height="14"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2.5"
+                                    <svg
+                                      width="14"
+                                      height="14"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="1.6"
+                                      strokeLinecap="round"
+                                      aria-hidden="true"
+                                    >
+                                      <line x1="5" y1="12" x2="19" y2="12" />
+                                    </svg>
+                                  </button>
+                                  <span
+                                    className={styles.stepperValue}
+                                    aria-live="polite"
+                                    aria-atomic="true"
                                   >
-                                    <line x1="12" y1="5" x2="12" y2="19" />
-                                    <line x1="5" y1="12" x2="19" y2="12" />
-                                  </svg>
+                                    {item.quantity}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    className={styles.stepperBtn}
+                                    onClick={() =>
+                                      handleQuantityChange(
+                                        item.id,
+                                        item.quantity + 1
+                                      )
+                                    }
+                                    disabled={atStockLimit}
+                                    title={
+                                      atStockLimit
+                                        ? "No more stock available"
+                                        : undefined
+                                    }
+                                    aria-label="Increase quantity"
+                                  >
+                                    <svg
+                                      width="14"
+                                      height="14"
+                                      viewBox="0 0 24 24"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      strokeWidth="1.6"
+                                      strokeLinecap="round"
+                                      aria-hidden="true"
+                                    >
+                                      <line x1="12" y1="5" x2="12" y2="19" />
+                                      <line x1="5" y1="12" x2="19" y2="12" />
+                                    </svg>
+                                  </button>
+                                </div>
+
+                                <button
+                                  type="button"
+                                  className={styles.removeBtn}
+                                  onClick={() => handleRemoveItem(item.id)}
+                                  aria-label={`Remove ${item.name}`}
+                                >
+                                  Remove
                                 </button>
                               </div>
                             </div>
-                          </motion.div>
+                          </motion.li>
                         );
                       })}
                     </AnimatePresence>
-                  </div>
+                  </ul>
 
-                  {/* Apply Promo Code */}
-                  <div className={styles.promoSection}>
-                    <h3 className={styles.sectionTitle}>Apply Promo Code</h3>
+                  {/* ---- Promo code -------------------------------------- */}
+                  <div className={styles.promo}>
+                    <h3 className={styles.eyebrow}>Promo code</h3>
                     {couponApplied ? (
-                      <div className={styles.couponApplied}>
-                        <span className={styles.couponAppliedText}>
-                          &#10003; {couponApplied.code} applied &minus;
-                          {formatCurrency(couponDiscount)}
+                      <div className={styles.couponChip}>
+                        <span className={styles.couponCode}>
+                          {couponApplied.code}
+                        </span>
+                        <span className={styles.couponValue}>
+                          &minus;{formatCurrency(couponDiscount)}
                         </span>
                         <button
+                          type="button"
                           className={styles.couponRemove}
                           onClick={removeCoupon}
-                          aria-label="Remove coupon"
+                          aria-label={`Remove coupon ${couponApplied.code}`}
                         >
-                          Remove
+                          <svg
+                            width="12"
+                            height="12"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            aria-hidden="true"
+                          >
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                          </svg>
                         </button>
                       </div>
                     ) : (
-                      <div className={styles.promoForm}>
+                      <div className={styles.promoField}>
                         <input
                           type="text"
                           className={styles.promoInput}
-                          placeholder="Enter promo code"
+                          placeholder="Enter code"
                           value={couponCode}
                           aria-label="Promo code"
                           onChange={(e) => {
@@ -469,54 +598,53 @@ const CartDrawer = ({ open, onClose }) => {
                           }}
                         />
                         <button
-                          className={styles.promoApplyBtn}
+                          type="button"
+                          className={styles.promoApply}
                           onClick={applyCoupon}
                           disabled={applying || !couponCode.trim()}
                         >
-                          {applying ? "…" : "Apply"}
+                          {applying ? "Applying" : "Apply"}
                         </button>
                       </div>
                     )}
                     {couponError && (
-                      <p className={styles.promoError}>{couponError}</p>
+                      <p className={`${styles.promoMsg} ${styles.promoError}`}>
+                        {couponError}
+                      </p>
                     )}
                     {couponNote && (
-                      <p className={styles.promoNote}>{couponNote}</p>
+                      <p className={styles.promoMsg}>{couponNote}</p>
                     )}
                   </div>
 
-                  {/* Price Details */}
-                  <div className={styles.priceDetails}>
-                    <h3 className={styles.sectionTitle}>Price Details</h3>
-                    <div className={styles.priceRow}>
-                      <span className={styles.priceLabel}>Subtotal</span>
-                      <span className={styles.priceValue}>
+                  {/* ---- Summary ----------------------------------------- */}
+                  <div className={styles.summary}>
+                    <h3 className={styles.eyebrow}>Summary</h3>
+                    <div className={styles.summaryRow}>
+                      <span className={styles.summaryLabel}>Subtotal</span>
+                      <span className={styles.summaryValue}>
                         {formatCurrency(cartTotal)}
                       </span>
                     </div>
                     {totalSavings > 0 && (
-                      <div className={styles.priceRow}>
-                        <span className={styles.priceLabel}>Savings</span>
-                        <span className={styles.savingsValue}>
+                      <div className={styles.summaryRow}>
+                        <span className={styles.summaryLabel}>Savings</span>
+                        <span
+                          className={`${styles.summaryValue} ${styles.savings}`}
+                        >
                           &minus;{formatCurrency(totalSavings)}
                         </span>
                       </div>
                     )}
-                    <div className={styles.priceRow}>
-                      <span className={styles.priceLabel}>Shipping</span>
-                      <span
-                        className={
-                          shippingCost === 0
-                            ? styles.freeShipping
-                            : styles.priceValue
-                        }
-                      >
+                    <div className={styles.summaryRow}>
+                      <span className={styles.summaryLabel}>Shipping</span>
+                      <span className={styles.summaryValue}>
                         {shippingCost === 0
-                          ? "FREE"
+                          ? "Free"
                           : formatCurrency(shippingCost)}
                       </span>
                     </div>
-                    <div className={`${styles.priceRow} ${styles.totalRow}`}>
+                    <div className={styles.totalRow}>
                       <span className={styles.totalLabel}>Total</span>
                       <span className={styles.totalValue}>
                         {formatCurrency(grandTotal)}
@@ -525,13 +653,21 @@ const CartDrawer = ({ open, onClose }) => {
                   </div>
                 </div>
 
-                {/* Sticky footer CTA */}
+                {/* ---- Pinned footer ------------------------------------- */}
                 <div className={styles.footer}>
                   <button
-                    className={styles.checkoutBtn}
+                    type="button"
+                    className="sf-btn sf-btn--emerald sf-btn--block"
                     onClick={() => handleNavigate("/checkout")}
                   >
                     Proceed to Checkout
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.continue}
+                    onClick={onClose}
+                  >
+                    Continue shopping
                   </button>
                 </div>
               </>
