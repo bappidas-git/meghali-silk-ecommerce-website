@@ -1,670 +1,796 @@
 /* =============================================================================
- * SearchModal — Meghali's Silk search experience.
- * Token-driven only (storefront-tokens.css); no hardcoded hex. Light/dark are
- * handled automatically by the --sf-* tokens (body.dark / body.light), so the
- * rules below never branch on theme.
+ * SearchModal — Meghali's Silk editorial search overlay
+ * =============================================================================
+ * Not a boxed modal: an ivory veil that descends over the page, full-bleed at
+ * every width, holding one oversized display-serif line on a hairline. The
+ * sheet paints --sf-color-bg, the same ground as the page, so opening search
+ * reads as the page clearing its throat rather than as a panel bolted on top.
+ *
+ * Structure, top to bottom:
+ *   .head  — eyebrow · close mark · the input line · category chips  (fixed)
+ *   .body  — results grid, or the idle state (suggestions / recent / trending)
+ * Both wrap their content in .inner, a centred --sf-container-max column.
+ *
+ * Token-driven only (storefront-tokens.css): no hardcoded hex, no hardcoded
+ * type, no theme branching — dark mode ("evening gallery") is re-derived for
+ * free by the body.dark block. The only literal colours in this feature live in
+ * the data-URI fallback image in SearchModal.js, which cannot read var().
  * ========================================================================== */
 
-/* ===== Overlay ===== */
+/* ---- Scrim ------------------------------------------------------------- */
 .overlay {
   position: fixed;
   inset: 0;
   z-index: var(--sf-z-modal);
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
+  display: block;
+  overflow: hidden;
   background: var(--sf-color-overlay);
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* ===== Modal ===== */
-.modal {
+/* ---- The sheet --------------------------------------------------------- */
+/* Full width at every breakpoint. On phones it takes the whole viewport; on
+   desktop it stops at 88vh so a sliver of scrim stays tappable underneath. */
+.sheet {
+  position: relative;
   width: 100%;
   height: 100%;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   overflow: hidden;
   background: var(--sf-color-bg);
   color: var(--sf-color-text);
   font-family: var(--sf-font-family);
+  border-bottom: 1px solid var(--sf-color-border);
 }
 
 @media (min-width: 769px) {
-  .modal {
-    width: 720px;
-    max-height: 86vh;
+  .sheet {
     height: auto;
-    margin-top: 56px;
-    border: 1px solid var(--sf-color-border);
-    border-radius: var(--sf-radius-lg);
+    max-height: 88vh;
     box-shadow: var(--sf-shadow-lg);
   }
 }
 
-/* ===== Header ===== */
-.header {
-  display: flex;
-  align-items: center;
-  gap: var(--sf-space-3);
-  padding: var(--sf-space-4) var(--sf-space-5);
-  border-bottom: 1px solid var(--sf-color-border);
-  background: var(--sf-color-surface);
-  flex-shrink: 0;
+/* ---- Centred measure --------------------------------------------------- */
+.inner {
+  width: 100%;
+  max-width: var(--sf-container-max);
+  margin: 0 auto;
+  padding-left: var(--sf-space-5);
+  padding-right: var(--sf-space-5);
 }
 
-/* ===== Search Bar ===== */
-.searchBar {
-  flex: 1;
-  /* without this the bar's auto minimum inherits the input's intrinsic width
-     (nested flex), pushing the close button off-panel at 320px */
-  min-width: 0;
+@media (min-width: 769px) {
+  .inner {
+    padding-left: var(--sf-space-8);
+    padding-right: var(--sf-space-8);
+  }
+}
+
+/* =============================================================================
+ * HEAD
+ * ========================================================================== */
+.head {
+  flex: none;
+}
+
+.topRow {
   display: flex;
   align-items: center;
-  gap: var(--sf-space-3);
+  justify-content: space-between;
+  gap: var(--sf-space-4);
+  padding: var(--sf-space-4) 0 var(--sf-space-6);
+}
+
+.eyebrow {
+  font-size: 0.6875rem;
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wider);
+  color: var(--sf-color-text-muted);
+}
+
+/* A word and a mark, not a button: no fill, no ring, the ink lightening. */
+.closeBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sf-space-2);
+  min-height: var(--sf-tap-target);
+  padding: 0 0 0 var(--sf-space-3);
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  color: var(--sf-color-text-secondary);
+  transition: color var(--sf-transition-fast);
+}
+
+.closeBtn:hover {
+  color: var(--sf-color-text);
+}
+
+/* ---- The input line ---------------------------------------------------- */
+/* A rule under a serif line — the whole field is that hairline. Focus deepens
+   it to the gold focus ring rather than drawing a box around anything. */
+.field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-4);
   margin: 0;
-  padding: var(--sf-space-3) var(--sf-space-4);
-  border-radius: var(--sf-radius-pill);
-  background: var(--sf-color-surface-2);
-  border: 1.5px solid var(--sf-color-border);
+  padding: 0 0 var(--sf-space-4);
+  border-bottom: 1px solid var(--sf-color-border-strong);
   transition: border-color var(--sf-transition-fast), box-shadow var(--sf-transition-fast);
 }
 
-.searchBar:focus-within {
-  border-color: var(--sf-color-gold);
-  box-shadow: var(--sf-shadow-focus);
+.field:focus-within {
+  border-bottom-color: var(--sf-color-focus-ring);
+  box-shadow: 0 1px 0 0 var(--sf-color-focus-ring);
 }
 
-.searchIcon {
-  display: flex;
+.fieldIcon {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  line-height: 1;
-  color: var(--sf-color-gold);
+  flex: none;
+  color: var(--sf-color-text-muted);
+  transition: color var(--sf-transition-fast);
 }
 
-.searchInput {
+.field:focus-within .fieldIcon {
+  color: var(--sf-color-gold-deep);
+}
+
+.input {
   flex: 1;
   min-width: 0;
   border: none;
   outline: none;
   background: transparent;
-  font-size: var(--sf-text-base);
-  font-family: inherit;
-  line-height: var(--sf-leading-normal);
+  font-family: var(--sf-font-display);
+  font-size: clamp(1.5rem, 4.2vw, 2rem);
+  font-weight: var(--sf-font-normal);
+  line-height: var(--sf-leading-tight);
+  letter-spacing: var(--sf-tracking-tight);
   color: var(--sf-color-text);
+  caret-color: var(--sf-color-gold);
 }
 
-.searchInput::placeholder {
+.input::placeholder {
   color: var(--sf-color-text-muted);
+  opacity: 1;
 }
 
 .clearBtn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border: none;
+  flex: none;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--sf-color-border);
   border-radius: var(--sf-radius-pill);
+  background: none;
   cursor: pointer;
-  flex-shrink: 0;
-  background: var(--sf-color-surface-hover);
-  color: var(--sf-color-text-secondary);
-  transition: background var(--sf-transition-fast);
+  color: var(--sf-color-text-muted);
+  transition: color var(--sf-transition-fast), border-color var(--sf-transition-fast);
 }
 
 .clearBtn:hover {
-  background: var(--sf-color-border);
   color: var(--sf-color-text);
-}
-
-.closeBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--sf-tap-target);
-  height: var(--sf-tap-target);
-  flex-shrink: 0;
-  border: 1px solid var(--sf-color-border);
-  border-radius: var(--sf-radius-md);
-  cursor: pointer;
-  background: var(--sf-color-surface-2);
-  color: var(--sf-color-text-secondary);
-  transition: background var(--sf-transition-fast), color var(--sf-transition-fast), border-color var(--sf-transition-fast);
-}
-
-.closeBtn:hover {
-  background: var(--sf-color-surface-hover);
   border-color: var(--sf-color-border-strong);
-  color: var(--sf-color-text);
 }
 
-/* Shared focus ring for every interactive control in the overlay. */
-.clearBtn:focus-visible,
-.closeBtn:focus-visible,
-.viewAllBtn:focus-visible,
-.clearRecentBtn:focus-visible,
-.suggestionRow:focus-visible,
-.trendingRow:focus-visible,
-.productCard:focus-visible {
-  outline: 2px solid var(--sf-color-gold);
-  outline-offset: 2px;
-  box-shadow: var(--sf-shadow-focus);
+/* Indeterminate hairline that sweeps the rule while a search is in flight —
+   the loading treatment, in place of a spinner. */
+.field::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--sf-gradient-gold);
+  transform: scaleX(0);
+  transform-origin: left center;
+  opacity: 0;
+  pointer-events: none;
 }
 
-/* ===== Category Filter Chips ===== */
-.categoryFilters {
+.field[data-busy="true"]::after {
+  opacity: 1;
+  animation: sweep 1.2s var(--sf-ease) infinite;
+}
+
+@keyframes sweep {
+  0% {
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+  49.9% {
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+  50% {
+    transform: scaleX(1);
+    transform-origin: right center;
+  }
+  100% {
+    transform: scaleX(0);
+    transform-origin: right center;
+  }
+}
+
+/* ---- Category chips ---------------------------------------------------- */
+/* Rides on the shared .sf-chip primitive; only the scroller tweaks live here. */
+.chipRow {
   display: flex;
   gap: var(--sf-space-2);
-  padding: var(--sf-space-3) var(--sf-space-5);
+  padding: var(--sf-space-4) 0 var(--sf-space-5);
   overflow-x: auto;
-  flex-shrink: 0;
-  border-bottom: 1px solid var(--sf-color-border);
+  overscroll-behavior-x: contain;
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
 
-.categoryFilters::-webkit-scrollbar {
+.chipRow::-webkit-scrollbar {
   display: none;
 }
 
-/* .categoryChip rides on top of the shared .sf-chip primitive — only the
-   single-line / tap-height tweaks for the horizontal scroller live here. */
-.categoryChip {
+.chip {
   white-space: nowrap;
-  min-height: 36px;
+  flex: none;
   padding-top: var(--sf-space-2);
   padding-bottom: var(--sf-space-2);
+  letter-spacing: var(--sf-tracking-wide);
+  text-transform: uppercase;
+  font-size: 0.6875rem;
 }
 
-/* ===== Content ===== */
-.content {
+/* =============================================================================
+ * BODY
+ * ========================================================================== */
+.body {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
-  padding: var(--sf-space-5);
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  border-top: 1px solid var(--sf-color-border);
+  padding: var(--sf-space-6) 0 var(--sf-space-12);
 }
 
-/* ===== Loading State ===== */
-.loadingState {
+/* ---- Section furniture ------------------------------------------------- */
+.blockHead {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sf-space-3);
-  padding: var(--sf-space-16) var(--sf-space-5);
-  color: var(--sf-color-text-muted);
-  font-size: var(--sf-text-sm);
-}
-
-.spinner {
-  width: 32px;
-  height: 32px;
-  border: 3px solid var(--sf-color-border);
-  border-top-color: var(--sf-color-gold);
-  border-radius: var(--sf-radius-pill);
-  animation: spin 0.7s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* ===== Results Section ===== */
-.resultsSection {
-  max-width: 100%;
-}
-
-.resultsHeader {
-  display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
-  margin-bottom: var(--sf-space-4);
-  flex-wrap: wrap;
-  gap: var(--sf-space-2);
+  gap: var(--sf-space-4);
+  padding-bottom: var(--sf-space-3);
+  margin-bottom: var(--sf-space-2);
+  border-bottom: 1px solid var(--sf-color-border-strong);
 }
 
-.resultsCount {
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-medium);
-  color: var(--sf-color-text-secondary);
-}
-
-.viewAllBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sf-space-2);
-  background: none;
-  border: none;
-  font-family: inherit;
-  font-size: var(--sf-text-sm);
+.blockLabel {
+  margin: 0;
+  font-family: var(--sf-font-family);
+  font-size: 0.6875rem;
   font-weight: var(--sf-font-semibold);
-  cursor: pointer;
-  padding: var(--sf-space-2) var(--sf-space-3);
-  border-radius: var(--sf-radius-md);
-  color: var(--sf-color-gold-deep);
-  transition: background var(--sf-transition-fast), color var(--sf-transition-fast);
-}
-
-.viewAllBtn:hover {
-  background: var(--sf-color-primary-soft);
-  color: var(--sf-color-gold);
-}
-
-/* ===== Empty State ===== */
-.emptyState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--sf-space-16) var(--sf-space-5);
-  text-align: center;
-}
-
-.emptyIcon {
-  display: flex;
-  margin-bottom: var(--sf-space-4);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wider);
   color: var(--sf-color-text-muted);
-  opacity: 0.6;
 }
 
-.emptyTitle {
-  font-size: var(--sf-text-lg);
-  font-weight: var(--sf-font-semibold);
-  margin: 0 0 var(--sf-space-2);
+/* Quiet secondary action sitting on a section rule (e.g. "Clear all"). */
+.quietBtn {
+  flex: none;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  color: var(--sf-color-text-muted);
+  transition: color var(--sf-transition-fast);
+}
+
+.quietBtn:hover {
   color: var(--sf-color-text);
 }
 
-.emptyHint {
-  font-size: var(--sf-text-sm);
+/* Gold-underlined text action. */
+.textLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sf-space-2);
+  flex: none;
+  border: none;
+  background: none;
+  padding: 0 0 2px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.6875rem;
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  color: var(--sf-color-text);
+  border-bottom: 1px solid var(--sf-color-gold);
+  transition: color var(--sf-transition-fast), border-color var(--sf-transition-fast);
+}
+
+.textLink:hover {
+  color: var(--sf-color-gold-deep);
+  border-bottom-color: var(--sf-color-gold-deep);
+}
+
+.textLink svg {
+  transition: transform var(--sf-transition-fast);
+}
+
+.textLink:hover svg {
+  transform: translateX(3px);
+}
+
+.moreRow {
+  display: flex;
+  justify-content: center;
+  padding-top: var(--sf-space-10);
+}
+
+/* ---- Loading ----------------------------------------------------------- */
+.searching {
   margin: 0;
+  padding: var(--sf-space-12) 0;
+  text-align: center;
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-xl);
+  font-weight: var(--sf-font-normal);
   color: var(--sf-color-text-muted);
 }
 
-/* ===== Product Results Grid ===== */
-.resultsGrid {
+/* =============================================================================
+ * RESULTS
+ * ========================================================================== */
+.grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: var(--sf-space-4);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sf-space-8) var(--sf-space-4);
+  padding-top: var(--sf-space-5);
 }
 
-.productCard {
-  display: flex;
-  gap: var(--sf-space-4);
-  padding: var(--sf-space-3);
-  border-radius: var(--sf-radius-md);
-  cursor: pointer;
-  transition: background var(--sf-transition-fast), border-color var(--sf-transition-fast), box-shadow var(--sf-transition-fast);
-  border: 1px solid var(--sf-color-border);
-  background: var(--sf-color-surface);
+@media (min-width: 640px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--sf-space-10) var(--sf-space-5);
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--sf-space-10) var(--sf-space-6);
+  }
+}
+
+/* Flat by design: a photograph, a name, a price. No card chrome. */
+.card {
+  display: block;
   width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
   text-align: left;
   font: inherit;
   color: inherit;
+  cursor: pointer;
   -webkit-appearance: none;
   appearance: none;
 }
 
-.productCard:hover {
-  background: var(--sf-color-surface-hover);
-  border-color: var(--sf-color-border-strong);
-  box-shadow: var(--sf-shadow-sm);
-}
-
-.productImageWrap {
-  width: 80px;
-  height: 80px;
-  border-radius: var(--sf-radius-md);
+.thumb {
+  display: block;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
   overflow: hidden;
-  flex-shrink: 0;
+  margin-bottom: var(--sf-space-3);
   background: var(--sf-color-surface-2);
+  border-radius: var(--sf-radius-sm);
 }
 
-.productImage {
+.thumbImg {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform var(--sf-transition);
+  transition: transform var(--sf-transition-slow);
 }
 
-.productCard:hover .productImage {
-  transform: scale(1.05);
+.card:hover .thumbImg,
+.card:focus-visible .thumbImg,
+.railItem:hover .thumbImg,
+.railItem:focus-visible .thumbImg {
+  transform: scale(1.04);
 }
 
-.productInfo {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 3px;
-  min-width: 0;
-}
-
-.productName {
-  margin: 0;
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-  line-height: var(--sf-leading-tight);
-  color: var(--sf-color-text);
+.cardName {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text);
+  text-decoration: underline 1px transparent;
+  text-underline-offset: 3px;
+  transition: text-decoration-color var(--sf-transition-fast);
 }
 
-.productCategory {
-  font-size: var(--sf-text-xs);
-  text-transform: capitalize;
+.card:hover .cardName,
+.card:focus-visible .cardName {
+  text-decoration-color: var(--sf-color-border-strong);
+}
+
+.cardCat {
+  display: block;
+  margin-top: var(--sf-space-2);
+  font-size: 0.625rem;
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
   color: var(--sf-color-text-muted);
 }
 
-.productPrice {
-  font-size: var(--sf-text-base);
-  font-weight: var(--sf-font-bold);
+.cardPrice {
+  display: block;
+  margin-top: var(--sf-space-2);
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-medium);
   color: var(--sf-color-price);
 }
 
-.productMeta {
+.cardStars {
   display: flex;
   align-items: center;
   gap: var(--sf-space-2);
-  margin-top: 2px;
-}
-
-.stars {
-  display: inline-flex;
-  align-items: center;
-  gap: 1px;
-  color: var(--sf-color-star);
-}
-
-.starDefs {
-  position: absolute;
-  width: 0;
-  height: 0;
-  pointer-events: none;
+  margin-top: var(--sf-space-1);
 }
 
 .ratingNum {
-  font-weight: var(--sf-font-medium);
   font-size: var(--sf-text-xs);
+  color: var(--sf-color-text-muted);
+}
+
+/* ---- Empty ------------------------------------------------------------- */
+.empty {
+  padding: var(--sf-space-16) 0;
+  text-align: center;
+}
+
+.emptyTitle {
+  margin: 0 0 var(--sf-space-3);
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-2xl);
+  font-weight: var(--sf-font-normal);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text);
+  overflow-wrap: anywhere;
+}
+
+.emptyHint {
+  margin: 0 auto var(--sf-space-8);
+  max-width: 40ch;
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-relaxed);
   color: var(--sf-color-text-secondary);
 }
 
-.moreResults {
-  text-align: center;
-  padding: var(--sf-space-5) 0 var(--sf-space-1);
+.emptyLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sf-space-2);
+  padding-bottom: var(--sf-space-1);
+  font-size: 0.6875rem;
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  text-decoration: none;
+  color: var(--sf-color-text);
+  border-bottom: 1px solid var(--sf-color-gold);
+  transition: color var(--sf-transition-fast), border-color var(--sf-transition-fast);
 }
 
-/* ===== Default Content (AI Suggestions + Recent + Trending) ===== */
-.defaultContent {
+.emptyLink:hover {
+  color: var(--sf-color-gold-deep);
+  border-bottom-color: var(--sf-color-gold-deep);
+}
+
+.emptyLink svg {
+  transition: transform var(--sf-transition-fast);
+}
+
+.emptyLink:hover svg {
+  transform: translateX(3px);
+}
+
+/* =============================================================================
+ * IDLE STATE — suggestions / recent / trending
+ * ========================================================================== */
+.idle {
   display: flex;
   flex-direction: column;
-  gap: var(--sf-space-8);
-  max-width: 720px;
-  margin: 0 auto;
+  gap: var(--sf-space-10);
 }
 
-.section {
+.block {
   display: flex;
   flex-direction: column;
-  gap: var(--sf-space-3);
 }
 
-.sectionHeader {
+/* ---- Ruled text rows --------------------------------------------------- */
+.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.rowItem {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-2);
+}
+
+.rowItem + .rowItem {
+  border-top: 1px solid var(--sf-color-border);
+}
+
+.row {
+  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-}
-
-.sectionTitle {
-  display: flex;
-  align-items: center;
-  gap: var(--sf-space-2);
-  margin: 0;
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-xl);
-  font-weight: var(--sf-font-semibold);
-  color: var(--sf-color-text);
-}
-
-.titleIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--sf-color-gold);
-}
-
-.clearRecentBtn {
-  background: none;
-  border: none;
-  font-family: inherit;
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-medium);
-  cursor: pointer;
-  padding: var(--sf-space-1) var(--sf-space-2);
-  border-radius: var(--sf-radius-sm);
-  color: var(--sf-color-text-muted);
-  transition: color var(--sf-transition-fast), background var(--sf-transition-fast);
-}
-
-.clearRecentBtn:hover {
-  color: var(--sf-color-text);
-  background: var(--sf-color-surface-2);
-}
-
-/* ----- AI Suggestions (curated rows) ----- */
-.suggestionList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sf-space-2);
-}
-
-.suggestionRow {
-  display: flex;
-  align-items: center;
-  gap: var(--sf-space-3);
-  width: 100%;
-  min-height: var(--sf-tap-target);
-  padding: var(--sf-space-3) var(--sf-space-4);
-  text-align: left;
-  font-family: inherit;
-  font-size: var(--sf-text-base);
-  font-weight: var(--sf-font-medium);
-  color: var(--sf-color-text);
-  cursor: pointer;
-  border: 1px solid var(--sf-color-border);
-  border-left: 3px solid var(--sf-color-emerald);
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-primary-soft);
-  transition: background var(--sf-transition-fast), border-color var(--sf-transition-fast), transform var(--sf-transition-fast);
-}
-
-.suggestionRow:hover {
-  background: var(--sf-color-surface-hover);
-  border-color: var(--sf-color-border-strong);
-  border-left-color: var(--sf-color-gold);
-  transform: translateX(2px);
-}
-
-.suggestionDot {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: var(--sf-color-emerald);
-}
-
-.suggestionText {
-  flex: 1;
-  min-width: 0;
-}
-
-.suggestionArrow {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: var(--sf-color-text-muted);
-  transition: color var(--sf-transition-fast), transform var(--sf-transition-fast);
-}
-
-.suggestionRow:hover .suggestionArrow {
-  color: var(--sf-color-gold);
-  transform: translateX(2px);
-}
-
-/* ----- Recent Searches (chips) ----- */
-.chipGroup {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sf-space-3);
-}
-
-/* .recentChip rides on the shared .sf-chip primitive; the icon tint is the
-   only local override. */
-.recentChip svg {
-  color: var(--sf-color-gold-deep);
-  flex-shrink: 0;
-}
-
-/* ----- Trending (numbered rows) ----- */
-.trendingList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sf-space-2);
-}
-
-.trendingRow {
-  display: flex;
-  align-items: center;
   gap: var(--sf-space-4);
-  width: 100%;
   min-height: var(--sf-tap-target);
-  padding: var(--sf-space-3) var(--sf-space-4);
+  padding: var(--sf-space-3) 0;
+  border: none;
+  background: none;
   text-align: left;
-  font-family: inherit;
-  font-size: var(--sf-text-base);
-  font-weight: var(--sf-font-medium);
-  color: var(--sf-color-text);
   cursor: pointer;
-  border: 1px solid var(--sf-color-border);
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-surface);
-  transition: background var(--sf-transition-fast), border-color var(--sf-transition-fast), box-shadow var(--sf-transition-fast);
+  font-family: inherit;
+  font-size: var(--sf-text-md);
+  font-weight: var(--sf-font-normal);
+  color: var(--sf-color-text);
+  transition: color var(--sf-transition-fast);
 }
 
-.trendingRow:hover {
-  background: var(--sf-color-surface-hover);
-  border-color: var(--sf-color-border-strong);
-  box-shadow: var(--sf-shadow-xs);
-}
-
-.trendingRank {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 28px;
-  height: 28px;
-  border-radius: var(--sf-radius-pill);
-  background: var(--sf-gradient-gold);
-  color: var(--sf-color-brand-green);
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-bold);
-}
-
-.trendingText {
-  flex: 1;
+.rowText {
   min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-decoration: underline 1px transparent;
+  text-underline-offset: 5px;
+  transition: text-decoration-color var(--sf-transition-fast);
 }
 
-.trendingIcon {
+.row:hover .rowText,
+.row:focus-visible .rowText {
+  text-decoration-color: var(--sf-color-gold);
+}
+
+.rowArrow {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  color: var(--sf-color-emerald);
+  flex: none;
+  color: var(--sf-color-text-muted);
+  opacity: 0;
+  transform: translateX(-4px);
+  transition: opacity var(--sf-transition-fast), transform var(--sf-transition-fast),
+    color var(--sf-transition-fast);
 }
 
-/* ===== Responsive ===== */
-@media (max-width: 768px) {
-  .header {
-    padding: var(--sf-space-3) var(--sf-space-4);
-  }
-
-  .categoryFilters {
-    padding: var(--sf-space-3) var(--sf-space-4);
-  }
-
-  .content {
-    padding: var(--sf-space-4);
-  }
-
-  .resultsGrid {
-    grid-template-columns: 1fr;
-    gap: var(--sf-space-3);
-  }
-
-  .productImageWrap {
-    width: 70px;
-    height: 70px;
-  }
-
-  .sectionTitle {
-    font-size: var(--sf-text-lg);
-  }
+.row:hover .rowArrow,
+.row:focus-visible .rowArrow {
+  opacity: 1;
+  transform: translateX(0);
+  color: var(--sf-color-gold-deep);
 }
 
-@media (max-width: 480px) {
-  .header {
-    padding: var(--sf-space-3);
-    gap: var(--sf-space-2);
-  }
+/* ---- Recent rows: term + remove mark ----------------------------------- */
+.recentItem .row {
+  justify-content: flex-start;
+}
 
-  .content {
-    padding: var(--sf-space-4) var(--sf-space-3);
-  }
+.removeBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: var(--sf-tap-target);
+  height: var(--sf-tap-target);
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--sf-color-text-muted);
+  transition: color var(--sf-transition-fast);
+}
 
-  .productImageWrap {
-    width: 64px;
-    height: 64px;
-  }
+.removeBtn:hover {
+  color: var(--sf-color-text);
+}
 
-  .productCard {
-    padding: var(--sf-space-3);
-    gap: var(--sf-space-3);
-  }
+/* ---- Trending rail ----------------------------------------------------- */
+.rail {
+  display: flex;
+  gap: var(--sf-space-4);
+  padding: var(--sf-space-5) 0 var(--sf-space-2);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
 
-  .suggestionRow,
-  .trendingRow {
-    padding: var(--sf-space-3);
-    font-size: var(--sf-text-sm);
-  }
+.rail::-webkit-scrollbar {
+  display: none;
+}
+
+.railItem {
+  flex: 0 0 128px;
+  display: block;
+  padding: 0;
+  border: none;
+  background: none;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 @media (min-width: 769px) {
-  .resultsGrid {
-    grid-template-columns: repeat(2, 1fr);
+  .railItem {
+    flex-basis: 156px;
   }
 }
 
-@media (min-width: 1100px) {
-  .resultsGrid {
-    grid-template-columns: repeat(3, 1fr);
+.railThumb {
+  display: block;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  margin-bottom: var(--sf-space-3);
+  background: var(--sf-color-surface-2);
+  border-radius: var(--sf-radius-sm);
+}
+
+.railName {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text);
+  text-decoration: underline 1px transparent;
+  text-underline-offset: 3px;
+  transition: text-decoration-color var(--sf-transition-fast);
+}
+
+.railItem:hover .railName,
+.railItem:focus-visible .railName {
+  text-decoration-color: var(--sf-color-border-strong);
+}
+
+.railPrice {
+  display: block;
+  margin-top: var(--sf-space-1);
+  font-size: var(--sf-text-xs);
+  color: var(--sf-color-price);
+}
+
+/* =============================================================================
+ * FOCUS + a11y
+ * ========================================================================== */
+/* One visible ring for every control in the overlay. The input is excluded on
+   purpose — its focus is the rule turning gold (see .field:focus-within). */
+.closeBtn:focus-visible,
+.clearBtn:focus-visible,
+.quietBtn:focus-visible,
+.textLink:focus-visible,
+.emptyLink:focus-visible,
+.row:focus-visible,
+.removeBtn:focus-visible,
+.card:focus-visible,
+.railItem:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 3px;
+  border-radius: var(--sf-radius-sm);
+  box-shadow: var(--sf-shadow-focus);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* =============================================================================
+ * RESPONSIVE
+ * ========================================================================== */
+@media (max-width: 480px) {
+  .inner {
+    padding-left: var(--sf-space-4);
+    padding-right: var(--sf-space-4);
+  }
+
+  .topRow {
+    padding: var(--sf-space-3) 0 var(--sf-space-5);
+  }
+
+  .closeText {
+    /* The mark alone carries it at 375px; the aria-label still reads "Close
+       search", so nothing is lost for assistive tech. */
+    display: none;
+  }
+
+  .body {
+    padding-top: var(--sf-space-5);
+  }
+
+  .grid {
+    gap: var(--sf-space-6) var(--sf-space-3);
+  }
+
+  .emptyTitle {
+    font-size: var(--sf-text-xl);
   }
 }
 
-/* Respect reduced-motion: kill the framer transforms-on-hover micro-motions
-   (the transition tokens already collapse to 0s storefront-wide). */
+/* =============================================================================
+ * REDUCED MOTION
+ * ========================================================================== */
+/* The transition tokens already collapse to 0s storefront-wide; these rules
+   kill the transforms and the looping sweep the tokens cannot reach. */
 @media (prefers-reduced-motion: reduce) {
-  .suggestionRow:hover,
-  .suggestionRow:hover .suggestionArrow,
-  .productCard:hover .productImage {
+  .card:hover .thumbImg,
+  .card:focus-visible .thumbImg,
+  .railItem:hover .thumbImg,
+  .railItem:focus-visible .thumbImg,
+  .textLink:hover svg,
+  .emptyLink:hover svg {
     transform: none;
+  }
+
+  .rowArrow {
+    transform: none;
+  }
+
+  /* Busy still reads as a gold rule — it simply stops moving. */
+  .field[data-busy="true"]::after {
+    animation: none;
+    transform: scaleX(1);
   }
 }
