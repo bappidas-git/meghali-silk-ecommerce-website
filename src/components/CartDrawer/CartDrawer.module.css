@@ -1,34 +1,54 @@
-/* ========================================
-   CartDrawer - Backdrop
-   ======================================== */
+/* =============================================================================
+ * CartDrawer — the quiet tray
+ * =============================================================================
+ * Not a shopping panel: a page of the boutique's ledger that slides in from the
+ * right. The tray paints --sf-color-bg, the same ivory ground as the page, so
+ * opening it reads as the page turning rather than as a slab arriving. Every
+ * separation in here is a 1px hairline — there is not a single card, fill or
+ * shadow inside the panel; only the panel's own edge lifts it off the scrim.
+ *
+ * THE ONE SERIF MOMENT
+ *   Two things are set in the display serif: the "Your Cart" masthead and the
+ *   Total. Everything between them is quiet Inter — tracked uppercase for
+ *   labels and actions, tabular figures for every number, so the column of
+ *   money on the right never jitters as quantities change.
+ *
+ * TOKENS ONLY
+ *   Colour, spacing, radius, shadow, type and motion all come from
+ *   src/theme/storefront-tokens.css, so dark mode ("evening gallery") and the
+ *   reduced-motion pass are re-derived for free. No hardcoded hex anywhere.
+ * ========================================================================== */
 
-.backdrop {
+/* =============================================================================
+ * 1. SCRIM + PANEL
+ * ========================================================================== */
+
+.scrim {
   position: fixed;
   inset: 0;
-  background: var(--sf-color-overlay);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
   z-index: var(--sf-z-overlay);
+  background: var(--sf-color-overlay);
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* ========================================
-   CartDrawer - Main Panel
-   ======================================== */
-
+/* Sits in the overlay band: above the masthead and the BottomNav (--sf-z-sticky)
+   and below Swal's 2000, so a confirm dialog still lands on top of the tray. */
 .drawer {
   position: fixed;
   top: 0;
   right: 0;
   bottom: 0;
-  width: 420px;
-  max-width: 100vw;
   z-index: var(--sf-z-modal);
+  width: min(100vw, 440px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  outline: none;
   background: var(--sf-color-bg);
   color: var(--sf-color-text);
+  border-left: 1px solid var(--sf-color-border);
   box-shadow: var(--sf-shadow-lg);
+  font-family: var(--sf-font-family);
 }
 
 /* Colours come from the storefront tokens (which flip on body.dark); these
@@ -42,134 +62,136 @@
   color-scheme: light;
 }
 
-/* ========================================
-   Header
-   ======================================== */
+/* =============================================================================
+ * 2. MASTHEAD ROW
+ * ========================================================================== */
 
 .header {
+  flex: none;
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
+  gap: var(--sf-space-4);
   padding: var(--sf-space-5) var(--sf-space-6);
-  flex-shrink: 0;
   border-bottom: 1px solid var(--sf-color-border);
-  background: var(--sf-color-surface);
+}
+
+.heading {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sf-space-3);
+  min-width: 0;
 }
 
 .title {
-  display: flex;
-  align-items: center;
-  gap: var(--sf-space-3);
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-xl);
-  font-weight: var(--sf-font-bold);
-  letter-spacing: -0.01em;
   margin: 0;
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-2xl);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  letter-spacing: var(--sf-tracking-normal);
   color: var(--sf-color-text);
 }
 
-.itemCount {
+/* The count is a note beside the title, not a badge on it. */
+.count {
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  white-space: nowrap;
+  color: var(--sf-color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.closeBtn {
+  flex: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 26px;
-  height: 26px;
-  padding: 0 var(--sf-space-2);
-  border-radius: var(--sf-radius-pill);
-  font-family: var(--sf-font-family);
-  font-size: var(--sf-text-xs);
-  font-weight: var(--sf-font-bold);
-  line-height: 1;
-  background: var(--sf-gradient-gold);
-  color: var(--sf-color-emerald-contrast);
-}
-
-.closeButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  align-self: center;
   width: var(--sf-tap-target);
   height: var(--sf-tap-target);
-  border: 1px solid var(--sf-color-border);
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-surface-2);
-  color: var(--sf-color-text-secondary);
-  cursor: pointer;
-  transition: background var(--sf-transition-fast),
-    color var(--sf-transition-fast), border-color var(--sf-transition-fast);
-}
-
-.closeButton:hover {
-  background: var(--sf-color-surface-hover);
+  margin-right: calc(var(--sf-space-3) * -1);
+  padding: 0;
+  border: none;
+  border-radius: var(--sf-radius-sm);
+  background: transparent;
   color: var(--sf-color-text);
-  border-color: var(--sf-color-border-strong);
+  cursor: pointer;
+  transition: color var(--sf-transition-fast);
+  -webkit-tap-highlight-color: transparent;
 }
 
-.closeButton:focus-visible {
-  outline: none;
+.closeBtn:hover {
+  color: var(--sf-color-accent);
+}
+
+.closeBtn:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
   box-shadow: var(--sf-shadow-focus);
 }
 
-/* ========================================
-   Free Shipping Progress Bar
-   ======================================== */
+/* =============================================================================
+ * 3. FREE-SHIPPING METER
+ * =============================================================================
+ * One honest line and one 2px rule. The number and the threshold are the real
+ * ones (FREE_SHIPPING_THRESHOLD / the Standard method's flat rate) — there is
+ * no timer, no scarcity note and nothing else in this block.
+ * ========================================================================== */
 
-.shippingBanner {
+.meter {
+  flex: none;
   padding: var(--sf-space-4) var(--sf-space-6);
-  flex-shrink: 0;
-  background: var(--sf-color-surface);
   border-bottom: 1px solid var(--sf-color-border);
 }
 
-.shippingText {
-  margin: 0 0 var(--sf-space-3) 0;
-  font-size: var(--sf-text-sm);
-  display: flex;
-  align-items: center;
-  gap: var(--sf-space-2);
-  color: var(--sf-color-text-secondary);
+.meterText {
+  margin: 0 0 var(--sf-space-3);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-normal);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  color: var(--sf-color-text-muted);
 }
 
-.shippingText strong {
-  color: var(--sf-color-price);
-  font-weight: var(--sf-font-semibold);
+.meterText strong {
+  font-weight: var(--sf-font-medium);
+  color: var(--sf-color-gold-deep);
+  font-variant-numeric: tabular-nums;
 }
 
-.checkIcon {
-  flex-shrink: 0;
-  color: var(--sf-color-emerald);
-}
-
-.progressBarTrack {
+.meterTrack {
+  position: relative;
   width: 100%;
-  height: 6px;
-  border-radius: var(--sf-radius-pill);
+  height: 2px;
   overflow: hidden;
-  background: var(--sf-color-surface-2);
+  background: var(--sf-color-border);
 }
 
-.progressBarFill {
+.meterFill {
   height: 100%;
-  border-radius: var(--sf-radius-pill);
-  background: linear-gradient(
-    90deg,
-    var(--sf-color-emerald),
-    var(--sf-color-gold)
-  );
+  background: var(--sf-gradient-gold);
 }
 
-/* ========================================
-   Scrollable body
-   ======================================== */
+/* =============================================================================
+ * 4. SCROLL REGION
+ * =============================================================================
+ * Everything between the meter and the pinned footer scrolls as one column —
+ * lines, promo and summary — so a long cart never pushes the CTA off-screen.
+ * `min-height: 0` is what actually lets a flex child shrink and scroll.
+ * ========================================================================== */
 
 .body {
   flex: 1;
+  min-height: 0;
   overflow-y: auto;
-  display: flex;
-  flex-direction: column;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Custom scrollbar */
 .body::-webkit-scrollbar {
   width: 6px;
 }
@@ -180,441 +202,470 @@
 
 .body::-webkit-scrollbar-thumb {
   background: var(--sf-color-border-strong);
-  border-radius: var(--sf-radius-pill);
 }
 
-/* ========================================
-   Items Container
-   ======================================== */
+/* =============================================================================
+ * 5. LINE ITEMS
+ * ========================================================================== */
 
-.itemsContainer {
-  padding: var(--sf-space-4) var(--sf-space-6);
-  display: flex;
-  flex-direction: column;
-  gap: var(--sf-space-3);
+.lines {
+  margin: 0;
+  padding: 0 var(--sf-space-6);
+  list-style: none;
 }
 
-/* ========================================
-   Empty State
-   ======================================== */
-
-.emptyState {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 1;
-  min-height: 300px;
-  padding: var(--sf-space-6);
-}
-
-.emptyStateInner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: var(--sf-space-8) var(--sf-space-6);
-}
-
-.emptyIcon {
-  margin-bottom: var(--sf-space-5);
-  color: var(--sf-color-border-strong);
-}
-
-.emptyTitle {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-xl);
-  font-weight: var(--sf-font-bold);
-  margin: 0 0 var(--sf-space-2) 0;
-  color: var(--sf-color-text);
-}
-
-.emptyText {
-  font-size: var(--sf-text-sm);
-  margin: 0 0 var(--sf-space-6) 0;
-  line-height: var(--sf-leading-normal);
-  max-width: 260px;
-  color: var(--sf-color-text-muted);
-}
-
-.shopBtn {
-  min-height: var(--sf-tap-target);
-  padding: 0 var(--sf-space-8);
-  border-radius: var(--sf-radius-md);
-  border: none;
-  font-family: var(--sf-font-family);
-  font-size: var(--sf-text-base);
-  font-weight: var(--sf-font-semibold);
-  cursor: pointer;
-  background: var(--sf-color-emerald);
-  color: var(--sf-color-emerald-contrast);
-  transition: background var(--sf-transition-fast);
-}
-
-.shopBtn:hover {
-  background: var(--sf-color-emerald-hover);
-}
-
-.shopBtn:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
-}
-
-/* ========================================
-   Cart Item Card
-   ======================================== */
-
-.cartItem {
+/* Hairline between rows, never around them. The first row needs no rule: the
+   meter above it already carries one. */
+.line {
   display: flex;
   gap: var(--sf-space-4);
-  padding: var(--sf-space-4);
-  border-radius: var(--sf-radius-lg);
-  background: var(--sf-color-surface);
-  border: 1px solid var(--sf-color-border);
-  transition: border-color var(--sf-transition-fast);
+  padding: var(--sf-space-5) 0;
+  border-top: 1px solid var(--sf-color-border);
 }
 
-.cartItem:hover {
-  border-color: var(--sf-color-border-strong);
+.line:first-child {
+  border-top: none;
 }
 
-/* Product image */
-.itemImage {
-  flex-shrink: 0;
-  width: 80px;
-  height: 80px;
-  border-radius: var(--sf-radius-md);
+/* ---- The photograph — a 3:4 crop on the sunken sand panel ----------------- */
+/* `align-self` is load-bearing: the row is a flex container, so without it the
+   default `stretch` gives the thumbnail the row's full height and the crop
+   silently stops being 3:4. */
+.thumb {
+  flex: none;
+  align-self: flex-start;
+  display: block;
+  width: 76px;
+  aspect-ratio: 3 / 4;
   overflow: hidden;
-  cursor: pointer;
+  border-radius: var(--sf-radius-sm);
   background: var(--sf-color-surface-2);
 }
 
-.itemImage img {
+.thumb img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform var(--sf-transition);
+  transition: transform var(--sf-transition-slow);
 }
 
-.itemImage:hover img {
-  transform: scale(1.05);
+.line:hover .thumb img {
+  transform: scale(1.03);
 }
 
-/* Item details column */
-.itemDetails {
+/* ---- The text column ----------------------------------------------------- */
+.lineBody {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: var(--sf-space-2);
-  min-width: 0;
-}
-
-.itemTop {
-  display: flex;
   align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--sf-space-2);
+  gap: var(--sf-space-1);
 }
 
-.itemMeta {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-}
-
-.itemName {
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-  margin: 0;
-  line-height: var(--sf-leading-tight);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  cursor: pointer;
-  color: var(--sf-color-text);
-  transition: color var(--sf-transition-fast);
-}
-
-.itemName:hover {
-  color: var(--sf-color-price);
-}
-
-.itemVariant {
-  font-size: var(--sf-text-xs);
+/* The name — display serif, two lines, hairline underline on hover. */
+.lineName {
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-md);
   font-weight: var(--sf-font-medium);
-  color: var(--sf-color-text-muted);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: text-decoration-color var(--sf-transition);
 }
 
-/* Pricing */
-.itemPricing {
+.line:hover .lineName {
+  text-decoration-color: var(--sf-color-border-strong);
+}
+
+.lineName:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 3px;
+  box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
+}
+
+.lineVariant {
+  font-size: var(--sf-text-xs);
+  color: var(--sf-color-text-muted);
+  letter-spacing: 0.02em;
+  line-height: var(--sf-leading-normal);
+}
+
+/* ---- Price — the PriceBlock language at cart-line scale ------------------- */
+.linePrice {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--sf-space-2);
+  margin: var(--sf-space-1) 0 var(--sf-space-2);
+}
+
+.price {
+  font-size: var(--sf-text-base);
+  font-weight: var(--sf-font-semibold);
+  letter-spacing: var(--sf-tracking-tight);
+  color: var(--sf-color-price);
+  font-variant-numeric: tabular-nums;
+}
+
+.compare {
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-normal);
+  color: var(--sf-color-compare);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Stepper + remove, on one baseline ----------------------------------- */
+.lineFoot {
   display: flex;
   align-items: center;
-  gap: var(--sf-space-2);
+  justify-content: space-between;
+  gap: var(--sf-space-3);
+  width: 100%;
+  margin-top: auto;
 }
 
-.itemPrice {
-  font-size: var(--sf-text-base);
-  font-weight: var(--sf-font-bold);
-  color: var(--sf-color-price);
+/* The QuantityStepper look (prompt 09), inlined: a near-square hairline frame
+   with two internal rules, not a pill of buttons. Kept visually identical to
+   the shared control so the PDP and the tray never disagree. */
+.stepper {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--sf-color-border-strong);
+  border-radius: var(--sf-radius-sm);
+  background: var(--sf-color-surface);
+  transition: border-color var(--sf-transition-fast);
 }
 
-.itemComparePrice {
-  font-size: var(--sf-text-xs);
-  text-decoration: line-through;
-  color: var(--sf-color-compare);
+.stepper:focus-within {
+  border-color: var(--sf-color-text-secondary);
 }
 
-/* Quantity controls */
-.quantityControl {
+.stepperBtn {
   display: inline-flex;
   align-items: center;
-  align-self: flex-start;
-  border-radius: var(--sf-radius-md);
-  overflow: hidden;
-  border: 1px solid var(--sf-color-border);
-}
-
-.quantityBtn {
-  display: flex;
-  align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  min-width: 34px;
+  min-height: 34px;
+  padding: 0;
   border: none;
-  cursor: pointer;
-  background: var(--sf-color-surface-2);
+  background: transparent;
   color: var(--sf-color-text-secondary);
-  transition: background var(--sf-transition-fast),
+  cursor: pointer;
+  transition: background-color var(--sf-transition-fast),
     color var(--sf-transition-fast);
 }
 
-.quantityBtn:hover:not(:disabled) {
+.stepperBtn:hover:not(:disabled) {
   background: var(--sf-color-primary-soft);
-  color: var(--sf-color-emerald);
+  color: var(--sf-color-text);
 }
 
-.quantityBtn:disabled {
+.stepperBtn:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: -2px;
+  box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
+  color: var(--sf-color-text);
+}
+
+/* Disabled edges — the control stays in place, it just stops responding. */
+.stepperBtn:disabled {
   opacity: 0.35;
   cursor: not-allowed;
 }
 
-.quantityBtn:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
-}
-
-.quantityValue {
-  display: flex;
+.stepperValue {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   min-width: 38px;
-  height: 36px;
+  padding: 0 var(--sf-space-2);
+  border-left: 1px solid var(--sf-color-border);
+  border-right: 1px solid var(--sf-color-border);
   font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-  text-align: center;
-  background: var(--sf-color-surface);
+  font-weight: var(--sf-font-medium);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
   color: var(--sf-color-text);
+  user-select: none;
 }
 
-/* Remove button */
+/* Quiet remove — a tracked label that only reddens when you reach for it. */
 .removeBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
+  flex: none;
+  padding: var(--sf-space-2) 0;
   border: none;
-  border-radius: var(--sf-radius-md);
-  cursor: pointer;
-  flex-shrink: 0;
   background: transparent;
   color: var(--sf-color-text-muted);
-  transition: background var(--sf-transition-fast),
-    color var(--sf-transition-fast);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: 1;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 4px;
+  transition: color var(--sf-transition-fast),
+    text-decoration-color var(--sf-transition-fast);
 }
 
 .removeBtn:hover {
-  background: var(--sf-color-danger-bg);
   color: var(--sf-color-danger);
+  text-decoration-color: currentColor;
 }
 
 .removeBtn:focus-visible {
-  outline: none;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
   box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
 }
 
-/* ========================================
-   Apply Promo Code
-   ======================================== */
+/* =============================================================================
+ * 6. SECTION EYEBROW  —  shared by the promo and summary blocks
+ * ========================================================================== */
 
-.promoSection {
-  padding: var(--sf-space-4) var(--sf-space-6);
+.eyebrow {
+  margin: 0 0 var(--sf-space-4);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: 1;
+  color: var(--sf-color-text-muted);
+}
+
+/* =============================================================================
+ * 7. PROMO CODE
+ * ========================================================================== */
+
+.promo {
+  padding: var(--sf-space-6);
   border-top: 1px solid var(--sf-color-border);
 }
 
-.sectionTitle {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-lg);
-  font-weight: var(--sf-font-semibold);
-  margin: 0 0 var(--sf-space-3) 0;
-  color: var(--sf-color-text);
+/* Underline field: the input has no chrome of its own, the rule beneath it is
+   the whole control. It darkens when the field is live. */
+.promoField {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-3);
+  border-bottom: 1px solid var(--sf-color-border-strong);
+  transition: border-color var(--sf-transition-fast);
 }
 
-.promoForm {
-  display: flex;
-  gap: var(--sf-space-2);
+.promoField:focus-within {
+  border-bottom-color: var(--sf-color-text-secondary);
 }
 
 .promoInput {
   flex: 1;
   min-width: 0;
   min-height: var(--sf-tap-target);
-  padding: 0 var(--sf-space-4);
-  border-radius: var(--sf-radius-md);
-  border: 1px solid var(--sf-color-border-strong);
-  background: var(--sf-color-surface);
+  padding: 0;
+  border: none;
+  background: transparent;
   color: var(--sf-color-text);
   font-family: var(--sf-font-family);
   font-size: var(--sf-text-sm);
-  letter-spacing: 0.04em;
+  font-weight: var(--sf-font-medium);
+  letter-spacing: var(--sf-tracking-wide);
   text-transform: uppercase;
 }
 
 .promoInput::placeholder {
   color: var(--sf-color-text-muted);
-  letter-spacing: normal;
+  font-weight: var(--sf-font-normal);
+  letter-spacing: 0.02em;
   text-transform: none;
 }
 
 .promoInput:focus {
   outline: none;
-  border-color: var(--sf-color-emerald);
+}
+
+.promoInput:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
   box-shadow: var(--sf-shadow-focus);
-}
-
-.promoApplyBtn {
-  flex-shrink: 0;
-  min-height: var(--sf-tap-target);
-  padding: 0 var(--sf-space-5);
-  border-radius: var(--sf-radius-md);
-  border: none;
-  font-family: var(--sf-font-family);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-  cursor: pointer;
-  background: var(--sf-color-emerald);
-  color: var(--sf-color-emerald-contrast);
-  transition: background var(--sf-transition-fast);
-}
-
-.promoApplyBtn:hover:not(:disabled) {
-  background: var(--sf-color-emerald-hover);
-}
-
-.promoApplyBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.promoApplyBtn:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
-}
-
-.couponApplied {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--sf-space-3);
-  padding: var(--sf-space-3) var(--sf-space-4);
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-discount-bg);
-  border: 1px solid var(--sf-color-border);
-}
-
-.couponAppliedText {
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-  color: var(--sf-color-discount);
-}
-
-.couponRemove {
-  flex-shrink: 0;
-  border: none;
-  background: transparent;
-  color: var(--sf-color-danger);
-  font-family: var(--sf-font-family);
-  font-size: var(--sf-text-xs);
-  font-weight: var(--sf-font-semibold);
-  cursor: pointer;
-  padding: var(--sf-space-1) var(--sf-space-2);
   border-radius: var(--sf-radius-sm);
 }
 
+.promoApply {
+  flex: none;
+  min-height: var(--sf-tap-target);
+  padding: 0 var(--sf-space-1);
+  border: none;
+  background: transparent;
+  color: var(--sf-color-text);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  cursor: pointer;
+  transition: color var(--sf-transition-fast), opacity var(--sf-transition-fast);
+}
+
+.promoApply:hover:not(:disabled) {
+  color: var(--sf-color-accent);
+}
+
+.promoApply:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.promoApply:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
+}
+
+/* ---- Applied: a small ink chip ------------------------------------------- */
+.couponChip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sf-space-3);
+  max-width: 100%;
+  padding: var(--sf-space-2) var(--sf-space-2) var(--sf-space-2)
+    var(--sf-space-4);
+  border-radius: var(--sf-radius-sm);
+  background: var(--sf-color-emerald);
+  color: var(--sf-color-emerald-contrast);
+}
+
+.couponCode {
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.couponValue {
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+
+/* The mark is 24px for the sake of the chip; the tap target underneath it is
+   the full 44px (WCAG 2.5.5) via a transparent pseudo-element. */
+.couponRemove {
+  position: relative;
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: var(--sf-radius-sm);
+  background: transparent;
+  color: inherit;
+  opacity: 0.7;
+  cursor: pointer;
+  transition: opacity var(--sf-transition-fast);
+}
+
+.couponRemove::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--sf-tap-target);
+  height: var(--sf-tap-target);
+  transform: translate(-50%, -50%);
+}
+
 .couponRemove:hover {
-  background: var(--sf-color-danger-bg);
+  opacity: 1;
 }
 
 .couponRemove:focus-visible {
-  outline: none;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
   box-shadow: var(--sf-shadow-focus);
+  opacity: 1;
+}
+
+/* Error and the below-minimum auto-remove note: calm inline text, no icons,
+   no boxes. The note keeps the muted voice; only a true error takes colour. */
+.promoMsg {
+  margin: var(--sf-space-3) 0 0;
+  font-size: var(--sf-text-xs);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-muted);
 }
 
 .promoError {
-  margin: var(--sf-space-2) 0 0 0;
-  font-size: var(--sf-text-xs);
   color: var(--sf-color-danger);
 }
 
-.promoNote {
-  margin: var(--sf-space-2) 0 0 0;
-  font-size: var(--sf-text-xs);
-  color: var(--sf-color-warning);
-}
+/* =============================================================================
+ * 8. SUMMARY
+ * ========================================================================== */
 
-/* ========================================
-   Price Details
-   ======================================== */
-
-.priceDetails {
-  padding: var(--sf-space-4) var(--sf-space-6) var(--sf-space-6);
+.summary {
+  padding: var(--sf-space-6);
   border-top: 1px solid var(--sf-color-border);
 }
 
-.priceRow {
+.summaryRow {
   display: flex;
+  align-items: baseline;
   justify-content: space-between;
-  align-items: center;
+  gap: var(--sf-space-4);
   margin-bottom: var(--sf-space-3);
 }
 
-.priceLabel {
+.summaryLabel {
   font-size: var(--sf-text-sm);
   color: var(--sf-color-text-secondary);
 }
 
-.priceValue {
+.summaryValue {
   font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
+  font-weight: var(--sf-font-medium);
+  text-align: right;
   color: var(--sf-color-text);
+  font-variant-numeric: tabular-nums;
 }
 
-.savingsValue {
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
+.savings {
   color: var(--sf-color-discount);
 }
 
-.freeShipping {
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-bold);
-  color: var(--sf-color-discount);
-}
-
+/* The single strong serif moment in the tray. */
 .totalRow {
-  margin-bottom: 0;
-  margin-top: var(--sf-space-3);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sf-space-4);
+  margin-top: var(--sf-space-5);
   padding-top: var(--sf-space-4);
   border-top: 1px solid var(--sf-color-border);
 }
@@ -622,92 +673,154 @@
 .totalLabel {
   font-family: var(--sf-font-display);
   font-size: var(--sf-text-lg);
-  font-weight: var(--sf-font-semibold);
+  font-weight: var(--sf-font-medium);
   color: var(--sf-color-text);
 }
 
 .totalValue {
   font-family: var(--sf-font-display);
-  font-size: var(--sf-text-xl);
-  font-weight: var(--sf-font-bold);
+  font-size: var(--sf-text-2xl);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  text-align: right;
   color: var(--sf-color-price);
+  font-variant-numeric: tabular-nums;
 }
 
-/* ========================================
-   Footer / Checkout CTA (Sticky)
-   ======================================== */
+/* =============================================================================
+ * 9. PINNED FOOTER
+ * ========================================================================== */
 
 .footer {
-  flex-shrink: 0;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sf-space-2);
   padding: var(--sf-space-4) var(--sf-space-6)
-    calc(var(--sf-space-6) + env(safe-area-inset-bottom, 0px));
+    calc(var(--sf-space-5) + env(safe-area-inset-bottom, 0px));
   border-top: 1px solid var(--sf-color-border);
-  background: var(--sf-color-surface);
+  background: var(--sf-color-bg);
 }
 
-.checkoutBtn {
-  width: 100%;
+.continue {
   min-height: var(--sf-tap-target);
-  padding: var(--sf-space-3) var(--sf-space-4);
-  border-radius: var(--sf-radius-md);
+  padding: 0 var(--sf-space-2);
   border: none;
+  background: transparent;
+  color: var(--sf-color-text-muted);
   font-family: var(--sf-font-family);
-  font-size: var(--sf-text-base);
-  font-weight: var(--sf-font-semibold);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
   cursor: pointer;
-  color: var(--sf-color-emerald-contrast);
-  background: var(--sf-color-emerald);
-  transition: background var(--sf-transition-fast),
-    transform var(--sf-transition-fast);
+  transition: color var(--sf-transition-fast);
 }
 
-.checkoutBtn:hover {
-  background: var(--sf-color-emerald-hover);
-  transform: translateY(-1px);
+.continue:hover {
+  color: var(--sf-color-accent);
 }
 
-.checkoutBtn:active {
-  transform: translateY(0);
-}
-
-.checkoutBtn:focus-visible {
-  outline: none;
+.continue:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
   box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
 }
 
-/* ========================================
-   Responsive - Full width on mobile
-   ======================================== */
+/* =============================================================================
+ * 10. EMPTY STATE
+ * =============================================================================
+ * A warm editorial pause: hairline line-art, a serif line, one gold-outline
+ * way back into the catalogue.
+ * ========================================================================== */
 
+.empty {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sf-space-3);
+  padding: var(--sf-space-10) var(--sf-space-8)
+    calc(var(--sf-space-12) + env(safe-area-inset-bottom, 0px));
+  text-align: center;
+}
+
+.emptyArt {
+  color: var(--sf-color-border-strong);
+  margin-bottom: var(--sf-space-2);
+}
+
+.emptyTitle {
+  margin: 0;
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-xl);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text);
+}
+
+.emptyText {
+  margin: 0 0 var(--sf-space-4);
+  max-width: 26ch;
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-muted);
+}
+
+/* =============================================================================
+ * 11. RESPONSIVE + INPUT MODE
+ * ========================================================================== */
+
+/* Full-width sheet on phones, with the gutters pulled in a step. */
 @media (max-width: 480px) {
   .drawer {
     width: 100vw;
+    border-left: none;
   }
 
-  .header {
-    padding: var(--sf-space-4) var(--sf-space-5);
-  }
-
-  .shippingBanner,
-  .itemsContainer,
-  .promoSection,
-  .priceDetails {
+  .header,
+  .meter,
+  .promo,
+  .summary,
+  .footer {
     padding-left: var(--sf-space-5);
     padding-right: var(--sf-space-5);
   }
 
-  .cartItem {
-    padding: var(--sf-space-3);
+  .lines {
+    padding-left: var(--sf-space-5);
+    padding-right: var(--sf-space-5);
+  }
+
+  .line {
     gap: var(--sf-space-3);
   }
 
-  .itemImage {
+  .thumb {
     width: 68px;
-    height: 68px;
+  }
+}
+
+/* On touch, the stepper's compact controls still have to clear the 44px
+   minimum (WCAG 2.5.5) — same rule the shared QuantityStepper applies. */
+@media (pointer: coarse) {
+  .stepperBtn {
+    min-width: var(--sf-tap-target);
+    min-height: var(--sf-tap-target);
   }
 
-  .footer {
-    padding: var(--sf-space-4) var(--sf-space-5)
-      calc(var(--sf-space-5) + env(safe-area-inset-bottom, 0px));
+  .stepperValue {
+    min-width: 44px;
+  }
+}
+
+/* Reduced motion: the tray's slide and the row offsets are dropped in JS
+   (useReducedMotion); these are the CSS-side hovers that also go still. */
+@media (prefers-reduced-motion: reduce) {
+  .line:hover .thumb img {
+    transform: none;
   }
 }
