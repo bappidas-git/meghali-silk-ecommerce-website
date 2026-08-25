@@ -1,39 +1,42 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Icon } from "@iconify/react";
+import { FREE_SHIPPING_THRESHOLD, DEFAULT_CURRENCY } from "../../utils/constants";
 import styles from "./AnnouncementBar.module.css";
 
 /**
- * AnnouncementBar — slim, full-width gradient promo bar pinned at the very top.
+ * AnnouncementBar — the storefront's utility hairline, pinned above the masthead.
  *
- * Cycles through three owner-attested promo messages every ~4s, each painted
- * with its matching brand gradient. Pauses on hover/focus and when the user
- * prefers reduced motion (then shows the first message statically). Dismissible,
- * with the choice persisted in localStorage.
+ * ONE calm treatment: a slim ivory-on-ink band carrying a single line of small,
+ * tracked uppercase copy. It replaces the old three-gradient promo bar — the
+ * `--sf-gradient-announce-*` tokens still exist for any component that wants
+ * them, but this bar no longer paints a different background per message.
  *
- * Presentation only — no fetch, no shipping logic. The promo ₹ figures here are
- * marketing copy and are intentionally decoupled from FREE_SHIPPING_THRESHOLD.
+ * Messages crossfade (opacity only — no travel, no colour change), pause on
+ * hover/focus, and hold on the first message when the user prefers reduced
+ * motion. Dismissible, with the choice persisted in localStorage.
+ *
+ * It renders in normal flow, ABOVE the sticky <header>, so it scrolls away and
+ * the pinned masthead + nav stay inside their ~120px budget.
+ *
+ * Presentation only — no fetch, no shipping logic. Copy is store-attested: the
+ * shipping figure reads from FREE_SHIPPING_THRESHOLD (the same constant the cart
+ * drawer's progress bar uses) so the two can never drift apart.
  */
+const shippingThreshold = `${DEFAULT_CURRENCY.symbol}${FREE_SHIPPING_THRESHOLD.toLocaleString(
+  "en-IN"
+)}`;
+
+// Kept short on purpose: set in tracked uppercase these have to survive a 375px
+// band without ellipsising, and a caption reads more editorial than a sentence.
 const ANNOUNCEMENTS = [
-  {
-    id: "flash",
-    text: "Flash Sale — Extra 25% Off on the Premium Collection",
-    gradient: "var(--sf-gradient-announce-1)",
-  },
-  {
-    id: "shipping",
-    text: "Free Shipping on Orders Above ₹1,999",
-    gradient: "var(--sf-gradient-announce-2)",
-  },
-  {
-    id: "giftwrap",
-    text: "Complimentary Gift Wrapping on All Orders",
-    gradient: "var(--sf-gradient-announce-3)",
-  },
+  { id: "shipping", text: `Complimentary shipping above ${shippingThreshold}` },
+  { id: "giftwrap", text: "Complimentary gift wrapping" },
+  { id: "origin", text: "Handwoven in Sualkuchi, Assam" },
 ];
 
 const STORAGE_KEY = "sf_announcement_dismissed";
-const ROTATE_MS = 4000;
+const ROTATE_MS = 6000;
 
 const prefersReducedMotion = () =>
   typeof window !== "undefined" &&
@@ -47,6 +50,7 @@ const AnnouncementBar = ({ messages = ANNOUNCEMENTS, className = "" }) => {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const [reduceMotion, setReduceMotion] = useState(false);
+  const [hidden, setHidden] = useState(false);
   const timerRef = useRef(null);
 
   // On mount, respect a persisted dismissal.
@@ -72,14 +76,28 @@ const AnnouncementBar = ({ messages = ANNOUNCEMENTS, className = "" }) => {
     return () => mq.removeListener(update);
   }, []);
 
-  // Auto-rotate, unless paused, reduced-motion, dismissed, or a single message.
+  // Hold while the tab is in the background. Browsers suspend rAF there, so a
+  // rotation started off-screen would queue an exit animation that can never
+  // finish — leaving every message stacked in the DOM until the tab returns.
   useEffect(() => {
-    if (paused || reduceMotion || dismissed || list.length <= 1) return undefined;
+    if (typeof document === "undefined") return undefined;
+    const update = () => setHidden(document.hidden);
+    update();
+    document.addEventListener("visibilitychange", update);
+    return () => document.removeEventListener("visibilitychange", update);
+  }, []);
+
+  // Auto-rotate, unless paused, off-screen, reduced-motion, dismissed, or a
+  // single message.
+  useEffect(() => {
+    if (paused || hidden || reduceMotion || dismissed || list.length <= 1) {
+      return undefined;
+    }
     timerRef.current = setInterval(() => {
       setIndex((i) => (i + 1) % list.length);
     }, ROTATE_MS);
     return () => clearInterval(timerRef.current);
-  }, [paused, reduceMotion, dismissed, list.length]);
+  }, [paused, hidden, reduceMotion, dismissed, list.length]);
 
   const handleDismiss = useCallback(() => {
     setDismissed(true);
@@ -98,7 +116,6 @@ const AnnouncementBar = ({ messages = ANNOUNCEMENTS, className = "" }) => {
   return (
     <div
       className={`${styles.bar} ${className}`.trim()}
-      style={{ background: active.gradient }}
       role="status"
       aria-live="polite"
       onMouseEnter={() => setPaused(true)}
@@ -107,18 +124,18 @@ const AnnouncementBar = ({ messages = ANNOUNCEMENTS, className = "" }) => {
       onBlurCapture={() => setPaused(false)}
     >
       <div className={styles.inner}>
-        <Icon icon="mdi:tag-heart-outline" className={styles.icon} aria-hidden="true" />
-
+        {/* Both messages share the cell during the crossfade, so the bar height
+            never twitches as one replaces the other. */}
         <div className={styles.messageWrap}>
           {animate ? (
-            <AnimatePresence mode="wait" initial={false}>
+            <AnimatePresence initial={false}>
               <motion.span
                 key={active.id}
                 className={styles.message}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -8 }}
-                transition={{ duration: 0.4, ease: "easeInOut" }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.6, ease: "easeInOut" }}
               >
                 {active.text}
               </motion.span>
