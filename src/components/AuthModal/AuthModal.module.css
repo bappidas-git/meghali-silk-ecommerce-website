@@ -1,11 +1,33 @@
-/* ==================================================================
- *  AuthModal — re-skinned to the Meghali's Silk brand system.
- *  Every colour is a var(--sf-*) token (defined in storefront-tokens.css)
- *  or a brand-mapped --auth-* alias; no hardcoded hex lives here. Dark/light
- *  is driven by the --sf-* tokens (body.dark), so the .light/.dark classes the
- *  component still applies only need to exist — they carry no colour of their own.
- * ================================================================== */
+/* =============================================================================
+ * AuthModal — the boutique welcome
+ * =============================================================================
+ * Not a sign-in form: the front desk of the shop. The dialog paints
+ * --sf-color-bg, the same warm ivory as the page, and the wordmark sits
+ * straight on it — the old deep-green logo plate is retired (both logo PNGs
+ * are transparent-ground artwork, so a plate was never needed). Light art on
+ * the ivory day room, white art on the evening one.
+ *
+ * THE ONE SERIF MOMENT
+ *   Only the greeting is set in the display serif ("Welcome back" / "Join
+ *   Meghali's Silk"). Everything else is quiet Inter: tracked uppercase for
+ *   labels, tabs and actions; sentence case for help text.
+ *
+ * EVERY FIELD IS A HAIRLINE
+ *   No filled inputs, no boxes, no card inside the card. A field is a rule
+ *   under a line of type; focus deepens that rule to the gold focus ring.
+ *   Errors are stated in small danger-token type, never shouted in a red box.
+ *
+ * TOKENS ONLY
+ *   Colour, spacing, radius, shadow, type and motion all come from
+ *   src/theme/storefront-tokens.css, so dark mode ("evening gallery") and the
+ *   reduced-motion pass are re-derived for free. The five social-brand hexes
+ *   live in the SVGs in AuthModal.js — the documented exception — and there is
+ *   no hardcoded colour in this file.
+ * ========================================================================== */
 
+/* Colours come from the storefront tokens (which flip on body.dark); these
+   marker classes only hint the native color-scheme so form controls, the
+   caret and scrollbars render correctly for the active theme. */
 .light {
   color-scheme: light;
 }
@@ -15,19 +37,22 @@
 }
 
 /* The strength meter is coloured from inline styles in JS that reference these
-   --auth-strength-* vars, so map them here to the brand palette (no purple/blue).
-   They live on the overlay so the dialog and its inputs inherit them. */
+   --auth-strength-* vars, so map them to the brand palette here. They live on
+   the overlay so the dialog and its fields inherit them.
+   NB "good" maps to gold-DEEP, not --sf-color-gold: the same value colours the
+   strength word, and decorative gold is 2.58:1 on ivory. gold-deep is the
+   text-safe gold (5.12:1), so bar and label can share one value. */
 .overlay {
   --auth-strength-empty: var(--sf-color-border);
   --auth-strength-weak: var(--sf-color-danger);
   --auth-strength-fair: var(--sf-color-warning);
-  --auth-strength-good: var(--sf-color-gold);
+  --auth-strength-good: var(--sf-color-gold-deep);
   --auth-strength-strong: var(--sf-color-emerald);
 }
 
-/* ================================================================== */
-/*  Overlay                                                            */
-/* ================================================================== */
+/* =============================================================================
+ * 1. SCRIM + DIALOG
+ * ========================================================================== */
 
 .overlay {
   position: fixed;
@@ -36,27 +61,28 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--sf-color-overlay);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
   padding: var(--sf-space-4);
+  background: var(--sf-color-overlay);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+  -webkit-tap-highlight-color: transparent;
 }
 
-/* ================================================================== */
-/*  Dialog                                                            */
-/* ================================================================== */
-
+/* Near-rectangular, hairline-edged, lifted off the scrim by its shadow alone. */
 .dialog {
   position: relative;
   width: 100%;
-  max-width: 440px;
-  max-height: calc(100vh - 32px);
+  max-width: 448px;
+  max-height: calc(100vh - var(--sf-space-8));
   overflow-y: auto;
   overflow-x: hidden;
-  background: var(--sf-color-surface);
+  background: var(--sf-color-bg);
+  color: var(--sf-color-text);
   border: 1px solid var(--sf-color-border);
-  border-radius: var(--sf-radius-lg);
+  border-radius: var(--sf-radius-sm);
   box-shadow: var(--sf-shadow-lg);
+  font-family: var(--sf-font-family);
+  outline: none;
 }
 
 .dialog::-webkit-scrollbar {
@@ -68,130 +94,114 @@
   border-radius: var(--sf-radius-pill);
 }
 
-/* Mobile bottom-sheet */
+/* Mobile bottom-sheet: the same page, hinged at the bottom edge. */
 .dialogMobile {
   max-width: 100%;
   max-height: 92vh;
-  border-radius: var(--sf-radius-xl) var(--sf-radius-xl) 0 0;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  overflow-y: auto;
+  border-width: 1px 0 0;
+  border-radius: var(--sf-radius-md) var(--sf-radius-md) 0 0;
 }
 
-/* Inner padded body (the logo panel bleeds to the dialog edges above it) */
 .body {
-  padding: var(--sf-space-6) var(--sf-space-8) var(--sf-space-8);
+  padding: var(--sf-space-8);
 }
 
-/* ================================================================== */
-/*  Logo panel (brand-green, logo blends with its own green bg)        */
-/* ================================================================== */
-
-.logoPanel {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--brand-logo-bg);
-  border-radius: var(--sf-radius-lg) var(--sf-radius-lg) 0 0;
-  padding: var(--sf-space-6) var(--sf-space-6) var(--sf-space-5);
-}
-
-.dialogMobile .logoPanel {
-  border-radius: var(--sf-radius-xl) var(--sf-radius-xl) 0 0;
-}
-
-.logo {
-  display: block;
-  height: 56px;
-  width: auto;
-  max-width: 80%;
-  object-fit: contain;
-}
-
-/* ================================================================== */
-/*  Close button (sits over the green logo panel)                      */
-/* ================================================================== */
+/* =============================================================================
+ * 2. CLOSE MARK
+ * Sits over the ivory, not over a coloured plate — so it is plain ink.
+ * ========================================================================== */
 
 .closeBtn {
   position: absolute;
-  top: var(--sf-space-3);
-  right: var(--sf-space-3);
+  top: var(--sf-space-2);
+  right: var(--sf-space-2);
   z-index: 2;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   width: var(--sf-tap-target);
   height: var(--sf-tap-target);
+  padding: 0;
   border: none;
-  border-radius: var(--sf-radius-md);
+  border-radius: var(--sf-radius-sm);
   background: transparent;
-  color: var(--sf-color-gold-light);
+  color: var(--sf-color-text-muted);
   cursor: pointer;
-  transition: var(--sf-transition-fast);
+  transition: color var(--sf-transition-fast);
 }
 
 .closeBtn:hover {
-  background: var(--sf-color-brand-green-deep);
-  color: var(--sf-color-gold);
+  color: var(--sf-color-text);
 }
 
 .closeBtn:focus-visible {
-  outline: none;
+  outline: 2px solid transparent;
   box-shadow: var(--sf-shadow-focus);
 }
 
-/* ================================================================== */
-/*  Header                                                            */
-/* ================================================================== */
+/* =============================================================================
+ * 3. MASTHEAD — wordmark, then the greeting
+ * ========================================================================== */
 
 .header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
+  margin-bottom: var(--sf-space-8);
+}
+
+.logo {
+  display: block;
+  height: 34px;
+  width: auto;
+  max-width: 62%;
+  object-fit: contain;
   margin-bottom: var(--sf-space-6);
 }
 
 .title {
-  margin: 0 0 var(--sf-space-1);
+  margin: 0 0 var(--sf-space-2);
   font-family: var(--sf-font-display);
-  font-size: var(--sf-text-2xl);
-  font-weight: var(--sf-font-bold);
+  font-size: var(--sf-text-3xl);
+  font-weight: var(--sf-font-normal);
+  line-height: var(--sf-leading-display);
+  letter-spacing: var(--sf-tracking-normal);
   color: var(--sf-color-text);
-  letter-spacing: -0.01em;
 }
 
 .subtitle {
   margin: 0;
+  max-width: 36ch;
   font-size: var(--sf-text-sm);
-  color: var(--sf-color-text-secondary);
   line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-secondary);
 }
 
-/* ================================================================== */
-/*  Tabs                                                              */
-/* ================================================================== */
+/* =============================================================================
+ * 4. TABS — two tracked labels on one hairline, gold rule beneath the active
+ * ========================================================================== */
 
 .tabs {
   position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  background: var(--sf-color-surface-2);
-  border-radius: var(--sf-radius-md);
-  padding: var(--sf-space-1);
+  border-bottom: 1px solid var(--sf-color-border);
   margin-bottom: var(--sf-space-6);
 }
 
 .tab {
   position: relative;
   z-index: 1;
-  padding: 10px 0;
+  padding: var(--sf-space-3) var(--sf-space-2);
   border: none;
-  border-radius: var(--sf-radius-sm);
   background: transparent;
-  color: var(--sf-color-text-secondary);
   font-family: var(--sf-font-family);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  color: var(--sf-color-text-muted);
   cursor: pointer;
   transition: color var(--sf-transition-fast);
 }
@@ -201,102 +211,101 @@
 }
 
 .tab:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
+  outline: 2px solid transparent;
   border-radius: var(--sf-radius-sm);
+  box-shadow: var(--sf-shadow-focus);
 }
 
 .tabActive {
-  color: var(--sf-color-emerald-contrast);
+  color: var(--sf-color-text);
 }
 
+/* Gold is seasoning: a 2px rule, nothing more. Sits ON the hairline it
+   replaces, so the row reads as one continuous line. */
 .tabIndicator {
   position: absolute;
-  top: var(--sf-space-1);
-  left: var(--sf-space-1);
-  width: calc(50% - var(--sf-space-1));
-  height: calc(100% - var(--sf-space-2));
-  background: var(--sf-gradient-gold);
-  border-radius: var(--sf-radius-sm);
-  box-shadow: var(--sf-shadow-xs);
+  bottom: -1px;
+  left: 0;
   z-index: 0;
+  width: 50%;
+  height: 2px;
+  background: var(--sf-color-gold);
 }
 
-/* ================================================================== */
-/*  Error banner                                                      */
-/* ================================================================== */
+/* =============================================================================
+ * 5. BANNERS + TOAST
+ * A rule in the margin, not a coloured slab.
+ * ========================================================================== */
 
-.errorBanner {
-  background: var(--sf-color-danger-bg);
-  color: var(--sf-color-danger);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-medium);
-  text-align: center;
-  padding: 10px var(--sf-space-4);
-  border-radius: var(--sf-radius-md);
-  margin-bottom: var(--sf-space-4);
-  overflow: hidden;
-}
-
-/* ================================================================== */
-/*  Info banner (forgot-password → support pointer)                    */
-/* ================================================================== */
-
+.errorBanner,
 .infoBanner {
-  background: var(--sf-color-info-bg);
-  color: var(--sf-color-text-secondary);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-medium);
-  text-align: center;
-  padding: 10px var(--sf-space-4);
-  border-radius: var(--sf-radius-md);
-  margin-bottom: var(--sf-space-4);
   overflow: hidden;
+  margin-bottom: var(--sf-space-5);
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-normal);
+}
+
+.bannerInner {
+  padding: var(--sf-space-3) var(--sf-space-4);
+  border-left: 2px solid var(--sf-color-danger);
+  background: var(--sf-color-danger-bg);
+  color: var(--sf-color-text);
+}
+
+.infoBanner .bannerInner {
+  border-left-color: var(--sf-color-info);
+  background: var(--sf-color-info-bg);
 }
 
 .infoBannerLink {
-  color: var(--sf-color-info);
-  font-weight: var(--sf-font-bold);
-  text-decoration: none;
+  color: var(--sf-color-accent);
+  font-weight: var(--sf-font-medium);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
   white-space: nowrap;
 }
 
 .infoBannerLink:hover {
-  text-decoration: underline;
+  text-decoration-thickness: 2px;
 }
 
-/* ================================================================== */
-/*  Success toast                                                     */
-/* ================================================================== */
+.infoBannerLink:focus-visible {
+  outline: 2px solid transparent;
+  border-radius: var(--sf-radius-sm);
+  box-shadow: var(--sf-shadow-focus);
+}
 
+/* The success note lands as a hairline chip on the surface, not a green pill. */
 .successToast {
   position: absolute;
-  top: var(--sf-space-3);
+  top: var(--sf-space-4);
   left: 50%;
-  transform: translateX(-50%);
   z-index: 10;
   display: flex;
   align-items: center;
   gap: var(--sf-space-2);
-  background: var(--sf-color-success-bg);
+  max-width: calc(100% - var(--sf-space-8));
+  padding: var(--sf-space-3) var(--sf-space-5);
+  border: 1px solid var(--sf-color-success);
+  border-radius: var(--sf-radius-sm);
+  background: var(--sf-color-surface);
   color: var(--sf-color-success);
   font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-  padding: 10px var(--sf-space-5);
-  border-radius: var(--sf-radius-md);
-  white-space: nowrap;
+  font-weight: var(--sf-font-medium);
   box-shadow: var(--sf-shadow-md);
 }
 
 .successIcon {
-  display: flex;
+  flex: none;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
 }
 
-/* ================================================================== */
-/*  Form                                                              */
-/* ================================================================== */
+/* =============================================================================
+ * 6. FORM + FIELDS
+ * ========================================================================== */
 
 .formWrapper {
   position: relative;
@@ -306,61 +315,43 @@
 .form {
   display: flex;
   flex-direction: column;
-  gap: 0;
 }
-
-/* ================================================================== */
-/*  Field group                                                       */
-/* ================================================================== */
 
 .fieldGroup {
-  margin-bottom: var(--sf-space-4);
+  margin-bottom: var(--sf-space-5);
 }
 
+/* Small, tracked, quiet — a caption above the rule. */
 .label {
   display: block;
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-  color: var(--sf-color-text);
-  margin-bottom: var(--sf-space-2);
-}
-
-/* ================================================================== */
-/*  Input wrapper                                                     */
-/* ================================================================== */
-
-.inputWrap {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  background: var(--sf-color-surface-2);
-  border: 1.5px solid var(--sf-color-border);
-  border-radius: var(--sf-radius-md);
-  padding: 0 var(--sf-space-3);
-  transition: border-color var(--sf-transition-fast), background var(--sf-transition-fast);
-}
-
-.inputWrap:focus-within {
-  background: var(--sf-color-surface);
-  border-color: var(--sf-color-gold);
-  box-shadow: var(--sf-shadow-focus);
-}
-
-.inputError {
-  border-color: var(--sf-color-danger) !important;
-}
-
-.inputIcon {
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  margin-bottom: var(--sf-space-1);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
   color: var(--sf-color-text-muted);
-  margin-right: var(--sf-space-2);
 }
 
-.inputWrap:focus-within .inputIcon {
-  color: var(--sf-color-gold-deep);
+/* The field IS the hairline. Focus deepens it to the gold ring rather than
+   drawing a box; the box-shadow doubles the rule to 2px without shifting
+   anything below it. */
+.field {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-2);
+  border-bottom: 1px solid var(--sf-color-border-strong);
+  transition: border-color var(--sf-transition-fast),
+    box-shadow var(--sf-transition-fast);
+}
+
+.field:focus-within {
+  border-bottom-color: var(--sf-color-focus-ring);
+  box-shadow: 0 1px 0 0 var(--sf-color-focus-ring);
+}
+
+.fieldInvalid {
+  border-bottom-color: var(--sf-color-danger);
+  box-shadow: 0 1px 0 0 var(--sf-color-danger);
 }
 
 .input {
@@ -371,104 +362,157 @@
   border: none;
   outline: none;
   background: transparent;
+  font-family: var(--sf-font-family);
   font-size: var(--sf-text-base);
   color: var(--sf-color-text);
-  font-family: var(--sf-font-family);
+  caret-color: var(--sf-color-gold);
 }
 
 .input::placeholder {
   color: var(--sf-color-text-muted);
+  opacity: 1;
 }
 
-/* Phone prefix */
+/* Chrome paints autofilled inputs a hard blue; hold the ivory ground and the
+   ink type with a long inset shadow (the only way to override it). */
+.input:-webkit-autofill,
+.input:-webkit-autofill:hover,
+.input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--sf-color-text);
+  -webkit-box-shadow: 0 0 0 1000px var(--sf-color-bg) inset;
+  caret-color: var(--sf-color-text);
+}
+
 .phonePrefix {
-  flex-shrink: 0;
+  flex: none;
   font-size: var(--sf-text-base);
-  font-weight: var(--sf-font-semibold);
   color: var(--sf-color-text-secondary);
-  margin-right: var(--sf-space-1);
+  font-variant-numeric: tabular-nums;
   user-select: none;
 }
 
 .phoneInput {
-  padding-left: 0;
+  font-variant-numeric: tabular-nums;
 }
 
-/* Eye toggle */
 .eyeBtn {
-  flex-shrink: 0;
-  display: flex;
+  flex: none;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 36px;
   height: 36px;
+  padding: 0;
   border: none;
   border-radius: var(--sf-radius-sm);
   background: transparent;
   color: var(--sf-color-text-muted);
   cursor: pointer;
-  transition: var(--sf-transition-fast);
+  transition: color var(--sf-transition-fast);
 }
 
 .eyeBtn:hover {
-  color: var(--sf-color-gold-deep);
-  background: var(--sf-color-surface-hover);
+  color: var(--sf-color-text);
 }
 
-/* ================================================================== */
-/*  Field error                                                       */
-/* ================================================================== */
+.eyeBtn:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: var(--sf-shadow-focus);
+}
 
+/* Stated, not shouted. */
 .fieldError {
   display: block;
+  margin-top: var(--sf-space-2);
   font-size: var(--sf-text-xs);
+  line-height: var(--sf-leading-normal);
   color: var(--sf-color-danger);
-  margin-top: var(--sf-space-1);
-  padding-left: 2px;
 }
 
-/* ================================================================== */
-/*  Options row (remember me / forgot password)                       */
-/* ================================================================== */
+.nameRow {
+  display: grid;
+  /* minmax(0,…) lets the columns shrink below the inputs' intrinsic width —
+     plain 1fr floors at min-content and overflows the dialog */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--sf-space-4);
+}
+
+/* =============================================================================
+ * 7. PASSWORD STRENGTH — four hairline segments + the word
+ * ========================================================================== */
+
+.strengthWrap {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-3);
+  margin-top: var(--sf-space-3);
+}
+
+.strengthBar {
+  display: flex;
+  flex: 1;
+  gap: var(--sf-space-1);
+}
+
+.strengthSegment {
+  flex: 1;
+  height: 2px;
+  transition: background-color var(--sf-transition);
+}
+
+/* The word carries the meaning; the bar only echoes it. */
+.strengthLabel {
+  flex: none;
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+}
+
+/* =============================================================================
+ * 8. CHECKBOXES + QUIET LINKS
+ * ========================================================================== */
 
 .optionsRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--sf-space-5);
+  gap: var(--sf-space-4);
+  margin-bottom: var(--sf-space-6);
 }
 
-/* ================================================================== */
-/*  Checkbox                                                          */
-/* ================================================================== */
-
 .checkLabel {
+  position: relative;
   display: flex;
   align-items: center;
-  gap: var(--sf-space-2);
+  gap: var(--sf-space-3);
   font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-normal);
   color: var(--sf-color-text-secondary);
   cursor: pointer;
   user-select: none;
 }
 
+/* Visually hidden but still focusable — the trap and screen readers need it. */
 .checkbox {
   position: absolute;
   opacity: 0;
   width: 0;
   height: 0;
+  margin: 0;
 }
 
 .checkMark {
-  flex-shrink: 0;
-  display: inline-block;
-  width: 18px;
-  height: 18px;
-  border: 1.5px solid var(--sf-color-border-strong);
-  border-radius: var(--sf-radius-sm);
-  background: var(--sf-color-surface-2);
-  transition: var(--sf-transition-fast);
   position: relative;
+  flex: none;
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--sf-color-border-strong);
+  border-radius: var(--sf-radius-sm);
+  background: transparent;
+  transition: background-color var(--sf-transition-fast),
+    border-color var(--sf-transition-fast);
 }
 
 .checkbox:checked + .checkMark {
@@ -481,10 +525,10 @@
   position: absolute;
   left: 5px;
   top: 2px;
-  width: 5px;
-  height: 9px;
+  width: 4px;
+  height: 8px;
   border: solid var(--sf-color-emerald-contrast);
-  border-width: 0 2px 2px 0;
+  border-width: 0 1.5px 1.5px 0;
   transform: rotate(45deg);
 }
 
@@ -494,86 +538,51 @@
 
 .termsLabel {
   align-items: flex-start;
-  line-height: 1.6;
 }
 
 .termsLabel .checkMark {
-  margin-top: 2px;
+  margin-top: 3px;
 }
 
-/* ================================================================== */
-/*  Link button                                                       */
-/* ================================================================== */
-
+/* Used on <button> (forgot password) and <a> (terms/privacy). */
 .linkBtn {
+  padding: 0;
   border: none;
   background: none;
-  padding: 0;
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-  color: var(--sf-color-gold-deep);
-  cursor: pointer;
-  transition: color var(--sf-transition-fast);
   font-family: var(--sf-font-family);
-  text-decoration: none; /* also used on <a> (terms/privacy links) */
+  font-size: inherit;
+  font-weight: var(--sf-font-medium);
+  color: var(--sf-color-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition: text-decoration-thickness var(--sf-transition-fast);
 }
 
 .linkBtn:hover {
-  color: var(--sf-color-gold);
-  text-decoration: underline;
+  text-decoration-thickness: 2px;
 }
 
 .linkBtn:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
+  outline: 2px solid transparent;
   border-radius: var(--sf-radius-sm);
+  box-shadow: var(--sf-shadow-focus);
 }
 
-/* ================================================================== */
-/*  Submit button (emerald CTA)                                        */
-/* ================================================================== */
+.forgotBtn {
+  flex: none;
+  font-size: var(--sf-text-sm);
+  white-space: nowrap;
+}
+
+/* =============================================================================
+ * 9. SUBMIT — the shared sf-btn primitive, no local chrome
+ * ========================================================================== */
 
 .submitBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 48px;
-  border: none;
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-emerald);
-  color: var(--sf-color-emerald-contrast);
-  font-family: var(--sf-font-family);
-  font-size: var(--sf-text-base);
-  font-weight: var(--sf-font-bold);
-  cursor: pointer;
-  transition: var(--sf-transition-fast);
-  letter-spacing: 0.01em;
+  margin-top: var(--sf-space-1);
 }
-
-.submitBtn:hover:not(:disabled) {
-  background: var(--sf-color-emerald-hover);
-  transform: translateY(-1px);
-  box-shadow: var(--sf-shadow-md);
-}
-
-.submitBtn:active:not(:disabled) {
-  transform: translateY(0);
-}
-
-.submitBtn:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
-}
-
-.submitBtn:disabled {
-  opacity: 0.65;
-  cursor: not-allowed;
-}
-
-/* ================================================================== */
-/*  Spinner animation                                                 */
-/* ================================================================== */
 
 .spinner {
   animation: spin 0.8s linear infinite;
@@ -585,15 +594,36 @@
   }
 }
 
-/* ================================================================== */
-/*  Divider                                                           */
-/* ================================================================== */
+/* The spinner still has to turn (it is the only "working" signal), but it
+   slows right down for anyone who asked for less motion. */
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2.4s;
+  }
+}
+
+/* Screen-reader-only text — the spinner's "Please wait" status. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* =============================================================================
+ * 10. DIVIDER + SOCIAL
+ * ========================================================================== */
 
 .divider {
   display: flex;
   align-items: center;
-  gap: var(--sf-space-3);
-  margin: var(--sf-space-5) 0;
+  gap: var(--sf-space-4);
+  margin: var(--sf-space-8) 0 var(--sf-space-5);
 }
 
 .dividerLine {
@@ -603,17 +633,14 @@
 }
 
 .dividerText {
+  flex: none;
   font-size: var(--sf-text-xs);
-  color: var(--sf-color-text-muted);
-  white-space: nowrap;
   font-weight: var(--sf-font-medium);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: var(--sf-tracking-wide);
+  color: var(--sf-color-text-muted);
+  white-space: nowrap;
 }
-
-/* ================================================================== */
-/*  Social login                                                      */
-/* ================================================================== */
 
 .socialRow {
   display: grid;
@@ -621,129 +648,89 @@
   gap: var(--sf-space-3);
 }
 
+/* Hairline buttons — the same weight as a field rule, so they sit back. */
 .socialBtn {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: var(--sf-space-2);
-  height: var(--sf-tap-target);
-  border: 1.5px solid var(--sf-color-border);
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-surface-2);
+  min-height: var(--sf-tap-target);
+  padding: var(--sf-space-2) var(--sf-space-3);
+  border: 1px solid var(--sf-color-border);
+  border-radius: var(--sf-radius-sm);
+  background: transparent;
   color: var(--sf-color-text);
   font-family: var(--sf-font-family);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
   cursor: pointer;
-  transition: var(--sf-transition-fast);
+  transition: border-color var(--sf-transition-fast);
 }
 
 .socialBtn:hover:not(:disabled) {
-  background: var(--sf-color-surface-hover);
   border-color: var(--sf-color-border-strong);
 }
 
-/* Social providers aren't wired up yet — shown disabled with a badge so
-   they read as "on the roadmap" rather than silently dead. */
+/* Social providers aren't wired up yet — shown disabled with an honest badge
+   so they read as "on the roadmap" rather than silently dead. */
 .socialBtnDisabled {
   cursor: not-allowed;
-  opacity: 0.6;
+  opacity: 0.55;
 }
 
 .soonBadge {
-  font-size: 0.5625rem;
-  font-weight: var(--sf-font-bold);
+  font-size: 0.625rem;
+  font-weight: var(--sf-font-medium);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--sf-tracking-wide);
   color: var(--sf-color-text-muted);
-  background: var(--sf-color-surface);
   border: 1px solid var(--sf-color-border);
   border-radius: var(--sf-radius-pill);
-  padding: 2px 7px;
-  line-height: 1.4;
+  padding: 1px 5px 1px 7px;
+  line-height: 1.5;
 }
 
-/* ================================================================== */
-/*  Switch text (bottom link)                                         */
-/* ================================================================== */
+/* =============================================================================
+ * 11. FOOTER SWITCH LINE
+ * ========================================================================== */
 
 .switchText {
+  margin: var(--sf-space-8) 0 0;
   text-align: center;
   font-size: var(--sf-text-sm);
   color: var(--sf-color-text-secondary);
-  margin: var(--sf-space-5) 0 0;
 }
 
 .switchBtn {
+  padding: 0;
   border: none;
   background: none;
-  padding: 0;
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-bold);
-  color: var(--sf-color-gold-deep);
-  cursor: pointer;
   font-family: var(--sf-font-family);
-  transition: color var(--sf-transition-fast);
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-medium);
+  color: var(--sf-color-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  cursor: pointer;
+  transition: text-decoration-thickness var(--sf-transition-fast);
 }
 
 .switchBtn:hover {
-  color: var(--sf-color-gold);
-  text-decoration: underline;
+  text-decoration-thickness: 2px;
 }
 
 .switchBtn:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
+  outline: 2px solid transparent;
   border-radius: var(--sf-radius-sm);
+  box-shadow: var(--sf-shadow-focus);
 }
 
-/* ================================================================== */
-/*  Name row (two columns)                                            */
-/* ================================================================== */
-
-.nameRow {
-  display: grid;
-  /* minmax(0,…) lets the columns shrink below the inputs' intrinsic width —
-     plain 1fr floors at min-content and overflows the 440px dialog */
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: var(--sf-space-3);
-}
-
-/* ================================================================== */
-/*  Password strength bar                                             */
-/* ================================================================== */
-
-.strengthWrap {
-  display: flex;
-  align-items: center;
-  gap: var(--sf-space-3);
-  margin-top: var(--sf-space-2);
-}
-
-.strengthBar {
-  display: flex;
-  gap: var(--sf-space-1);
-  flex: 1;
-}
-
-.strengthSegment {
-  flex: 1;
-  height: 4px;
-  border-radius: 2px;
-  transition: background-color var(--sf-transition);
-}
-
-.strengthLabel {
-  font-size: 0.6875rem;
-  font-weight: var(--sf-font-bold);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  flex-shrink: 0;
-}
-
-/* ================================================================== */
-/*  Responsive                                                        */
-/* ================================================================== */
+/* =============================================================================
+ * 12. RESPONSIVE
+ * ========================================================================== */
 
 @media (max-width: 640px) {
   .overlay {
@@ -752,25 +739,38 @@
   }
 
   .body {
-    padding: var(--sf-space-5) var(--sf-space-5) var(--sf-space-8);
+    padding: var(--sf-space-6) var(--sf-space-5) var(--sf-space-8);
+  }
+
+  .header {
+    margin-bottom: var(--sf-space-6);
+  }
+
+  .title {
+    font-size: var(--sf-text-2xl);
   }
 
   .nameRow {
-    grid-template-columns: 1fr;
-    gap: 0;
+    display: block;
   }
 
   .socialRow {
     grid-template-columns: 1fr;
   }
+
+  .divider {
+    margin: var(--sf-space-6) 0 var(--sf-space-4);
+  }
 }
 
 @media (max-width: 380px) {
   .body {
-    padding: var(--sf-space-5) var(--sf-space-4);
+    padding: var(--sf-space-6) var(--sf-space-4) var(--sf-space-6);
   }
 
-  .title {
-    font-size: var(--sf-text-xl);
+  .optionsRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sf-space-3);
   }
 }
