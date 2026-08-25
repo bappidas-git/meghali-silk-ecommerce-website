@@ -1,18 +1,26 @@
-/* TrustStrip — teal/green guarantee band. Mobile-first: 2×2 grid by default,
-   four-across from tablet up. Token-driven; light labels on brand green. */
+/* TrustStrip — the "promises" hairline. A quiet row of store-attested policies
+   set in small tracked uppercase with thin gold glyphs, bounded by hairlines
+   rather than a filled band. Mobile-first: 2×2 grid, four-across from tablet up.
+
+   It is rendered in two places with very different grounds — under the header
+   nav on the storefront, and inside the SidebarMenu hero (a rounded, bordered
+   box that also compacts it by overriding --sf-space-3/-4 on the wrapper). So
+   the strip paints NO ground and NO border of its own: each host draws the
+   bounding rules (see Header's .promises), which keeps the sidebar from showing
+   a doubled hairline just inside its box. The padding keeps reading the spacing
+   tokens so the sidebar's compacting override still works. */
 
 .strip {
   width: 100%;
-  background: var(--sf-color-brand-green);
-  color: var(--sf-color-primary-contrast);
+  background: transparent;
+  color: var(--sf-color-text-secondary);
   font-family: var(--sf-font-family);
-  border-bottom: 1px solid var(--sf-color-border);
 }
 
 .list {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: var(--sf-space-2) var(--sf-space-4);
+  gap: var(--sf-space-3) var(--sf-space-4);
   width: 100%;
   max-width: var(--sf-container-max);
   margin: 0 auto;
@@ -31,17 +39,21 @@
 
 .icon {
   flex: none;
-  font-size: var(--sf-text-lg);
-  color: var(--sf-color-gold);
+  font-size: var(--sf-text-base);
+  color: var(--sf-color-gold-deep);
 }
 
+/* Narrow hosts (the SidebarMenu hero) give each item ~110px of label width,
+   which tracked uppercase does not fit on one line — so wrap rather than
+   ellipsise a policy the customer is meant to read. The single-line treatment
+   comes back at ≥640px, where there is room for it. */
 .label {
-  font-size: var(--sf-text-xs);
-  font-weight: var(--sf-font-semibold);
+  font-size: 0.6875rem;
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
   line-height: var(--sf-leading-tight);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  overflow-wrap: anywhere;
 }
 
 /* Very narrow phones: stay readable, allow the label to shrink gracefully. */
@@ -53,9 +65,12 @@
   .item {
     gap: var(--sf-space-1);
   }
+  .label {
+    letter-spacing: 0.04em;
+  }
 }
 
-/* Tablet and up: four across in a single row. */
+/* Tablet and up: four across on one line, with the full editorial tracking. */
 @media (min-width: 640px) {
   .list {
     grid-template-columns: repeat(4, 1fr);
@@ -63,9 +78,19 @@
     padding: var(--sf-space-3) var(--sf-space-6);
   }
   .icon {
-    font-size: var(--sf-text-xl);
+    font-size: var(--sf-text-lg);
   }
   .label {
-    font-size: var(--sf-text-sm);
+    font-size: var(--sf-text-xs);
+    letter-spacing: var(--sf-tracking-wider);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+@media print {
+  .strip {
+    display: none !important;
   }
 }

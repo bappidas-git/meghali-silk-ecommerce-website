@@ -1,144 +1,88 @@
 /* ==========================================================================
-   Header — Meghali's Silk masthead
-   Announcement bar → trust strip → main row → category chips.
-   Fully token-driven (storefront-tokens.css); no hardcoded hex.
+   Header — Meghali's Silk editorial masthead
+   Three bands, top to bottom:
+     1. utility line   — <AnnouncementBar>, in normal flow (scrolls away)
+     2. masthead       — wordmark · search · actions          } the sticky
+     3. primary nav    — tracked uppercase links under a rule } ~120px total
+   …with the promises hairline (<TrustStrip>) capping the page below it.
+
+   Everything sits on the page ivory (--sf-color-bg), so the chrome reads as
+   part of the page rather than as a bar bolted on top of it. Fully token-driven
+   (storefront-tokens.css); no hardcoded hex, no hardcoded type.
    ========================================================================== */
 
-/* ---- Sticky header wrapper ---- */
+/* ---- Sticky wrapper ---------------------------------------------------- */
+/* Only the masthead + nav pin. The closing hairline is always drawn and only
+   deepens when scrolled, so pinning never shifts the page by a pixel. */
 .header {
   position: sticky;
   top: 0;
   left: 0;
   right: 0;
   z-index: var(--sf-z-sticky);
+  background: var(--sf-color-bg);
+  color: var(--sf-color-text);
   font-family: var(--sf-font-family);
-  transition: box-shadow var(--sf-transition);
+  border-bottom: 1px solid var(--sf-color-border);
+  transition: border-color var(--sf-transition),
+    box-shadow var(--sf-transition);
 }
 
-/* Subtle elevation once scrolled. */
+/* A hairline settling in, not a shadow popping out. */
 .header.scrolled {
-  box-shadow: var(--sf-shadow-md);
-}
-
-/* ---- Trust strip wrapper ---- */
-.trustWrap {
-  width: 100%;
+  border-bottom-color: var(--sf-color-border-strong);
+  box-shadow: var(--sf-shadow-xs);
 }
 
 /* ==========================================================================
-   MAIN HEADER ROW
+   1. MASTHEAD
    ========================================================================== */
 
-.mainHeader {
-  background: var(--sf-color-brand-green);
-  color: var(--sf-color-primary-contrast);
-  border-bottom: 1px solid var(--sf-color-border);
+.masthead {
+  width: 100%;
 }
 
-.mainHeaderInner {
+.mastheadInner {
   width: 100%;
   max-width: var(--sf-container-max);
+  min-height: 72px;
   margin: 0 auto;
-  padding: var(--sf-space-3) var(--sf-space-4);
+  padding: var(--sf-space-3) var(--sf-space-6);
   display: flex;
   align-items: center;
   gap: var(--sf-space-4);
 }
 
-/* ---- Hamburger (mobile) ---- */
-.hamburger {
-  color: var(--sf-color-primary-contrast) !important;
-  min-width: var(--sf-tap-target);
-  min-height: var(--sf-tap-target);
-}
-
-/* ---- Logo on deep-green panel ---- */
+/* ---- Wordmark ---------------------------------------------------------- */
+/* Transparent-ground artwork on the ivory ground — no panel, no plate. */
 .logoLink {
-  text-decoration: none;
-  color: inherit;
-  flex-shrink: 0;
-  display: inline-flex;
-}
-
-.logoPanel {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  background: var(--brand-logo-bg);
-  border-radius: var(--sf-radius-md);
-  padding: var(--sf-space-1) var(--sf-space-2);
-  cursor: pointer;
+  flex-shrink: 0;
+  text-decoration: none;
+  color: inherit;
+  border-radius: var(--sf-radius-sm);
+  transition: opacity var(--sf-transition-fast);
+}
+
+.logoLink:hover {
+  opacity: 0.78;
+}
+
+.logoLink:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 4px;
+  box-shadow: var(--sf-shadow-focus);
 }
 
 .logoImg {
   display: block;
-  height: 52px;
+  height: 44px;
   width: auto;
   object-fit: contain;
 }
 
-/* ---- Search bar (desktop/tablet) ---- */
-.searchWrap {
-  flex: 1;
-  max-width: 680px;
-  display: flex;
-  align-items: stretch;
-  gap: var(--sf-space-2);
-  background: var(--sf-color-surface);
-  border: 1px solid var(--sf-color-border-strong);
-  border-radius: var(--sf-radius-pill);
-  padding: var(--sf-space-1);
-  transition: border-color var(--sf-transition-fast),
-    box-shadow var(--sf-transition-fast);
-}
-
-.searchWrap:hover,
-.searchWrap:focus-within {
-  border-color: var(--sf-color-gold);
-  box-shadow: var(--sf-shadow-focus);
-}
-
-.searchField {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: var(--sf-space-2);
-  min-height: 38px;
-  padding: 0 var(--sf-space-4);
-  border: none;
-  background: transparent;
-  color: var(--sf-color-text);
-  font-family: var(--sf-font-family);
-  font-size: var(--sf-text-sm);
-  text-align: left;
-  cursor: text;
-}
-
-.searchFieldIcon {
-  flex: none;
-  color: var(--sf-color-text-muted);
-  font-size: var(--sf-text-lg) !important;
-}
-
-.searchPlaceholder {
-  flex: 1;
-  color: var(--sf-color-text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* AI Search emerald CTA — composes the shared .sf-btn--emerald primitive. */
-.aiSearchBtn {
-  flex: none;
-  min-height: 38px !important;
-}
-
-.aiSearchIcon {
-  font-size: var(--sf-text-base) !important;
-}
-
-/* ---- Right-side actions ---- */
+/* ---- Right-side actions ------------------------------------------------ */
 .actions {
   display: flex;
   align-items: center;
@@ -147,80 +91,342 @@
   flex-shrink: 0;
 }
 
+/* Thin-line icon buttons: no fill, no ring, the ink lightening to gold. */
 .actionIcon {
-  color: var(--sf-color-primary-contrast) !important;
+  color: var(--sf-color-text) !important;
   min-width: var(--sf-tap-target);
   min-height: var(--sf-tap-target);
+  border-radius: var(--sf-radius-sm) !important;
+  transition: color var(--sf-transition-fast) !important;
+}
+
+.actionIcon:hover {
+  color: var(--sf-color-accent) !important;
+  background: transparent !important;
 }
 
 .actionIcon svg {
-  font-size: 24px;
+  font-size: 22px;
 }
 
 .actionIcon:focus-visible {
-  outline: 2px solid var(--sf-color-gold);
-  outline-offset: 2px;
+  outline: 2px solid transparent;
+  box-shadow: var(--sf-shadow-focus);
 }
 
-/* Live count badges read in the discount/red token. */
-.badge :global(.MuiBadge-badge) {
-  background: var(--sf-color-danger) !important;
-  color: var(--sf-color-primary-contrast) !important;
-  font-weight: var(--sf-font-bold);
-}
-
-.avatar {
-  background: var(--sf-gradient-gold) !important;
-  color: var(--sf-color-brand-green-deep) !important;
-  font-weight: var(--sf-font-bold) !important;
-  font-size: var(--sf-text-sm) !important;
-}
-
-/* ==========================================================================
-   CATEGORY NAV-CHIPS ROW
-   ========================================================================== */
-
-.chipsBar {
-  background: var(--sf-color-brand-green-deep);
-  border-bottom: 1px solid var(--sf-color-border);
-}
-
-.chipsInner {
-  width: 100%;
-  max-width: var(--sf-container-max);
-  margin: 0 auto;
-  padding: var(--sf-space-2) var(--sf-space-4);
-  display: flex;
-  align-items: center;
-  gap: var(--sf-space-2);
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-
-.chipsInner::-webkit-scrollbar {
+/* No ripple: the editorial masthead does not splash. */
+.actionIcon :global(.MuiTouchRipple-root) {
   display: none;
 }
 
-.chip {
-  flex: none;
-  min-height: 36px !important;
+/* ---- Search trigger ---------------------------------------------------- */
+/* ONE affordance, honestly labelled: an outlined field-button that opens the
+   search modal. It is not an input, so it does not pretend to be one. */
+.searchTrigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sf-space-2);
+  min-height: 38px;
+  margin-right: var(--sf-space-2);
+  padding: 0 var(--sf-space-4);
+  background: transparent;
+  border: 1px solid var(--sf-color-border-strong);
+  border-radius: var(--sf-radius-sm);
+  color: var(--sf-color-text-secondary);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color var(--sf-transition-fast),
+    color var(--sf-transition-fast);
+}
+
+.searchTrigger:hover {
+  border-color: var(--sf-color-accent);
+  color: var(--sf-color-text);
+}
+
+.searchTrigger:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: var(--sf-shadow-focus);
+}
+
+.searchTriggerIcon {
+  font-size: var(--sf-text-lg) !important;
+}
+
+.searchTriggerLabel {
+  padding-right: var(--sf-space-8);
+}
+
+/* ---- Badges & avatar --------------------------------------------------- */
+/* The emerald pair is ink-on-ivory in light mode and ivory-on-charcoal in dark,
+   so one rule keeps the count legible against both grounds. */
+.badge :global(.MuiBadge-badge) {
+  background: var(--sf-color-emerald) !important;
+  color: var(--sf-color-emerald-contrast) !important;
+  font-size: 0.625rem !important;
+  font-weight: var(--sf-font-semibold);
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+}
+
+.avatar {
+  background: var(--sf-color-primary) !important;
+  color: var(--sf-color-primary-contrast) !important;
+  font-family: var(--sf-font-family) !important;
+  font-weight: var(--sf-font-medium) !important;
+  font-size: var(--sf-text-xs) !important;
 }
 
 /* ==========================================================================
-   USER DROPDOWN MENU
+   2. PRIMARY NAV
+   ========================================================================== */
+
+.navBar {
+  position: relative;
+  width: 100%;
+  border-top: 1px solid var(--sf-color-border);
+}
+
+.navInner {
+  width: 100%;
+  max-width: var(--sf-container-max);
+  margin: 0 auto;
+  padding: 0 var(--sf-space-6);
+}
+
+/* Deliberately NOT an overflow scroller. The collection panel is a child of a
+   nav item (so the sub-collections follow their trigger in the tab order, which
+   is the only way a keyboard user ever reaches them), and any overflow here
+   would clip both that panel and the focus ring. If a catalogue ever carries
+   more labels than one line holds, the row wraps and the header grows — content
+   stays reachable either way. */
+.navList {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sf-space-4);
+  min-height: 44px;
+  margin: 0;
+  padding: var(--sf-space-1) 0;
+  list-style: none;
+}
+
+.navItem {
+  flex: none;
+  display: flex;
+  align-items: center;
+}
+
+/* A hairline tick between the category group and the editorial group. */
+.navSep {
+  flex: none;
+  width: 1px;
+  height: 14px;
+  background: var(--sf-color-border-strong);
+}
+
+/* Tracked uppercase text links — the gold underline is the only state colour. */
+.navLink {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0;
+  color: var(--sf-color-text-secondary);
+  font-size: 0.6875rem;
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color var(--sf-transition-fast);
+}
+
+/* Touch: clear the 44px minimum (WCAG 2.5.5), as the button primitives do. */
+@media (pointer: coarse) {
+  .navLink {
+    min-height: var(--sf-tap-target);
+  }
+}
+
+.navLink::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 8px;
+  height: 1px;
+  background: var(--sf-color-gold);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform var(--sf-transition);
+}
+
+.navLink:hover {
+  color: var(--sf-color-text);
+}
+
+.navLink:hover::after {
+  transform: scaleX(1);
+}
+
+.navLinkActive {
+  color: var(--sf-color-text);
+}
+
+.navLinkActive::after {
+  transform: scaleX(1);
+}
+
+.navLink:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--sf-shadow-focus);
+}
+
+/* ---- Collection panel -------------------------------------------------- */
+/* Restrained on purpose: an eyebrow, a "view all", and the child collections as
+   text links. It is rendered inside its trigger's <li> (for tab order) but its
+   containing block is .navBar, so it still spans the whole band. */
+.collectionPanel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: var(--sf-color-surface);
+  border-top: 1px solid var(--sf-color-border);
+  border-bottom: 1px solid var(--sf-color-border);
+  box-shadow: var(--sf-shadow-sm);
+  animation: panelIn 0.24s var(--sf-ease);
+}
+
+@keyframes panelIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collectionPanel {
+    animation: none;
+  }
+}
+
+.collectionInner {
+  width: 100%;
+  max-width: var(--sf-container-max);
+  margin: 0 auto;
+  padding: var(--sf-space-5) var(--sf-space-6);
+  display: flex;
+  align-items: baseline;
+  gap: var(--sf-space-10);
+}
+
+.collectionHead {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-2);
+  min-width: 180px;
+}
+
+.collectionEyebrow {
+  color: var(--sf-color-text-muted);
+  font-size: var(--sf-text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+}
+
+.collectionAll {
+  color: var(--sf-color-accent);
+  font-size: var(--sf-text-sm);
+  text-decoration: none;
+  text-underline-offset: 4px;
+}
+
+.collectionAll:hover {
+  text-decoration: underline;
+}
+
+.collectionAll:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: var(--sf-shadow-focus);
+}
+
+.collectionList {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sf-space-3) var(--sf-space-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.collectionLink {
+  display: inline-block;
+  padding: var(--sf-space-1) 0;
+  color: var(--sf-color-text);
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-lg);
+  line-height: var(--sf-leading-tight);
+  text-decoration: none;
+  text-underline-offset: 6px;
+  transition: color var(--sf-transition-fast);
+}
+
+.collectionLink:hover {
+  color: var(--sf-color-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+}
+
+.collectionLink:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: var(--sf-shadow-focus);
+}
+
+/* ==========================================================================
+   3. PROMISES LINE (TrustStrip host)
+   The strip paints no ground of its own, so the bounding hairline lives here.
+   ========================================================================== */
+.promises {
+  width: 100%;
+  background: var(--sf-color-bg);
+  border-bottom: 1px solid var(--sf-color-border);
+}
+
+/* ==========================================================================
+   USER DROPDOWN MENU (MUI)
+   Ivory sheet, hairline border, no glow — the MUI elevation is switched off in
+   Header.js and replaced with a soft token shadow.
    ========================================================================== */
 
 .userMenu {
-  margin-top: var(--sf-space-1);
+  margin-top: var(--sf-space-2);
 }
 
 .userMenuPaper {
-  border-radius: var(--sf-radius-md) !important;
-  min-width: 240px;
+  /* MUI's own .MuiPopover-paper min-width lands after this sheet, so the
+     override has to shout to be heard. */
+  min-width: 244px !important;
   overflow: hidden;
   background: var(--sf-color-surface) !important;
+  color: var(--sf-color-text) !important;
   border: 1px solid var(--sf-color-border);
-  color: var(--sf-color-text);
+  border-radius: var(--sf-radius-md) !important;
+  box-shadow: var(--sf-shadow-md) !important;
 }
 
 .menuGreeting {
@@ -230,23 +436,38 @@
   padding: var(--sf-space-4) var(--sf-space-5);
 }
 
+.menuIdentity {
+  min-width: 0;
+}
+
 .menuAvatar {
-  background: var(--sf-gradient-gold) !important;
-  color: var(--sf-color-brand-green-deep) !important;
-  font-weight: var(--sf-font-bold) !important;
+  background: var(--sf-color-primary) !important;
+  color: var(--sf-color-primary-contrast) !important;
+  font-family: var(--sf-font-family) !important;
+  font-weight: var(--sf-font-medium) !important;
+  font-size: var(--sf-text-sm) !important;
 }
 
 .menuUserName {
+  display: block;
   font-weight: var(--sf-font-semibold) !important;
   color: var(--sf-color-text) !important;
 }
 
 .menuUserEmail {
+  display: block;
   color: var(--sf-color-text-muted) !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.menuDivider {
+  border-color: var(--sf-color-border) !important;
 }
 
 .menuItem {
   padding: var(--sf-space-3) var(--sf-space-5) !important;
+  font-family: var(--sf-font-family) !important;
   font-size: var(--sf-text-sm) !important;
   display: flex !important;
   align-items: center !important;
@@ -271,35 +492,75 @@
    RESPONSIVE
    ========================================================================== */
 
-/* Tablet — search persists but tightens; AI Search collapses to its icon. */
-@media (min-width: 769px) and (max-width: 1024px) {
-  .mainHeaderInner {
+/* Laptops / small desktops — tighten the nav tracking before it ever scrolls. */
+@media (max-width: 1200px) {
+  .navList {
     gap: var(--sf-space-3);
   }
-  .searchWrap {
-    max-width: 380px;
+  .navLink {
+    letter-spacing: 0.06em;
+  }
+  .collectionInner {
+    gap: var(--sf-space-6);
   }
 }
 
-/* Mobile — compact single row: hamburger + logo + search/cart/account. */
-@media (max-width: 768px) {
-  .mainHeaderInner {
-    padding: var(--sf-space-2) var(--sf-space-3);
+/* Tablet — the search trigger drops its label (see isTablet in Header.js). */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .mastheadInner {
+    min-height: 68px;
+    padding: var(--sf-space-3) var(--sf-space-4);
+    gap: var(--sf-space-3);
+  }
+  .navInner {
+    padding: 0 var(--sf-space-3);
+  }
+  /* Ten links have to clear 1024 without the scroller kicking in, so the row
+     trades tracking and gap rather than truncating "Today's Deals". */
+  .navList {
     gap: var(--sf-space-2);
   }
+  .navLink {
+    letter-spacing: 0.04em;
+  }
+  .searchTrigger {
+    min-width: var(--sf-tap-target);
+    justify-content: center;
+    padding: 0 var(--sf-space-3);
+    margin-right: var(--sf-space-1);
+  }
   .logoImg {
-    height: 40px;
+    height: 38px;
+  }
+  .collectionHead {
+    min-width: 140px;
+  }
+}
+
+/* Mobile — one compact row: hamburger · wordmark · search/cart/account. */
+@media (max-width: 768px) {
+  .mastheadInner {
+    min-height: 56px;
+    padding: var(--sf-space-2) var(--sf-space-2);
+    gap: var(--sf-space-1);
+  }
+  .logoImg {
+    height: 34px;
   }
   .actions {
     gap: 0;
   }
+  .actionIcon svg {
+    font-size: 21px;
+  }
 }
 
 /* ==========================================================================
-   PRINT — hide header
+   PRINT — hide the chrome
    ========================================================================== */
 @media print {
-  .header {
+  .header,
+  .promises {
     display: none !important;
   }
 }

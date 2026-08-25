@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
 import { useCart } from "../../hooks/useCart";
@@ -6,7 +6,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useWishlist } from "../../context/WishlistContext";
 import { useDealsConfig } from "../../context/DealsConfigContext";
 import apiService from "../../services/api";
-import { categoryParam } from "../../utils/categories";
+import { categoryParam, getMainMenuCategories } from "../../utils/categories";
 import { APP_NAME } from "../../utils/constants";
 import AnnouncementBar from "../AnnouncementBar";
 import TrustStrip from "../TrustStrip";
@@ -25,28 +25,29 @@ import {
   Divider,
 } from "@mui/material";
 import {
-  ShoppingCart,
-  Menu as MenuIcon,
-  AccountCircle,
+  MenuOutlined,
+  SearchOutlined,
+  ShoppingBagOutlined,
   FavoriteBorder,
-  Search as SearchIcon,
-  AutoAwesome,
-  Person,
-  ListAlt,
-  Favorite,
-  Logout as LogoutIcon,
-  Login as LoginIcon,
-  PersonAdd,
-  Brightness4,
-  Brightness7,
+  PersonOutline,
+  DarkModeOutlined,
+  LightModeOutlined,
+  ListAltOutlined,
+  LogoutOutlined,
+  LoginOutlined,
+  PersonAddAltOutlined,
 } from "@mui/icons-material";
-import { motion } from "framer-motion";
 import styles from "./Header.module.css";
 
-// The brand logo PNG ships with its own deep-green background, so it must always
-// sit on a panel filled with that same green (var(--brand-logo-bg)).
+// The wordmark is gold on a TRANSPARENT ground, so it sits directly on the ivory
+// masthead — there is no logo panel any more. This is byte-for-byte the URL that
+// index.html preloads for the splash screen, so the masthead paints from cache
+// with no second request. Intrinsic art is 1454×454; the w_520 transform is
+// 520×162, ~3.7× the 44px render height, so it stays crisp on retina.
 const LOGO_SRC =
-  "https://res.cloudinary.com/dn9gyaiik/image/upload/v1782451315/Logo_gpxble.png";
+  "https://res.cloudinary.com/v8vrixwq/image/upload/f_auto,q_auto,w_520/v1787592407/meghali-silk-logo.png";
+const LOGO_W = 520;
+const LOGO_H = 162;
 
 const Header = () => {
   const navigate = useNavigate();
@@ -63,7 +64,7 @@ const Header = () => {
   } = useAuth();
   const { getCartItemCount, isCartOpen, setIsCartOpen } = useCart();
   const { getWishlistCount } = useWishlist();
-  // The "Today's Deals" chip is hidden when the admin turns the deals page off.
+  // The "Today's Deals" link is hidden when the admin turns the deals page off.
   const { enabled: dealsEnabled } = useDealsConfig();
   const isMobile = useMediaQuery("(max-width:768px)");
   const isTablet = useMediaQuery("(max-width:1024px)");
@@ -77,6 +78,8 @@ const Header = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [searchModalOpen, setSearchModalOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  // Key of the nav entry whose collection panel is showing (hover or focus).
+  const [openCollection, setOpenCollection] = useState(null);
 
   // Fetch categories on mount. Also refetch when the tab regains focus so any
   // change the admin makes (toggling a category into the main menu, reordering
@@ -102,13 +105,19 @@ const Header = () => {
     };
   }, []);
 
-  // Subtle elevation once the page is scrolled.
+  // Subtle hairline/elevation change once the page is scrolled. The masthead
+  // never changes height, so nothing under it shifts.
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 4);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  // Any route change closes an open collection panel.
+  useEffect(() => {
+    setOpenCollection(null);
+  }, [location.pathname, location.search]);
 
   const handleUserMenuOpen = (e) => {
     if (isAuthenticated) {
@@ -135,160 +144,211 @@ const Header = () => {
   const handleSearchClick = () => setSearchModalOpen(true);
   const handleMobileMenuClick = () => setSidebarOpen(true);
 
-  const handleCategoryClick = (category) => {
-    navigate(`/products?category=${categoryParam(category)}`);
-  };
+  // ---------------------------------------------------------------------------
+  // PRIMARY NAV
+  // ---------------------------------------------------------------------------
+  // Two groups on one hairline row: the admin-curated main-menu categories
+  // (API-driven, in `menuOrder`), then the curated editorial links.
+  //
+  // The old "Mega Silk" / "Bridal" chips bound themselves to a live category by
+  // regex with a ?search= fallback. The reseeded Assamese catalogue promotes
+  // those very collections — Mekhela Chador and Bridal & Occasion — into the
+  // main menu proper, so the regex slots are retired rather than rendered twice.
+  const mainMenuCategories = useMemo(
+    () => getMainMenuCategories(categories),
+    [categories]
+  );
 
-  // Category quick-filter chips. Each maps to real data where possible, falling
-  // back to a sensible /products query so a chip is never a dead link. "Mega
-  // Silk" and "Bridal" bind to a matching category slug when the catalogue has
-  // one; otherwise they fall back to a search query.
-  const findCategory = (...needles) =>
-    categories.find((c) => {
-      const hay = `${c.name || ""} ${c.slug || ""}`.toLowerCase();
-      return needles.some((n) => hay.includes(n));
-    });
+  // Children of a main-menu category, for its collection panel. Ordered the way
+  // the rest of the app orders siblings: sortOrder, then name.
+  const childrenOf = useCallback(
+    (parentId) =>
+      categories
+        .filter(
+          (c) => String(c.parentId) === String(parentId) && c.isActive !== false
+        )
+        .sort(
+          (a, b) =>
+            (a.sortOrder ?? 0) - (b.sortOrder ?? 0) ||
+            String(a.name).localeCompare(String(b.name))
+        ),
+    [categories]
+  );
 
-  const megaSilkCat = findCategory("mega silk", "silk");
-  const bridalCat = findCategory("bridal", "wedding");
+  const categoryLinks = useMemo(
+    () =>
+      mainMenuCategories.map((cat) => ({
+        key: `cat-${cat.id}`,
+        label: cat.name,
+        to: `/products?category=${categoryParam(cat)}`,
+        children: childrenOf(cat.id),
+      })),
+    [mainMenuCategories, childrenOf]
+  );
 
-  const navChips = [
+  const editorialLinks = [
     { key: "new", label: "New Arrivals", to: "/products?sort=newest" },
     { key: "best", label: "Bestsellers", to: "/products?sort=popular" },
     { key: "sale", label: "Sale", to: "/products?sort=discount" },
-    {
-      key: "mega",
-      label: "Mega Silk",
-      category: megaSilkCat,
-      to: megaSilkCat
-        ? `/products?category=${categoryParam(megaSilkCat)}`
-        : "/products?search=silk",
-    },
-    {
-      key: "bridal",
-      label: "Bridal",
-      category: bridalCat,
-      to: bridalCat
-        ? `/products?category=${categoryParam(bridalCat)}`
-        : "/products?search=bridal",
-    },
-    // Deals chip is hidden when the admin disables the deals page.
+    // Deals link is hidden when the admin disables the deals page.
     ...(dealsEnabled
       ? [{ key: "deals", label: "Today's Deals", to: "/special-offers" }]
       : []),
   ];
 
-  // A chip is active when the current route matches its path and every query
-  // param the chip sets is present with the same value.
+  // A link is active when the current route matches its path and every query
+  // param the link sets is present with the same value.
   const currentParams = new URLSearchParams(location.search);
-  const isChipActive = (to) => {
+  const isLinkActive = (to) => {
     const [path, query] = to.split("?");
     if (location.pathname !== path) return false;
     if (!query) return location.search === "";
-    const chipParams = new URLSearchParams(query);
-    for (const [key, value] of chipParams.entries()) {
+    const linkParams = new URLSearchParams(query);
+    for (const [key, value] of linkParams.entries()) {
       if (currentParams.get(key) !== value) return false;
     }
     return true;
   };
 
-  // Real-category chips route through the shared category handler (canonical
-  // ?category= scheme); the rest navigate straight to their fallback query.
-  const handleChipClick = (chip) => {
-    if (chip.category) {
-      handleCategoryClick(chip.category);
-    } else {
-      navigate(chip.to);
-    }
+  const openPanelFor = (item) =>
+    setOpenCollection(item.children && item.children.length ? item.key : null);
+
+  // Close the panel when focus leaves the nav entirely (a keyboard user tabbing
+  // past it), but not while focus moves between a trigger and the panel links.
+  const handleNavBlur = (e) => {
+    if (!e.currentTarget.contains(e.relatedTarget)) setOpenCollection(null);
+  };
+
+  const handleNavKeyDown = (e) => {
+    if (e.key === "Escape") setOpenCollection(null);
+  };
+
+  // Collection panel — a hairline drawer of one category's sub-collections.
+  // It lives INSIDE its trigger's <li> so its links follow the trigger in the
+  // tab order (as a sibling of the whole list they were visually adjacent but
+  // eight links away from the keyboard, i.e. unreachable). It still positions
+  // against .navBar, so it spans the full band and never needs measuring.
+  const renderCollectionPanel = (item) => (
+    <div
+      className={styles.collectionPanel}
+      role="group"
+      aria-label={`${item.label} collections`}
+    >
+      <div className={styles.collectionInner}>
+        <div className={styles.collectionHead}>
+          <span className={styles.collectionEyebrow}>{item.label}</span>
+          <Link
+            to={item.to}
+            className={styles.collectionAll}
+            aria-label={`View all ${item.label}`}
+            onClick={() => setOpenCollection(null)}
+          >
+            View all
+          </Link>
+        </div>
+        <ul className={styles.collectionList}>
+          {item.children.map((child) => (
+            <li key={child.id}>
+              <Link
+                to={`/products?category=${categoryParam(child)}`}
+                className={styles.collectionLink}
+                onClick={() => setOpenCollection(null)}
+              >
+                {child.name}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+
+  const renderNavLink = (item) => {
+    const active = isLinkActive(item.to);
+    const hasPanel = Boolean(item.children && item.children.length);
+    const expanded = hasPanel && openCollection === item.key;
+    return (
+      <li
+        key={item.key}
+        className={styles.navItem}
+        onMouseEnter={() => openPanelFor(item)}
+      >
+        <Link
+          to={item.to}
+          className={`${styles.navLink} ${active ? styles.navLinkActive : ""}`}
+          aria-current={active ? "page" : undefined}
+          aria-expanded={hasPanel ? expanded : undefined}
+          onFocus={() => openPanelFor(item)}
+          onClick={() => setOpenCollection(null)}
+        >
+          {item.label}
+        </Link>
+        {expanded && renderCollectionPanel(item)}
+      </li>
+    );
   };
 
   return (
     <>
-      <header
-        className={`${styles.header} ${isDarkMode ? styles.dark : styles.light} ${
-          scrolled ? styles.scrolled : ""
-        }`}
-      >
-        {/* ===== ANNOUNCEMENT BAR (very top, cycling + dismissible) ===== */}
-        <AnnouncementBar />
+      {/* ===== UTILITY LINE =================================================
+          Rendered in normal flow ABOVE the sticky header, so it scrolls away
+          and the pinned masthead + nav stay inside their ~120px budget. */}
+      <AnnouncementBar />
 
-        {/* ===== TRUST STRIP (desktop/tablet) ===== */}
-        {!isMobile && (
-          <div className={styles.trustWrap}>
-            <TrustStrip />
-          </div>
-        )}
-
-        {/* ===== MAIN HEADER ROW ===== */}
-        <div className={styles.mainHeader}>
-          <div className={styles.mainHeaderInner}>
+      <header className={`${styles.header} ${scrolled ? styles.scrolled : ""}`}>
+        {/* ===== MASTHEAD ===== */}
+        <div className={styles.masthead}>
+          <div className={styles.mastheadInner}>
             {/* Hamburger (mobile) */}
             {isMobile && (
               <IconButton
                 onClick={handleMobileMenuClick}
-                className={styles.hamburger}
+                className={styles.actionIcon}
                 aria-label="Open menu"
               >
-                <MenuIcon />
+                <MenuOutlined />
               </IconButton>
             )}
 
-            {/* Logo — Cloudinary image on a deep-green panel */}
+            {/* Wordmark — transparent-ground artwork straight on the ivory. */}
             <Link to="/" className={styles.logoLink} aria-label={APP_NAME}>
-              <motion.div
-                className={styles.logoPanel}
-                whileHover={{ scale: 1.03 }}
-                whileTap={{ scale: 0.97 }}
-              >
-                <img
-                  className={styles.logoImg}
-                  src={LOGO_SRC}
-                  alt={APP_NAME}
-                  width={isMobile ? 116 : 150}
-                  height={isMobile ? 40 : 52}
-                  loading="eager"
-                  decoding="async"
-                />
-              </motion.div>
+              <img
+                className={styles.logoImg}
+                src={LOGO_SRC}
+                alt={APP_NAME}
+                width={LOGO_W}
+                height={LOGO_H}
+                loading="eager"
+                decoding="async"
+              />
             </Link>
-
-            {/* Search Bar (desktop/tablet) */}
-            {!isMobile && (
-              <div className={styles.searchWrap} role="search">
-                <button
-                  type="button"
-                  className={styles.searchField}
-                  onClick={handleSearchClick}
-                  aria-label="Open search"
-                >
-                  <SearchIcon className={styles.searchFieldIcon} />
-                  <span className={styles.searchPlaceholder}>
-                    Search for silk sarees, suits, dupattas...
-                  </span>
-                </button>
-                <button
-                  type="button"
-                  className={`sf-btn sf-btn--emerald sf-btn--sm ${styles.aiSearchBtn}`}
-                  onClick={handleSearchClick}
-                  aria-label="Open AI search"
-                >
-                  <AutoAwesome className={styles.aiSearchIcon} />
-                  {!isTablet && <span>AI Search</span>}
-                </button>
-              </div>
-            )}
 
             {/* Right actions */}
             <div className={styles.actions}>
-              {/* Search icon (mobile) */}
-              {isMobile && (
+              {/* Search — ONE honest affordance opening the search modal. */}
+              {isMobile ? (
                 <IconButton
                   onClick={handleSearchClick}
                   className={styles.actionIcon}
                   aria-label="Search"
                 >
-                  <SearchIcon />
+                  <SearchOutlined />
                 </IconButton>
+              ) : (
+                <button
+                  type="button"
+                  className={styles.searchTrigger}
+                  onClick={handleSearchClick}
+                  aria-label="Search"
+                >
+                  <SearchOutlined
+                    className={styles.searchTriggerIcon}
+                    aria-hidden="true"
+                  />
+                  {!isTablet && (
+                    <span className={styles.searchTriggerLabel}>Search</span>
+                  )}
+                </button>
               )}
 
               {/* Theme toggle (desktop/tablet) */}
@@ -296,9 +356,11 @@ const Header = () => {
                 <IconButton
                   onClick={toggleTheme}
                   className={styles.actionIcon}
-                  aria-label="Toggle theme"
+                  aria-label={
+                    isDarkMode ? "Switch to light theme" : "Switch to dark theme"
+                  }
                 >
-                  {isDarkMode ? <Brightness7 /> : <Brightness4 />}
+                  {isDarkMode ? <LightModeOutlined /> : <DarkModeOutlined />}
                 </IconButton>
               )}
 
@@ -307,9 +369,15 @@ const Header = () => {
                 <IconButton
                   onClick={() => navigate("/wishlist")}
                   className={styles.actionIcon}
-                  aria-label="Wishlist"
+                  aria-label={`Wishlist, ${wishlistCount} ${
+                    wishlistCount === 1 ? "item" : "items"
+                  }`}
                 >
-                  <Badge badgeContent={wishlistCount} max={99} className={styles.badge}>
+                  <Badge
+                    badgeContent={wishlistCount}
+                    max={99}
+                    className={styles.badge}
+                  >
                     <FavoriteBorder />
                   </Badge>
                 </IconButton>
@@ -319,10 +387,16 @@ const Header = () => {
               <IconButton
                 onClick={handleCartClick}
                 className={styles.actionIcon}
-                aria-label="Cart"
+                aria-label={`Cart, ${cartCount} ${
+                  cartCount === 1 ? "item" : "items"
+                }`}
               >
-                <Badge badgeContent={cartCount} max={99} className={styles.badge}>
-                  <ShoppingCart />
+                <Badge
+                  badgeContent={cartCount}
+                  max={99}
+                  className={styles.badge}
+                >
+                  <ShoppingBagOutlined />
                 </Badge>
               </IconButton>
 
@@ -330,42 +404,58 @@ const Header = () => {
               <IconButton
                 onClick={handleUserMenuOpen}
                 className={styles.actionIcon}
-                aria-label="Account"
+                aria-label={isAuthenticated ? "Account menu" : "Log in"}
+                aria-haspopup={isAuthenticated ? "menu" : undefined}
               >
                 {isAuthenticated && user ? (
-                  <Avatar className={styles.avatar} sx={{ width: 30, height: 30 }}>
+                  <Avatar
+                    className={styles.avatar}
+                    sx={{ width: 28, height: 28 }}
+                  >
                     {(user.firstName || user.name || "U").charAt(0).toUpperCase()}
                   </Avatar>
                 ) : (
-                  <AccountCircle />
+                  <PersonOutline />
                 )}
               </IconButton>
             </div>
           </div>
         </div>
 
-        {/* ===== CATEGORY NAV-CHIPS ROW (desktop/tablet) ===== */}
+        {/* ===== PRIMARY NAV (desktop/tablet), under a 1px hairline ===== */}
         {!isMobile && (
-          <nav className={styles.chipsBar} aria-label="Category quick filters">
-            <div className={styles.chipsInner}>
-              {navChips.map((chip) => {
-                const active = isChipActive(chip.to);
-                return (
-                  <button
-                    key={chip.key}
-                    type="button"
-                    className={`sf-chip ${active ? "sf-chip--active" : ""} ${styles.chip}`}
-                    aria-current={active ? "page" : undefined}
-                    onClick={() => handleChipClick(chip)}
-                  >
-                    {chip.label}
-                  </button>
-                );
-              })}
+          <nav
+            className={styles.navBar}
+            /* Not "Primary" — BottomNav already claims that label, and two nav
+               landmarks with the same name are indistinguishable to a screen
+               reader running the landmark list. */
+            aria-label="Shop"
+            onMouseLeave={() => setOpenCollection(null)}
+            onBlur={handleNavBlur}
+            onKeyDown={handleNavKeyDown}
+          >
+            <div className={styles.navInner}>
+              <ul className={styles.navList}>
+                {categoryLinks.map(renderNavLink)}
+                {categoryLinks.length > 0 && editorialLinks.length > 0 && (
+                  <li className={styles.navSep} role="presentation" />
+                )}
+                {editorialLinks.map(renderNavLink)}
+              </ul>
             </div>
           </nav>
         )}
       </header>
+
+      {/* ===== PROMISES LINE ================================================
+          Store-attested policies. Deliberately OUTSIDE the sticky header — it
+          used to pin, which pushed the pinned chrome past its height budget —
+          so it caps the top of the page and then scrolls away. */}
+      {!isMobile && (
+        <div className={styles.promises}>
+          <TrustStrip />
+        </div>
+      )}
 
       {/* ===== USER DROPDOWN MENU ===== */}
       <Menu
@@ -374,8 +464,8 @@ const Header = () => {
         onClose={handleUserMenuClose}
         className={styles.userMenu}
         PaperProps={{
-          className: `${styles.userMenuPaper} ${isDarkMode ? styles.dark : ""}`,
-          elevation: 8,
+          className: styles.userMenuPaper,
+          elevation: 0,
         }}
         anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
         transformOrigin={{ vertical: "top", horizontal: "right" }}
@@ -383,10 +473,10 @@ const Header = () => {
         {isAuthenticated ? (
           [
             <div key="greeting" className={styles.menuGreeting}>
-              <Avatar className={styles.menuAvatar} sx={{ width: 40, height: 40 }}>
+              <Avatar className={styles.menuAvatar} sx={{ width: 36, height: 36 }}>
                 {(user?.firstName || user?.name || "U").charAt(0).toUpperCase()}
               </Avatar>
-              <div>
+              <div className={styles.menuIdentity}>
                 <Typography variant="subtitle2" className={styles.menuUserName}>
                   {user?.firstName || user?.name || "User"}
                 </Typography>
@@ -395,33 +485,33 @@ const Header = () => {
                 </Typography>
               </div>
             </div>,
-            <Divider key="div1" />,
+            <Divider key="div1" className={styles.menuDivider} />,
             <MenuItem key="profile" onClick={() => handleMenuNavigate("/profile")} className={styles.menuItem}>
-              <Person fontSize="small" className={styles.menuItemIcon} />
+              <PersonOutline fontSize="small" className={styles.menuItemIcon} />
               My Profile
             </MenuItem>,
             <MenuItem key="orders" onClick={() => handleMenuNavigate("/orders")} className={styles.menuItem}>
-              <ListAlt fontSize="small" className={styles.menuItemIcon} />
+              <ListAltOutlined fontSize="small" className={styles.menuItemIcon} />
               My Orders
             </MenuItem>,
             <MenuItem key="wishlist" onClick={() => handleMenuNavigate("/wishlist")} className={styles.menuItem}>
-              <Favorite fontSize="small" className={styles.menuItemIcon} />
+              <FavoriteBorder fontSize="small" className={styles.menuItemIcon} />
               My Wishlist
             </MenuItem>,
-            <Divider key="div2" />,
+            <Divider key="div2" className={styles.menuDivider} />,
             <MenuItem key="logout" onClick={handleLogout} className={`${styles.menuItem} ${styles.logoutItem}`}>
-              <LogoutIcon fontSize="small" className={styles.menuItemIcon} />
+              <LogoutOutlined fontSize="small" className={styles.menuItemIcon} />
               Logout
             </MenuItem>,
           ]
         ) : (
           [
             <MenuItem key="login" onClick={() => { handleUserMenuClose(); openAuthModal("login"); }} className={styles.menuItem}>
-              <LoginIcon fontSize="small" className={styles.menuItemIcon} />
+              <LoginOutlined fontSize="small" className={styles.menuItemIcon} />
               Login
             </MenuItem>,
             <MenuItem key="register" onClick={() => { handleUserMenuClose(); openAuthModal("signup"); }} className={styles.menuItem}>
-              <PersonAdd fontSize="small" className={styles.menuItemIcon} />
+              <PersonAddAltOutlined fontSize="small" className={styles.menuItemIcon} />
               Register
             </MenuItem>,
           ]

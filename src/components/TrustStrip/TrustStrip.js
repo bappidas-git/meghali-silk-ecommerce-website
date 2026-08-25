@@ -5,9 +5,12 @@ import styles from "./TrustStrip.module.css";
 /**
  * TrustStrip — horizontal band of exactly four static brand reassurances.
  *
- * Non-interactive text + Iconify icon per item. Four-across on desktop,
- * collapses to a clean 2×2 grid on mobile (no clipping at 360px). Fully
- * token-driven; no fabricated metrics — these are static guarantees.
+ * Non-interactive text + a thin Iconify glyph per item, set in small tracked
+ * uppercase. Four-across on desktop, collapsing to a clean 2×2 grid on mobile
+ * (no clipping at 360px). The strip paints no ground of its own — the host
+ * supplies the bounding hairlines — so it reads correctly under the header nav
+ * and inside the SidebarMenu hero alike. Fully token-driven; no fabricated
+ * metrics — these are store-attested policies.
  */
 const TRUST_ITEMS = [
   { id: "returns", label: "7-Day Easy Returns", icon: "mdi:autorenew" },
