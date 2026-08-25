@@ -1,40 +1,78 @@
+/* =============================================================================
+ * RelatedProducts — the rail shell
+ * =============================================================================
+ * A hairline rule, a tracked eyebrow, a serif heading, then the cards with air
+ * between them. The affordance that there is more to the right is the peek of
+ * the next card plus a hairline scrollbar — no arrows, no gradient veil that
+ * would clip a card's focus ring at the edge of the scroller.
+ * ========================================================================== */
+
 .section {
-  margin-top: var(--sf-space-12);
+  margin-top: var(--sf-space-16);
+  padding-top: var(--sf-space-8);
+  border-top: 1px solid var(--sf-color-border);
 }
 
+/* The heading is whatever the caller passed as `title` — the shell adds no copy
+   of its own, so it can never announce something the data does not support. */
 .title {
-  margin: 0 0 var(--sf-space-5);
+  margin: 0 0 var(--sf-space-8);
   font-family: var(--sf-font-display);
   font-size: var(--sf-text-2xl);
-  font-weight: var(--sf-font-bold);
-  letter-spacing: 0.01em;
+  font-weight: var(--sf-font-medium);
+  letter-spacing: var(--sf-tracking-normal);
+  line-height: var(--sf-leading-display);
   color: var(--sf-color-text);
 }
 
 .scroller {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: minmax(190px, 1fr);
-  gap: var(--sf-space-4);
+  grid-auto-columns: minmax(220px, 1fr);
+  gap: var(--sf-space-8);
   overflow-x: auto;
-  padding-bottom: var(--sf-space-3);
-  scroll-snap-type: x mandatory;
+  /* Room for the cards' focus rings, which the scroller would otherwise clip. */
+  padding: var(--sf-space-1) var(--sf-space-1) var(--sf-space-5);
+  margin: calc(var(--sf-space-1) * -1) calc(var(--sf-space-1) * -1) 0;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: var(--sf-color-border-strong) transparent;
   -webkit-overflow-scrolling: touch;
+}
+
+.scroller::-webkit-scrollbar {
+  height: 3px;
+}
+
+.scroller::-webkit-scrollbar-track {
+  background: var(--sf-color-border);
+}
+
+.scroller::-webkit-scrollbar-thumb {
+  background: var(--sf-color-border-strong);
 }
 
 .cell {
   scroll-snap-align: start;
 }
 
-/* On wide screens show ~5 across without forcing a scroll for small sets. */
+/* Wide: four and a bit across, so the next card always peeks past the edge.
+   A plain calc, NOT minmax(0, calc(…)) — a zero floor lets an over-full row
+   shrink every track to fit, which quietly turns the rail into a squeezed
+   contact sheet instead of a scroller. */
 @media (min-width: 1024px) {
   .scroller {
-    grid-auto-columns: minmax(210px, 1fr);
+    grid-auto-columns: calc((100% - 4 * var(--sf-space-8)) / 4.4);
   }
 }
 
 @media (max-width: 768px) {
+  .section {
+    margin-top: var(--sf-space-12);
+  }
+
   .scroller {
-    grid-auto-columns: minmax(160px, 70%);
+    gap: var(--sf-space-5);
+    grid-auto-columns: minmax(150px, 62%);
   }
 }

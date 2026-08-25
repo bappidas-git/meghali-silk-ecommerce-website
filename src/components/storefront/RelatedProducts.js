@@ -9,6 +9,12 @@ import styles from "./RelatedProducts.module.css";
 // the caller has no real related products to pass, the whole section renders
 // nothing (no filler, no fabricated "recommended" items). Helpful, not pushy.
 //
+// The shell is a hairline rule and a serif heading, and the heading is only ever
+// the caller's `title` — the rail adds no copy of its own. The "there is more to
+// the right" affordance is the peek of the next card and a hairline scrollbar
+// rather than a gradient veil, which would fade out a card's focus ring exactly
+// when a keyboard user scrolled it to the edge.
+//
 // Props:
 //   title            string
 //   products         array   real products to recommend
