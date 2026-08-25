@@ -1,10 +1,23 @@
+/* =============================================================================
+ * QuantityStepper — hairline − / value / +
+ * =============================================================================
+ * A near-square hairline frame with two internal rules, not a pill of buttons.
+ * The value reads as type (tabular, so it never jitters between 9 and 10) and
+ * the controls stay at the 44px touch minimum on every surface.
+ * ========================================================================== */
+
 .stepper {
   display: inline-flex;
-  align-items: center;
+  align-items: stretch;
   border: 1px solid var(--sf-color-border-strong);
-  border-radius: var(--sf-radius-pill);
+  border-radius: var(--sf-radius-sm);
   background: var(--sf-color-surface);
-  overflow: hidden;
+  font-family: var(--sf-font-family);
+  transition: border-color var(--sf-transition-fast);
+}
+
+.stepper:focus-within {
+  border-color: var(--sf-color-text-secondary);
 }
 
 .btn {
@@ -13,47 +26,79 @@
   justify-content: center;
   min-width: var(--sf-tap-target);
   min-height: var(--sf-tap-target);
+  padding: 0;
   border: none;
   background: transparent;
-  color: var(--sf-color-text);
+  color: var(--sf-color-text-secondary);
   cursor: pointer;
-  transition: background var(--sf-transition-fast), color var(--sf-transition-fast);
+  transition: background-color var(--sf-transition-fast),
+    color var(--sf-transition-fast);
 }
 
 .btn:hover:not(:disabled) {
   background: var(--sf-color-primary-soft);
-  color: var(--sf-color-primary);
-}
-
-.btn:active:not(:disabled) {
-  transform: scale(0.92);
+  color: var(--sf-color-text);
 }
 
 .btn:focus-visible {
-  outline: none;
+  outline: 2px solid transparent;
+  outline-offset: -2px;
   box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
+  color: var(--sf-color-text);
 }
 
+/* Disabled edges — the control stays in place, it just stops responding. */
 .btn:disabled {
-  opacity: 0.4;
+  opacity: 0.35;
   cursor: not-allowed;
 }
 
+/* The two internal hairlines that separate the controls from the value. */
 .value {
-  min-width: 40px;
-  text-align: center;
-  font-weight: var(--sf-font-semibold);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  padding: 0 var(--sf-space-2);
+  border-left: 1px solid var(--sf-color-border);
+  border-right: 1px solid var(--sf-color-border);
   font-size: var(--sf-text-base);
+  font-weight: var(--sf-font-medium);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
   color: var(--sf-color-text);
   user-select: none;
 }
 
-/* small variant for dense surfaces (cart lines, bundles) */
-.sm .btn {
-  min-width: 32px;
-  min-height: 32px;
+/* Whole control greyed while the caller has it disabled (e.g. out of stock). */
+.disabled {
+  border-color: var(--sf-color-border);
+  background: var(--sf-color-surface-2);
 }
+
+.disabled .value {
+  color: var(--sf-color-text-muted);
+}
+
+/* ---- small variant — dense surfaces (cart lines, bundle rows) ------------- */
+.sm .btn {
+  min-width: 34px;
+  min-height: 34px;
+}
+
 .sm .value {
-  min-width: 32px;
+  min-width: 38px;
   font-size: var(--sf-text-sm);
+}
+
+/* …but never below the touch minimum on a touch device (WCAG 2.5.5). */
+@media (pointer: coarse) {
+  .sm .btn {
+    min-width: var(--sf-tap-target);
+    min-height: var(--sf-tap-target);
+  }
+  .sm .value {
+    min-width: 44px;
+  }
 }

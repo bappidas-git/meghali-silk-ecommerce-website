@@ -1,45 +1,68 @@
 /* =============================================================================
- * ProductCard — Meghali's Silk brand card (token-driven, no raw hex)
+ * ProductCard — the editorial gallery object
  * =============================================================================
- * Dark-first heritage silk card: portrait saree image, discount badge, wishlist
- * heart, optional gold PREMIUM ribbon, name, authentic rating, gold price with
- * struck compare + "Save ₹X", and an emerald Add-to-Cart with an "Added ✓"
- * micro-interaction. Every colour/space/radius/shadow comes from the storefront
- * tokens so the whole storefront re-skins from one file.
+ * No frame, no fill, no shadow. The card is a 3:4 photograph on the sunken sand
+ * panel followed by air and a quiet text stack; the page ground shows straight
+ * through everywhere else. Everything that is not the garment is a hairline.
+ *
+ * LAYOUT — why this is a grid and not a flex column
+ *   Three rows: media / body / action. The action button is LAST in the DOM (so
+ *   it is the last tab stop and keyboard order reads image, heart, name, add),
+ *   but on a fine pointer the stylesheet moves it back into row 1, where it
+ *   overlaps the foot of the photograph and is revealed on hover or focus.
+ *   Explicit `grid-row` is what lets one button live in two places without a
+ *   second DOM node, a wrapper, or absolute positioning against an unknown
+ *   height. On touch it simply stays in row 3, always visible, always tappable.
+ *
+ * THE FIXED BOX
+ *   The reveal changes opacity, never layout: the card is the same height at
+ *   rest and on hover. Wishlist stacks its own Move-to-Cart button directly
+ *   under this component and Home/Products stretch cards to a grid row — none
+ *   of them can afford a card that resizes when the pointer crosses it.
+ *
+ * PRIMITIVES
+ *   The discount badge and PREMIUM ribbon are the global `.sf-badge-discount` /
+ *   `.sf-ribbon-premium` primitives from prompt 03. The module classes beside
+ *   them only place them and add the veil that keeps them legible over a
+ *   photograph, and they double their own selector (`.x.x`) to win that veil
+ *   against the primitive's own background whatever the stylesheet order is.
  * ========================================================================== */
 
 .card {
-  display: flex;
-  flex-direction: column;
-  background: var(--sf-color-surface);
-  border: 1px solid var(--sf-color-border);
-  border-radius: var(--sf-radius-lg);
-  box-shadow: var(--sf-shadow-sm);
-  overflow: hidden;
-  font-family: var(--sf-font-family);
-  transition: transform var(--sf-transition-fast),
-    box-shadow var(--sf-transition-fast), border-color var(--sf-transition-fast);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto 1fr auto;
   height: 100%;
+  background: transparent;
+  font-family: var(--sf-font-family);
 }
 
-.card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--sf-shadow-md);
-  border-color: var(--sf-color-border-strong);
+/* Every child is pinned to the single column. Without this, an item carrying an
+   explicit `grid-row` that is already occupied does not overlap — auto-placement
+   walks it sideways into a brand-new implicit column, and the card silently
+   becomes two columns wide with a half-width photograph. */
+.card > * {
+  grid-column: 1;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .card:hover {
-    transform: none;
-  }
-}
+/* =============================================================================
+ * 1. THE PHOTOGRAPH
+ * ========================================================================== */
 
-/* ---- Media (portrait ~3:4 — saree photography is tall) ------------------- */
-.media {
+.mediaWrap {
+  grid-row: 1;
   position: relative;
-  display: block;
   aspect-ratio: 3 / 4;
   background: var(--sf-color-surface-2);
+  border-radius: var(--sf-radius-sm);
+  overflow: hidden;
+}
+
+.media {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
 }
 
 .media img {
@@ -47,211 +70,321 @@
   height: 100%;
   object-fit: cover;
   display: block;
-  transition: transform var(--sf-transition);
+  transition: transform var(--sf-transition-slow);
 }
 
+/* The one piece of motion on the card: the image breathing, slowly. */
 .card:hover .media img {
-  transform: scale(1.04);
+  transform: scale(1.03);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .card:hover .media img {
-    transform: none;
-  }
+/* The ring has to sit INSIDE the crop, since the wrapper clips its overflow. */
+.media:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: -4px;
+  box-shadow: inset 0 0 0 2px var(--sf-color-surface-2),
+    inset 0 0 0 4px var(--sf-color-focus-ring);
 }
 
-/* Out-of-stock: dim the media, keep the card visible. */
+/* Out of stock: the garment steps back, the card stays legible. */
 .isOutOfStock .media img {
-  opacity: 0.5;
-  filter: saturate(0.7);
+  opacity: 0.55;
+  filter: grayscale(0.5);
 }
 
-/* ---- Discount badge — top-left ------------------------------------------ */
-.discountBadge {
-  position: absolute;
-  top: var(--sf-space-2);
-  left: var(--sf-space-2);
-  background: var(--sf-color-discount-bg);
-  color: var(--sf-color-discount);
-  font-size: var(--sf-text-xs);
-  font-weight: var(--sf-font-bold);
-  letter-spacing: 0.02em;
-  padding: 4px 9px;
-  border-radius: var(--sf-radius-pill);
-  backdrop-filter: blur(4px);
+.isOutOfStock:hover .media img {
+  transform: none;
 }
 
-/* ---- PREMIUM ribbon — top-right (opposite the badge) -------------------- */
-.premiumRibbon {
+/* =============================================================================
+ * 2. MARKS ON THE PHOTOGRAPH  —  badge, ribbon, heart, stock
+ * ========================================================================== */
+
+/* Top-left. The doubled selector wins the veil against the primitive's tint. */
+.discountBadge.discountBadge {
   position: absolute;
-  top: var(--sf-space-2);
-  right: var(--sf-space-2);
-  background: var(--sf-gradient-gold);
-  color: var(--sf-color-emerald-contrast);
-  font-size: var(--sf-text-xs);
-  font-weight: var(--sf-font-bold);
-  letter-spacing: 0.08em;
-  padding: 4px 9px;
-  border-radius: var(--sf-radius-sm);
-  box-shadow: var(--sf-shadow-sm);
+  top: var(--sf-space-3);
+  left: var(--sf-space-3);
+  z-index: 2;
+  background: var(--sf-color-surface);
+  letter-spacing: 0.1em;
+}
+
+/* Top-right, opposite the badge. Opaque for the same reason. */
+.premiumRibbon.premiumRibbon {
+  position: absolute;
+  top: var(--sf-space-3);
+  right: var(--sf-space-3);
+  z-index: 2;
+  background: var(--sf-color-surface);
 }
 
 /* When both the heart and the ribbon sit top-right, drop the heart below it. */
 .premiumRibbon ~ .wishlist {
-  top: calc(var(--sf-space-2) + 30px);
+  top: calc(var(--sf-space-3) + 34px);
 }
 
+/* Out of stock — a tracked label on a warm scrim, across the foot of the crop. */
 .stockTag {
   position: absolute;
-  bottom: var(--sf-space-2);
-  left: var(--sf-space-2);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  padding: var(--sf-space-3);
   background: var(--sf-color-overlay);
   color: var(--sf-color-primary-contrast);
   font-size: var(--sf-text-xs);
-  font-weight: var(--sf-font-semibold);
-  letter-spacing: 0.04em;
+  font-weight: var(--sf-font-medium);
+  letter-spacing: var(--sf-tracking-wide);
   text-transform: uppercase;
-  padding: 4px 9px;
-  border-radius: var(--sf-radius-pill);
+  text-align: center;
 }
 
-/* ---- Wishlist heart — top-right ----------------------------------------- */
+/* ---- The heart ----------------------------------------------------------- */
 .wishlist {
   position: absolute;
-  top: var(--sf-space-2);
-  right: var(--sf-space-2);
+  top: var(--sf-space-3);
+  right: var(--sf-space-3);
+  z-index: 3;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
+  padding: 0;
   border: 1px solid var(--sf-color-border);
   border-radius: var(--sf-radius-pill);
   background: var(--sf-color-surface);
   color: var(--sf-color-text-secondary);
-  box-shadow: var(--sf-shadow-sm);
   cursor: pointer;
   transition: color var(--sf-transition-fast),
-    transform var(--sf-transition-fast), border-color var(--sf-transition-fast);
+    border-color var(--sf-transition-fast);
+}
+
+/* The visible button is 34px for the sake of the composition; the tap target
+   underneath it is the full 44px (WCAG 2.5.5) via a transparent pseudo. */
+.wishlist::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--sf-tap-target);
+  height: var(--sf-tap-target);
+  transform: translate(-50%, -50%);
 }
 
 .wishlist:hover {
-  transform: scale(1.08);
   color: var(--sf-cat-pink);
   border-color: var(--sf-color-border-strong);
 }
 
 .wishlist:focus-visible {
-  outline: none;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
   box-shadow: var(--sf-shadow-focus);
 }
 
 .wishlisted {
   color: var(--sf-cat-pink);
+  border-color: color-mix(in srgb, var(--sf-cat-pink) 40%, transparent);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .wishlist:hover {
-    transform: none;
-  }
-}
+/* =============================================================================
+ * 3. THE TEXT STACK
+ * ========================================================================== */
 
-/* ---- Body --------------------------------------------------------------- */
 .body {
+  grid-row: 2;
   display: flex;
   flex-direction: column;
+  align-items: flex-start;
   gap: var(--sf-space-2);
-  padding: var(--sf-space-3);
-  flex: 1;
+  padding: var(--sf-space-4) 0 0;
 }
 
+/* Tracked eyebrow — the smallest, quietest line on the card. */
 .brand {
   font-size: var(--sf-text-xs);
-  color: var(--sf-color-text-secondary);
+  font-weight: var(--sf-font-medium);
+  color: var(--sf-color-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.06em;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: 1;
 }
 
+/* The name — display serif, two lines, hairline underline on card hover. */
 .name {
   font-family: var(--sf-font-display);
-  font-size: var(--sf-text-md);
-  font-weight: var(--sf-font-semibold);
+  font-size: var(--sf-text-lg);
+  font-weight: var(--sf-font-medium);
   color: var(--sf-color-text);
-  text-decoration: none;
   line-height: var(--sf-leading-tight);
+  letter-spacing: var(--sf-tracking-normal);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  min-height: calc(2 * var(--sf-text-md) * var(--sf-leading-tight));
+  transition: text-decoration-color var(--sf-transition);
 }
 
-.name:hover {
-  color: var(--sf-color-secondary);
+.card:hover .name {
+  text-decoration-color: var(--sf-color-border-strong);
+}
+
+.name:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 3px;
+  box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
 }
 
 .rating {
   display: inline-flex;
   align-items: center;
-  gap: var(--sf-space-1);
+  gap: var(--sf-space-2);
+  min-height: 14px;
 }
 
 .ratingCount {
   font-size: var(--sf-text-xs);
-  color: var(--sf-color-text-secondary);
+  color: var(--sf-color-text-muted);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
 }
 
 .noRating {
   font-size: var(--sf-text-xs);
   color: var(--sf-color-text-muted);
-  font-style: italic;
+  letter-spacing: 0.02em;
+  min-height: 14px;
+  line-height: 1.2;
 }
 
-/* ---- Add to Cart — emerald, full-width ---------------------------------- */
+/* =============================================================================
+ * 4. THE ADD AFFORDANCE
+ * ========================================================================== */
+
+/* Touch / no-hover default: its own row under the price, always visible. */
 .addBtn {
-  margin-top: auto;
+  grid-row: 3;
+  align-self: stretch;
+  margin-top: var(--sf-space-4);
   min-height: var(--sf-tap-target);
-  width: 100%;
-  border: 1px solid transparent;
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-emerald);
-  color: var(--sf-color-emerald-contrast);
-  font-weight: var(--sf-font-semibold);
-  font-size: var(--sf-text-sm);
+  padding: var(--sf-space-2) var(--sf-space-4);
+  border: 1px solid var(--sf-color-border-strong);
+  border-radius: var(--sf-radius-sm);
+  background: var(--sf-color-surface);
+  color: var(--sf-color-text);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
   cursor: pointer;
-  transition: background var(--sf-transition-fast),
-    transform var(--sf-transition-fast);
+  transition: background-color var(--sf-transition),
+    border-color var(--sf-transition), color var(--sf-transition),
+    opacity var(--sf-transition), transform var(--sf-transition);
 }
 
 .addBtn:hover:not(:disabled) {
-  background: var(--sf-color-emerald-hover);
-}
-
-.addBtn:active:not(:disabled) {
-  transform: scale(0.98);
-}
-
-.addBtn:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
-}
-
-.addBtn.added {
-  background: var(--sf-color-gold-deep);
+  background: var(--sf-color-emerald);
+  border-color: var(--sf-color-emerald);
   color: var(--sf-color-emerald-contrast);
 }
 
+.addBtn:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--sf-shadow-focus);
+}
+
+/* Confirmation — gold hairline, then it quietly returns to itself. */
+.addBtn.added,
+.addBtn.added:hover {
+  background: var(--sf-color-surface);
+  border-color: var(--sf-color-gold-deep);
+  color: var(--sf-color-gold-deep);
+}
+
 .addBtn:disabled {
-  opacity: 0.55;
   cursor: not-allowed;
-  background: var(--sf-color-surface-2);
-  border-color: var(--sf-color-border-strong);
+  background: transparent;
+  border-color: var(--sf-color-border);
   color: var(--sf-color-text-muted);
 }
 
+/* ---- Fine pointer: the button returns to the foot of the photograph ------- */
+@media (hover: hover) and (pointer: fine) {
+  .addBtn {
+    grid-row: 1;
+    align-self: end;
+    justify-self: stretch;
+    z-index: 3;
+    margin: var(--sf-space-3);
+    min-height: 40px;
+    opacity: 0;
+    transform: translateY(var(--sf-space-2));
+    pointer-events: none;
+  }
+
+  /* Revealed by the pointer OR by the keyboard — the button stays in the tab
+     order while hidden, and focusing it is what brings it into view. */
+  .card:hover .addBtn,
+  .card:focus-within .addBtn {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+
+  /* Nothing to add: leave the photograph and its stock label alone. */
+  .isOutOfStock:hover .addBtn,
+  .isOutOfStock:focus-within .addBtn {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+/* ---- …unless the device can also be touched -------------------------------
+ * A touchscreen laptop answers (hover: hover) and (pointer: fine) because that
+ * describes its PRIMARY input — but a finger on that same screen would have to
+ * tap once to raise the hover state and again to actually add. `any-pointer`
+ * asks whether ANY input is coarse, so hybrids opt back into the always-visible
+ * button. Declared after the block above so it wins at equal specificity.
+ * ------------------------------------------------------------------------- */
+@media (any-pointer: coarse) {
+  .addBtn,
+  .card:hover .addBtn,
+  .card:focus-within .addBtn,
+  .isOutOfStock:hover .addBtn,
+  .isOutOfStock:focus-within .addBtn {
+    grid-row: 3;
+    align-self: stretch;
+    margin: var(--sf-space-4) 0 0;
+    min-height: var(--sf-tap-target);
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+}
+
+/* =============================================================================
+ * 5. REDUCED MOTION
+ * The transition tokens are already zeroed globally; kill the transforms too so
+ * nothing translates or scales — things simply appear.
+ * ========================================================================== */
 @media (prefers-reduced-motion: reduce) {
-  .addBtn:active:not(:disabled) {
+  .card:hover .media img {
+    transform: none;
+  }
+
+  .addBtn {
     transform: none;
   }
 }

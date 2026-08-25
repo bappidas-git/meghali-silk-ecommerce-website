@@ -11,6 +11,11 @@ import styles from "./PriceBlock.module.css";
 // component author cannot type in a fake "% off". If compare ≤ current, nothing
 // but the price renders.
 //
+// The editorial treatment lives entirely in the stylesheet: the price is set in
+// the display serif at lg/md, the compare is struck in muted ink, and the
+// "% off" / "You save" lines are quiet tracked text rather than pills. Nothing
+// about the markup or the arithmetic below changes with the skin.
+//
 // Props:
 //   price        number   current/selling price (required)
 //   comparePrice number   original price (optional)

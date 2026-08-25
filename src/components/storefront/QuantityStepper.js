@@ -6,9 +6,11 @@ import styles from "./QuantityStepper.module.css";
 // =============================================================================
 // Visible +/- steppers (no fiddly number input on mobile) with instant feedback
 // and thumb-friendly tap targets. The ceiling is driven by real stock passed in
-// by the caller, so a shopper can never select more than is genuinely available.
+// by the caller, so a shopper can never select more than is genuinely available
+// — and when they hit it, the + button says so plainly rather than silently
+// swallowing the tap.
 //
-// Props:
+// Props (stable contract):
 //   value     number   current quantity (controlled)
 //   onChange  fn       (next:number) => void
 //   min       number   default 1
@@ -42,7 +44,7 @@ const QuantityStepper = ({
         disabled={disabled || atMin}
         aria-label="Decrease quantity"
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
           <line x1="5" y1="12" x2="19" y2="12" />
         </svg>
       </button>
@@ -57,7 +59,7 @@ const QuantityStepper = ({
         title={atMax && Number.isFinite(max) ? "No more stock available" : undefined}
         aria-label="Increase quantity"
       >
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" aria-hidden="true">
           <line x1="12" y1="5" x2="12" y2="19" />
           <line x1="5" y1="12" x2="19" y2="12" />
         </svg>

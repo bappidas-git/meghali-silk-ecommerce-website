@@ -1,65 +1,107 @@
+/* =============================================================================
+ * PriceBlock — editorial price typography
+ * =============================================================================
+ * The price is the one number on the page that has to be believed, so it is set
+ * like a headline rather than dressed like a sticker: serif at the display
+ * sizes, the struck compare in muted ink beside it, and the "% off" / "You save"
+ * annotations as quiet tracked text — no pills, no red, no shouting.
+ *
+ * Sizes: lg (PDP buy box) · md (cart / bundle lines) · sm (product card).
+ * ========================================================================== */
+
 .block {
   display: flex;
   flex-direction: column;
   gap: var(--sf-space-1);
+  font-family: var(--sf-font-family);
 }
 
 .row {
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
-  gap: var(--sf-space-2);
+  gap: var(--sf-space-2) var(--sf-space-3);
 }
 
+/* The number itself — antique gold, the palette's price token. */
 .price {
   color: var(--sf-color-price);
-  font-weight: var(--sf-font-bold);
-  letter-spacing: -0.01em;
+  font-weight: var(--sf-font-semibold);
+  line-height: var(--sf-leading-tight);
+  letter-spacing: var(--sf-tracking-tight);
+  font-variant-numeric: tabular-nums;
 }
 
+/* Struck original — muted, lighter, and never louder than the real price. */
 .compare {
   color: var(--sf-color-compare);
   text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
   font-weight: var(--sf-font-normal);
+  font-variant-numeric: tabular-nums;
 }
 
+/* "% off" — a tracked ink note, deliberately the quietest thing in the row. */
 .discount {
-  color: var(--sf-color-discount);
-  font-weight: var(--sf-font-semibold);
+  color: var(--sf-color-text-muted);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
 }
 
+/* "You save ₹X" — gold, to read as part of the price cluster rather than as a
+   promotional badge sitting beside it. */
 .savings {
-  color: var(--sf-color-discount);
+  color: var(--sf-color-gold-deep);
   font-weight: var(--sf-font-medium);
-  font-size: var(--sf-text-sm);
+  font-size: var(--sf-text-xs);
+  letter-spacing: 0.01em;
+  font-variant-numeric: tabular-nums;
 }
 
 .taxNote {
   color: var(--sf-color-text-muted);
   font-size: var(--sf-text-xs);
+  line-height: var(--sf-leading-normal);
 }
 
-/* ---- sizes ---- */
+/* ---- lg — the PDP moment: the price set in the display serif -------------- */
 .lg .price {
+  font-family: var(--sf-font-display);
   font-size: var(--sf-text-3xl);
+  font-weight: var(--sf-font-medium);
+  letter-spacing: var(--sf-tracking-normal);
 }
 .lg .compare {
   font-size: var(--sf-text-lg);
 }
 .lg .discount {
-  font-size: var(--sf-text-md);
+  font-size: var(--sf-text-xs);
+}
+.lg .savings {
+  font-size: var(--sf-text-sm);
 }
 
+/* ---- md — cart lines and bundles: serif, but at reading scale ------------- */
 .md .price {
-  font-size: var(--sf-text-xl);
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-2xl);
+  font-weight: var(--sf-font-medium);
+  letter-spacing: var(--sf-tracking-normal);
 }
 .md .compare {
   font-size: var(--sf-text-base);
 }
 .md .discount {
-  font-size: var(--sf-text-sm);
+  font-size: var(--sf-text-xs);
 }
 
+/* ---- sm — the card: Inter, because small serif numerals lose their edge ---- */
+.sm .row {
+  gap: var(--sf-space-2);
+}
 .sm .price {
   font-size: var(--sf-text-md);
 }
@@ -68,4 +110,5 @@
 }
 .sm .discount {
   font-size: var(--sf-text-xs);
+  letter-spacing: 0.08em;
 }

@@ -16,10 +16,24 @@ import styles from "./ProductCard.module.css";
 // ProductCard — the reusable Meghali's Silk storefront product card
 // =============================================================================
 // One card, used by every product surface (home rails, listing grid, wishlist
-// grid, and the PDP "You may also like" / "Frequently bought together" rows).
-// Domain-agnostic and presentational: it renders whatever real product data it
-// is given and wires nothing itself — the call-site passes `onAddToCart`
-// (CartContext + buildCartItem) and `onToggleWishlist` (WishlistContext).
+// grid, and the PDP "You may also like" row). Domain-agnostic and
+// presentational: it renders whatever real product data it is given and wires
+// nothing itself — the call-site passes `onAddToCart` (CartContext +
+// buildCartItem) and `onToggleWishlist` (WishlistContext).
+//
+// THE EDITORIAL CARD
+//   A gallery object, not a marketplace tile: no frame, no shadow, no fill. A
+//   3:4 photograph on the sunken sand panel, then air, then a quiet text stack —
+//   tracked brand line, serif name, the gold star line, the price. Everything
+//   that isn't the garment is a hairline.
+//
+//   The DOM is laid out as a 3-row grid (media / body / action) and the action
+//   is the LAST tab stop, so keyboard order reads image → heart → name → add
+//   whichever row the stylesheet paints it into. On a fine pointer the add
+//   affordance is placed back over the foot of the photograph and revealed on
+//   hover or focus-within; on touch it stays in its own row, always reachable.
+//   Either way the card's outer box is a fixed shape, which is what lets the
+//   Wishlist stack its own Move-to-Cart button underneath without jumping.
 //
 // Authenticity over persuasion:
 //   • Stars + count show ONLY when there are real ratings; otherwise a muted
@@ -27,8 +41,9 @@ import styles from "./ProductCard.module.css";
 //   • The discount badge / struck compare / "Save ₹X" all derive from real
 //     price vs comparePrice (via PriceBlock) — nothing can be typed in.
 //   • The gold PREMIUM ribbon shows ONLY on a real flag (featured / bridal).
+//   • Out of stock is the only urgency this card knows how to express.
 //
-// Props:
+// Props (stable contract — consumed by Home, Products, Wishlist, PDP rails):
 //   product           object  (required)
 //   onAddToCart       fn      (cartItem) => void  — omit to hide the button
 //   onToggleWishlist  fn      (product) => void   — omit to hide the heart
@@ -71,26 +86,38 @@ const ProductCard = ({
   };
 
   return (
-    <div className={`${styles.card} ${outOfStock ? styles.isOutOfStock : ""}`}>
-      <Link
-        to={productPath(product)}
-        className={styles.media}
-        aria-label={product.name}
-      >
-        <img
-          src={product.images?.[0] || product.image || PLACEHOLDER_IMG}
-          alt={product.name}
-          loading="lazy"
-          onError={onImageError}
-        />
+    <article
+      className={`${styles.card} ${outOfStock ? styles.isOutOfStock : ""}`}
+    >
+      <div className={styles.mediaWrap}>
+        {/* The photograph. The heart and the badges are siblings, not children:
+            nesting a button inside the anchor is invalid and traps the tap. */}
+        <Link
+          to={productPath(product)}
+          className={styles.media}
+          aria-label={product.name}
+        >
+          <img
+            src={product.images?.[0] || product.image || PLACEHOLDER_IMG}
+            alt={product.name}
+            loading="lazy"
+            onError={onImageError}
+          />
+        </Link>
 
         {/* Discount badge — top-left, only when genuinely discounted. */}
         {discount > 0 && (
-          <span className={styles.discountBadge}>{discount}% OFF</span>
+          <span className={`sf-badge-discount ${styles.discountBadge}`}>
+            {discount}% off
+          </span>
         )}
 
         {/* PREMIUM ribbon — top-right corner, only on a real flag. */}
-        {isPremium && <span className={styles.premiumRibbon}>PREMIUM</span>}
+        {isPremium && (
+          <span className={`sf-ribbon-premium ${styles.premiumRibbon}`}>
+            Premium
+          </span>
+        )}
 
         {outOfStock && <span className={styles.stockTag}>Out of Stock</span>}
 
@@ -108,18 +135,20 @@ const ProductCard = ({
           >
             <svg
               viewBox="0 0 24 24"
-              width="18"
-              height="18"
+              width="17"
+              height="17"
               fill={isWishlisted ? "currentColor" : "none"}
               stroke="currentColor"
-              strokeWidth="2"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
               aria-hidden="true"
             >
               <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" />
             </svg>
           </button>
         )}
-      </Link>
+      </div>
 
       <div className={styles.body}>
         {product.brand && <span className={styles.brand}>{product.brand}</span>}
@@ -130,7 +159,7 @@ const ProductCard = ({
 
         {ratingCount > 0 ? (
           <span className={styles.rating}>
-            <StarRating rating={rating} size={13} />
+            <StarRating rating={rating} size={12} />
             <span className={styles.ratingCount}>
               ({ratingCount.toLocaleString()})
             </span>
@@ -145,19 +174,21 @@ const ProductCard = ({
           size="sm"
           showSavings
         />
-
-        {showAddToCart && onAddToCart && (
-          <button
-            type="button"
-            className={`${styles.addBtn} ${added ? styles.added : ""}`}
-            disabled={outOfStock}
-            onClick={handleAdd}
-          >
-            {outOfStock ? "Out of Stock" : added ? "Added ✓" : "Add to Cart"}
-          </button>
-        )}
       </div>
-    </div>
+
+      {/* Last in the DOM so it is the last tab stop; the stylesheet decides
+          whether it sits in its own row or over the foot of the photograph. */}
+      {showAddToCart && onAddToCart && (
+        <button
+          type="button"
+          className={`${styles.addBtn} ${added ? styles.added : ""}`}
+          disabled={outOfStock}
+          onClick={handleAdd}
+        >
+          {outOfStock ? "Out of Stock" : added ? "Added ✓" : "Add to Cart"}
+        </button>
+      )}
+    </article>
   );
 };
 
