@@ -48,44 +48,50 @@ class ErrorBoundary extends React.Component {
     // Meghali's Silk brand palette mirrored here as literals on purpose: this
     // boundary must render even when the provider tree (and the body.dark class
     // the CSS tokens key off) failed to mount, so it cannot rely on var(--sf-*).
-    // Keep these in sync with storefront-tokens.css.
+    // SYNC SOURCE: src/theme/storefront-tokens.css — each literal below is the
+    // resolved value of the --sf-* token named in its comment. Re-copy them
+    // whenever that file's palette changes; nothing here updates automatically.
     const palette = dark
       ? {
-          bg: "#0B0C0B",
-          card: "#15171A",
-          border: "rgba(203, 163, 90, 0.28)",
-          heading: "#F3EFE6",
-          text: "#C3C9C4",
-          detailsBg: "#1B1E20",
-          detailsText: "#f4a9a9",
-          primaryGradient:
-            "linear-gradient(135deg, #E6C27A 0%, #CBA35A 50%, #B6863C 100%)",
-          primaryText: "#0A2E24",
-          ghostBorder: "rgba(255,255,255,0.22)",
-          ghostText: "#F3EFE6",
+          bg: "#14120F", // --sf-color-bg
+          card: "#1B1815", // --sf-color-surface
+          border: "rgba(244, 239, 230, 0.10)", // --sf-color-border
+          heading: "#F4EFE6", // --sf-color-text
+          text: "#C4BCAE", // --sf-color-text-secondary
+          detailsBg: "#221E1A", // --sf-color-surface-2
+          detailsText: "#E08472", // --sf-color-danger
+          primaryBg: "#F4EFE6", // --sf-color-emerald (inverted ink CTA)
+          primaryText: "#14120F", // --sf-color-emerald-contrast
+          ghostBorder: "rgba(227, 185, 94, 0.30)", // --sf-color-border-strong
+          ghostText: "#F4EFE6", // --sf-color-text
+          shadow: "0 20px 48px rgba(0, 0, 0, 0.65)", // --sf-shadow-lg
         }
       : {
-          bg: "#FBF8F2",
-          card: "#FFFFFF",
-          border: "rgba(203, 163, 90, 0.28)",
-          heading: "#10221C",
-          text: "#4A5550",
-          detailsBg: "#F4EFE6",
-          detailsText: "#b4232b",
-          primaryGradient:
-            "linear-gradient(135deg, #E6C27A 0%, #CBA35A 50%, #B6863C 100%)",
-          primaryText: "#0A2E24",
-          ghostBorder: "rgba(16,34,28,0.18)",
-          ghostText: "#10221C",
+          bg: "#FAF6EC", // --sf-color-bg
+          card: "#FFFFFF", // --sf-color-surface
+          border: "#E8DFCD", // --sf-color-border
+          heading: "#1D1A16", // --sf-color-text
+          text: "#5C554A", // --sf-color-text-secondary
+          detailsBg: "#F2ECE1", // --sf-color-surface-2
+          detailsText: "#9E3B2E", // --sf-color-danger
+          primaryBg: "#1D1A16", // --sf-color-emerald (the ink CTA)
+          primaryText: "#FAF6EC", // --sf-color-emerald-contrast
+          ghostBorder: "#D6C9B2", // --sf-color-border-strong
+          ghostText: "#1D1A16", // --sf-color-text
+          shadow: "0 20px 48px rgba(29, 26, 22, 0.12)", // --sf-shadow-lg
         };
 
+    // Editorial button: near-rectangular, uppercase Inter, wide tracking —
+    // the inline twin of `.sf-btn` in storefront-primitives.css.
     const btnBase = {
-      padding: "12px 24px",
-      borderRadius: "12px",
-      fontSize: "0.95rem",
-      fontWeight: 600,
+      padding: "14px 28px",
+      borderRadius: "2px", // --sf-radius-sm
+      fontSize: "0.75rem", // --sf-text-xs
+      fontWeight: 500, // --sf-font-medium
+      textTransform: "uppercase",
+      letterSpacing: "0.14em", // --sf-tracking-wide
       cursor: "pointer",
-      transition: "transform 0.15s ease, box-shadow 0.15s ease",
+      transition: "background-color 0.35s cubic-bezier(0.22, 1, 0.36, 1)",
       fontFamily: "inherit",
     };
 
@@ -99,8 +105,9 @@ class ErrorBoundary extends React.Component {
           justifyContent: "center",
           padding: "24px",
           background: palette.bg,
+          // --sf-font-family
           fontFamily:
-            '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif',
         }}
       >
         <div
@@ -109,24 +116,26 @@ class ErrorBoundary extends React.Component {
             maxWidth: "520px",
             background: palette.card,
             border: `1px solid ${palette.border}`,
-            borderRadius: "20px",
-            padding: "40px 32px",
+            borderRadius: "4px", // --sf-radius-md
+            padding: "48px 32px",
             textAlign: "center",
-            boxShadow: dark
-              ? "0 20px 60px rgba(0,0,0,0.45)"
-              : "0 20px 60px rgba(11,59,46,0.15)",
+            boxShadow: palette.shadow,
           }}
         >
-          <div style={{ fontSize: "52px", lineHeight: 1, marginBottom: "16px" }}>
+          <div style={{ fontSize: "44px", lineHeight: 1, marginBottom: "20px" }}>
             <span role="img" aria-label="warning">
               ⚠️
             </span>
           </div>
           <h1
             style={{
-              margin: "0 0 10px",
-              fontSize: "1.6rem",
-              fontWeight: 700,
+              margin: "0 0 12px",
+              // --sf-font-display / --sf-leading-display
+              fontFamily:
+                '"Cormorant Garamond", "Playfair Display", Georgia, serif',
+              fontSize: "2.25rem",
+              fontWeight: 600,
+              lineHeight: 1.1,
               color: palette.heading,
             }}
           >
@@ -134,9 +143,9 @@ class ErrorBoundary extends React.Component {
           </h1>
           <p
             style={{
-              margin: "0 0 28px",
+              margin: "0 0 32px",
               fontSize: "1rem",
-              lineHeight: 1.6,
+              lineHeight: 1.7, // --sf-leading-relaxed
               color: palette.text,
             }}
           >
@@ -157,9 +166,9 @@ class ErrorBoundary extends React.Component {
               onClick={this.handleReload}
               style={{
                 ...btnBase,
-                border: "none",
+                border: `1px solid ${palette.primaryBg}`,
                 color: palette.primaryText,
-                background: palette.primaryGradient,
+                background: palette.primaryBg,
               }}
             >
               Reload Page
@@ -200,7 +209,7 @@ class ErrorBoundary extends React.Component {
                 style={{
                   marginTop: "12px",
                   padding: "16px",
-                  borderRadius: "10px",
+                  borderRadius: "2px", // --sf-radius-sm
                   background: palette.detailsBg,
                   color: palette.detailsText,
                   fontSize: "0.8rem",
