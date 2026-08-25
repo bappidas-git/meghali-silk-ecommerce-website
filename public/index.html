@@ -84,7 +84,10 @@
           "Helvetica Neue", sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
-        background: linear-gradient(135deg, #0B0C0B 0%, #101312 100%);
+        /* Light (warm ivory) is the default theme — this static rule paints
+           before the pre-mount script runs, so it must match the light branch
+           there. The script overrides it inline when dark is the saved choice. */
+        background: linear-gradient(135deg, #FAF6EC 0%, #FFFFFF 100%);
         min-height: 100vh;
       }
 
@@ -479,15 +482,18 @@
       // first paint already has the correct theme (matches src/context/ThemeContext.js,
       // which keys CSS off body.dark / body.light). Avoids a flash of the wrong theme.
       (function () {
-        // Dark is the default for Meghali's Silk (mirrors src/context/ThemeContext.js):
-        // dark unless the user has explicitly chosen light.
+        // Light (warm ivory) is the default for Meghali's Silk — this MUST
+        // mirror src/context/ThemeContext.js: light unless the user has
+        // explicitly chosen dark.
         var savedTheme = localStorage.getItem("theme");
-        var isDark = savedTheme !== "light";
+        var isDark = savedTheme === "dark";
 
         document.body.classList.add(isDark ? "dark" : "light");
+        // Keep these two gradients in sync with LIGHT/DARK.bodyBackground in
+        // src/theme/colors.js, or the first paint won't match React's.
         document.body.style.background = isDark
-          ? "linear-gradient(135deg, #0B0C0B 0%, #15171A 100%)"
-          : "linear-gradient(135deg, #FBF8F2 0%, #FFFFFF 100%)";
+          ? "linear-gradient(135deg, #14120F 0%, #1B1815 100%)"
+          : "linear-gradient(135deg, #FAF6EC 0%, #FFFFFF 100%)";
       })();
 
       // Hide the loading screen once React has mounted. React signals readiness

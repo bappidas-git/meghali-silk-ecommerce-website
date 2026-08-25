@@ -36,10 +36,13 @@ const iconButtonTouchOverrides = {
 
 export const ThemeContextProvider = ({ children }) => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    // Dark is the primary/default experience for Meghali's Silk. With no saved
-    // choice we default to dark; only an explicit "light" selection opts out.
+    // Light is the primary/default experience for Meghali's Silk — the warm
+    // ivory editorial ground. With no saved choice we default to light; only an
+    // explicit "dark" selection opts into the evening palette.
+    // NB: the pre-mount script at the bottom of public/index.html MUST apply the
+    // same rule, or the first paint flashes the wrong theme.
     const savedTheme = localStorage.getItem("theme");
-    return savedTheme !== "light";
+    return savedTheme === "dark";
   });
 
   useEffect(() => {
@@ -64,26 +67,31 @@ export const ThemeContextProvider = ({ children }) => {
       background: LIGHT.background,
       text: LIGHT.text,
       action: {
-        hover: `rgba(102, 126, 234, 0.08)`,
+        hover: "rgba(29, 26, 22, 0.06)", // --sf-color-primary-soft
       },
     },
     typography: {
       fontFamily:
         '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif',
+      // Display tier is set in Cormorant Garamond, tight, to match
+      // --sf-font-display / --sf-leading-display in storefront-tokens.css.
       h1: {
-        fontSize: "3rem",
-        fontWeight: 700,
-        lineHeight: 1.2,
+        fontFamily: '"Cormorant Garamond", "Playfair Display", Georgia, serif',
+        fontSize: "3.5rem",
+        fontWeight: 600,
+        lineHeight: 1.1,
       },
       h2: {
-        fontSize: "2.5rem",
+        fontFamily: '"Cormorant Garamond", "Playfair Display", Georgia, serif',
+        fontSize: "2.75rem",
         fontWeight: 600,
-        lineHeight: 1.3,
+        lineHeight: 1.15,
       },
       h3: {
-        fontSize: "2rem",
+        fontFamily: '"Cormorant Garamond", "Playfair Display", Georgia, serif',
+        fontSize: "2.25rem",
         fontWeight: 600,
-        lineHeight: 1.3,
+        lineHeight: 1.2,
       },
       h4: {
         fontSize: "1.5rem",
@@ -106,26 +114,30 @@ export const ThemeContextProvider = ({ children }) => {
       },
     },
     shape: {
-      borderRadius: 12,
+      borderRadius: 4, // --sf-radius-md — classic, near-square
     },
     components: {
+      // Editorial surfaces sit FLAT: no translateY lifts, no coloured glows.
       MuiButton: {
         styleOverrides: {
           root: {
-            borderRadius: "12px",
-            padding: "10px 24px",
-            fontSize: "1rem",
-            transition: "all 0.3s ease",
+            borderRadius: "4px",
+            padding: "12px 28px",
+            fontSize: "0.9375rem",
+            letterSpacing: "0.02em",
+            boxShadow: "none",
+            transition: "background 0.2s cubic-bezier(0.22, 1, 0.36, 1), color 0.2s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s cubic-bezier(0.22, 1, 0.36, 1)",
             "&:hover": {
-              transform: "translateY(-2px)",
-              boxShadow: "0 8px 20px rgba(102, 126, 234, 0.3)",
+              boxShadow: "none",
             },
           },
           contained: {
             background: LIGHT.gradient.primary,
-            color: "#ffffff",
+            color: LIGHT.background.default,
+            boxShadow: "none",
             "&:hover": {
               background: LIGHT.gradient.primaryReverse,
+              boxShadow: "none",
             },
           },
         },
@@ -133,12 +145,12 @@ export const ThemeContextProvider = ({ children }) => {
       MuiCard: {
         styleOverrides: {
           root: {
-            borderRadius: "16px",
-            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
-            transition: "all 0.3s ease",
+            borderRadius: "8px",
+            border: "1px solid #E8DFCD", // --sf-color-border hairline
+            boxShadow: "none",
+            transition: "border-color 0.2s cubic-bezier(0.22, 1, 0.36, 1)",
             "&:hover": {
-              transform: "translateY(-4px)",
-              boxShadow: "0 12px 30px rgba(0, 0, 0, 0.15)",
+              borderColor: "#D6C9B2", // --sf-color-border-strong
             },
           },
         },
@@ -147,7 +159,7 @@ export const ThemeContextProvider = ({ children }) => {
         styleOverrides: {
           root: {
             "& .MuiOutlinedInput-root": {
-              borderRadius: "12px",
+              borderRadius: "4px",
               "&:hover fieldset": {
                 borderColor: LIGHT.primary.main,
               },
@@ -162,17 +174,21 @@ export const ThemeContextProvider = ({ children }) => {
       MuiDrawer: {
         styleOverrides: {
           paper: {
-            backgroundColor: "rgba(255, 255, 255, 0.95)",
-            backdropFilter: "blur(20px)",
+            backgroundColor: LIGHT.background.default,
+            borderColor: "#E8DFCD",
+            backgroundImage: "none",
+            boxShadow: "0 20px 48px rgba(29, 26, 22, 0.12)", // --sf-shadow-lg
           },
         },
       },
       MuiAppBar: {
         styleOverrides: {
           root: {
-            backgroundColor: "rgba(255, 255, 255, 0.95)",
-            backdropFilter: "blur(20px)",
-            boxShadow: "0 2px 10px rgba(0, 0, 0, 0.08)",
+            backgroundColor: LIGHT.background.default,
+            backgroundImage: "none",
+            color: LIGHT.text.primary,
+            borderBottom: "1px solid #E8DFCD",
+            boxShadow: "none",
           },
         },
       },
@@ -195,26 +211,31 @@ export const ThemeContextProvider = ({ children }) => {
       background: DARK.background,
       text: DARK.text,
       action: {
-        hover: "rgba(168, 85, 247, 0.15)",
+        hover: "rgba(244, 239, 230, 0.08)", // --sf-color-primary-soft (dark)
       },
     },
     typography: {
       fontFamily:
         '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", sans-serif',
+      // Display tier is set in Cormorant Garamond, tight, to match
+      // --sf-font-display / --sf-leading-display in storefront-tokens.css.
       h1: {
-        fontSize: "3rem",
-        fontWeight: 700,
-        lineHeight: 1.2,
+        fontFamily: '"Cormorant Garamond", "Playfair Display", Georgia, serif',
+        fontSize: "3.5rem",
+        fontWeight: 600,
+        lineHeight: 1.1,
       },
       h2: {
-        fontSize: "2.5rem",
+        fontFamily: '"Cormorant Garamond", "Playfair Display", Georgia, serif',
+        fontSize: "2.75rem",
         fontWeight: 600,
-        lineHeight: 1.3,
+        lineHeight: 1.15,
       },
       h3: {
-        fontSize: "2rem",
+        fontFamily: '"Cormorant Garamond", "Playfair Display", Georgia, serif',
+        fontSize: "2.25rem",
         fontWeight: 600,
-        lineHeight: 1.3,
+        lineHeight: 1.2,
       },
       h4: {
         fontSize: "1.5rem",
@@ -237,26 +258,30 @@ export const ThemeContextProvider = ({ children }) => {
       },
     },
     shape: {
-      borderRadius: 12,
+      borderRadius: 4, // --sf-radius-md — classic, near-square
     },
     components: {
+      // Same flat editorial treatment, re-derived for the evening palette.
       MuiButton: {
         styleOverrides: {
           root: {
-            borderRadius: "12px",
-            padding: "10px 24px",
-            fontSize: "1rem",
-            transition: "all 0.3s ease",
+            borderRadius: "4px",
+            padding: "12px 28px",
+            fontSize: "0.9375rem",
+            letterSpacing: "0.02em",
+            boxShadow: "none",
+            transition: "background 0.2s cubic-bezier(0.22, 1, 0.36, 1), color 0.2s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s cubic-bezier(0.22, 1, 0.36, 1)",
             "&:hover": {
-              transform: "translateY(-2px)",
-              boxShadow: "0 8px 20px rgba(168, 85, 247, 0.4)",
+              boxShadow: "none",
             },
           },
           contained: {
             background: DARK.gradient.primary,
-            color: "#ffffff",
+            color: DARK.text.primary, // ivory label on the dark primary band
+            boxShadow: "none",
             "&:hover": {
               background: DARK.gradient.primaryReverse,
+              boxShadow: "none",
             },
           },
         },
@@ -264,16 +289,13 @@ export const ThemeContextProvider = ({ children }) => {
       MuiCard: {
         styleOverrides: {
           root: {
-            borderRadius: "16px",
-            background: "rgba(26, 31, 58, 0.8)",
-            backdropFilter: "blur(10px)",
-            border: `1px solid rgba(168, 85, 247, 0.2)`,
-            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)",
-            transition: "all 0.3s ease",
+            borderRadius: "8px",
+            background: DARK.background.paper,
+            border: "1px solid rgba(244, 239, 230, 0.10)", // --sf-color-border
+            boxShadow: "none",
+            transition: "border-color 0.2s cubic-bezier(0.22, 1, 0.36, 1)",
             "&:hover": {
-              transform: "translateY(-4px)",
-              boxShadow: "0 12px 30px rgba(168, 85, 247, 0.3)",
-              borderColor: "rgba(168, 85, 247, 0.4)",
+              borderColor: "rgba(227, 185, 94, 0.30)", // --sf-color-border-strong
             },
           },
         },
@@ -282,7 +304,7 @@ export const ThemeContextProvider = ({ children }) => {
         styleOverrides: {
           root: {
             "& .MuiOutlinedInput-root": {
-              borderRadius: "12px",
+              borderRadius: "4px",
               "&:hover fieldset": {
                 borderColor: DARK.primary.main,
               },
@@ -297,8 +319,29 @@ export const ThemeContextProvider = ({ children }) => {
       MuiDrawer: {
         styleOverrides: {
           paper: {
-            backgroundColor: "rgba(26, 31, 58, 0.95)",
-            backdropFilter: "blur(20px)",
+            backgroundColor: DARK.background.default,
+            borderColor: "rgba(244, 239, 230, 0.10)",
+            backgroundImage: "none",
+            boxShadow: "0 20px 48px rgba(0, 0, 0, 0.65)", // --sf-shadow-lg (dark)
+          },
+        },
+      },
+      MuiAppBar: {
+        styleOverrides: {
+          root: {
+            backgroundColor: DARK.background.default,
+            backgroundImage: "none",
+            color: DARK.text.primary,
+            borderBottom: "1px solid rgba(244, 239, 230, 0.10)",
+            boxShadow: "none",
+          },
+        },
+      },
+      // MUI tints dark Paper by elevation; the editorial surfaces stay flat.
+      MuiPaper: {
+        styleOverrides: {
+          root: {
+            backgroundImage: "none",
           },
         },
       },

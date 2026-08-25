@@ -1,8 +1,17 @@
 // =====================================================================
 // GLOBAL COLOR THEME — Edit this file to restyle the entire storefront
 // =====================================================================
-// All colors used by the front-end come from here. The admin panel uses
-// its own hardcoded palette and is NOT affected by changes to this file.
+// All colors used by the front-end come from here. The admin panel builds
+// its own palette in `adminTheme.js` and is NOT affected by this file.
+//
+// This is the MUI mirror of `storefront-tokens.css`. That file is the
+// source of truth (and documents where every hex was sampled from —
+// the Meghali's Silk logo artwork); keep the two in sync.
+//
+// The system is IVORY ground + INK type + GOLD seasoning. Note that
+// `primary` is the ink, not a colour: in this editorial palette the CTA
+// and the body copy are the same warm near-black, and gold accents.
+// In dark mode that inverts — ivory becomes the fill, ink the label.
 //
 // HOW TO USE:
 //   1. Change the hex values below.
@@ -11,68 +20,75 @@
 // =====================================================================
 
 // ---------------------
-// LIGHT MODE PALETTE
+// LIGHT MODE PALETTE  (the default)
 // ---------------------
 export const LIGHT = {
-  // Primary brand color — Meghali's Silk deep bottle-green
+  // Primary — warm near-black ink. Carries type and the primary CTA fill.
   primary: {
-    main:  "#0B3B2E",
-    light: "#13573F",
-    dark:  "#0A2E24",
+    main:  "#1D1A16",
+    light: "#322C25",
+    dark:  "#0F0D0A",
   },
-  // Secondary accent color — gold/champagne (readable on white)
+  // Secondary accent — antique gold, sampled from the logo and deepened
+  // until it is safe as text on ivory (5.12:1).
   secondary: {
-    main:  "#B6863C",
-    light: "#CBA35A",
-    dark:  "#9A7728",
+    main:  "#8A6118",
+    light: "#C8912A",
+    dark:  "#6B4A12",
   },
   // Page and component backgrounds
   background: {
-    default: "#FBF8F2",
+    default: "#FAF6EC", // warm ivory — the logo's own halo tone
     paper:   "#FFFFFF",
   },
   // Text colors
   text: {
-    primary:   "#10221C",
-    secondary: "#4A5550",
+    primary:   "#1D1A16",
+    secondary: "#5C554A",
   },
-  // Gradient used for contained buttons, hero section, etc. (gold gradient)
+  // Gradients. `primary` fills contained buttons, so it stays ink (an ivory
+  // label needs a dark ground); the gold gradient is decorative and lives in
+  // storefront-tokens.css as --sf-gradient-gold.
   gradient: {
-    primary:        "linear-gradient(135deg, #E6C27A 0%, #CBA35A 50%, #B6863C 100%)",
-    primaryReverse: "linear-gradient(135deg, #B6863C 0%, #CBA35A 50%, #9A7728 100%)",
-    // Hero background gradient — deep brand green
-    hero: "linear-gradient(135deg, #0B3B2E 0%, #0A2E24 50%, #13573F 100%)",
+    primary:        "linear-gradient(135deg, #1D1A16 0%, #322C25 100%)",
+    primaryReverse: "linear-gradient(135deg, #322C25 0%, #1D1A16 100%)",
+    // Hero background gradient — warm ink, matching --sf-gradient-heritage
+    hero: "linear-gradient(135deg, #1D1A16 0%, #33261E 55%, #4A3F31 100%)",
   },
-  // Body background applied on initial HTML load (before React mounts)
-  bodyBackground: "linear-gradient(135deg, #FBF8F2 0%, #FFFFFF 100%)",
+  // Body background applied on initial HTML load (before React mounts).
+  // Must match the pre-mount script in public/index.html.
+  bodyBackground: "linear-gradient(135deg, #FAF6EC 0%, #FFFFFF 100%)",
 };
 
 // ---------------------
-// DARK MODE PALETTE
+// DARK MODE PALETTE  ("evening gallery")
 // ---------------------
 export const DARK = {
+  // Primary stays a DARK band with ivory type in both modes — see the
+  // INVARIANT note in storefront-tokens.css. The ivory-fill CTA for dark mode
+  // is --sf-color-emerald, not primary.
   primary: {
-    main:  "#0B3B2E",
-    light: "#1C6E50",
-    dark:  "#0A2E24",
+    main:  "#2B241C",
+    light: "#3A3128",
+    dark:  "#1E1913",
   },
   secondary: {
-    main:  "#CBA35A",
-    light: "#E6C27A",
-    dark:  "#B6863C",
+    main:  "#E3B95E",
+    light: "#F3DDA4",
+    dark:  "#C99B3D",
   },
   background: {
-    default: "#0B0C0B",
-    paper:   "#15171A",
+    default: "#14120F", // deep warm charcoal
+    paper:   "#1B1815",
   },
   text: {
-    primary:   "#F3EFE6",
-    secondary: "#C3C9C4",
+    primary:   "#F4EFE6",
+    secondary: "#C4BCAE",
   },
   gradient: {
-    primary:        "linear-gradient(135deg, #E6C27A 0%, #CBA35A 50%, #B6863C 100%)",
-    primaryReverse: "linear-gradient(135deg, #B6863C 0%, #CBA35A 50%, #9A7728 100%)",
-    hero: "linear-gradient(135deg, #0B3B2E 0%, #0A2E24 50%, #101312 100%)",
+    primary:        "linear-gradient(135deg, #2B241C 0%, #3A3128 100%)",
+    primaryReverse: "linear-gradient(135deg, #3A3128 0%, #2B241C 100%)",
+    hero: "linear-gradient(135deg, #14120F 0%, #241C15 55%, #3A2F24 100%)",
   },
-  bodyBackground: "linear-gradient(135deg, #0B0C0B 0%, #15171A 100%)",
+  bodyBackground: "linear-gradient(135deg, #14120F 0%, #1B1815 100%)",
 };
