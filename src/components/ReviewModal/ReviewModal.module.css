@@ -1,135 +1,405 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   REVIEW MODAL  —  the editorial note card
+   ═══════════════════════════════════════════════════════════════════════════
+   Opened from Order History, on a piece the customer actually received. It is
+   a small sheet, not a form in a box: a tracked eyebrow, a serif invitation,
+   the piece being reviewed on a sunken hairline row, five gold stars with the
+   word for the score beside them, and two fields that are rules rather than
+   boxes — the same underline field the checkout uses.
+
+   The last line before the buttons is the honest one: whatever is written here
+   goes to moderation before it appears on the product page, and editing an
+   approved review sends it back through. The dialog says so rather than
+   implying an instant publish.
+
+   TOKENS ONLY — every colour, space, radius and type value resolves through
+   `--sf-*`, which flips under `body.dark`, so light and dark are one sheet.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 .overlay {
   position: fixed;
   inset: 0;
-  background: var(--sf-color-overlay);
-  backdrop-filter: blur(2px);
+  z-index: var(--sf-z-modal);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 16px;
-  z-index: 2000;
+  padding: var(--sf-space-4);
+  background: var(--sf-color-overlay);
+  backdrop-filter: blur(2px);
 }
 
+/* Transform only, so a stalled timeline can never leave the sheet invisible. */
 .modal {
   position: relative;
   width: 100%;
-  max-width: 460px;
+  max-width: 30rem;
   max-height: 90vh;
   overflow-y: auto;
+  padding: var(--sf-space-10) var(--sf-space-8) var(--sf-space-8);
+  border: 1px solid var(--sf-color-border);
+  border-radius: var(--sf-radius-md);
   background: var(--sf-color-surface);
   color: var(--sf-color-text);
-  border-radius: var(--sf-radius-lg);
-  padding: 28px 24px 22px;
   box-shadow: var(--sf-shadow-lg);
+  font-family: var(--sf-font-family);
+  animation: sheetIn 0.35s var(--sf-ease) both;
+}
+
+@keyframes sheetIn {
+  from {
+    transform: translateY(10px) scale(0.99);
+  }
+  to {
+    transform: none;
+  }
 }
 
 .closeBtn {
   position: absolute;
-  top: 12px;
-  right: 14px;
+  top: var(--sf-space-2);
+  right: var(--sf-space-2);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   width: var(--sf-tap-target);
   height: var(--sf-tap-target);
   border: none;
+  border-radius: var(--sf-radius-sm);
   background: transparent;
-  font-size: 1.6rem;
-  line-height: 1;
   color: var(--sf-color-text-muted);
   cursor: pointer;
-  border-radius: var(--sf-radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  transition: color var(--sf-transition-fast);
 }
-.closeBtn:hover { background: var(--sf-color-surface-hover); }
-.closeBtn:focus-visible { outline: none; box-shadow: var(--sf-shadow-focus); }
 
-.heading { font-family: var(--sf-font-display); font-size: 1.3rem; font-weight: 700; margin: 0 0 16px; }
+.closeBtn:hover {
+  color: var(--sf-color-text);
+}
 
+.closeBtn:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--sf-shadow-focus);
+}
+
+.eyebrow {
+  margin: 0 0 var(--sf-space-3);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wider);
+  line-height: 1;
+  color: var(--sf-color-gold-deep);
+}
+
+.heading {
+  margin: 0 0 var(--sf-space-5);
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-2xl);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-display);
+  letter-spacing: var(--sf-tracking-tight);
+  color: var(--sf-color-text);
+}
+
+/* The piece, on the sunken panel — a reminder of what is being spoken about. */
 .productRow {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-surface-2);
-  margin-bottom: 14px;
-}
-.productRow img { width: 44px; height: 44px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
-.productName { font-size: 0.9rem; font-weight: 600; }
-
-.editNote {
-  font-size: 0.8rem;
-  color: var(--sf-color-warning);
-  background: var(--sf-color-warning-bg);
-  border: 1px solid var(--sf-color-warning);
-  padding: 8px 10px;
+  gap: var(--sf-space-4);
+  padding: var(--sf-space-3);
+  margin-bottom: var(--sf-space-5);
   border-radius: var(--sf-radius-sm);
-  margin: 0 0 14px;
+  background: var(--sf-color-surface-2);
 }
 
-.label { display: block; font-size: 0.85rem; font-weight: 600; margin: 12px 0 6px; }
+.productThumb {
+  flex: none;
+  display: block;
+  width: 40px;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: var(--sf-radius-sm);
+  background: var(--sf-color-surface);
+}
 
-.starInput { display: flex; gap: 4px; }
-.starBtn {
-  background: none;
-  border: none;
-  font-size: 2rem;
+.productThumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.productName {
+  min-width: 0;
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-lg);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  letter-spacing: var(--sf-tracking-tight);
+  color: var(--sf-color-text);
+}
+
+/* Editing resubmits — said plainly, on a hairline rather than a warning box. */
+.editNote {
+  margin: 0 0 var(--sf-space-6);
+  padding-left: var(--sf-space-4);
+  border-left: 2px solid var(--sf-color-warning);
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-secondary);
+}
+
+.field {
+  margin-bottom: var(--sf-space-6);
+}
+
+.labelRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sf-space-4);
+  margin-bottom: var(--sf-space-2);
+}
+
+.label {
+  display: block;
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
   line-height: 1;
-  cursor: pointer;
-  color: var(--sf-color-compare);
-  padding: 0 2px;
-  transition: transform 0.1s;
+  color: var(--sf-color-text-muted);
 }
-.starBtn:hover { transform: scale(1.15); }
-.starBtn:focus-visible { outline: none; box-shadow: var(--sf-shadow-focus); border-radius: var(--sf-radius-sm); }
-.starActive { color: var(--sf-color-star); }
+
+.counter {
+  flex: none;
+  font-size: var(--sf-text-xs);
+  color: var(--sf-color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── The stars ───────────────────────────────────────────────────────────── */
+
+.ratingRow {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-4);
+}
+
+.starInput {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-1);
+}
+
+.starBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: none;
+  border-radius: var(--sf-radius-sm);
+  background: none;
+  color: var(--sf-color-border-strong);
+  cursor: pointer;
+  transition: color var(--sf-transition-fast), transform var(--sf-transition-fast);
+}
+
+.starBtn:hover {
+  transform: translateY(-1px);
+}
+
+.starBtn:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--sf-shadow-focus);
+}
+
+.starActive {
+  color: var(--sf-color-star);
+}
+
+/* The score in words, so the rating is never carried by gold alone. */
+.ratingWord {
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-secondary);
+}
+
+.ratingWordEmpty {
+  color: var(--sf-color-text-muted);
+}
+
+/* ── The fields: the checkout's underline, not a box ─────────────────────── */
 
 .input,
 .textarea {
+  display: block;
   width: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--sf-color-border-strong);
-  border-radius: var(--sf-radius-md);
-  font-size: 0.9rem;
-  font-family: inherit;
-  background: var(--sf-color-surface);
-  color: var(--sf-color-text);
+  padding: var(--sf-space-2) 0;
+  border: none;
+  border-bottom: 1px solid var(--sf-color-border-strong);
+  border-radius: 0;
+  outline: none;
+  background: transparent;
   box-sizing: border-box;
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-base);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text);
+  caret-color: var(--sf-color-gold);
+  transition: border-color var(--sf-transition-fast),
+    box-shadow var(--sf-transition-fast);
+}
+
+.input {
+  height: var(--sf-tap-target);
+}
+
+.textarea {
+  min-height: 6.5rem;
   resize: vertical;
 }
-.input:focus,
-.textarea:focus { outline: none; border-color: var(--sf-color-accent); box-shadow: var(--sf-shadow-focus); }
 
-.error { color: var(--sf-color-danger); font-size: 0.82rem; margin: 10px 0 0; }
-
-.actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
-.cancelBtn {
-  padding: 10px 18px;
-  min-height: var(--sf-tap-target);
-  border: 1px solid var(--sf-color-border-strong);
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-surface);
-  color: var(--sf-color-text-secondary);
-  font-weight: 600;
-  font-size: 0.875rem;
-  cursor: pointer;
-  font-family: inherit;
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--sf-color-text-muted);
+  opacity: 1;
 }
-.cancelBtn:focus-visible { outline: none; box-shadow: var(--sf-shadow-focus); }
+
+.input:focus,
+.textarea:focus {
+  border-bottom-color: var(--sf-color-focus-ring);
+  box-shadow: 0 1px 0 0 var(--sf-color-focus-ring);
+}
+
+/* ── The honest line, the error, the buttons ─────────────────────────────── */
+
+.moderationNote {
+  margin: 0;
+  padding-top: var(--sf-space-4);
+  border-top: 1px solid var(--sf-color-border);
+  font-size: var(--sf-text-xs);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-muted);
+}
+
+.error {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-2);
+  margin: var(--sf-space-4) 0 0;
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-danger);
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sf-space-3);
+  margin-top: var(--sf-space-6);
+}
+
+.cancelBtn,
 .submitBtn {
-  padding: 10px 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sf-space-2);
   min-height: var(--sf-tap-target);
-  border: none;
-  border-radius: var(--sf-radius-md);
+  padding: var(--sf-space-3) var(--sf-space-6);
+  border-radius: var(--sf-radius-sm);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  cursor: pointer;
+  transition: background-color var(--sf-transition),
+    border-color var(--sf-transition), color var(--sf-transition);
+}
+
+.cancelBtn {
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--sf-color-text-secondary);
+}
+
+.cancelBtn:hover:not(:disabled) {
+  color: var(--sf-color-text);
+  border-color: var(--sf-color-border-strong);
+}
+
+.submitBtn {
+  border: 1px solid var(--sf-color-emerald);
   background: var(--sf-color-emerald);
   color: var(--sf-color-emerald-contrast);
-  font-weight: 600;
-  font-size: 0.875rem;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background var(--sf-transition-fast);
 }
-.submitBtn:hover:not(:disabled) { background: var(--sf-color-emerald-hover); }
-.submitBtn:focus-visible { outline: none; box-shadow: var(--sf-shadow-focus); }
-.submitBtn:disabled,
-.cancelBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.submitBtn:hover:not(:disabled) {
+  background: var(--sf-color-gold-deep);
+  border-color: var(--sf-color-gold-deep);
+  color: var(--sf-color-primary-contrast);
+}
+
+.cancelBtn:focus-visible,
+.submitBtn:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--sf-shadow-focus);
+}
+
+.cancelBtn:disabled,
+.submitBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnSpinner {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+  border-top-color: currentColor;
+  border-radius: var(--sf-radius-pill);
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 480px) {
+  .modal {
+    padding: var(--sf-space-8) var(--sf-space-5) var(--sf-space-6);
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+  }
+
+  .cancelBtn,
+  .submitBtn {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .modal {
+    animation: none;
+  }
+
+  .starBtn:hover {
+    transform: none;
+  }
+
+  .btnSpinner {
+    animation-duration: 2.4s;
+  }
+}
