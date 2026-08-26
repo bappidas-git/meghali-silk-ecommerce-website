@@ -1,588 +1,707 @@
-/* =============================================================================
- * Contact Us — Meghali's Silk re-skin (tokens only; no hardcoded hex)
- * =============================================================================
- * Dark-first, gold-on-green "Let's Start a Conversation" contact experience on
- * route /support. Every colour resolves from src/theme/storefront-tokens.css and
- * is theme-aware via body.dark; the `.dark` class is kept for parity with the
- * page's useTheme() pattern.
- * ========================================================================== */
+/* ═══════════════════════════════════════════════════════════════════════════
+   CONTACT  —  the care desk, on the ivory ground
+   ═══════════════════════════════════════════════════════════════════════════
+   The old page was a dashboard: a gradient hero, a row of glowing stat tiles,
+   three colour-coded contact tiles, a boxed form with a green "Online" dot and
+   a showroom card with an emblem lozenge. This one is a letter-writing desk.
+   Four movements, and nothing between them but air and hairlines.
 
-.container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: var(--sf-space-6) var(--sf-space-4) var(--sf-space-16);
-  min-height: calc(100vh - 200px);
+     1. THE INVITATION — tracked eyebrow, serif line, and three quiet marks
+        over a single rule. (The invented ratings/customer counts are gone; see
+        the page component's header for what replaced them and why.)
+     2. THE CHANNELS   — three hairline cards. A thin mark, a tracked label, the
+        value in reading size, one line of what it is for.
+     3. THE LETTER     — the Prompt 18/22 form language: tracked caption labels
+        over fields that ARE the hairline. Focus deepens the rule to the gold
+        ring instead of drawing a box, so nothing below ever shifts.
+     4. THE RAIL       — three rules with content hanging under them, and a
+        closing line to the Help Centre. No cards, no emblems.
+
+   TOKENS ONLY
+   Every colour, space, radius, shadow and type value resolves through `--sf-*`,
+   which flips under `body.dark` — light and dark are one stylesheet and there
+   is no hex in this file.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.page {
+  min-height: 100vh;
+  padding: var(--sf-space-12) 0 var(--sf-space-24);
   background: var(--sf-color-bg);
   color: var(--sf-color-text);
   font-family: var(--sf-font-family);
-  transition: background var(--sf-transition), color var(--sf-transition);
 }
 
-/* ===== Breadcrumb ===== */
-.breadcrumb {
+/* The only thing ThemeContext is consumed for here: a native color-scheme hint
+   so scrollbars, the date/tel keypads and the textarea grip render for the
+   active theme. */
+.dark {
+  color-scheme: dark;
+}
+
+.container {
+  max-width: var(--sf-container-max);
+  margin: 0 auto;
+  padding: 0 var(--sf-space-6);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   1. THE INVITATION
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.head {
+  max-width: 46rem;
+  margin-bottom: var(--sf-space-16);
+}
+
+/* The storefront's shared opener — a tracked gold label led in by a short
+   rule (Prompt 12/14/23), so this page reads as part of the same magazine. */
+.eyebrow {
   display: flex;
-  gap: var(--sf-space-2);
   align-items: center;
-  margin-bottom: var(--sf-space-6);
-  font-size: var(--sf-text-sm);
+  gap: var(--sf-space-3);
+  margin: 0 0 var(--sf-space-4);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wider);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-gold-deep);
+}
+
+.eyebrow::before {
+  content: "";
+  width: var(--sf-space-8);
+  height: 1px;
+  background: var(--sf-color-gold);
+}
+
+.title {
+  margin: 0 0 var(--sf-space-5);
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-4xl);
+  font-weight: var(--sf-font-light);
+  line-height: var(--sf-leading-display);
+  letter-spacing: var(--sf-tracking-tight);
+  color: var(--sf-color-text);
+}
+
+.lede {
+  margin: 0;
+  max-width: 40rem;
+  font-size: var(--sf-text-md);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-secondary);
+}
+
+/* The three marks. Attested facts, set as serif numerals over tracked labels —
+   the same figures the About page prints, so the two surfaces agree. */
+.marks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sf-space-6) var(--sf-space-12);
+  margin: var(--sf-space-10) 0 0;
+  padding: var(--sf-space-6) 0 0;
+  border-top: 1px solid var(--sf-color-border);
+  list-style: none;
+}
+
+.mark {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-1);
+}
+
+.markValue {
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-2xl);
+  font-weight: var(--sf-font-light);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text);
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.markLabel {
+  font-size: var(--sf-text-xs);
+  letter-spacing: var(--sf-tracking-wide);
+  text-transform: uppercase;
   color: var(--sf-color-text-muted);
 }
-.breadcrumb a {
+
+.headLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sf-space-2);
+  min-height: var(--sf-tap-target);
+  margin-top: var(--sf-space-2);
+  font-size: var(--sf-text-sm);
   color: var(--sf-color-gold-deep);
   text-decoration: none;
   transition: color var(--sf-transition-fast);
 }
-.breadcrumb a:hover {
-  color: var(--sf-color-gold);
+
+.headLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
 }
-.breadcrumb a:focus-visible {
+
+.headLink:focus-visible,
+.railLink:focus-visible {
   outline: none;
   box-shadow: var(--sf-shadow-focus);
   border-radius: var(--sf-radius-sm);
 }
-@media (max-width: 768px) {
-  .breadcrumb a {
-    display: inline-block;
-    padding: 10px 2px;
-    margin: -10px 0;
-  }
-}
 
-/* ===== 1. Intro ===== */
-.intro {
-  text-align: center;
-  margin-bottom: var(--sf-space-10);
-}
-.pill {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sf-space-2);
-  padding: var(--sf-space-2) var(--sf-space-4);
-  margin-bottom: var(--sf-space-5);
-  border-radius: var(--sf-radius-pill);
-  border: 1px solid var(--sf-color-border-strong);
-  background: var(--sf-color-badge-bg);
-  color: var(--sf-color-gold);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-medium);
-}
-.pill svg {
-  font-size: 1.1em;
-}
-.title {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-3xl);
-  font-weight: var(--sf-font-bold);
-  line-height: var(--sf-leading-tight);
-  color: var(--sf-color-text);
-  margin: 0 0 var(--sf-space-4);
-}
-.titleAccent {
-  display: block;
-  font-family: var(--sf-font-display);
-  background: var(--sf-gradient-gold);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: var(--sf-color-gold);
-}
-.subtitle {
-  max-width: 620px;
-  margin: 0 auto var(--sf-space-8);
-  color: var(--sf-color-text-secondary);
-  font-size: var(--sf-text-md);
-  line-height: var(--sf-leading-normal);
-}
+/* ═══════════════════════════════════════════════════════════════════════════
+   2. THE CHANNELS
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ===== 2. Stats row ===== */
-.statsRow {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--sf-space-8);
-}
-.stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--sf-space-1);
-  min-width: 120px;
-}
-.statIcon {
-  font-size: 1.4rem;
-  color: var(--sf-color-gold);
-}
-.statNumber {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-2xl);
-  font-weight: var(--sf-font-bold);
-  color: var(--sf-color-text);
-}
-.statLabel {
-  font-size: var(--sf-text-sm);
-  color: var(--sf-color-text-muted);
-}
-
-/* ===== 3. Contact cards ===== */
-.cards {
+.channels {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
   gap: var(--sf-space-5);
-  margin: var(--sf-space-10) 0;
+  margin-bottom: var(--sf-space-20);
 }
-.card {
+
+.channel {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: var(--sf-space-2);
   padding: var(--sf-space-6);
-  border-radius: var(--sf-radius-lg);
-  background: var(--sf-color-surface);
   border: 1px solid var(--sf-color-border);
+  border-radius: var(--sf-radius-md);
+  background: transparent;
   text-decoration: none;
-  transition: transform var(--sf-transition), border-color var(--sf-transition),
-    box-shadow var(--sf-transition);
+  color: inherit;
+  transition: border-color var(--sf-transition), background-color var(--sf-transition);
 }
-a.card:hover {
-  transform: translateY(-3px);
+
+.channel:hover {
   border-color: var(--sf-color-border-strong);
-  box-shadow: var(--sf-shadow-md);
+  background: var(--sf-color-surface);
 }
-a.card:focus-visible {
+
+.channel:focus-visible {
   outline: none;
   box-shadow: var(--sf-shadow-focus);
 }
-.cardIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  border-radius: var(--sf-radius-md);
-  font-size: 1.5rem;
-  margin-bottom: var(--sf-space-2);
+
+.channelIcon {
+  display: block;
+  margin-bottom: var(--sf-space-5);
+  color: var(--sf-color-text-muted);
+  transition: color var(--sf-transition);
 }
-.iconEmerald {
-  background: var(--sf-color-discount-bg);
-  color: var(--sf-color-emerald);
+
+.channel:hover .channelIcon {
+  color: var(--sf-color-gold-deep);
 }
-.iconPink {
-  background: var(--sf-color-danger-bg);
-  color: var(--sf-cat-pink);
-}
-.cardTitle {
-  font-size: var(--sf-text-lg);
-  font-weight: var(--sf-font-semibold);
-  color: var(--sf-color-text);
-  margin: 0;
-}
-.cardValue {
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-medium);
-  color: var(--sf-color-gold);
-  word-break: break-word;
-}
-.cardCaption {
-  font-size: var(--sf-text-sm);
+
+.channelLabel {
+  font-size: var(--sf-text-xs);
+  letter-spacing: var(--sf-tracking-wide);
+  text-transform: uppercase;
   color: var(--sf-color-text-muted);
 }
 
-/* ===== 4. Two-column body ===== */
+.channelValue {
+  margin-top: var(--sf-space-2);
+  font-size: var(--sf-text-md);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text);
+  overflow-wrap: anywhere;
+}
+
+.channelNote {
+  margin-top: var(--sf-space-3);
+  font-size: var(--sf-text-xs);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   3 + 4. THE LETTER AND THE RAIL
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 .body {
   display: grid;
-  grid-template-columns: minmax(0, 1.7fr) minmax(0, 1fr);
-  gap: var(--sf-space-6);
+  grid-template-columns: minmax(0, 1fr) 19rem;
+  gap: var(--sf-space-16);
   align-items: start;
 }
-@media (max-width: 900px) {
-  .body {
-    grid-template-columns: minmax(0, 1fr);
-  }
+
+.letterHead {
+  padding-bottom: var(--sf-space-6);
+  margin-bottom: var(--sf-space-8);
+  border-bottom: 1px solid var(--sf-color-border);
 }
 
-/* ----- Left: form card ----- */
-.formCard {
-  padding: var(--sf-space-8);
-  border-radius: var(--sf-radius-lg);
-  background: var(--sf-color-surface);
-  border: 1px solid var(--sf-color-border);
-  min-width: 0;
-}
-.formHead {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--sf-space-4);
-  margin-bottom: var(--sf-space-6);
-}
-.formTitle {
+.sectionTitle {
+  margin: 0 0 var(--sf-space-3);
   font-family: var(--sf-font-display);
   font-size: var(--sf-text-2xl);
-  font-weight: var(--sf-font-bold);
+  font-weight: var(--sf-font-light);
+  line-height: var(--sf-leading-tight);
   color: var(--sf-color-text);
-  margin: 0 0 var(--sf-space-1);
-}
-.formSubtitle {
-  font-size: var(--sf-text-sm);
-  color: var(--sf-color-text-muted);
-  margin: 0;
-}
-.onlineBadge {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sf-space-2);
-  padding: var(--sf-space-1) var(--sf-space-3);
-  border-radius: var(--sf-radius-pill);
-  background: var(--sf-color-success-bg);
-  color: var(--sf-color-success);
-  font-size: var(--sf-text-xs);
-  font-weight: var(--sf-font-semibold);
-}
-.onlineDot {
-  width: 8px;
-  height: 8px;
-  border-radius: var(--sf-radius-pill);
-  background: var(--sf-color-success);
 }
 
-.formRow {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: var(--sf-space-4);
-}
-@media (max-width: 576px) {
-  .formRow {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-.formGroup {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sf-space-2);
-  margin-bottom: var(--sf-space-4);
-  min-width: 0;
-}
-.formGroup label {
+/* The one availability statement on the page — SUPPORT_HOURS, the same string
+   the Footer and the Help Centre print. No response-time promise. */
+.sectionLede {
+  margin: 0;
+  max-width: 38rem;
   font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-relaxed);
   color: var(--sf-color-text-secondary);
 }
-.formGroup input,
-.formGroup textarea {
-  width: 100%;
+
+/* ── The form language ───────────────────────────────────────────────────── */
+
+.formGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--sf-space-6) var(--sf-space-8);
+  max-width: 44rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
   min-width: 0;
-  min-height: var(--sf-tap-target);
-  padding: var(--sf-space-3) var(--sf-space-4);
-  border-radius: var(--sf-radius-md);
-  border: 1px solid var(--sf-color-border-strong);
+}
+
+.fieldWide {
+  grid-column: 1 / -1;
+}
+
+.field label {
+  margin-bottom: var(--sf-space-2);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  color: var(--sf-color-text-muted);
+}
+
+/* "Optional" is a word, not a badge — it steps out of the tracked caps so it
+   reads as an aside rather than a second label. */
+.optional {
+  margin-left: var(--sf-space-2);
+  font-weight: var(--sf-font-normal);
+  font-style: italic;
+  text-transform: none;
+  letter-spacing: var(--sf-tracking-normal);
+  color: var(--sf-color-text-muted);
+}
+
+.field input,
+.field textarea {
+  min-width: 0;
+  padding: 0;
+  border: none;
+  border-bottom: 1px solid var(--sf-color-border-strong);
+  border-radius: 0;
+  outline: none;
+  background: transparent;
+  font-family: var(--sf-font-family);
   font-size: var(--sf-text-base);
-  font-family: inherit;
-  background: var(--sf-color-surface-2);
   color: var(--sf-color-text);
+  caret-color: var(--sf-color-gold);
   transition: border-color var(--sf-transition-fast),
     box-shadow var(--sf-transition-fast);
 }
-.formGroup textarea {
-  resize: vertical;
-  min-height: 120px;
-}
-.formGroup input::placeholder,
-.formGroup textarea::placeholder {
-  color: var(--sf-color-text-muted);
-}
-.formGroup input:focus-visible,
-.formGroup textarea:focus-visible {
-  outline: none;
-  border-color: var(--sf-color-gold);
-  box-shadow: var(--sf-shadow-focus);
-}
-.inputError {
-  border-color: var(--sf-color-danger) !important;
-}
-.error {
-  color: var(--sf-color-danger);
-  font-size: var(--sf-text-xs);
-}
-.submitError {
-  color: var(--sf-color-danger);
-  background: var(--sf-color-danger-bg);
-  padding: var(--sf-space-3);
-  border-radius: var(--sf-radius-md);
-  font-size: var(--sf-text-sm);
-  margin-bottom: var(--sf-space-4);
-  text-align: center;
-}
-.sendBtn {
-  width: 100%;
-  min-height: var(--sf-tap-target);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sf-space-2);
-  padding: var(--sf-space-3) var(--sf-space-6);
-  border: none;
-  border-radius: var(--sf-radius-md);
-  font-size: var(--sf-text-base);
-  font-weight: var(--sf-font-semibold);
-  font-family: inherit;
-  background: var(--sf-gradient-gold);
-  color: var(--sf-color-brand-green);
-  cursor: pointer;
-  transition: transform var(--sf-transition), box-shadow var(--sf-transition),
-    opacity var(--sf-transition);
-}
-.sendBtn svg {
-  font-size: 1.2em;
-}
-.sendBtn:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--sf-shadow-md);
-}
-.sendBtn:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
-}
-.sendBtn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-}
-.formNote {
-  margin: var(--sf-space-3) 0 0;
-  text-align: center;
-  font-size: var(--sf-text-xs);
-  color: var(--sf-color-text-muted);
+
+.field input {
+  height: var(--sf-tap-target);
 }
 
-/* ----- Right: rail ----- */
-.rail {
+.field textarea {
+  padding-bottom: var(--sf-space-3);
+  min-height: 9rem;
+  line-height: var(--sf-leading-relaxed);
+  resize: vertical;
+}
+
+.field input:focus,
+.field textarea:focus {
+  border-bottom-color: var(--sf-color-focus-ring);
+  box-shadow: 0 1px 0 0 var(--sf-color-focus-ring);
+}
+
+/* An invalid field states its condition on its own rule — no red box, no icon
+   tray. The message underneath carries the words. */
+.field input[aria-invalid="true"],
+.field textarea[aria-invalid="true"] {
+  border-bottom-color: var(--sf-color-danger);
+}
+
+/* Chrome paints autofilled inputs a hard blue; hold the ivory ground and the
+   ink type with a long inset shadow (the only way to override it). */
+.field input:-webkit-autofill,
+.field input:-webkit-autofill:hover,
+.field input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--sf-color-text);
+  -webkit-box-shadow: 0 0 0 1000px var(--sf-color-bg) inset;
+  caret-color: var(--sf-color-text);
+}
+
+.fieldError {
+  display: block;
+  margin-top: var(--sf-space-2);
+  font-size: var(--sf-text-xs);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-danger);
+}
+
+.hint {
+  display: block;
+  margin-top: var(--sf-space-2);
+  font-size: var(--sf-text-xs);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The only raised note on the page: a send that genuinely failed. */
+.formError {
+  max-width: 44rem;
+  margin: var(--sf-space-8) 0 0;
+  padding: var(--sf-space-4) var(--sf-space-5);
+  border-left: 2px solid var(--sf-color-danger);
+  background: var(--sf-color-danger-bg);
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text);
+}
+
+.formFoot {
   display: flex;
   flex-direction: column;
-  gap: var(--sf-space-6);
-  min-width: 0;
-}
-.railCard {
-  padding: var(--sf-space-6);
-  border-radius: var(--sf-radius-lg);
-  background: var(--sf-color-surface);
-  border: 1px solid var(--sf-color-border);
-}
-.railTitle {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-xl);
-  font-weight: var(--sf-font-bold);
-  color: var(--sf-color-text);
-  margin: 0 0 var(--sf-space-4);
+  align-items: flex-start;
+  gap: var(--sf-space-5);
+  margin-top: var(--sf-space-10);
 }
 
-/* Showroom */
-.showroom {
-  border-radius: var(--sf-radius-lg);
-  background: var(--sf-color-surface);
-  border: 1px solid var(--sf-color-border);
-  overflow: hidden;
-}
-.showroomHead {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: var(--sf-space-8) var(--sf-space-6);
-  background: linear-gradient(
-    135deg,
-    var(--sf-color-brand-green) 0%,
-    var(--sf-color-brand-green-deep) 100%
-  );
-}
-.showroomEmblem {
+.sendBtn,
+.ghostBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 64px;
-  height: 64px;
+  min-height: 3rem;
+  padding: 0 var(--sf-space-10);
+  border: 1px solid transparent;
+  border-radius: var(--sf-radius-sm);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  cursor: pointer;
+  transition: background-color var(--sf-transition),
+    border-color var(--sf-transition), color var(--sf-transition);
+}
+
+.sendBtn {
+  background: var(--sf-color-emerald);
+  color: var(--sf-color-emerald-contrast);
+}
+
+.sendBtn:hover:not(:disabled) {
+  background: var(--sf-color-emerald-hover);
+}
+
+.sendBtn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.ghostBtn {
+  background: transparent;
+  border-color: var(--sf-color-border-strong);
+  color: var(--sf-color-text);
+}
+
+.ghostBtn:hover {
+  border-color: var(--sf-color-text);
+  background: var(--sf-color-surface);
+}
+
+.sendBtn:focus-visible,
+.ghostBtn:focus-visible {
+  outline: none;
+  box-shadow: var(--sf-shadow-focus);
+}
+
+.formNote {
+  max-width: 34rem;
+  margin: 0;
+  font-size: var(--sf-text-xs);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-muted);
+}
+
+.formNote a {
+  color: var(--sf-color-gold-deep);
+  text-decoration: none;
+}
+
+.formNote a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
+
+.formNote a:focus-visible {
+  outline: none;
+  box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
+}
+
+/* ── The sent panel — swaps the form, keeps the page ─────────────────────── */
+
+.sent {
+  max-width: 34rem;
+  padding: var(--sf-space-10);
+  border: 1px solid var(--sf-color-border);
   border-radius: var(--sf-radius-md);
-  background: var(--sf-gradient-gold);
-  color: var(--sf-color-brand-green);
-  font-size: 1.8rem;
-  box-shadow: var(--sf-shadow-md);
+  background: var(--sf-color-surface);
 }
-.showroomBody {
-  padding: var(--sf-space-6);
+
+.sentMark {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  margin-bottom: var(--sf-space-6);
+  border: 1px solid var(--sf-color-gold);
+  border-radius: var(--sf-radius-pill);
+  color: var(--sf-color-gold-deep);
 }
-.showroomAddress {
+
+.sentTitle {
   margin: 0 0 var(--sf-space-3);
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-2xl);
+  font-weight: var(--sf-font-light);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text);
+}
+
+/* Focused programmatically when the panel appears, so nothing is drawn unless
+   the visitor is actually navigating by keyboard. */
+.sentTitle:focus {
+  outline: none;
+}
+
+.sentTitle:focus-visible {
+  box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
+}
+
+.sentBody {
+  margin: 0 0 var(--sf-space-8);
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-secondary);
+}
+
+/* ── The rail ────────────────────────────────────────────────────────────── */
+
+.rail {
+  display: grid;
+  gap: var(--sf-space-10);
+  position: sticky;
+  top: var(--sf-space-16);
+}
+
+.railCard {
+  padding-top: var(--sf-space-5);
+  border-top: 1px solid var(--sf-color-border);
+}
+
+.railTitle {
+  margin: 0 0 var(--sf-space-5);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  color: var(--sf-color-text-muted);
+}
+
+.railLine {
+  display: flex;
+  gap: var(--sf-space-3);
+  margin: 0 0 var(--sf-space-4);
   font-size: var(--sf-text-sm);
   line-height: var(--sf-leading-normal);
   color: var(--sf-color-text-secondary);
 }
-.showroomHours {
-  display: flex;
-  align-items: center;
-  gap: var(--sf-space-2);
-  margin: 0 0 var(--sf-space-5);
-  font-size: var(--sf-text-sm);
-  color: var(--sf-color-text-muted);
-}
-.directionsBtn {
-  width: 100%;
-  min-height: var(--sf-tap-target);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sf-space-2);
-  padding: var(--sf-space-3) var(--sf-space-5);
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-emerald);
-  color: var(--sf-color-emerald-contrast);
-  font-size: var(--sf-text-base);
-  font-weight: var(--sf-font-semibold);
-  text-decoration: none;
-  transition: background var(--sf-transition), transform var(--sf-transition);
-}
-.directionsBtn:hover {
-  background: var(--sf-color-emerald-hover);
-  transform: translateY(-2px);
-}
-.directionsBtn:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
+
+.railIcon {
+  flex: none;
+  margin-top: 1px;
+  color: var(--sf-color-gold-deep);
 }
 
-/* Socials */
-.socialRow {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.railLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sf-space-2);
+  min-height: var(--sf-tap-target);
+  font-size: var(--sf-text-sm);
+  color: var(--sf-color-gold-deep);
+  text-decoration: none;
+}
+
+.railLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
+
+.socials {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--sf-space-3);
+  gap: var(--sf-space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
-.socialLink {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+
+.social {
+  display: grid;
+  place-items: center;
   width: var(--sf-tap-target);
   height: var(--sf-tap-target);
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-surface-2);
   border: 1px solid var(--sf-color-border);
-  color: var(--sf-color-gold);
-  font-size: 1.3rem;
-  transition: background var(--sf-transition), color var(--sf-transition),
-    transform var(--sf-transition);
+  border-radius: var(--sf-radius-sm);
+  color: var(--sf-color-text-muted);
+  transition: color var(--sf-transition), border-color var(--sf-transition);
 }
-.socialLink:hover {
-  background: var(--sf-color-brand-green);
-  color: var(--sf-color-gold-light);
-  transform: translateY(-2px);
+
+.social:hover {
+  color: var(--sf-color-gold-deep);
+  border-color: var(--sf-color-border-strong);
 }
-.socialLink:focus-visible {
+
+.social:focus-visible {
   outline: none;
   box-shadow: var(--sf-shadow-focus);
 }
 
-/* Why Choose Us */
-.whyList {
-  list-style: none;
+.why {
   margin: 0;
   padding: 0;
+  list-style: none;
+}
+
+.whyRow {
   display: flex;
   flex-direction: column;
-  gap: var(--sf-space-3);
+  gap: var(--sf-space-1);
+  padding: var(--sf-space-4) 0;
+  border-bottom: 1px solid var(--sf-color-border);
 }
-.whyItem {
-  display: flex;
-  align-items: center;
-  gap: var(--sf-space-3);
+
+.whyRow:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
-.whyIcon {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-badge-bg);
-  color: var(--sf-color-gold);
-  font-size: 1.2rem;
+
+.whyRow:first-child {
+  padding-top: 0;
 }
+
 .whyTitle {
   font-size: var(--sf-text-sm);
   font-weight: var(--sf-font-medium);
   color: var(--sf-color-text);
 }
 
-/* ===== Success state ===== */
-.successCard {
-  max-width: 480px;
-  margin: var(--sf-space-16) auto;
-  text-align: center;
-  padding: var(--sf-space-12) var(--sf-space-8);
-  border-radius: var(--sf-radius-lg);
-  background: var(--sf-color-surface);
-  border: 1px solid var(--sf-color-border);
-}
-.successIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 64px;
-  height: 64px;
-  border-radius: var(--sf-radius-pill);
-  background: var(--sf-color-success-bg);
-  color: var(--sf-color-success);
-  font-size: 2rem;
-  margin: 0 auto var(--sf-space-5);
-}
-.successCard h2 {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-2xl);
-  font-weight: var(--sf-font-bold);
-  color: var(--sf-color-text);
-  margin: 0 0 var(--sf-space-2);
-}
-.successCard p {
-  color: var(--sf-color-text-secondary);
-  margin: 0 0 var(--sf-space-6);
-}
-.successBtn {
-  min-height: var(--sf-tap-target);
-  padding: var(--sf-space-3) var(--sf-space-8);
-  border: none;
-  border-radius: var(--sf-radius-md);
-  font-size: var(--sf-text-base);
-  font-weight: var(--sf-font-semibold);
-  font-family: inherit;
-  background: var(--sf-color-emerald);
-  color: var(--sf-color-emerald-contrast);
-  cursor: pointer;
-  transition: background var(--sf-transition), transform var(--sf-transition);
-}
-.successBtn:hover {
-  background: var(--sf-color-emerald-hover);
-  transform: translateY(-2px);
-}
-.successBtn:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
+.whyDesc {
+  font-size: var(--sf-text-xs);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-muted);
 }
 
-/* ===== Responsive ===== */
+.railFoot {
+  margin: 0;
+  font-size: var(--sf-text-xs);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-muted);
+}
+
+.railFoot a {
+  color: var(--sf-color-gold-deep);
+  text-decoration: none;
+}
+
+.railFoot a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
+}
+
+.railFoot a:focus-visible {
+  outline: none;
+  box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE  —  1440 → 375
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+  .body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--sf-space-16);
+  }
+
+  /* Below the two-column split the rail is simply the next thing on the page,
+     so nothing should pin it. */
+  .rail {
+    position: static;
+    max-width: 34rem;
+  }
+}
+
 @media (max-width: 768px) {
-  .cards {
+  .page {
+    padding-top: var(--sf-space-10);
+  }
+
+  .head {
+    margin-bottom: var(--sf-space-12);
+  }
+
+  .channels {
+    margin-bottom: var(--sf-space-16);
+  }
+
+  .marks {
+    gap: var(--sf-space-6) var(--sf-space-8);
+  }
+}
+
+@media (max-width: 640px) {
+  .formGrid {
     grid-template-columns: minmax(0, 1fr);
   }
-  .statsRow {
-    gap: var(--sf-space-5) var(--sf-space-8);
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 var(--sf-space-5);
   }
-  .stat {
-    min-width: 40%;
+
+  .channel,
+  .sent {
+    padding: var(--sf-space-5);
   }
-  .title {
-    font-size: var(--sf-text-2xl);
+
+  /* One mark per line reads better than two cramped columns. */
+  .marks {
+    flex-direction: column;
+  }
+
+  .sendBtn,
+  .ghostBtn {
+    width: 100%;
   }
 }

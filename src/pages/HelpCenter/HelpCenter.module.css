@@ -1,391 +1,597 @@
-/* =============================================================================
- * Help Center — Meghali's Silk re-skin (tokens only; no hardcoded hex)
- * =============================================================================
- * Themed FAQ + support entry points on the dark-first, gold-on-green brand
- * system. Every colour resolves from src/theme/storefront-tokens.css and is
- * theme-aware via body.dark. The FAQ search + accordion behaviour and ARIA
- * wiring are unchanged; this file only restyles them.
- * ========================================================================== */
+/* ═══════════════════════════════════════════════════════════════════════════
+   HELP CENTRE  —  the reference shelf beside the care desk
+   ═══════════════════════════════════════════════════════════════════════════
+   The old page was a widget board: a pill-shaped search capsule, six cards each
+   glowing in a different `--sf-cat-*` colour, a boxed accordion and a gradient
+   call-to-action panel. This one is a book. Four movements on the ivory ground.
 
-.container {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: var(--sf-space-6) var(--sf-space-4) var(--sf-space-16);
-  min-height: calc(100vh - 200px);
+     1. THE OPENING — eyebrow, serif question, and a search line that IS a
+        hairline. The match count sits under it in a live region.
+     2. THE CONTENTS — six identical hairline cards. Retiring the per-card
+        accent is the point: six colours for six equal topics was decoration
+        pretending to be information.
+     3. THE ANSWERS — the Prompt 16 accordion, drawn the same way here: tracked
+        ordinal in gold, the question at reading size, a thin plus that loses
+        its upright as the answer opens, and the answer hanging past the ordinal.
+     4. THE CLOSING BAND — one sunken band, the hours, the two live channels.
+
+   TOKENS ONLY
+   Every colour, space, radius and type value resolves through `--sf-*`, which
+   flips under `body.dark` — light and dark are one stylesheet, and there is no
+   hex in this file.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.page {
+  min-height: 100vh;
+  padding-top: var(--sf-space-12);
   background: var(--sf-color-bg);
   color: var(--sf-color-text);
   font-family: var(--sf-font-family);
-  transition: background var(--sf-transition), color var(--sf-transition);
 }
 
-/* ===== Breadcrumb ===== */
-.breadcrumb {
-  display: flex;
-  gap: var(--sf-space-2);
-  align-items: center;
-  margin-bottom: var(--sf-space-6);
-  font-size: var(--sf-text-sm);
-  color: var(--sf-color-text-muted);
-}
-.breadcrumb a {
-  color: var(--sf-color-gold-deep);
-  text-decoration: none;
-  transition: color var(--sf-transition-fast);
-}
-.breadcrumb a:hover {
-  color: var(--sf-color-gold);
-}
-.breadcrumb a:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
-  border-radius: var(--sf-radius-sm);
-}
-@media (max-width: 768px) {
-  .breadcrumb a {
-    display: inline-block;
-    padding: 10px 2px;
-    margin: -10px 0;
-  }
+/* The only thing ThemeContext is consumed for here: a native color-scheme hint,
+   so the search field's own chrome renders for the active theme. */
+.dark {
+  color-scheme: dark;
 }
 
-/* ===== Header + search ===== */
-.header {
-  text-align: center;
-  margin-bottom: var(--sf-space-10);
-}
-.title {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-3xl);
-  font-weight: var(--sf-font-bold);
-  line-height: var(--sf-leading-tight);
-  color: var(--sf-color-text);
-  margin: 0 0 var(--sf-space-2);
-}
-.lede {
-  color: var(--sf-color-text-secondary);
-  font-size: var(--sf-text-md);
-  margin: 0 0 var(--sf-space-5);
-}
-.searchBox {
-  position: relative;
-  max-width: 500px;
+.container {
+  max-width: var(--sf-container-max);
   margin: 0 auto;
+  padding: 0 var(--sf-space-6);
 }
-.searchIcon {
-  position: absolute;
-  left: var(--sf-space-4);
-  top: 50%;
-  transform: translateY(-50%);
-  font-size: 1.25rem;
-  color: var(--sf-color-text-muted);
-  pointer-events: none;
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   1. THE OPENING
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.head {
+  max-width: 46rem;
+  margin-bottom: var(--sf-space-20);
 }
-.searchBox input {
-  width: 100%;
-  padding: var(--sf-space-3) var(--sf-space-4) var(--sf-space-3) var(--sf-space-10);
-  min-height: var(--sf-tap-target);
-  border-radius: var(--sf-radius-md);
-  border: 1px solid var(--sf-color-border);
-  font-size: var(--sf-text-base);
-  font-family: var(--sf-font-family);
-  background: var(--sf-color-surface);
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-3);
+  margin: 0 0 var(--sf-space-4);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wider);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-gold-deep);
+}
+
+.eyebrow::before {
+  content: "";
+  width: var(--sf-space-8);
+  height: 1px;
+  background: var(--sf-color-gold);
+}
+
+.title {
+  margin: 0 0 var(--sf-space-5);
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-4xl);
+  font-weight: var(--sf-font-light);
+  line-height: var(--sf-leading-display);
+  letter-spacing: var(--sf-tracking-tight);
   color: var(--sf-color-text);
-  transition: border-color var(--sf-transition-fast), box-shadow var(--sf-transition-fast);
 }
-.searchBox input::placeholder {
+
+.lede {
+  margin: 0;
+  max-width: 40rem;
+  font-size: var(--sf-text-md);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-secondary);
+}
+
+/* ── The search line ─────────────────────────────────────────────────────── */
+
+.search {
+  margin-top: var(--sf-space-10);
+  max-width: 34rem;
+}
+
+.search label {
+  display: block;
+  margin-bottom: var(--sf-space-2);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
   color: var(--sf-color-text-muted);
 }
-.searchBox input:focus {
-  outline: none;
-  border-color: var(--sf-color-gold);
+
+.searchRow {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-3);
+  border-bottom: 1px solid var(--sf-color-border-strong);
+  transition: border-color var(--sf-transition-fast),
+    box-shadow var(--sf-transition-fast);
 }
-.searchBox input:focus-visible {
+
+/* The whole rule lights, not the input alone — the field IS the hairline. */
+.searchRow:focus-within {
+  border-bottom-color: var(--sf-color-focus-ring);
+  box-shadow: 0 1px 0 0 var(--sf-color-focus-ring);
+}
+
+.searchIcon {
+  flex: none;
+  display: grid;
+  place-items: center;
+  color: var(--sf-color-text-muted);
+}
+
+.searchRow input {
+  flex: 1;
+  min-width: 0;
+  height: 3rem;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-md);
+  color: var(--sf-color-text);
+  caret-color: var(--sf-color-gold);
+}
+
+.searchRow input::placeholder {
+  color: var(--sf-color-text-muted);
+  opacity: 1;
+}
+
+/* WebKit draws its own clear affordance on type="search"; this page provides a
+   labelled one, so suppress the duplicate. */
+.searchRow input::-webkit-search-cancel-button {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.searchClear {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: none;
+  border-radius: var(--sf-radius-pill);
+  background: transparent;
+  color: var(--sf-color-text-muted);
+  cursor: pointer;
+  transition: color var(--sf-transition-fast),
+    background-color var(--sf-transition-fast);
+}
+
+.searchClear:hover {
+  color: var(--sf-color-text);
+  background: var(--sf-color-primary-soft);
+}
+
+.searchClear:focus-visible {
+  outline: none;
   box-shadow: var(--sf-shadow-focus);
 }
 
-/* ===== Section titles ===== */
+/* Reserves its line whether or not it has anything to say, so the contents
+   below never jump as the visitor types. */
+.searchStatus {
+  min-height: 1.25rem;
+  margin: var(--sf-space-3) 0 0;
+  font-size: var(--sf-text-xs);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   2. THE CONTENTS
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.section {
+  margin-bottom: var(--sf-space-20);
+}
+
 .sectionTitle {
+  margin: 0 0 var(--sf-space-8);
+  padding-bottom: var(--sf-space-4);
+  border-bottom: 1px solid var(--sf-color-border);
   font-family: var(--sf-font-display);
   font-size: var(--sf-text-2xl);
-  font-weight: var(--sf-font-semibold);
+  font-weight: var(--sf-font-light);
+  line-height: var(--sf-leading-tight);
   color: var(--sf-color-text);
-  margin: 0 0 var(--sf-space-5);
 }
 
-/* ===== Help topics ===== */
 .topics {
-  margin-bottom: var(--sf-space-12);
-}
-.topicGrid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--sf-space-4);
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: var(--sf-space-5);
 }
-@media (max-width: 768px) {
-  .topicGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-@media (max-width: 480px) {
-  .topicGrid {
-    grid-template-columns: 1fr;
-  }
-}
-.topicCard {
-  --topic-accent: var(--sf-color-gold);
-  padding: var(--sf-space-5);
-  border-radius: var(--sf-radius-lg);
-  background: var(--sf-color-surface);
+
+.topic {
+  display: flex;
+  flex-direction: column;
+  padding: var(--sf-space-6);
   border: 1px solid var(--sf-color-border);
-  text-decoration: none;
+  border-radius: var(--sf-radius-md);
+  background: transparent;
   color: inherit;
-  display: block;
-  transition: transform var(--sf-transition), border-color var(--sf-transition),
-    box-shadow var(--sf-transition);
+  text-decoration: none;
+  transition: border-color var(--sf-transition), background-color var(--sf-transition);
 }
-.topicCard:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--sf-shadow-md);
+
+.topic:hover {
   border-color: var(--sf-color-border-strong);
+  background: var(--sf-color-surface);
 }
-.topicCard:focus-visible {
+
+.topic:focus-visible {
   outline: none;
   box-shadow: var(--sf-shadow-focus);
 }
+
 .topicIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--sf-radius-md);
-  margin-bottom: var(--sf-space-3);
-  font-size: 1.5rem;
-  /* Tinted tile in the topic's category accent — accent set inline per card. */
-  color: var(--topic-accent);
-  background: color-mix(in srgb, var(--topic-accent) 14%, transparent);
-}
-.topicCard h3 {
-  font-size: var(--sf-text-md);
-  font-weight: var(--sf-font-semibold);
-  color: var(--sf-color-text);
-  margin: 0 0 var(--sf-space-1);
-}
-.topicCard p {
-  font-size: var(--sf-text-sm);
+  display: block;
+  margin-bottom: var(--sf-space-5);
   color: var(--sf-color-text-muted);
-  margin: 0;
-  line-height: var(--sf-leading-normal);
+  transition: color var(--sf-transition);
 }
 
-/* ===== FAQ ===== */
-.faqSection {
-  margin-bottom: var(--sf-space-12);
+.topic:hover .topicIcon {
+  color: var(--sf-color-gold-deep);
 }
-.faqList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sf-space-2);
-}
-.faqItem {
-  border-radius: var(--sf-radius-md);
-  border: 1px solid var(--sf-color-border);
-  overflow: hidden;
-  background: var(--sf-color-surface);
-  transition: border-color var(--sf-transition-fast);
-}
-.faqItem.open {
-  border-color: var(--sf-color-border-strong);
-}
-.faqQuestion {
-  width: 100%;
-  padding: var(--sf-space-4) var(--sf-space-5);
-  min-height: var(--sf-tap-target);
-  background: var(--sf-color-surface);
-  border: none;
-  cursor: pointer;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--sf-space-4);
-  font-size: var(--sf-text-base);
-  font-weight: var(--sf-font-medium);
-  font-family: var(--sf-font-family);
-  text-align: left;
+
+.topicTitle {
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-xl);
+  font-weight: var(--sf-font-normal);
+  line-height: var(--sf-leading-tight);
   color: var(--sf-color-text);
-  transition: background var(--sf-transition-fast);
 }
+
+.topicDesc {
+  margin-top: var(--sf-space-3);
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-muted);
+}
+
+.topicArrow {
+  display: block;
+  margin-top: auto;
+  padding-top: var(--sf-space-6);
+  color: var(--sf-color-text-muted);
+  transition: transform var(--sf-transition), color var(--sf-transition);
+}
+
+.topic:hover .topicArrow {
+  transform: translateX(var(--sf-space-1));
+  color: var(--sf-color-gold-deep);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   3. THE ANSWERS  —  the Prompt 16 hairline accordion
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.faqList {
+  --help-faq-index: 2.4rem;
+
+  max-width: 940px;
+  border-top: 1px solid var(--sf-color-border);
+}
+
+.faqItem {
+  border-bottom: 1px solid var(--sf-color-border);
+}
+
+/* The question is a real heading, so the list is navigable by heading as well
+   as by Tab — the button keeps all the behaviour. */
+.faqHeading {
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.faqQuestion {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sf-space-4);
+  width: 100%;
+  min-height: var(--sf-tap-target);
+  padding: var(--sf-space-5) 0;
+  border: none;
+  background: none;
+  text-align: left;
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-md);
+  font-weight: var(--sf-font-normal);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text);
+  cursor: pointer;
+  transition: color var(--sf-transition);
+}
+
 .faqQuestion:hover {
-  background: var(--sf-color-surface-hover);
+  color: var(--sf-color-gold-deep);
 }
+
 .faqQuestion:focus-visible {
   outline: none;
   box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
 }
 
-/* Plus icon drawn with pseudo-elements so it can rotate into a cross. */
-.faqToggle {
-  position: relative;
-  flex: 0 0 auto;
-  width: 18px;
-  height: 18px;
+.faqIndex {
+  flex: none;
+  width: var(--help-faq-index);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  letter-spacing: var(--sf-tracking-wide);
+  color: var(--sf-color-gold-deep);
+  font-variant-numeric: tabular-nums;
 }
-.faqToggle::before,
-.faqToggle::after {
+
+.faqText {
+  flex: 1;
+  min-width: 0;
+}
+
+/* A thin plus that loses its upright as the answer opens — no rotating
+   chevron, no glyph borrowed from the body font. */
+.faqIcon {
+  position: relative;
+  flex: none;
+  align-self: center;
+  width: 12px;
+  height: 12px;
+}
+
+.faqIcon::before,
+.faqIcon::after {
   content: "";
   position: absolute;
+  background: var(--sf-color-text-muted);
+  transition: transform var(--sf-transition), background-color var(--sf-transition);
+}
+
+.faqIcon::before {
   top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  margin-top: -0.5px;
+}
+
+.faqIcon::after {
   left: 50%;
-  width: 14px;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--sf-color-gold);
-  transform: translate(-50%, -50%);
-  transition: transform 0.28s ease;
-}
-.faqToggle::after {
-  transform: translate(-50%, -50%) rotate(90deg);
-}
-.faqItem.open .faqToggle::after {
-  transform: translate(-50%, -50%) rotate(180deg);
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  margin-left: -0.5px;
 }
 
-/* Smooth height animation via animatable grid-template-rows (0fr -> 1fr). */
+.faqItemOpen .faqIcon::before,
+.faqItemOpen .faqIcon::after {
+  background: var(--sf-color-gold-deep);
+}
+
+.faqItemOpen .faqIcon::after {
+  transform: scaleY(0);
+}
+
+/* The answer hangs under the question, indented past the ordinal. */
 .faqAnswer {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.28s ease;
-}
-.faqItem.open .faqAnswer {
-  grid-template-rows: 1fr;
-}
-.faqAnswerInner {
-  overflow: hidden;
-  min-height: 0;
-}
-.faqAnswerInner p {
-  padding: 0 var(--sf-space-5) var(--sf-space-4);
-  margin: 0;
+  margin-left: calc(var(--help-faq-index) + var(--sf-space-4));
+  padding: 0 0 var(--sf-space-6);
+  max-width: 68ch;
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-relaxed);
   color: var(--sf-color-text-secondary);
-  line-height: var(--sf-leading-normal);
-  font-size: var(--sf-text-base);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .faqAnswer,
-  .faqToggle::before,
-  .faqToggle::after {
-    transition: none;
-  }
-}
 .noResults {
-  text-align: center;
-  color: var(--sf-color-text-muted);
-  padding: var(--sf-space-6);
+  max-width: 46rem;
+  margin: 0;
+  padding: var(--sf-space-8) 0;
+  border-top: 1px solid var(--sf-color-border);
+  border-bottom: 1px solid var(--sf-color-border);
+  font-size: var(--sf-text-md);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-secondary);
 }
+
 .noResults a {
   color: var(--sf-color-gold-deep);
-  font-weight: var(--sf-font-medium);
-}
-.noResults a:hover {
-  color: var(--sf-color-gold);
+  text-decoration: none;
 }
 
-/* ===== Support banner ===== */
-.contactBanner {
-  text-align: center;
-  padding: var(--sf-space-10);
-  border-radius: var(--sf-radius-xl);
-  background: var(--sf-color-brand-green);
-  border: 1px solid var(--sf-color-border-strong);
-  color: var(--sf-color-primary-contrast);
-}
-.contactBanner h3 {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-2xl);
-  font-weight: var(--sf-font-bold);
-  color: var(--sf-color-gold);
-  margin: 0 0 var(--sf-space-2);
-}
-.contactBanner p {
-  color: var(--sf-color-gold-light);
-  opacity: 0.92;
-  margin: 0 0 var(--sf-space-3);
-}
-.contactMeta {
-  display: flex;
-  gap: var(--sf-space-3);
-  justify-content: center;
-  align-items: center;
-  flex-wrap: wrap;
-  margin-bottom: var(--sf-space-5);
-  font-size: var(--sf-text-base);
-}
-.contactMeta a {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sf-space-1);
-  color: var(--sf-color-gold-light);
-  text-decoration: none;
-  font-weight: var(--sf-font-semibold);
-  transition: color var(--sf-transition-fast);
-}
-.contactMeta a:hover {
-  color: var(--sf-color-gold);
+.noResults a:hover {
   text-decoration: underline;
+  text-underline-offset: 0.25em;
 }
-.contactMeta a:focus-visible {
+
+.noResults a:focus-visible {
   outline: none;
   box-shadow: var(--sf-shadow-focus);
   border-radius: var(--sf-radius-sm);
 }
-@media (max-width: 768px) {
-  .contactMeta a {
-    padding: 10px 4px;
-    margin: -6px 0;
-  }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   4. THE CLOSING BAND
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.band {
+  padding: var(--sf-space-16) 0;
+  border-top: 1px solid var(--sf-color-border);
+  background: var(--sf-color-surface-2);
 }
-.contactMeta span {
-  color: var(--sf-color-gold-deep);
-  opacity: 0.7;
-}
-.contactActions {
+
+.bandInner {
   display: flex;
-  gap: var(--sf-space-3);
-  justify-content: center;
   flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--sf-space-10);
 }
+
+.bandTitle {
+  margin: 0 0 var(--sf-space-3);
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-2xl);
+  font-weight: var(--sf-font-light);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text);
+}
+
+.bandLede {
+  max-width: 34rem;
+  margin: 0 0 var(--sf-space-5);
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-secondary);
+}
+
+.bandMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sf-space-3) var(--sf-space-8);
+  margin: 0;
+}
+
+.bandMeta a {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sf-space-2);
+  min-height: var(--sf-tap-target);
+  font-size: var(--sf-text-sm);
+  color: var(--sf-color-text);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+  transition: color var(--sf-transition-fast);
+}
+
+.bandMeta a:hover {
+  color: var(--sf-color-gold-deep);
+}
+
+.bandMeta a:focus-visible {
+  outline: none;
+  box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
+}
+
+.bandActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sf-space-4);
+}
+
 .primaryBtn,
-.secondaryBtn {
+.ghostBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: var(--sf-tap-target);
-  padding: var(--sf-space-3) var(--sf-space-8);
-  border-radius: var(--sf-radius-md);
-  font-weight: var(--sf-font-semibold);
+  min-height: 3rem;
+  padding: 0 var(--sf-space-10);
+  border: 1px solid transparent;
+  border-radius: var(--sf-radius-sm);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
   text-decoration: none;
-  transition: transform var(--sf-transition), box-shadow var(--sf-transition),
-    background var(--sf-transition);
+  cursor: pointer;
+  transition: background-color var(--sf-transition),
+    border-color var(--sf-transition), color var(--sf-transition);
 }
+
 .primaryBtn {
   background: var(--sf-color-emerald);
   color: var(--sf-color-emerald-contrast);
 }
+
 .primaryBtn:hover {
   background: var(--sf-color-emerald-hover);
-  transform: translateY(-2px);
-  box-shadow: var(--sf-shadow-md);
 }
-.secondaryBtn {
-  border: 1px solid var(--sf-color-gold);
-  color: var(--sf-color-gold);
+
+.ghostBtn {
+  background: transparent;
+  border-color: var(--sf-color-border-strong);
+  color: var(--sf-color-text);
 }
-.secondaryBtn:hover {
-  background: var(--sf-color-badge-bg);
+
+.ghostBtn:hover {
+  border-color: var(--sf-color-text);
+  background: var(--sf-color-surface);
 }
+
 .primaryBtn:focus-visible,
-.secondaryBtn:focus-visible {
+.ghostBtn:focus-visible {
   outline: none;
   box-shadow: var(--sf-shadow-focus);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE  —  1440 → 375
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+  .head {
+    margin-bottom: var(--sf-space-16);
+  }
+
+  .section {
+    margin-bottom: var(--sf-space-16);
+  }
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding-top: var(--sf-space-10);
+  }
+
+  .band {
+    padding: var(--sf-space-12) 0;
+  }
+
+  .bandInner {
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 var(--sf-space-5);
+  }
+
+  .topic {
+    padding: var(--sf-space-5);
+  }
+
+  /* The ordinal costs a third of the line at 375 — the questions read better
+     without it, and it was always decorative (aria-hidden). */
+  .faqIndex {
+    display: none;
+  }
+
+  .faqAnswer {
+    margin-left: 0;
+  }
+
+  .bandActions {
+    width: 100%;
+  }
+
+  .primaryBtn,
+  .ghostBtn {
+    flex: 1;
+    padding: 0 var(--sf-space-6);
+  }
 }

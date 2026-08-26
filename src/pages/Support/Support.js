@@ -1,15 +1,42 @@
 // =============================================================================
-// Contact Us page — Meghali's Silk storefront, route `/support`.
+// CONTACT  —  Meghali's Silk, route `/support`
 // =============================================================================
-// This is the storefront Contact Us page on route `/support` (the dark,
-// gold-on-green "Let's Start a Conversation" experience). It posts a real lead
-// via apiService.leads.createContact. The separate `/help` route is the Help
-// Center (FAQ / ticket-style help) and is NOT this page.
+// The care desk, written as a page. The old screen opened with a fabricated
+// scoreboard — "4.9 Rating · 10K+ Customers · 500+ Designs · 15+ Years" — none
+// of which the store can evidence. It is gone. What stands in its place are the
+// only three facts about the house that are attested elsewhere in this codebase
+// (the About page's founding year, its artisan count and its award year), set
+// as three quiet marks. Nothing on this page claims a rating, a customer count
+// or a response time.
+//
+// FOUR MOVEMENTS
+//   1. THE INVITATION — tracked eyebrow, a serif line, and the three marks.
+//   2. THE CHANNELS   — Call / Email / WhatsApp as hairline cards. Every value
+//      is a live tel: / mailto: / wa.me link resolved from constants, and a
+//      channel whose URL is blank simply does not render.
+//   3. THE LETTER     — the lead form in the Prompt 18/22 form language: tracked
+//      caption labels over fields that ARE the hairline, calm errors, and a
+//      state-driven success panel that swaps only the form.
+//   4. THE RAIL       — the showroom, the journey, and the four things the shop
+//      can stand behind.
+//
+// THE API CONTRACT IS UNCHANGED
+//   `apiService.leads.createContact(formData)` still receives the full lead
+//   shape — including the two fields the form never shows, `orderNumber` (blank
+//   from this surface) and `category: "general"` — so a message written here
+//   lands in Admin → Leads next to the seeded rows, with the same keys.
+//
+// HONESTY RULES OBSERVED HERE
+//   • No rating, no customer count, no "average response in X hours". The one
+//     availability statement on the page is SUPPORT_HOURS, which is also what
+//     the Footer and the Help Centre print.
+//   • The "Online" live-status badge is retired: nothing in this app knows
+//     whether anyone is at the desk.
+//   • Address, phone, email and the social handles all resolve from constants,
+//     which now carry the same values as db.json `settings.store` / `.social`.
 // =============================================================================
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Icon } from "@iconify/react";
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
 import apiService from "../../services/api";
@@ -24,57 +51,182 @@ import {
 import { isEmailValid, isValidPhone } from "../../utils/helpers";
 import styles from "./Support.module.css";
 
-// Static, brand-attested figures — NOT live counters or API-derived metrics.
-const STATS = [
-  { icon: "mdi:star", number: "4.9", label: "Rating" },
-  { icon: "mdi:account-group", number: "10K+", label: "Customers" },
-  { icon: "mdi:palette-swatch", number: "500+", label: "Designs" },
-  { icon: "mdi:calendar-clock", number: "15+", label: "Years" },
+// ---- Inline icon set ------------------------------------------------------
+// Hairline weight (1.3), stroke = currentColor, no fills — the same drawing
+// language as the Profile index and the order ledger. Iconify's mdi glyphs are
+// solid shapes and read as app furniture next to this page's type.
+const Glyph = ({ name, size = 20, strokeWidth = 1.3 }) => {
+  const paths = {
+    phone: (
+      <path d="M6.2 3.5h3l1.4 3.5-1.8 1.3a11.5 11.5 0 0 0 5.4 5.4l1.3-1.8 3.5 1.4v3a1.9 1.9 0 0 1-2.1 1.9A15.8 15.8 0 0 1 4.3 5.6 1.9 1.9 0 0 1 6.2 3.5Z" />
+    ),
+    mail: (
+      <>
+        <rect x="2.75" y="5" width="18.5" height="14" rx="1.5" />
+        <path d="m3.4 6.2 8.6 6.3 8.6-6.3" />
+      </>
+    ),
+    whatsapp: (
+      <>
+        <path d="M20.4 11.7a8.4 8.4 0 0 1-12.4 7.4L3.6 20.4l1.4-4.3A8.4 8.4 0 1 1 20.4 11.7Z" />
+        <path d="M9.3 8.8h.9l1 2.2-.8.9a6.2 6.2 0 0 0 2.7 2.7l.9-.8 2.2 1v.9c0 .7-.6 1.2-1.3 1.2a7.9 7.9 0 0 1-7.1-7.1c0-.6.5-1 1.1-1Z" />
+      </>
+    ),
+    pin: (
+      <>
+        <path d="M12 21.2s6.6-5.8 6.6-10.4a6.6 6.6 0 1 0-13.2 0C5.4 15.4 12 21.2 12 21.2Z" />
+        <circle cx="12" cy="10.6" r="2.5" />
+      </>
+    ),
+    clock: (
+      <>
+        <circle cx="12" cy="12" r="8.6" />
+        <path d="M12 7.2V12l3.2 1.9" />
+      </>
+    ),
+    arrow: (
+      <>
+        <path d="M7 17 17 7" />
+        <path d="M9 7h8v8" />
+      </>
+    ),
+    check: <path d="m5 12.6 4.6 4.6L19 6.8" />,
+    instagram: (
+      <>
+        <rect x="3.4" y="3.4" width="17.2" height="17.2" rx="5" />
+        <circle cx="12" cy="12" r="4" />
+        <circle cx="16.9" cy="7.1" r="0.9" />
+      </>
+    ),
+    facebook: (
+      <path d="M14.6 21.2v-8h2.7l.5-3.2h-3.2V7.9c0-.9.3-1.5 1.6-1.5h1.7V3.5a22 22 0 0 0-2.5-.1c-2.5 0-4.2 1.5-4.2 4.3V10H8.5v3.2h2.7v8Z" />
+    ),
+    twitter: (
+      <>
+        <path d="M4.2 4.2 19.8 19.8" />
+        <path d="M19.8 4.2 4.2 19.8" />
+      </>
+    ),
+    youtube: (
+      <>
+        <rect x="2.8" y="5.6" width="18.4" height="12.8" rx="3.6" />
+        <path d="m10.3 9.3 5.2 2.7-5.2 2.7Z" />
+      </>
+    ),
+  };
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={strokeWidth}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      focusable="false"
+    >
+      {paths[name] || null}
+    </svg>
+  );
+};
+
+// ---- The three marks ------------------------------------------------------
+// What replaces the invented scoreboard. Each is a fact the About page already
+// states in its own Journey / Impact blocks, so the two surfaces agree; none of
+// it is derived from the API, and none of it is a performance claim.
+const MARKS = [
+  { value: "2010", label: "Founded in Kolkata" },
+  { value: "50+", label: "Artisan partners" },
+  { value: "2023", label: "National Handloom Award" },
 ];
 
-// Contact cards — each value is a real tel:/mailto:/WhatsApp link.
+// A message has to say something — the same floor the old form enforced.
+const MESSAGE_MIN = 20;
+
+// Live tel: / maps links, derived once from the constants above.
 const PHONE_TEL = `tel:${SUPPORT_PHONE.replace(/[^\d+]/g, "")}`;
 const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
   SUPPORT_ADDRESS
 )}`;
 
-// Follow Our Journey — render only non-empty channels (no dead links).
-const SOCIALS = [
-  { key: "INSTAGRAM", icon: "mdi:instagram", label: "Instagram" },
-  { key: "FACEBOOK", icon: "mdi:facebook", label: "Facebook" },
-  { key: "TWITTER", icon: "mdi:twitter", label: "Twitter" },
-  { key: "YOUTUBE", icon: "mdi:youtube", label: "YouTube" },
-  { key: "WHATSAPP", icon: "mdi:whatsapp", label: "WhatsApp" },
-].filter((s) => SOCIAL_LINKS[s.key]);
+// The three ways in. WhatsApp is only offered when a URL exists — an empty
+// entry drops the card rather than printing a dead one.
+const CHANNELS = [
+  {
+    key: "call",
+    glyph: "phone",
+    label: "Call",
+    value: SUPPORT_PHONE,
+    note: "Speak to the desk during showroom hours",
+    href: PHONE_TEL,
+    external: false,
+  },
+  {
+    key: "email",
+    glyph: "mail",
+    label: "Email",
+    value: SUPPORT_EMAIL,
+    note: "For measurements, care and considered questions",
+    href: `mailto:${SUPPORT_EMAIL}`,
+    external: false,
+  },
+  {
+    key: "whatsapp",
+    glyph: "whatsapp",
+    label: "WhatsApp",
+    value: "Start a chat",
+    note: "Send a photograph of the piece you are asking about",
+    href: SOCIAL_LINKS.WHATSAPP,
+    external: true,
+  },
+].filter((channel) => !!channel.href);
 
-// Shared subtle reveal — respects reduced-motion via tokens.
-const reveal = {
-  initial: { opacity: 0, y: 20 },
-  whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, amount: 0.2 },
-  transition: { duration: 0.5 },
+// Follow our journey — the same filtered-by-URL rule the Footer uses.
+const SOCIALS = [
+  { key: "INSTAGRAM", glyph: "instagram", label: "Instagram" },
+  { key: "FACEBOOK", glyph: "facebook", label: "Facebook" },
+  { key: "TWITTER", glyph: "twitter", label: "Twitter" },
+  { key: "YOUTUBE", glyph: "youtube", label: "YouTube" },
+  { key: "WHATSAPP", glyph: "whatsapp", label: "WhatsApp" },
+].filter((social) => !!SOCIAL_LINKS[social.key]);
+
+const EMPTY_LEAD = {
+  name: "",
+  email: "",
+  phone: "",
+  // Never shown on this surface, always sent: the Admin → Leads table and the
+  // seeded rows both expect them.
+  orderNumber: "",
+  category: "general",
+  subject: "",
+  message: "",
 };
 
 const Support = () => {
   const { isDarkMode } = useTheme();
   const { user } = useAuth();
-  // Keep the full lead shape so the POST stays compatible with seeded `leads`
-  // rows (category/orderNumber are sent but hidden from the visible form set).
-  const [formData, setFormData] = useState({
-    name: "", email: "", phone: "", orderNumber: "",
-    category: "general", subject: "", message: "",
-  });
+
+  const [formData, setFormData] = useState(EMPTY_LEAD);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const sentRef = useRef(null);
 
-  // Pre-fill the email for logged-in users once the auth context resolves,
-  // without clobbering anything they may have already typed.
+  // Pre-fill the email for a signed-in visitor once auth resolves, without
+  // overwriting anything already typed.
   useEffect(() => {
     if (user?.email) {
       setFormData((prev) => (prev.email ? prev : { ...prev, email: user.email }));
     }
   }, [user]);
+
+  // The success panel replaces the form in place; move focus to it so a
+  // keyboard visitor is not dropped onto <body> when the button disappears.
+  useEffect(() => {
+    if (isSubmitted) sentRef.current?.focus();
+  }, [isSubmitted]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -82,328 +234,350 @@ const Support = () => {
     if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
+  // The same rules as before, said more kindly. Phone stays optional and is
+  // only checked once something has been typed into it.
   const validate = () => {
     const newErrors = {};
-    if (!formData.name.trim()) newErrors.name = "Name is required";
-    if (!formData.email.trim()) newErrors.email = "Email is required";
-    else if (!isEmailValid(formData.email)) newErrors.email = "Invalid email";
+    if (!formData.name.trim()) newErrors.name = "Please tell us your name";
+    if (!formData.email.trim())
+      newErrors.email = "Please add an email we can reply to";
+    else if (!isEmailValid(formData.email))
+      newErrors.email = "That email address doesn't look right";
     if (formData.phone.trim() && !isValidPhone(formData.phone))
-      newErrors.phone = "Enter a valid 10-digit mobile number";
-    if (!formData.subject.trim()) newErrors.subject = "Subject is required";
-    if (!formData.message.trim()) newErrors.message = "Message is required";
-    else if (formData.message.trim().length < 20)
-      newErrors.message = "At least 20 characters";
+      newErrors.phone = "Please enter a valid 10-digit mobile number";
+    if (!formData.subject.trim())
+      newErrors.subject = "A few words about the subject, please";
+    if (!formData.message.trim()) newErrors.message = "Please write your message";
+    else if (formData.message.trim().length < MESSAGE_MIN)
+      newErrors.message = `A little more, please — at least ${MESSAGE_MIN} characters`;
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+    return newErrors;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!validate()) return;
+    const found = validate();
+    const firstInvalid = Object.keys(found)[0];
+    if (firstInvalid) {
+      document.getElementById(firstInvalid)?.focus();
+      return;
+    }
     setIsSubmitting(true);
     try {
       await apiService.leads.createContact(formData);
       setIsSubmitted(true);
-      setFormData({
-        name: "", email: "", phone: "", orderNumber: "",
-        category: "general", subject: "", message: "",
-      });
+      setFormData({ ...EMPTY_LEAD, email: user?.email || "" });
     } catch {
-      setErrors({ submit: "Failed to send. Please try again." });
+      setErrors({
+        submit:
+          "The message didn't send. Please try again, or write to us directly.",
+      });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  if (isSubmitted) {
-    return (
-      <div className={`${styles.container} ${isDarkMode ? styles.dark : ""}`}>
-        <motion.div
-          className={styles.successCard}
-          initial={{ scale: 0.9, opacity: 0 }}
-          animate={{ scale: 1, opacity: 1 }}
-        >
-          <span className={styles.successIcon} aria-hidden="true">
-            <Icon icon="mdi:check-bold" />
-          </span>
-          <h2>Message Sent!</h2>
-          <p>Thank you for reaching out. We'll respond within 24 hours.</p>
-          <button
-            type="button"
-            className={styles.successBtn}
-            onClick={() => setIsSubmitted(false)}
-          >
-            Send Another
-          </button>
-        </motion.div>
-      </div>
-    );
-  }
+  // The counter is a hint, never a scold — it says how far along the note is
+  // and goes quiet once it clears the floor.
+  const messageLength = formData.message.trim().length;
+  const messageHint =
+    messageLength === 0
+      ? `A sentence or two is plenty — at least ${MESSAGE_MIN} characters.`
+      : messageLength < MESSAGE_MIN
+      ? `${messageLength} of ${MESSAGE_MIN} characters`
+      : "";
+
+  const describedBy = (field, extra) =>
+    [errors[field] ? `${field}-error` : null, extra].filter(Boolean).join(" ") ||
+    undefined;
 
   return (
-    <div className={`${styles.container} ${isDarkMode ? styles.dark : ""}`}>
-      <div className={styles.breadcrumb}>
-        <Link to="/">Home</Link> <span aria-hidden="true">/</span>{" "}
-        <span>Contact Us</span>
-      </div>
+    <div className={`${styles.page} ${isDarkMode ? styles.dark : ""}`}>
+      <div className={styles.container}>
+        {/* ── 1. THE INVITATION ─────────────────────────────────────────── */}
+        <header className={styles.head}>
+          <p className={styles.eyebrow}>Client care</p>
+          <h1 className={styles.title}>We're here to help</h1>
+          <p className={styles.lede}>
+            Whether you are choosing a first Mekhela Chador, asking after a piece
+            already on its way, or learning how to keep Muga for the next
+            generation — write to us. Someone at the desk in Kolkata will answer.
+          </p>
 
-      {/* 1. Intro block */}
-      <motion.section
-        className={styles.intro}
-        initial={{ opacity: 0, y: -16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <span className={styles.pill}>
-          <Icon icon="mdi:headset" aria-hidden="true" />
-          We're here to Help
-        </span>
-        <h1 className={styles.title}>
-          Let's Start a <span className={styles.titleAccent}>Conversation</span>
-        </h1>
-        <p className={styles.subtitle}>
-          Whether you're looking for the perfect silk saree or need expert
-          guidance, our team is ready to assist you.
-        </p>
+          <ul className={styles.marks}>
+            {MARKS.map((mark) => (
+              <li key={mark.label} className={styles.mark}>
+                <span className={styles.markValue}>{mark.value}</span>
+                <span className={styles.markLabel}>{mark.label}</span>
+              </li>
+            ))}
+          </ul>
+          <Link to="/about" className={styles.headLink}>
+            Our story
+            <Glyph name="arrow" size={14} />
+          </Link>
+        </header>
 
-        {/* 2. Stats row — static brand-attested figures */}
-        <ul className={styles.statsRow}>
-          {STATS.map((stat) => (
-            <li key={stat.label} className={styles.stat}>
-              <Icon className={styles.statIcon} icon={stat.icon} aria-hidden="true" />
-              <span className={styles.statNumber}>{stat.number}</span>
-              <span className={styles.statLabel}>{stat.label}</span>
-            </li>
+        {/* ── 2. THE CHANNELS ───────────────────────────────────────────── */}
+        <section className={styles.channels} aria-label="Ways to reach us">
+          {CHANNELS.map((channel) => (
+            <a
+              key={channel.key}
+              className={styles.channel}
+              href={channel.href}
+              {...(channel.external
+                ? { target: "_blank", rel: "noopener noreferrer" }
+                : {})}
+            >
+              <span className={styles.channelIcon}>
+                <Glyph name={channel.glyph} />
+              </span>
+              <span className={styles.channelLabel}>{channel.label}</span>
+              <span className={styles.channelValue}>{channel.value}</span>
+              <span className={styles.channelNote}>{channel.note}</span>
+            </a>
           ))}
-        </ul>
-      </motion.section>
+        </section>
 
-      {/* 3. Contact cards */}
-      <motion.section className={styles.cards} {...reveal}>
-        <a className={styles.card} href={PHONE_TEL}>
-          <span className={`${styles.cardIcon} ${styles.iconEmerald}`} aria-hidden="true">
-            <Icon icon="mdi:phone" />
-          </span>
-          <h2 className={styles.cardTitle}>Call Us</h2>
-          <span className={styles.cardValue}>{SUPPORT_PHONE}</span>
-          <span className={styles.cardCaption}>
-            Speak directly with our silk experts
-          </span>
-        </a>
-
-        <a className={styles.card} href={`mailto:${SUPPORT_EMAIL}`}>
-          <span className={`${styles.cardIcon} ${styles.iconPink}`} aria-hidden="true">
-            <Icon icon="mdi:email-outline" />
-          </span>
-          <h2 className={styles.cardTitle}>Email Us</h2>
-          <span className={styles.cardValue}>{SUPPORT_EMAIL}</span>
-          <span className={styles.cardCaption}>
-            Detailed answers to your queries
-          </span>
-        </a>
-
-        {SOCIAL_LINKS.WHATSAPP ? (
-          <a
-            className={styles.card}
-            href={SOCIAL_LINKS.WHATSAPP}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <span className={`${styles.cardIcon} ${styles.iconEmerald}`} aria-hidden="true">
-              <Icon icon="mdi:whatsapp" />
-            </span>
-            <h2 className={styles.cardTitle}>WhatsApp</h2>
-            <span className={styles.cardValue}>Chat with us</span>
-            <span className={styles.cardCaption}>
-              Quick chat support available
-            </span>
-          </a>
-        ) : (
-          <div className={styles.card}>
-            <span className={`${styles.cardIcon} ${styles.iconEmerald}`} aria-hidden="true">
-              <Icon icon="mdi:whatsapp" />
-            </span>
-            <h2 className={styles.cardTitle}>WhatsApp</h2>
-            <span className={styles.cardCaption}>
-              Quick chat support available
-            </span>
-          </div>
-        )}
-      </motion.section>
-
-      {/* 4. Two-column body */}
-      <div className={styles.body}>
-        {/* Left — Send us a Message form card */}
-        <motion.form className={styles.formCard} onSubmit={handleSubmit} {...reveal}>
-          <div className={styles.formHead}>
-            <div>
-              <h2 className={styles.formTitle}>Send us a Message</h2>
-              <p className={styles.formSubtitle}>
-                We'll get back to you within 24 hours.
+        <div className={styles.body}>
+          {/* ── 3. THE LETTER ───────────────────────────────────────────── */}
+          <section className={styles.letter} aria-labelledby="support-form-title">
+            <div className={styles.letterHead}>
+              <h2 className={styles.sectionTitle} id="support-form-title">
+                Write to us
+              </h2>
+              <p className={styles.sectionLede}>
+                We read every message. Replies come from the desk during
+                showroom hours — {SUPPORT_HOURS}.
               </p>
             </div>
-            <span className={styles.onlineBadge}>
-              <span className={styles.onlineDot} aria-hidden="true" />
-              Online
-            </span>
-          </div>
 
-          <div className={styles.formRow}>
-            <div className={styles.formGroup}>
-              <label htmlFor="name">Full Name</label>
-              <input
-                id="name" type="text" name="name" value={formData.name}
-                onChange={handleChange} placeholder="Your name"
-                className={errors.name ? styles.inputError : ""}
-                aria-invalid={!!errors.name}
-                aria-describedby={errors.name ? "name-error" : undefined}
-              />
-              {errors.name && (
-                <span id="name-error" className={styles.error}>{errors.name}</span>
-              )}
-            </div>
-            <div className={styles.formGroup}>
-              <label htmlFor="email">Email Address</label>
-              <input
-                id="email" type="email" name="email" value={formData.email}
-                onChange={handleChange} placeholder="your@email.com"
-                className={errors.email ? styles.inputError : ""}
-                aria-invalid={!!errors.email}
-                aria-describedby={errors.email ? "email-error" : undefined}
-              />
-              {errors.email && (
-                <span id="email-error" className={styles.error}>{errors.email}</span>
-              )}
-            </div>
-          </div>
-
-          <div className={styles.formRow}>
-            <div className={styles.formGroup}>
-              <label htmlFor="phone">Phone Number</label>
-              <input
-                id="phone" type="tel" name="phone" value={formData.phone}
-                onChange={handleChange} placeholder="+91 98765 43210"
-                className={errors.phone ? styles.inputError : ""}
-                aria-invalid={!!errors.phone}
-                aria-describedby={errors.phone ? "phone-error" : undefined}
-              />
-              {errors.phone && (
-                <span id="phone-error" className={styles.error}>{errors.phone}</span>
-              )}
-            </div>
-            <div className={styles.formGroup}>
-              <label htmlFor="subject">Subject</label>
-              <input
-                id="subject" type="text" name="subject" value={formData.subject}
-                onChange={handleChange} placeholder="How can we help?"
-                className={errors.subject ? styles.inputError : ""}
-                aria-invalid={!!errors.subject}
-                aria-describedby={errors.subject ? "subject-error" : undefined}
-              />
-              {errors.subject && (
-                <span id="subject-error" className={styles.error}>{errors.subject}</span>
-              )}
-            </div>
-          </div>
-
-          <div className={styles.formGroup}>
-            <label htmlFor="message">Your Message</label>
-            <textarea
-              id="message" name="message" value={formData.message}
-              onChange={handleChange} rows={5}
-              placeholder="Tell us about your requirements..."
-              className={errors.message ? styles.inputError : ""}
-              aria-invalid={!!errors.message}
-              aria-describedby={errors.message ? "message-error" : undefined}
-            />
-            {errors.message && (
-              <span id="message-error" className={styles.error}>{errors.message}</span>
-            )}
-          </div>
-
-          {errors.submit && (
-            <div className={styles.submitError} role="alert">{errors.submit}</div>
-          )}
-
-          <button type="submit" className={styles.sendBtn} disabled={isSubmitting}>
-            {isSubmitting ? (
-              "Sending…"
+            {isSubmitted ? (
+              <div className={styles.sent} role="status">
+                <span className={styles.sentMark} aria-hidden="true">
+                  <Glyph name="check" size={22} strokeWidth={1.2} />
+                </span>
+                <h3 className={styles.sentTitle} ref={sentRef} tabIndex={-1}>
+                  Message sent
+                </h3>
+                <p className={styles.sentBody}>
+                  Your note is with the care desk. We answer during showroom
+                  hours — {SUPPORT_HOURS}.
+                </p>
+                <button
+                  type="button"
+                  className={styles.ghostBtn}
+                  onClick={() => setIsSubmitted(false)}
+                >
+                  Send another
+                </button>
+              </div>
             ) : (
-              <>
-                <Icon icon="mdi:send" aria-hidden="true" />
-                Send Message
-              </>
-            )}
-          </button>
-          <p className={styles.formNote}>
-            Your information is secure and will never be shared.
-          </p>
-        </motion.form>
+              <form className={styles.form} onSubmit={handleSubmit} noValidate>
+                <div className={styles.formGrid}>
+                  <div className={styles.field}>
+                    <label htmlFor="name">Your name</label>
+                    <input
+                      id="name"
+                      name="name"
+                      type="text"
+                      autoComplete="name"
+                      required
+                      value={formData.name}
+                      onChange={handleChange}
+                      aria-invalid={!!errors.name}
+                      aria-describedby={describedBy("name")}
+                    />
+                    {errors.name && (
+                      <span id="name-error" className={styles.fieldError}>
+                        {errors.name}
+                      </span>
+                    )}
+                  </div>
 
-        {/* Right — rail */}
-        <div className={styles.rail}>
-          {/* Visit Our Showroom */}
-          <motion.section className={styles.showroom} {...reveal}>
-            <div className={styles.showroomHead}>
-              <span className={styles.showroomEmblem} aria-hidden="true">
-                <Icon icon="mdi:map-marker" />
-              </span>
-            </div>
-            <div className={styles.showroomBody}>
-              <h2 className={styles.railTitle}>Visit Our Showroom</h2>
-              <p className={styles.showroomAddress}>{SUPPORT_ADDRESS}</p>
-              <p className={styles.showroomHours}>
-                <Icon icon="mdi:clock-outline" aria-hidden="true" />
-                {SUPPORT_HOURS}
+                  <div className={styles.field}>
+                    <label htmlFor="email">Email</label>
+                    <input
+                      id="email"
+                      name="email"
+                      type="email"
+                      autoComplete="email"
+                      required
+                      value={formData.email}
+                      onChange={handleChange}
+                      aria-invalid={!!errors.email}
+                      aria-describedby={describedBy("email")}
+                    />
+                    {errors.email && (
+                      <span id="email-error" className={styles.fieldError}>
+                        {errors.email}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className={styles.field}>
+                    <label htmlFor="phone">
+                      Phone <span className={styles.optional}>Optional</span>
+                    </label>
+                    <input
+                      id="phone"
+                      name="phone"
+                      type="tel"
+                      autoComplete="tel"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      aria-invalid={!!errors.phone}
+                      aria-describedby={describedBy("phone")}
+                    />
+                    {errors.phone && (
+                      <span id="phone-error" className={styles.fieldError}>
+                        {errors.phone}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className={styles.field}>
+                    <label htmlFor="subject">Subject</label>
+                    <input
+                      id="subject"
+                      name="subject"
+                      type="text"
+                      autoComplete="off"
+                      required
+                      value={formData.subject}
+                      onChange={handleChange}
+                      aria-invalid={!!errors.subject}
+                      aria-describedby={describedBy("subject")}
+                    />
+                    {errors.subject && (
+                      <span id="subject-error" className={styles.fieldError}>
+                        {errors.subject}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className={`${styles.field} ${styles.fieldWide}`}>
+                    <label htmlFor="message">Your message</label>
+                    <textarea
+                      id="message"
+                      name="message"
+                      rows={6}
+                      required
+                      value={formData.message}
+                      onChange={handleChange}
+                      aria-invalid={!!errors.message}
+                      aria-describedby={describedBy(
+                        "message",
+                        messageHint ? "message-hint" : null
+                      )}
+                    />
+                    {errors.message && (
+                      <span id="message-error" className={styles.fieldError}>
+                        {errors.message}
+                      </span>
+                    )}
+                    {messageHint && (
+                      <span id="message-hint" className={styles.hint}>
+                        {messageHint}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {errors.submit && (
+                  <p className={styles.formError} role="alert">
+                    {errors.submit}
+                  </p>
+                )}
+
+                <div className={styles.formFoot}>
+                  <button
+                    type="submit"
+                    className={styles.sendBtn}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Sending…" : "Send message"}
+                  </button>
+                  <p className={styles.formNote}>
+                    Your details are used to answer this message and nothing
+                    else. <Link to="/privacy">Privacy policy</Link>.
+                  </p>
+                </div>
+              </form>
+            )}
+          </section>
+
+          {/* ── 4. THE RAIL ─────────────────────────────────────────────── */}
+          <aside className={styles.rail}>
+            <section className={styles.railCard} aria-labelledby="support-showroom">
+              <h2 className={styles.railTitle} id="support-showroom">
+                Visit the showroom
+              </h2>
+              <p className={styles.railLine}>
+                <span className={styles.railIcon}>
+                  <Glyph name="pin" size={16} />
+                </span>
+                <span>{SUPPORT_ADDRESS}</span>
+              </p>
+              <p className={styles.railLine}>
+                <span className={styles.railIcon}>
+                  <Glyph name="clock" size={16} />
+                </span>
+                <span>{SUPPORT_HOURS}</span>
               </p>
               <a
-                className={styles.directionsBtn}
+                className={styles.railLink}
                 href={MAPS_URL}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <Icon icon="mdi:directions" aria-hidden="true" />
-                Get Directions
+                Get directions
+                <Glyph name="arrow" size={14} />
               </a>
-            </div>
-          </motion.section>
+            </section>
 
-          {/* Follow Our Journey */}
-          {SOCIALS.length > 0 && (
-            <motion.section className={styles.railCard} {...reveal}>
-              <h2 className={styles.railTitle}>Follow Our Journey</h2>
-              <ul className={styles.socialRow}>
-                {SOCIALS.map((s) => (
-                  <li key={s.key}>
-                    <a
-                      className={styles.socialLink}
-                      href={SOCIAL_LINKS[s.key]}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={s.label}
-                    >
-                      <Icon icon={s.icon} aria-hidden="true" />
-                    </a>
+            {SOCIALS.length > 0 && (
+              <section className={styles.railCard} aria-labelledby="support-social">
+                <h2 className={styles.railTitle} id="support-social">
+                  Follow our journey
+                </h2>
+                <ul className={styles.socials}>
+                  {SOCIALS.map((social) => (
+                    <li key={social.key}>
+                      <a
+                        className={styles.social}
+                        href={SOCIAL_LINKS[social.key]}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label={social.label}
+                      >
+                        <Glyph name={social.glyph} size={18} />
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            <section className={styles.railCard} aria-labelledby="support-why">
+              <h2 className={styles.railTitle} id="support-why">
+                Why choose us
+              </h2>
+              <ul className={styles.why}>
+                {WHY_CHOOSE_US.map((item) => (
+                  <li key={item.id} className={styles.whyRow}>
+                    <span className={styles.whyTitle}>{item.title}</span>
+                    <span className={styles.whyDesc}>{item.description}</span>
                   </li>
                 ))}
               </ul>
-            </motion.section>
-          )}
+            </section>
 
-          {/* Why Choose Us */}
-          <motion.section className={styles.railCard} {...reveal}>
-            <h2 className={styles.railTitle}>Why Choose Us</h2>
-            <ul className={styles.whyList}>
-              {WHY_CHOOSE_US.map((item) => (
-                <li key={item.id} className={styles.whyItem}>
-                  <span className={styles.whyIcon} aria-hidden="true">
-                    <Icon icon={item.icon} />
-                  </span>
-                  <span className={styles.whyTitle}>{item.title}</span>
-                </li>
-              ))}
-            </ul>
-          </motion.section>
+            <p className={styles.railFoot}>
+              Looking for an answer straight away?{" "}
+              <Link to="/help">Read the Help Centre</Link>.
+            </p>
+          </aside>
         </div>
       </div>
     </div>

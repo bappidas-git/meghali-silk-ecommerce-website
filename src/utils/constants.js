@@ -109,19 +109,19 @@ export const FREE_SHIPPING_THRESHOLD = 999;
 // icon only for entries with a non-empty URL, so blanking one here hides it
 // instead of leaving a dead link.
 export const SOCIAL_LINKS = {
-  FACEBOOK: "https://facebook.com/meghalissilk",
-  TWITTER: "https://twitter.com/meghalissilk",
-  INSTAGRAM: "https://instagram.com/meghalissilk",
-  YOUTUBE: "https://youtube.com/@meghalissilk",
-  WHATSAPP: "https://wa.me/919830000000",
+  FACEBOOK: "https://facebook.com/meghalisilk",
+  TWITTER: "https://twitter.com/meghalisilk",
+  INSTAGRAM: "https://instagram.com/meghalisilk",
+  YOUTUBE: "https://youtube.com/@meghalisilk",
+  WHATSAPP: "https://wa.me/913340001100",
 };
 
 // Store contact (Meghali's Silk — Kolkata). Single source so the Header top bar,
 // Footer, Help Center and Support/Contact page all stay in sync.
-export const SUPPORT_EMAIL = "care@meghalissilk.com";
-export const SUPPORT_PHONE = "+91 98300 00000";
+export const SUPPORT_EMAIL = "care@meghalisilk.com";
+export const SUPPORT_PHONE = "+91 33 4000 1100";
 export const SUPPORT_ADDRESS =
-  "Galleria Producer Company Limited, 42 Rashbehari Avenue, Kolkata, West Bengal 700001";
+  "Galleria Producer Company Limited, Park Street, Kolkata, West Bengal 700016";
 export const SUPPORT_HOURS = "Mon – Sat: 10:00 AM – 7:00 PM IST";
 
 // Date the legal/policy pages were last reviewed. Single source so the Privacy,
@@ -185,31 +185,37 @@ export const FAQ_ITEMS = [
   },
 ];
 
-// Why choose us
+// Why choose us — the four things the storefront can actually stand behind.
+// Every line is traceable: the loom provenance to the catalogue copy and
+// settings.store.tagline, the undyed-Muga claim to the FAQ above, the ₹999
+// threshold to the Standard shipping method, the seven-day window to the
+// Refund Policy page. Read on the Contact page as quiet hairline rows; the
+// icon field is retained for surfaces that still want a glyph.
 export const WHY_CHOOSE_US = [
   {
     id: 1,
-    title: "Premium Quality Silk",
-    description: "Handwoven pure silk, inspected by hand for purity and finish",
-    icon: "mdi:diamond-stone",
+    title: "Handwoven in Sualkuchi",
+    description:
+      "Bought directly from weaving families on the north bank of the Brahmaputra",
+    icon: "mdi:hand-back-right",
   },
   {
     id: 2,
-    title: "100% Authentic",
-    description: "Traceable, genuine Bengal handloom silk — guaranteed",
+    title: "Undyed Muga, handspun Eri",
+    description: "The honey gold is the fibre's own colour — never a dye, never a blend",
     icon: "mdi:check-decagram",
   },
   {
     id: 3,
-    title: "Free Shipping ₹999+",
-    description: "Complimentary delivery on every order above ₹999",
+    title: "Free shipping above ₹999",
+    description: "Complimentary insured delivery on every order over the threshold",
     icon: "mdi:truck-fast",
   },
   {
     id: 4,
-    title: "Expert Support",
-    description: "Our silk experts are here to guide every purchase",
-    icon: "mdi:headset",
+    title: "Seven-day returns",
+    description: "Unworn, unwashed and with its tags, within seven days of delivery",
+    icon: "mdi:backup-restore",
   },
 ];
 
