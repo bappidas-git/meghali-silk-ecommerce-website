@@ -1,11 +1,61 @@
+// =============================================================================
+// ORDER CONFIRMATION  —  the thank-you moment
+// =============================================================================
+// The quiet end of the flow. A hairline gold seal, a serif thank-you addressed
+// by name, one warm line, then the order said back plainly: number, date,
+// arrival, lines, money, address, payment.
+//
+// WHAT IS DERIVED, NEVER DECORATED
+//   • The money ledger is the placed order's own numbers, in the order the
+//     order records them — Subtotal, Discount, Shipping, Tax, Total, and then
+//     Store Credit + Amount Paid only when credit was actually spent.
+//   • The payment chip's LABEL comes from `order.paymentStatus`, never from a
+//     hardcoded "successful"; its TONE follows that label (a refund is not a
+//     failure, so it reads neutral rather than red).
+//   • The lede follows the same real state, so a failed or refunded order is
+//     never congratulated for a payment that did not happen.
+//   • Arrival is `createdAt + 5 days` and is LABELLED an estimate, unless the
+//     order has actually been delivered — then it is the real `deliveredAt`.
+//   • "Download Invoice" is still only an alert(). It is drawn as a muted
+//     "coming soon" row so it never pretends otherwise.
+//
+// MOTION
+//   One-shot confetti — a brief gold shimmer, guarded by `confettiFiredRef` and
+//   skipped entirely under `prefers-reduced-motion`. The seal's own flourish is
+//   CSS and purely additive: its resting state is its finished state.
+//
+// ThemeContext is consumed for exactly one thing: the `color-scheme` hint that
+// makes native scrollbars and controls render for the active theme.
+// =============================================================================
+
 import React, { useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 import { useTheme } from "../../context/ThemeContext";
 import apiService from "../../services/api";
 import { formatCurrency, formatDate, normalizeOrderAddress } from "../../utils/helpers";
 import styles from "./OrderConfirmation.module.css";
+
+// The one documented hex exception on this page: canvas-confetti paints to a
+// <canvas>, so it cannot read CSS custom properties. These are the storefront's
+// own golds, copied from src/theme/storefront-tokens.css — keep in sync:
+//   #F0D06B  --sf-color-gold-light   (champagne highlight, logo p95)
+//   #DCAA33  the mean gold, middle stop of --sf-gradient-gold
+//   #C8912A  --sf-color-gold         (brand gold)
+// Gold only, in both themes: a shimmer that reads on ivory and on charcoal.
+const CONFETTI_COLORS = ["#F0D06B", "#DCAA33", "#C8912A"];
+
+// The customer's own name, taken off the order so it works for guests and for
+// a deep-linked order alike. Returns "" when the order carries no name.
+const firstNameOf = (order) => {
+  const raw =
+    order?.shippingAddress?.firstName ||
+    order?.billingAddress?.firstName ||
+    normalizeOrderAddress(order?.shippingAddress)?.name ||
+    normalizeOrderAddress(order?.billingAddress)?.name ||
+    "";
+  return String(raw).trim().split(/\s+/)[0] || "";
+};
 
 const OrderConfirmation = () => {
   const { orderNumber } = useParams();
@@ -16,7 +66,6 @@ const OrderConfirmation = () => {
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState(false);
   const [copied, setCopied] = useState(false);
-  const [showCheck, setShowCheck] = useState(false);
   // Guards the celebratory confetti to a single one-shot burst per mount.
   const confettiFiredRef = useRef(false);
 
@@ -25,16 +74,10 @@ const OrderConfirmation = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [orderNumber]);
 
-  useEffect(() => {
-    if (order) {
-      const timer = setTimeout(() => setShowCheck(true), 300);
-      return () => clearTimeout(timer);
-    }
-  }, [order]);
-
-  // One-shot gold/emerald/green confetti on first successful load. Fired from an
-  // effect so it never blocks render, and skipped entirely when the user prefers
-  // reduced motion.
+  // One-shot gold shimmer on first successful load. Fired from an effect so it
+  // never blocks render, and skipped entirely when the user prefers reduced
+  // motion. Low count, low velocity, small scalar — a seal being stamped, not
+  // a party popper.
   useEffect(() => {
     if (!order || confettiFiredRef.current) return;
     confettiFiredRef.current = true;
@@ -43,11 +86,15 @@ const OrderConfirmation = () => {
     )?.matches;
     if (prefersReducedMotion) return;
     confetti({
-      particleCount: 90,
-      spread: 75,
-      startVelocity: 38,
-      origin: { y: 0.3 },
-      colors: ["#E6C27A", "#12B886", "#0B3B2E"],
+      particleCount: 34,
+      spread: 58,
+      startVelocity: 26,
+      gravity: 0.85,
+      decay: 0.92,
+      scalar: 0.8,
+      ticks: 140,
+      origin: { y: 0.32 },
+      colors: CONFETTI_COLORS,
       disableForReducedMotion: true,
     });
   }, [order]);
@@ -71,9 +118,17 @@ const OrderConfirmation = () => {
 
   const handleCopyOrderNumber = () => {
     const text = order?.orderNumber || orderNumber;
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    // Only claim "Copied" once the write has actually resolved. An unfocused
+    // tab or an insecure context rejects, and announcing a copy that never
+    // happened would be a lie the customer only finds out about on paste.
+    const write = navigator.clipboard?.writeText(text);
+    if (!write) return;
+    write
+      .then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      })
+      .catch((err) => console.error("Clipboard write failed:", err));
   };
 
   const formatDeliveryDate = (date) =>
@@ -101,9 +156,12 @@ const OrderConfirmation = () => {
     return (
       <div className={`${styles.page} ${isDarkMode ? styles.dark : ""}`}>
         <div className={styles.container}>
-          <div className={styles.loadingState}>
-            <div className={styles.spinner} />
-            <p>Loading order details...</p>
+          <div className={styles.state} role="status" aria-live="polite">
+            <div className={styles.stateMark}>
+              <div className={styles.spinner} />
+            </div>
+            <p className={styles.stateLabel}>One moment</p>
+            <p className={styles.stateBody}>Bringing up your order.</p>
           </div>
         </div>
       </div>
@@ -116,24 +174,26 @@ const OrderConfirmation = () => {
     return (
       <div className={`${styles.page} ${isDarkMode ? styles.dark : ""}`}>
         <div className={styles.container}>
-          <div className={styles.notFound}>
-            <div className={styles.notFoundIcon}>
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="12" />
-                <line x1="12" y1="16" x2="12.01" y2="16" />
+          <div className={styles.state}>
+            <div className={styles.stateMark}>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="11" />
+                <line x1="12" y1="7" x2="12" y2="13" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
               </svg>
             </div>
-            <h2>Couldn't Load Your Order</h2>
-            <p>
-              Something went wrong while fetching order {orderNumber}. Please
-              check your connection and try again.
+            <p className={styles.stateLabel}>Something went wrong</p>
+            <h1 className={styles.stateTitle}>We couldn't load your order</h1>
+            <p className={styles.stateBody}>
+              Order <span className={styles.stateRef}>{orderNumber}</span> didn't
+              come back to us. Your order itself is safe — check your connection
+              and try again.
             </p>
-            <div className={styles.notFoundActions}>
-              <button className={styles.btnPrimary} onClick={fetchOrder}>
+            <div className={styles.stateActions}>
+              <button type="button" className={styles.btnPrimary} onClick={fetchOrder}>
                 Try Again
               </button>
-              <button className={styles.btnSecondary} onClick={() => navigate("/orders")}>
+              <button type="button" className={styles.btnQuiet} onClick={() => navigate("/orders")}>
                 View Order History
               </button>
             </div>
@@ -148,23 +208,25 @@ const OrderConfirmation = () => {
     return (
       <div className={`${styles.page} ${isDarkMode ? styles.dark : ""}`}>
         <div className={styles.container}>
-          <div className={styles.notFound}>
-            <div className={styles.notFoundIcon}>
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="12" />
-                <line x1="12" y1="16" x2="12.01" y2="16" />
+          <div className={styles.state}>
+            <div className={styles.stateMark}>
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="11" />
+                <line x1="8" y1="12" x2="16" y2="12" />
               </svg>
             </div>
-            <h2>Order Not Found</h2>
-            <p>
-              We couldn't find the order you're looking for. It may have been placed in a different session.
+            <p className={styles.stateLabel}>Not on our books</p>
+            <h1 className={styles.stateTitle}>We couldn't find that order</h1>
+            <p className={styles.stateBody}>
+              Nothing here matches{" "}
+              <span className={styles.stateRef}>{orderNumber}</span>. It may have
+              been placed in a different session, or signed in as someone else.
             </p>
-            <div className={styles.notFoundActions}>
-              <button className={styles.btnPrimary} onClick={() => navigate("/")}>
+            <div className={styles.stateActions}>
+              <button type="button" className={styles.btnPrimary} onClick={() => navigate("/")}>
                 Go to Home
               </button>
-              <button className={styles.btnSecondary} onClick={() => navigate("/orders")}>
+              <button type="button" className={styles.btnQuiet} onClick={() => navigate("/orders")}>
                 View Order History
               </button>
             </div>
@@ -180,337 +242,293 @@ const OrderConfirmation = () => {
   const taxAmount = order.taxAmount ?? order.tax ?? 0;
   const shippingAmount = order.shippingAmount ?? order.shipping ?? 0;
   const discountAmount = order.discountAmount ?? 0;
-  const isPaymentPending = order.paymentStatus === "pending";
   const shippingAddr = normalizeOrderAddress(order.shippingAddress);
   const isDelivered = order.shippingStatus === "delivered";
+  const orderNo = order.orderNumber || orderNumber;
+  const firstName = firstNameOf(order);
 
-  // Badge text mirrors the order's real paymentStatus — never a hardcoded
-  // "successful".
+  // Chip text mirrors the order's real paymentStatus — never a hardcoded
+  // "successful". The tone follows the label: a refund is a fact, not a fault,
+  // so it reads neutral rather than red.
   const paymentStatusInfo = (() => {
     switch (order.paymentStatus) {
       case "paid":
-        return { label: "Payment Successful", modifier: "" };
+        return { label: "Payment Successful", modifier: styles.statusOk };
       case "failed":
-        return { label: "Payment Failed", modifier: styles.paymentStatusFailed };
+        return { label: "Payment Failed", modifier: styles.statusDanger };
       case "refunded":
-        return { label: "Payment Refunded", modifier: styles.paymentStatusFailed };
+        return { label: "Payment Refunded", modifier: styles.statusNeutral };
       case "partially_refunded":
-        return { label: "Payment Partially Refunded", modifier: styles.paymentStatusPending };
+        return { label: "Payment Partially Refunded", modifier: styles.statusWarn };
       default:
         return {
           label:
             order.paymentMethod === "cod"
               ? "Payment Pending — Pay on Delivery"
               : "Payment Pending",
-          modifier: styles.paymentStatusPending,
+          modifier: styles.statusWarn,
         };
+    }
+  })();
+
+  // The one warm line, said honestly for the state the order is actually in.
+  const lede = (() => {
+    switch (order.paymentStatus) {
+      case "paid":
+        return "Your payment is settled and your order is with our studio now. We'll write to you as soon as it's on its way.";
+      case "failed":
+        return "Your order is placed, but the payment didn't go through. Write to us and we'll help you settle it.";
+      case "refunded":
+        return "This order has been refunded in full. Nothing further is owed.";
+      case "partially_refunded":
+        return "Part of this order has been refunded. The amounts below are the order as it was placed.";
+      default:
+        return order.paymentMethod === "cod"
+          ? "Nothing to pay now — you'll settle the amount when the parcel reaches your door."
+          : "Your order is placed. We'll confirm here as soon as the payment settles.";
     }
   })();
 
   return (
     <div className={`${styles.page} ${isDarkMode ? styles.dark : ""}`}>
       <div className={styles.container}>
-        {/* Success Animation */}
-        <motion.div
-          className={styles.successSection}
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ type: "spring", stiffness: 200, damping: 20, duration: 0.6 }}
-        >
-          <div className={`${styles.checkCircle} ${showCheck ? styles.checkCircleActive : ""}`}>
+        {/* ── The seal & the thank-you ─────────────────────────────────── */}
+        <header className={styles.head}>
+          <div className={styles.seal}>
             <svg
-              className={styles.checkSvg}
-              width="56"
-              height="56"
-              viewBox="0 0 24 24"
+              className={styles.sealSvg}
+              width="88"
+              height="88"
+              viewBox="0 0 88 88"
               fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
+              aria-hidden="true"
             >
-              <polyline points="20 6 9 17 4 12" />
+              <circle className={styles.sealRing} cx="44" cy="44" r="43" stroke="currentColor" strokeWidth="1" />
+              <circle
+                className={styles.sealInner}
+                cx="44"
+                cy="44"
+                r="35"
+                stroke="currentColor"
+                strokeWidth="1"
+                strokeDasharray="1 6"
+                strokeLinecap="round"
+              />
+              <path
+                className={styles.sealCheck}
+                d="M31 45.5 L40 54.5 L57.5 34"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
             </svg>
+            <span className={styles.sealHalo} aria-hidden="true" />
           </div>
-          <h1 className={styles.successTitle}>Order Confirmed!</h1>
-          <p className={styles.successSubtext}>
-            {isPaymentPending
-              ? "Your order has been placed. Pay when it arrives at your door."
-              : "Your payment was successful and your order is being processed."}
-          </p>
-        </motion.div>
 
-        {/* Order Number (Prominent + Copyable) */}
-        <motion.div
-          className={styles.orderNumberBanner}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <span className={styles.orderNumberLabel}>Order Number</span>
-          <div className={styles.orderNumberRow}>
-            <span className={styles.orderNumberValue}>
-              {order.orderNumber || orderNumber}
-            </span>
-            <button className={styles.btnCopyBanner} onClick={handleCopyOrderNumber}>
-              {copied ? (
-                <>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <polyline points="20 6 9 17 4 12" />
-                  </svg>
-                  Copied!
-                </>
-              ) : (
-                <>
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                    <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-                  </svg>
-                  Copy
-                </>
-              )}
-            </button>
-          </div>
-          <div className={styles.orderMeta}>
-            <span>Placed on {formatDate(order.createdAt)}</span>
-          </div>
-        </motion.div>
+          <p className={styles.eyebrow}>Order Confirmed</p>
+          <h1 className={styles.title}>
+            {firstName ? `Thank you, ${firstName}.` : "Thank you."}
+          </h1>
+          <p className={styles.lede}>{lede}</p>
+        </header>
 
-        {/* Estimated Delivery */}
-        <motion.div
-          className={styles.deliveryBanner}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-        >
-          <div className={styles.deliveryIcon}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="1" y="3" width="15" height="13" rx="2" ry="2" />
-              <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
-              <circle cx="5.5" cy="18.5" r="2.5" />
-              <circle cx="18.5" cy="18.5" r="2.5" />
-            </svg>
-          </div>
-          <div className={styles.deliveryText}>
-            <span className={styles.deliveryLabel}>
-              {isDelivered ? "Delivered" : "Estimated Delivery"}
+        {/* ── The record: number, date, arrival ────────────────────────── */}
+        <section className={styles.record} aria-label="Order record">
+          <div className={styles.recordCell}>
+            <p className={styles.recordLabel}>Order Number</p>
+            <div className={styles.recordNumberRow}>
+              <span className={styles.recordNumber}>{orderNo}</span>
+              <button
+                type="button"
+                className={`${styles.copyBtn} ${copied ? styles.copyBtnDone : ""}`}
+                onClick={handleCopyOrderNumber}
+                aria-label={`Copy order number ${orderNo}`}
+              >
+                {copied ? (
+                  <>
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    Copied
+                  </>
+                ) : (
+                  "Copy"
+                )}
+              </button>
+            </div>
+            <p className={styles.recordMeta}>Placed on {formatDate(order.createdAt)}</p>
+            {/* The copy result, announced rather than only coloured. */}
+            <span role="status" aria-live="polite" className={styles.srOnly}>
+              {copied ? `Order number ${orderNo} copied to clipboard` : ""}
             </span>
-            <span className={styles.deliveryDate}>
+          </div>
+
+          <div className={styles.recordCell}>
+            <p className={styles.recordLabel}>
+              {isDelivered ? "Delivered" : "Estimated Arrival"}
+            </p>
+            <p className={styles.recordDate}>
               {isDelivered
                 ? formatDeliveryDate(new Date(order.deliveredAt || order.updatedAt))
                 : getEstimatedDelivery()}
-            </span>
+            </p>
+            {!isDelivered && (
+              <p className={styles.recordNote}>
+                An estimate, counted five days from the date you ordered — not a
+                guaranteed date.
+              </p>
+            )}
           </div>
-        </motion.div>
+        </section>
 
-        <div className={styles.contentGrid}>
-          {/* Left Column */}
-          <div className={styles.mainColumn}>
-            {/* Order Items */}
-            <motion.div
-              className={styles.card}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.35 }}
-            >
-              <div className={styles.cardHeader}>
-                <h3 className={styles.cardTitle}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
-                    <line x1="3" y1="6" x2="21" y2="6" />
-                    <path d="M16 10a4 4 0 01-8 0" />
-                  </svg>
+        <div className={styles.grid}>
+          <div className={styles.main}>
+            {/* ── Order summary ───────────────────────────────────────── */}
+            <section aria-labelledby="oc-summary-title">
+              <div className={styles.blockHead}>
+                <h2 className={styles.blockTitle} id="oc-summary-title">
                   Order Summary
-                </h3>
-                <span className={styles.itemCount}>
+                </h2>
+                <span className={styles.blockCount}>
                   {orderItems.length} item{orderItems.length !== 1 ? "s" : ""}
                 </span>
               </div>
-              <div className={styles.cardBody}>
-                <div className={styles.itemsList}>
-                  {orderItems.map((item, index) => (
-                    <div key={index} className={styles.orderItem}>
-                      <div className={styles.itemImage}>
-                        <img
-                          src={item.image || "https://placehold.co/72x72?text=Item"}
-                          alt={item.name || "Product"}
-                          loading="lazy"
-                        />
-                      </div>
-                      <div className={styles.itemInfo}>
-                        <span className={styles.itemName}>{item.name || item.productName}</span>
-                        {item.variantName && (
-                          <span className={styles.itemVariant}>{item.variantName}</span>
-                        )}
-                        <span className={styles.itemQty}>Qty: {item.quantity}</span>
-                      </div>
-                      <div className={styles.itemPrice}>
-                        {formatCurrency(item.price * item.quantity, item.currency)}
-                      </div>
-                    </div>
-                  ))}
-                </div>
 
-                {/* Totals */}
-                <div className={styles.totalsSection}>
-                  <div className={styles.totalsRow}>
-                    <span>Subtotal</span>
-                    <span>{formatCurrency(order.subtotal)}</span>
-                  </div>
-                  {discountAmount > 0 && (
-                    <div className={styles.totalsRow}>
-                      <span>Discount{order.couponCode ? ` (${order.couponCode})` : ""}</span>
-                      <span>-{formatCurrency(discountAmount)}</span>
+              <ul className={styles.lines}>
+                {orderItems.map((item, index) => (
+                  <li key={index} className={styles.line}>
+                    <span className={styles.thumb}>
+                      <img
+                        src={item.image || "https://placehold.co/168x224?text=Item"}
+                        alt={item.name || "Product"}
+                        loading="lazy"
+                      />
+                    </span>
+                    <div className={styles.lineBody}>
+                      <h3 className={styles.lineName}>
+                        {item.name || item.productName}
+                      </h3>
+                      {item.variantName && (
+                        <span className={styles.lineVariant}>{item.variantName}</span>
+                      )}
+                      <span className={styles.lineQty}>Qty {item.quantity}</span>
                     </div>
-                  )}
-                  <div className={styles.totalsRow}>
-                    <span>Shipping</span>
-                    <span>{shippingAmount > 0 ? formatCurrency(shippingAmount) : "FREE"}</span>
-                  </div>
-                  <div className={styles.totalsRow}>
-                    <span>Tax</span>
-                    <span>{formatCurrency(taxAmount)}</span>
-                  </div>
-                  <div className={`${styles.totalsRow} ${styles.totalsRowFinal}`}>
-                    <span>Total</span>
-                    <span>{formatCurrency(order.total)}</span>
-                  </div>
-                  {(order.storeCreditUsed ?? 0) > 0 && (
-                    <>
-                      <div className={styles.totalsRow}>
-                        <span>Store Credit</span>
-                        <span>-{formatCurrency(order.storeCreditUsed)}</span>
-                      </div>
-                      <div className={`${styles.totalsRow} ${styles.totalsRowFinal}`}>
-                        <span>Amount Paid</span>
-                        <span>{formatCurrency(order.amountPayable ?? Math.max(0, order.total - order.storeCreditUsed))}</span>
-                      </div>
-                    </>
-                  )}
-                </div>
-              </div>
-            </motion.div>
+                    <p className={styles.lineTotal}>
+                      {formatCurrency(item.price * item.quantity, item.currency)}
+                    </p>
+                  </li>
+                ))}
+              </ul>
 
-            {/* Shipping Address */}
-            <motion.div
-              className={styles.card}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <div className={styles.cardHeader}>
-                <h3 className={styles.cardTitle}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-                    <circle cx="12" cy="10" r="3" />
-                  </svg>
-                  Shipping Address
-                </h3>
-              </div>
-              <div className={styles.cardBody}>
-                {shippingAddr ? (
-                  <div className={styles.addressBlock}>
-                    {shippingAddr.name && (
-                      <p className={styles.addressName}>{shippingAddr.name}</p>
-                    )}
-                    {shippingAddr.line1 && <p>{shippingAddr.line1}</p>}
-                    {shippingAddr.line2 && <p>{shippingAddr.line2}</p>}
-                    {shippingAddr.cityLine && <p>{shippingAddr.cityLine}</p>}
-                    {shippingAddr.country && <p>{shippingAddr.country}</p>}
-                    {shippingAddr.phone && (
-                      <p className={styles.addressPhone}>Phone: {shippingAddr.phone}</p>
-                    )}
+              {/* The order's own money, in the order the order records it. */}
+              <dl className={styles.ledger}>
+                <div className={styles.ledgerRow}>
+                  <dt>Subtotal</dt>
+                  <dd>{formatCurrency(order.subtotal)}</dd>
+                </div>
+                {discountAmount > 0 && (
+                  <div className={`${styles.ledgerRow} ${styles.ledgerDiscount}`}>
+                    <dt>Discount{order.couponCode ? ` (${order.couponCode})` : ""}</dt>
+                    <dd>-{formatCurrency(discountAmount)}</dd>
                   </div>
-                ) : (
-                  <p className={styles.textMuted}>Shipping address not available</p>
                 )}
+                <div className={styles.ledgerRow}>
+                  <dt>Shipping</dt>
+                  <dd>{shippingAmount > 0 ? formatCurrency(shippingAmount) : "Free"}</dd>
+                </div>
+                <div className={styles.ledgerRow}>
+                  <dt>Tax</dt>
+                  <dd>{formatCurrency(taxAmount)}</dd>
+                </div>
+                <div className={`${styles.ledgerRow} ${styles.ledgerTotal}`}>
+                  <dt>Total</dt>
+                  <dd>{formatCurrency(order.total)}</dd>
+                </div>
+                {(order.storeCreditUsed ?? 0) > 0 && (
+                  <>
+                    <div className={styles.ledgerRow}>
+                      <dt>Store Credit</dt>
+                      <dd>-{formatCurrency(order.storeCreditUsed)}</dd>
+                    </div>
+                    <div className={`${styles.ledgerRow} ${styles.ledgerTotal}`}>
+                      <dt>Amount Paid</dt>
+                      <dd>
+                        {formatCurrency(
+                          order.amountPayable ??
+                            Math.max(0, order.total - order.storeCreditUsed)
+                        )}
+                      </dd>
+                    </div>
+                  </>
+                )}
+              </dl>
+            </section>
+
+            {/* ── Shipping address ────────────────────────────────────── */}
+            <section aria-labelledby="oc-address-title">
+              <div className={styles.blockHead}>
+                <h2 className={styles.blockTitle} id="oc-address-title">
+                  Shipping Address
+                </h2>
               </div>
-            </motion.div>
+              {shippingAddr ? (
+                /* A plain block, not <address> — that element is for the page's
+                   own contact details, and its UA italic isn't the house voice. */
+                <div>
+                  {shippingAddr.name && (
+                    <p className={styles.addrName}>{shippingAddr.name}</p>
+                  )}
+                  {shippingAddr.line1 && <p className={styles.addrLine}>{shippingAddr.line1}</p>}
+                  {shippingAddr.line2 && <p className={styles.addrLine}>{shippingAddr.line2}</p>}
+                  {shippingAddr.cityLine && <p className={styles.addrLine}>{shippingAddr.cityLine}</p>}
+                  {shippingAddr.country && <p className={styles.addrLine}>{shippingAddr.country}</p>}
+                  {shippingAddr.phone && (
+                    <p className={styles.addrPhone}>{shippingAddr.phone}</p>
+                  )}
+                </div>
+              ) : (
+                <p className={styles.muted}>Shipping address not available.</p>
+              )}
+            </section>
           </div>
 
-          {/* Right Column */}
-          <div className={styles.sideColumn}>
-            {/* Payment Method */}
-            <motion.div
-              className={styles.card}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.45 }}
-            >
-              <div className={styles.cardHeader}>
-                <h3 className={styles.cardTitle}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
-                    <line x1="1" y1="10" x2="23" y2="10" />
-                  </svg>
-                  Payment Method
-                </h3>
+          <div className={styles.side}>
+            {/* ── Payment ─────────────────────────────────────────────── */}
+            <section aria-labelledby="oc-payment-title">
+              <div className={styles.blockHead}>
+                <h2 className={styles.blockTitle} id="oc-payment-title">
+                  Payment
+                </h2>
               </div>
-              <div className={styles.cardBody}>
-                <div className={styles.paymentBadge}>
-                  {order.paymentMethod ? order.paymentMethod.replace(/_/g, " ").toUpperCase() : "N/A"}
-                </div>
-                <div className={`${styles.paymentStatus} ${paymentStatusInfo.modifier}`}>
-                  <span className={styles.paymentStatusDot} />
-                  {paymentStatusInfo.label}
-                </div>
-              </div>
-            </motion.div>
+              <p className={styles.payMethod}>
+                {order.paymentMethod
+                  ? order.paymentMethod.replace(/_/g, " ").toUpperCase()
+                  : "N/A"}
+              </p>
+              <p className={`${styles.statusChip} ${paymentStatusInfo.modifier}`}>
+                <span className={styles.statusDot} aria-hidden="true" />
+                {paymentStatusInfo.label}
+              </p>
+            </section>
 
-            {/* Action Buttons */}
-            <motion.div
-              className={styles.actionsCard}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-            >
-              <button
-                className={styles.btnContinue}
-                onClick={() => navigate("/")}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
-                  <line x1="3" y1="6" x2="21" y2="6" />
-                  <path d="M16 10a4 4 0 01-8 0" />
-                </svg>
+            {/* ── Actions ─────────────────────────────────────────────── */}
+            <div className={styles.actions}>
+              <button type="button" className={styles.btnPrimary} onClick={() => navigate("/")}>
                 Continue Shopping
               </button>
-              <button
-                className={styles.btnSecondary}
-                onClick={() => navigate("/orders")}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-                  <polyline points="14 2 14 8 20 8" />
-                  <line x1="8" y1="13" x2="16" y2="13" />
-                  <line x1="8" y1="17" x2="16" y2="17" />
-                </svg>
+              <button type="button" className={styles.btnQuiet} onClick={() => navigate("/orders")}>
                 View Orders
               </button>
-              <button
-                className={styles.btnTrack}
-                onClick={() => navigate("/orders")}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="1" y="3" width="15" height="13" rx="2" ry="2" />
-                  <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
-                  <circle cx="5.5" cy="18.5" r="2.5" />
-                  <circle cx="18.5" cy="18.5" r="2.5" />
-                </svg>
+              <button type="button" className={styles.btnQuiet} onClick={() => navigate("/orders")}>
                 Track Order
               </button>
-              <button
-                className={styles.btnInvoice}
-                onClick={handleDownloadInvoice}
-              >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-                  <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
-                </svg>
+              {/* Still only an alert() — drawn as the placeholder it is. */}
+              <button type="button" className={styles.invoiceBtn} onClick={handleDownloadInvoice}>
                 Download Invoice
+                <span className={styles.invoiceSoon}>Coming soon</span>
               </button>
-            </motion.div>
+            </div>
           </div>
         </div>
       </div>
