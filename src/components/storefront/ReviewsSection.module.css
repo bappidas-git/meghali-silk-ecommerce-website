@@ -1,233 +1,387 @@
+/* =============================================================================
+ * ReviewsSection — the letters page
+ * =============================================================================
+ * Two movements, divided by hairlines and nothing else:
+ *
+ *   1. THE SUMMARY PLATE — the average set as a serif number on the left, the
+ *      five-bar distribution beside it. The bars are hairline tracks, not
+ *      capsules, and each one carries its own sentence for assistive tech, so
+ *      nothing on this plate is conveyed by a coloured fill alone.
+ *   2. THE LETTERS — every review a ruled entry rather than a card: who wrote
+ *      it in a narrow left column (initial, name, date, the verified mark set
+ *      quiet), what they wrote in the measure beside it.
+ *
+ * TOKENS ONLY. Dark mode needs no rules of its own — the tokens flip under
+ * `body.dark`, and the only colours used here are ink, muted ink, the border
+ * hairline, the star gold and the success tone on the verified tick.
+ * ========================================================================== */
+
 .section {
   display: flex;
   flex-direction: column;
-  gap: var(--sf-space-6);
+  gap: var(--sf-space-10);
 }
 
-/* ---- Summary ---- */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ═══ 1. THE SUMMARY PLATE ═══════════════════════════════════════════════ */
+
 .summary {
   display: grid;
-  grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
-  gap: var(--sf-space-6);
-  padding: var(--sf-space-5);
-  border: 1px solid var(--sf-color-border);
-  border-radius: var(--sf-radius-lg);
-  background: var(--sf-color-surface);
+  grid-template-columns: minmax(0, 190px) minmax(0, 1fr);
+  gap: var(--sf-space-10);
+  align-items: center;
+  padding-bottom: var(--sf-space-8);
+  border-bottom: 1px solid var(--sf-color-border);
 }
 
+/* The average, left-aligned like a masthead figure — no centred disc. */
 .avgBlock {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-start;
   gap: var(--sf-space-2);
-  text-align: center;
+  min-width: 0;
+  padding-right: var(--sf-space-10);
   border-right: 1px solid var(--sf-color-border);
-  padding-right: var(--sf-space-5);
 }
 
 .avgNumber {
   font-family: var(--sf-font-display);
   font-size: var(--sf-text-3xl);
-  font-weight: var(--sf-font-bold);
-  color: var(--sf-color-text);
+  font-weight: var(--sf-font-medium);
   line-height: 1;
+  letter-spacing: var(--sf-tracking-tight);
+  color: var(--sf-color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.avgOutOf {
+  margin-top: calc(var(--sf-space-1) * -1);
+  font-size: var(--sf-text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  color: var(--sf-color-text-muted);
 }
 
 .avgTotal {
+  font-size: var(--sf-text-xs);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.avgEmpty {
   font-size: var(--sf-text-sm);
   color: var(--sf-color-text-muted);
 }
 
-.avgEmpty {
-  font-size: var(--sf-text-base);
-  color: var(--sf-color-text-muted);
-  font-style: italic;
-}
+/* ---- The distribution ---------------------------------------------------- */
 
 .bars {
   display: flex;
   flex-direction: column;
   gap: var(--sf-space-2);
   justify-content: center;
+  min-width: 0;
 }
 
 .barRow {
   display: flex;
   align-items: center;
-  gap: var(--sf-space-3);
+  gap: var(--sf-space-4);
 }
 
 .barLabel {
-  font-size: var(--sf-text-sm);
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
+  flex: none;
+  min-width: 26px;
+  font-size: var(--sf-text-xs);
   color: var(--sf-color-text-secondary);
-  min-width: 34px;
+  font-variant-numeric: tabular-nums;
 }
 
+.barStar {
+  font-size: 0.7em;
+  color: var(--sf-color-star);
+}
+
+/* A hairline track, not a capsule: 2px of ground with 2px of ink laid over it. */
 .barTrack {
   flex: 1;
-  height: 8px;
-  border-radius: var(--sf-radius-pill);
-  background: var(--sf-color-surface-2);
-  overflow: hidden;
+  height: 2px;
+  min-width: 0;
+  background: var(--sf-color-border);
 }
 
 .barFill {
+  display: block;
   height: 100%;
-  border-radius: inherit;
   background: var(--sf-color-star);
   transition: width var(--sf-transition);
 }
 
 .barCount {
-  font-size: var(--sf-text-sm);
-  color: var(--sf-color-text-muted);
+  flex: none;
   min-width: 20px;
   text-align: right;
+  font-size: var(--sf-text-xs);
+  color: var(--sf-color-text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 .barsCaption,
 .barsEmpty {
+  margin-top: var(--sf-space-2);
   font-size: var(--sf-text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
   color: var(--sf-color-text-muted);
-  margin-top: var(--sf-space-1);
 }
 
-/* ---- States ---- */
+/* ═══ THE HONEST STATES ══════════════════════════════════════════════════ */
+/* Loading, error and empty share one quiet band — no panel, no icon, no
+   apology larger than the sentence itself. */
+
 .state {
+  margin: 0;
+  padding: var(--sf-space-10) 0;
   text-align: center;
+  font-size: var(--sf-text-sm);
   color: var(--sf-color-text-muted);
-  padding: var(--sf-space-8) var(--sf-space-4);
 }
 
+.stateLine {
+  margin: 0;
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-lg);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text);
+}
+
+.stateNote {
+  margin: var(--sf-space-2) 0 0;
+  font-size: var(--sf-text-sm);
+  color: var(--sf-color-text-muted);
+}
+
+/* The global .sf-btn primitive comes chrome-less, so the retry gets the same
+   hairline outline the PDP's secondary action wears. */
 .retry {
-  margin-top: var(--sf-space-3);
-  min-height: var(--sf-tap-target);
-  padding: 0 var(--sf-space-5);
-  border: 1.5px solid var(--sf-color-primary);
-  border-radius: var(--sf-radius-md);
-  background: transparent;
-  color: var(--sf-color-primary);
-  font-weight: var(--sf-font-semibold);
-  cursor: pointer;
+  margin-top: var(--sf-space-5);
+  border-color: var(--sf-color-border-strong);
+  color: var(--sf-color-text);
 }
 
-.retry:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
+.retry:hover {
+  border-color: var(--sf-color-text);
+  background: var(--sf-color-primary-soft);
 }
 
-/* ---- List ---- */
+/* ═══ 2. THE LETTERS ═════════════════════════════════════════════════════ */
+
 .list {
   display: flex;
   flex-direction: column;
-  gap: var(--sf-space-4);
 }
 
-.card {
-  border: 1px solid var(--sf-color-border);
-  border-radius: var(--sf-radius-lg);
-  background: var(--sf-color-surface);
-  padding: var(--sf-space-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--sf-space-2);
+/* Each review a ruled entry: the writer in a narrow column, the letter beside
+   it in a comfortable measure. */
+.review {
+  display: grid;
+  grid-template-columns: minmax(0, 190px) minmax(0, 1fr);
+  gap: var(--sf-space-10);
+  padding: var(--sf-space-8) 0;
+  border-bottom: 1px solid var(--sf-color-border);
 }
 
-.cardHead {
+.review:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.reviewAside {
   display: flex;
   align-items: flex-start;
-  justify-content: space-between;
   gap: var(--sf-space-3);
+  min-width: 0;
 }
 
-.user {
-  display: flex;
-  align-items: center;
-  gap: var(--sf-space-3);
-}
-
+/* A hairline ring holding the initial in the display serif — no fill, no
+   gradient; the mark should read as a monogram, not a chat avatar. */
 .avatar {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex: none;
   width: 38px;
   height: 38px;
+  border: 1px solid var(--sf-color-border-strong);
   border-radius: var(--sf-radius-pill);
-  background: var(--sf-gradient-primary);
-  color: var(--sf-color-primary-contrast);
-  font-weight: var(--sf-font-semibold);
+  background: transparent;
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-lg);
+  line-height: 1;
+  color: var(--sf-color-gold-deep);
+}
+
+.who {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  padding-top: 2px;
 }
 
 .userName {
-  display: block;
   font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-  color: var(--sf-color-text);
-}
-
-.verified {
-  font-size: var(--sf-text-xs);
-  color: var(--sf-color-success);
   font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text);
+  overflow-wrap: anywhere;
 }
 
 .date {
   font-size: var(--sf-text-xs);
   color: var(--sf-color-text-muted);
-  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 
-.ratingLine {
+/* The verified mark, set quiet: tracked capitals in muted ink with one small
+   tick in the success tone. It is a fact, not a badge. */
+.verified {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sf-space-1);
+  margin-top: var(--sf-space-1);
+  font-size: var(--sf-text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text-muted);
+}
+
+.verifiedMark {
+  color: var(--sf-color-success);
+}
+
+.reviewMain {
   display: flex;
-  align-items: center;
-  gap: var(--sf-space-2);
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sf-space-3);
+  min-width: 0;
 }
 
 .reviewTitle {
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
+  margin: 0;
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-xl);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  letter-spacing: var(--sf-tracking-tight);
   color: var(--sf-color-text);
 }
 
-.body {
+.reviewBody {
   margin: 0;
+  max-width: 68ch;
   font-size: var(--sf-text-sm);
-  line-height: var(--sf-leading-normal);
+  line-height: var(--sf-leading-relaxed);
   color: var(--sf-color-text-secondary);
 }
 
+/* ---- Customer photographs ------------------------------------------------ */
+
 .photos {
+  list-style: none;
   display: flex;
   flex-wrap: wrap;
   gap: var(--sf-space-2);
-  margin-top: var(--sf-space-1);
+  margin: var(--sf-space-1) 0 0;
+  padding: 0;
 }
 
 .photo {
-  width: 72px;
-  height: 72px;
+  display: block;
+  width: 78px;
+  height: 78px;
   object-fit: cover;
-  border-radius: var(--sf-radius-md);
   border: 1px solid var(--sf-color-border);
+  border-radius: var(--sf-radius-sm);
   background: var(--sf-color-surface-2);
 }
 
 .helpful {
+  margin: var(--sf-space-1) 0 0;
   font-size: var(--sf-text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
   color: var(--sf-color-text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
-@media (max-width: 640px) {
-  .summary {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--sf-space-4);
+/* ═══ RESPONSIVE ═════════════════════════════════════════════════════════ */
+
+@media (max-width: 860px) {
+  .summary,
+  .review {
+    grid-template-columns: minmax(0, 160px) minmax(0, 1fr);
+    gap: var(--sf-space-8);
   }
   .avgBlock {
+    padding-right: var(--sf-space-8);
+  }
+}
+
+/* The two columns fold: the plate stacks, and the writer's line runs above the
+   letter rather than beside it. */
+@media (max-width: 640px) {
+  .section {
+    gap: var(--sf-space-8);
+  }
+  .summary {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--sf-space-6);
+  }
+  .avgBlock {
+    flex-direction: row;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: var(--sf-space-3);
+    padding-right: 0;
+    padding-bottom: var(--sf-space-5);
     border-right: none;
     border-bottom: 1px solid var(--sf-color-border);
-    padding-right: 0;
-    padding-bottom: var(--sf-space-4);
+  }
+  .avgOutOf {
+    margin-top: 0;
+  }
+  .review {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--sf-space-4);
+    padding: var(--sf-space-6) 0;
+  }
+  .who {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--sf-space-1) var(--sf-space-3);
+  }
+  .verified {
+    margin-top: 0;
   }
 }

@@ -1,171 +1,296 @@
+/* =============================================================================
+ * FrequentlyBoughtTogether — "Completes the look"
+ * =============================================================================
+ * A hairline rule opens the block; nothing here is a card.
+ *
+ *   THE PLATES run left — the piece you are looking at, then each curated
+ *   companion, divided by a thin plus mark that sits on the optical centre of
+ *   the plates rather than the whole tile.
+ *   THE CHECKLIST stands on the right as a ruled column: a tick, the name, the
+ *   real price. The total sits over a hairline in the serif, and the ink
+ *   button closes it.
+ *
+ * The plate size is one custom property so the plus mark can centre itself
+ * against it at every breakpoint without a second magic number.
+ *
+ * TOKENS ONLY — the button is the global .sf-btn primitive.
+ * ========================================================================== */
+
 .section {
-  margin-top: var(--sf-space-12);
-  padding: var(--sf-space-6);
-  border: 1px solid var(--sf-color-border);
-  border-radius: var(--sf-radius-lg);
-  background: var(--sf-color-surface);
+  --fbt-plate: 112px;
+
+  margin-top: var(--sf-space-16);
+  padding-top: var(--sf-space-8);
+  border-top: 1px solid var(--sf-color-border);
+}
+
+/* ---- The head ------------------------------------------------------------ */
+
+.head {
+  margin-bottom: var(--sf-space-8);
+}
+
+/* The same tracked eyebrow opened by a short gold rule that heads every
+   section of the storefront. */
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-3);
+  margin-bottom: var(--sf-space-3);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wider);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-gold-deep);
+}
+
+.eyebrow::before {
+  content: "";
+  flex: none;
+  width: var(--sf-space-8);
+  height: 1px;
+  background: currentColor;
 }
 
 .title {
-  margin: 0 0 var(--sf-space-5);
+  margin: 0;
   font-family: var(--sf-font-display);
-  font-size: var(--sf-text-xl);
-  font-weight: var(--sf-font-bold);
+  font-size: var(--sf-text-2xl);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-display);
+  letter-spacing: var(--sf-tracking-tight);
   color: var(--sf-color-text);
 }
+
+/* One line of plain speech: this is a curation, and it says so. */
+.note {
+  margin: var(--sf-space-2) 0 0;
+  max-width: 52ch;
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-muted);
+}
+
+/* ---- The layout ---------------------------------------------------------- */
 
 .layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
-  gap: var(--sf-space-6);
+  gap: var(--sf-space-8);
 }
 
-@media (min-width: 768px) {
+@media (min-width: 900px) {
   .layout {
-    grid-template-columns: auto minmax(280px, 360px);
-    align-items: center;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
+    gap: var(--sf-space-12);
+    align-items: start;
   }
 }
 
+/* ---- The plates ---------------------------------------------------------- */
+
 .visual {
   display: flex;
-  align-items: center;
-  gap: var(--sf-space-3);
+  align-items: flex-start;
+  gap: var(--sf-space-4);
   flex-wrap: wrap;
 }
 
 .tile {
-  position: relative;
-  width: 110px;
-  height: 110px;
-  border: 1px solid var(--sf-color-border);
-  border-radius: var(--sf-radius-md);
-  overflow: hidden;
-  background: var(--sf-color-surface-2);
-  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-2);
+  width: var(--fbt-plate);
+  flex: none;
+  text-decoration: none;
 }
 
-.tile img {
+.plate {
+  display: block;
+  width: var(--fbt-plate);
+  height: var(--fbt-plate);
+  overflow: hidden;
+  border: 1px solid var(--sf-color-border);
+  border-radius: var(--sf-radius-sm);
+  background: var(--sf-color-surface-2);
+  transition: border-color var(--sf-transition);
+}
+
+.plate img {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
+}
+
+.tile:hover .plate {
+  border-color: var(--sf-color-border-strong);
+}
+
+.tile:focus-visible {
+  outline: none;
+}
+
+.tile:focus-visible .plate {
+  box-shadow: var(--sf-shadow-focus);
+  border-color: var(--sf-color-accent);
+}
+
+/* The anchor names itself in tracked gold; the companions in quiet ink. */
+.thisItem,
+.tileName {
+  font-size: var(--sf-text-xs);
+  line-height: var(--sf-leading-tight);
+  overflow-wrap: anywhere;
 }
 
 .thisItem {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: var(--sf-color-brand-green);
-  color: var(--sf-color-gold-light);
-  font-size: var(--sf-text-xs);
   font-weight: var(--sf-font-medium);
-  text-align: center;
-  padding: 2px;
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  color: var(--sf-color-gold-deep);
 }
 
+.tileName {
+  color: var(--sf-color-text-secondary);
+}
+
+.tile:hover .tileName {
+  color: var(--sf-color-text);
+}
+
+/* Centred against the PLATE, not the tile — the captions below must not drag
+   the mark off the middle of the photographs. */
 .plus {
-  font-size: var(--sf-text-xl);
-  font-weight: var(--sf-font-bold);
+  flex: none;
+  margin-top: calc(var(--fbt-plate) / 2 - 0.6em);
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-lg);
+  line-height: 1.2;
   color: var(--sf-color-text-muted);
 }
+
+/* ---- The checklist ------------------------------------------------------- */
 
 .summary {
   display: flex;
   flex-direction: column;
-  gap: var(--sf-space-3);
+  gap: var(--sf-space-5);
+  min-width: 0;
 }
 
 .checklist {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--sf-space-2);
+  border-top: 1px solid var(--sf-color-border);
+}
+
+.check {
+  border-bottom: 1px solid var(--sf-color-border);
 }
 
 .checkLabel {
   display: flex;
   align-items: flex-start;
-  gap: var(--sf-space-2);
+  gap: var(--sf-space-3);
+  min-height: var(--sf-tap-target);
+  padding: var(--sf-space-3) 0;
   cursor: pointer;
 }
 
 .checkLabel input {
-  margin-top: 3px;
-  width: 17px;
-  height: 17px;
-  accent-color: var(--sf-color-primary);
+  flex: none;
+  margin-top: 2px;
+  width: 16px;
+  height: 16px;
+  accent-color: var(--sf-color-emerald);
   cursor: pointer;
+}
+
+.checkLabel input:disabled {
+  cursor: default;
+}
+
+.checkLabel input:focus-visible {
+  outline: none;
+  box-shadow: var(--sf-shadow-focus);
 }
 
 .checkText {
   display: flex;
-  flex-direction: column;
-  gap: 1px;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sf-space-4);
+  flex: 1;
   min-width: 0;
 }
 
 .checkName {
   font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-normal);
   color: var(--sf-color-text);
+  min-width: 0;
 }
 
 .checkName em {
-  color: var(--sf-color-text-muted);
   font-style: normal;
+  color: var(--sf-color-text-muted);
 }
 
 .checkPrice {
+  flex: none;
   font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
   color: var(--sf-color-text);
+  font-variant-numeric: tabular-nums;
 }
+
+/* ---- The total + the button ---------------------------------------------- */
 
 .totalRow {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
-  padding-top: var(--sf-space-3);
-  border-top: 1px solid var(--sf-color-border);
+  gap: var(--sf-space-4);
 }
 
 .totalLabel {
-  font-size: var(--sf-text-sm);
-  color: var(--sf-color-text-secondary);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  color: var(--sf-color-text-muted);
 }
 
 .totalValue {
-  font-size: var(--sf-text-xl);
-  font-weight: var(--sf-font-bold);
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-2xl);
+  font-weight: var(--sf-font-medium);
+  line-height: 1;
   color: var(--sf-color-price);
+  font-variant-numeric: tabular-nums;
 }
 
 .addBtn {
-  min-height: var(--sf-tap-target);
-  border: none;
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-emerald);
-  color: var(--sf-color-emerald-contrast);
-  font-weight: var(--sf-font-semibold);
-  font-size: var(--sf-text-base);
-  cursor: pointer;
-  transition: background var(--sf-transition-fast), transform var(--sf-transition-fast);
+  margin-top: calc(var(--sf-space-1) * -1);
 }
 
-.addBtn:hover:not(:disabled) {
-  background: var(--sf-color-emerald-hover);
-  transform: translateY(-1px);
-}
+/* ═══ RESPONSIVE ═════════════════════════════════════════════════════════ */
 
-.addBtn:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
-}
+@media (max-width: 520px) {
+  .section {
+    --fbt-plate: 88px;
 
-.addBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+    margin-top: var(--sf-space-12);
+    padding-top: var(--sf-space-6);
+  }
+  .visual {
+    gap: var(--sf-space-3);
+  }
+  .checkText {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+  }
 }
