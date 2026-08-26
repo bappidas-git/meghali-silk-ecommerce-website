@@ -1,57 +1,248 @@
+// =============================================================================
+// COOKIE POLICY  —  Meghali's Silk, route `/cookies`
+// =============================================================================
+// One of the four policy pages (/privacy, /terms, /cookies, /refund) that share
+// a single typeset "document" treatment: a tracked gold kicker, a serif title
+// over a hairline, the revision stamp, a standfirst, then numbered clauses down
+// a ~70-character measure with their numbers hung out into the left gutter. See
+// the stylesheet header for the shared vocabulary.
+//
+// WHAT THE REBUILD CORRECTED
+//   • THE TABLE WAS NOT A TABLE. Four columns of <div>s in a CSS grid, with
+//     `data-label` pseudo-elements faking row headers on mobile: a screen
+//     reader got twelve loose strings with nothing tying a cell to its column.
+//     It is now a real <table> — `<th scope="col">` across the head, the cookie
+//     type as `<th scope="row">` — inside a focusable, labelled scroller, so it
+//     can be reached and panned from the keyboard and cannot widen the page.
+//   • THE COPY DESCRIBED NOBODY'S COOKIES. "Remember your preferences" is true
+//     of every site; the purposes now name what this one actually keeps — the
+//     cart, the session, the light/dark choice.
+//   • THE LAST COLUMN SAID "YES"/"NO" UNDER A HEAD READING "REQUIRED", which
+//     is a double negative waiting to happen. It reads "Always on" / "Optional"
+//     under a head reading "Status".
+//   • THE PAGE STOOD ALONE. It now links across to the Privacy Policy, which is
+//     where the wider data question is answered.
+//
+// STATIC BY DESIGN
+//   No API calls and none needed. `POLICY_LAST_UPDATED` is shared with the
+//   other three policy pages so they can never disagree about their date.
+//
+// THEMING
+//   Tokens only; ThemeContext is consumed for nothing but the `color-scheme`
+//   hint, which here also themes the table's own scrollbar.
+// =============================================================================
 import React from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useTheme } from "../../context/ThemeContext";
-import { APP_NAME, SUPPORT_EMAIL, POLICY_LAST_UPDATED } from "../../utils/constants";
+import {
+  APP_NAME,
+  SUPPORT_EMAIL,
+  POLICY_LAST_UPDATED,
+} from "../../utils/constants";
 import styles from "./CookiePolicy.module.css";
+
+// The four families of cookie the site sets, in descending order of necessity.
+const COOKIE_TYPES = [
+  {
+    type: "Essential",
+    purpose:
+      "Holds your cart between visits, keeps you signed in, and carries the security tokens that protect checkout.",
+    duration: "Session – 1 year",
+    required: true,
+  },
+  {
+    type: "Functional",
+    purpose:
+      "Remembers the choices you have made — your light or dark theme, and the pieces you have recently looked at.",
+    duration: "1 year",
+    required: false,
+  },
+  {
+    type: "Analytics",
+    purpose:
+      "Tells us, in aggregate, which pages and which weaves are being looked at, so we know what to photograph and stock.",
+    duration: "2 years",
+    required: false,
+  },
+  {
+    type: "Marketing",
+    purpose:
+      "Measures how a campaign performed and lets us show our pieces to you on other sites.",
+    duration: "90 days",
+    required: false,
+  },
+];
 
 const CookiePolicy = () => {
   const { isDarkMode } = useTheme();
+  const prefersReducedMotion = useReducedMotion();
 
-  const cookieTypes = [
-    { type: "Essential", purpose: "Required for basic site functionality (cart, login, security)", duration: "Session / 1 year", required: true },
-    { type: "Functional", purpose: "Remember your preferences (language, theme, region)", duration: "1 year", required: false },
-    { type: "Analytics", purpose: "Help us understand how visitors interact with our site", duration: "2 years", required: false },
-    { type: "Marketing", purpose: "Used for targeted advertising and retargeting", duration: "90 days", required: false },
-  ];
+  // Gentle fade and rise, staggered, disabled outright for anyone who asked for
+  // less motion.
+  const reveal = (i) =>
+    prefersReducedMotion
+      ? {}
+      : {
+          initial: { opacity: 0, y: 12 },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0.55, delay: Math.min(i, 6) * 0.06 },
+        };
 
   return (
-    <div className={`${styles.container} ${isDarkMode ? styles.dark : ""}`}>
-      <div className={styles.breadcrumb}><Link to="/">Home</Link> <span>/</span> <span>Cookie Policy</span></div>
-      <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-        <h1 className={styles.title}>Cookie Policy</h1>
-        <p className={styles.subtitle}>Last updated: {POLICY_LAST_UPDATED}</p>
-        <p className={styles.intro}>{APP_NAME} uses cookies and similar technologies to improve your browsing experience, analyze site traffic, and personalize content.</p>
-      </motion.div>
+    <div className={`${styles.page} ${isDarkMode ? styles.dark : ""}`}>
+      <div className={styles.container}>
+        <div className={styles.doc}>
+          {/* ── Breadcrumb ───────────────────────────────────────────────── */}
+          <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+            <Link to="/" className={styles.breadcrumbLink}>
+              Home
+            </Link>
+            <span className={styles.breadcrumbSep} aria-hidden="true">
+              /
+            </span>
+            <span className={styles.breadcrumbCurrent} aria-current="page">
+              Cookie Policy
+            </span>
+          </nav>
 
-      <motion.div className={styles.section} initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }}>
-        <h2>What Are Cookies?</h2>
-        <p>Cookies are small text files stored on your device when you visit a website. They help the site remember your preferences and improve your experience.</p>
-      </motion.div>
+          {/* ── Masthead ─────────────────────────────────────────────────── */}
+          <motion.div {...reveal(0)}>
+            <p className={styles.kicker}>Policies</p>
+            <h1 className={styles.title}>Cookie Policy</h1>
+            <p className={styles.updated}>
+              Last updated: {POLICY_LAST_UPDATED}
+            </p>
+            <p className={styles.standfirst}>
+              {APP_NAME} uses cookies to keep your cart, remember how you like
+              the site set, and understand which weaves are being looked at.
+              This is the full list, and how to turn off the ones you would
+              rather not have.
+            </p>
+          </motion.div>
 
-      <motion.div className={styles.section} initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.15 }}>
-        <h2>Types of Cookies We Use</h2>
-        <div className={styles.table}>
-          <div className={styles.tableHeader}>
-            <span>Type</span><span>Purpose</span><span>Duration</span><span>Required</span>
+          <div className={styles.sections}>
+            {/* ── 01. What cookies are ───────────────────────────────────── */}
+            <motion.section className={styles.section} {...reveal(1)}>
+              <span className={styles.sectionNum} aria-hidden="true">
+                01
+              </span>
+              <h2 className={styles.sectionTitle}>What a cookie is</h2>
+              <p className={styles.prose}>
+                A cookie is a small text file that a site asks your browser to
+                keep. On the next page you open, the browser hands it back, and
+                that is how a site remembers that the sari you added is still in
+                your cart and that you are the person who added it.
+              </p>
+              <p className={styles.prose}>
+                Cookies cannot read the rest of your device, and ours hold
+                identifiers rather than personal details. What we do with the
+                data behind those identifiers is set out in our{" "}
+                <Link to="/privacy" className={styles.link}>
+                  Privacy Policy
+                </Link>
+                .
+              </p>
+              <p className={styles.prose}>
+                Some of what is listed below is kept in your browser's local
+                storage rather than in a cookie proper — your cart, your theme
+                and your recently viewed pieces are held that way. It is the
+                same bargain either way, so this policy covers both, and
+                clearing your site data clears all of it.
+              </p>
+            </motion.section>
+
+            {/* ── 02. The cookies we set ─────────────────────────────────── */}
+            <motion.section className={styles.section} {...reveal(2)}>
+              <span className={styles.sectionNum} aria-hidden="true">
+                02
+              </span>
+              <h2 className={styles.sectionTitle} id="cookie-table-heading">
+                The cookies we set
+              </h2>
+              <p className={styles.prose}>
+                Only the essential family is required for the site to work.
+                Everything else can be refused without losing your cart or your
+                order history.
+              </p>
+
+              {/* The wrapper is the scroller, and it is focusable and labelled
+                  so the table can be panned from the keyboard on a phone. */}
+              <div
+                className={styles.tableWrap}
+                role="region"
+                aria-labelledby="cookie-table-heading"
+                tabIndex={0}
+              >
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th scope="col">Type</th>
+                      <th scope="col" className={styles.colPurpose}>
+                        Purpose
+                      </th>
+                      <th scope="col">Lifetime</th>
+                      <th scope="col">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {COOKIE_TYPES.map((cookie) => (
+                      <tr key={cookie.type}>
+                        <th scope="row">{cookie.type}</th>
+                        <td>{cookie.purpose}</td>
+                        <td>{cookie.duration}</td>
+                        <td>
+                          <span
+                            className={`${styles.status} ${
+                              cookie.required ? styles.statusRequired : ""
+                            }`}
+                          >
+                            {cookie.required ? "Always on" : "Optional"}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <p className={styles.tableHint} aria-hidden="true">
+                Scroll the table sideways to see every column.
+              </p>
+            </motion.section>
+
+            {/* ── 03. Managing cookies ───────────────────────────────────── */}
+            <motion.section className={styles.section} {...reveal(3)}>
+              <span className={styles.sectionNum} aria-hidden="true">
+                03
+              </span>
+              <h2 className={styles.sectionTitle}>Turning them off</h2>
+              <p className={styles.prose}>
+                Every browser lets you block or clear cookies, usually under
+                Settings, then Privacy. You can refuse them for this site alone
+                or for every site, and you can delete the ones already stored.
+              </p>
+              <p className={styles.prose}>
+                Blocking the essential family will stop the cart and the
+                sign-in from working — the site cannot remember you without it.
+                Blocking the other three costs you nothing but the convenience
+                of not setting your preferences again.
+              </p>
+            </motion.section>
           </div>
-          {cookieTypes.map((cookie, i) => (
-            <div key={i} className={styles.tableRow}>
-              <span className={styles.cookieType}>{cookie.type}</span>
-              <span data-label="Purpose">{cookie.purpose}</span>
-              <span data-label="Duration">{cookie.duration}</span>
-              <span data-label="Required">{cookie.required ? "Yes" : "No"}</span>
-            </div>
-          ))}
+
+          {/* ── Colophon ─────────────────────────────────────────────────── */}
+          <div className={styles.colophon}>
+            <p className={styles.colophonLabel}>Questions about cookies</p>
+            <p className={styles.colophonText}>
+              Write to{" "}
+              <a href={`mailto:${SUPPORT_EMAIL}`} className={styles.link}>
+                {SUPPORT_EMAIL}
+              </a>{" "}
+              and we will tell you exactly what a given cookie holds.
+            </p>
+          </div>
         </div>
-      </motion.div>
-
-      <motion.div className={styles.section} initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.2 }}>
-        <h2>Managing Cookies</h2>
-        <p>You can control cookies through your browser settings. Most browsers allow you to block or delete cookies. Note that disabling essential cookies may affect site functionality.</p>
-      </motion.div>
-
-      <div className={styles.contact}><p>Questions? <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a></p></div>
+      </div>
     </div>
   );
 };

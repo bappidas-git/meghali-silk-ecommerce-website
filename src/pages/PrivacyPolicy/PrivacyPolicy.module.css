@@ -1,125 +1,427 @@
-/* =============================================================================
- * Privacy Policy — Meghali's Silk re-skin (tokens only; no hardcoded hex)
- * =============================================================================
- * Long-form legal document on the dark-first, gold-on-green brand system. Every
- * colour resolves from src/theme/storefront-tokens.css and is theme-aware via
- * body.dark; the `.dark` class is kept for parity with the page's useTheme()
- * pattern. Shared document chrome is mirrored across Terms / Cookies / Refund.
- * ========================================================================== */
+/* ═══════════════════════════════════════════════════════════════════════════
+   PRIVACY POLICY  —  Meghali's Silk, route `/privacy`
+   ═══════════════════════════════════════════════════════════════════════════
+   One of four policy pages that share a single document treatment. The old
+   page was a stack of boxed cards on a 920px column with a bold sans title;
+   this one is typeset: a serif masthead over a hairline, eight clauses down a
+   ~70-character measure, their numbers hung out in the left gutter in tracked
+   gold, and a colophon instead of a "Questions?" footer.
 
-.container {
-  max-width: 820px; /* ~72ch comfortable reading measure */
-  margin: 0 auto;
-  padding: var(--sf-space-6) var(--sf-space-4) var(--sf-space-16);
-  min-height: calc(100vh - 200px);
+   This page adds nothing to the shared document vocabulary — it is the plain
+   case, and the three siblings extend it.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE DOCUMENT  —  shared vocabulary across /privacy /terms /cookies /refund
+   ═══════════════════════════════════════════════════════════════════════════
+   The four policy pages are one typeset document in four parts, so this block
+   is deliberately identical in all four modules: same shell, same measure,
+   same masthead, same numbered clauses, same table, same colophon. Any change
+   here gets copied into the other three. It is inlined rather than pulled from
+   a shared file so each page stays a self-contained CSS Module, which is the
+   convention the rest of the storefront follows.
+
+   TOKENS ONLY — every colour, space, radius and type value resolves through
+   `--sf-*`, which flips under `body.dark`. Light and dark are one stylesheet
+   and there is no hex in this file.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.page {
+  min-height: 100vh;
+  padding: var(--sf-space-10) 0 var(--sf-space-24);
   background: var(--sf-color-bg);
   color: var(--sf-color-text);
   font-family: var(--sf-font-family);
-  transition: background var(--sf-transition), color var(--sf-transition);
 }
 
-/* ===== Breadcrumb ===== */
+/* The only thing ThemeContext is consumed for: a native color-scheme hint so
+   the scrollbars — including the ones inside the table wrappers — render for
+   the active theme. */
+.dark {
+  color-scheme: dark;
+}
+
+.container {
+  max-width: var(--sf-container-max);
+  margin: 0 auto;
+  padding: 0 var(--sf-space-6);
+}
+
+/* ── The measure ───────────────────────────────────────────────────────────
+   64ch counted against this element's 1rem Inter, which sets the 1.0625rem
+   body inside it at roughly 70 characters a line — the long-form reading
+   band. Everything hangs off this column, breadcrumb included, so the left
+   edge never moves as you read down. */
+.doc {
+  max-width: 64ch;
+  margin: 0 auto;
+}
+
+/* ═══ Breadcrumb ═══════════════════════════════════════════════════════════ */
+
 .breadcrumb {
   display: flex;
-  gap: var(--sf-space-2);
   align-items: center;
-  margin-bottom: var(--sf-space-6);
-  font-size: var(--sf-text-sm);
+  flex-wrap: wrap;
+  gap: var(--sf-space-2);
+  margin-bottom: var(--sf-space-12);
+  font-size: var(--sf-text-xs);
+  letter-spacing: 0.04em;
   color: var(--sf-color-text-muted);
 }
-.breadcrumb a {
-  color: var(--sf-color-gold-deep);
+
+.breadcrumbSep {
+  color: var(--sf-color-border-strong);
+}
+
+/* No chrome; a gold hairline grows in under the link on hover. */
+.breadcrumbLink {
+  position: relative;
+  color: var(--sf-color-text-secondary);
   text-decoration: none;
   transition: color var(--sf-transition-fast);
 }
-.breadcrumb a:hover {
-  color: var(--sf-color-gold);
+
+.breadcrumbLink::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 100%;
+  bottom: -3px;
+  height: 1px;
+  background: var(--sf-color-gold-deep);
+  transition: right var(--sf-transition);
 }
-.breadcrumb a:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
+
+.breadcrumbLink:hover {
+  color: var(--sf-color-text);
+}
+
+.breadcrumbLink:hover::after {
+  right: 0;
+}
+
+.breadcrumbLink:focus-visible {
+  outline: 2px solid transparent;
   border-radius: var(--sf-radius-sm);
+  box-shadow: var(--sf-shadow-focus);
 }
+
+.breadcrumbCurrent {
+  color: var(--sf-color-text-muted);
+}
+
+/* A comfortable thumb target on phones, without moving the row. */
 @media (max-width: 768px) {
-  .breadcrumb a {
+  .breadcrumbLink {
     display: inline-block;
-    padding: 10px 2px;
-    margin: -10px 0;
+    padding: var(--sf-space-2) 0;
+    margin: calc(var(--sf-space-2) * -1) 0;
   }
 }
 
-/* ===== Document head ===== */
-.title {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-3xl);
-  font-weight: var(--sf-font-bold);
+/* ═══ Masthead ═════════════════════════════════════════════════════════════
+   The storefront's shared opener — a tracked gold label led in by a short rule
+   — then the serif title over its hairline, the revision stamp, and the
+   standfirst. Identical on all four so they read as one set. */
+
+.kicker {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-3);
+  margin: 0 0 var(--sf-space-5);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wider);
   line-height: var(--sf-leading-tight);
-  color: var(--sf-color-text);
-  margin: 0 0 var(--sf-space-2);
-}
-.subtitle {
-  color: var(--sf-color-text-muted);
-  font-size: var(--sf-text-sm);
-  margin: 0 0 var(--sf-space-4);
-}
-.intro {
-  color: var(--sf-color-text-secondary);
-  line-height: var(--sf-leading-normal);
-  margin: 0 0 var(--sf-space-8);
-  font-size: var(--sf-text-md);
+  color: var(--sf-color-gold-deep);
 }
 
-/* ===== Sections ===== */
-.sections {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sf-space-5);
-  margin-bottom: var(--sf-space-10);
+.kicker::before {
+  content: "";
+  width: var(--sf-space-8);
+  height: 1px;
+  background: var(--sf-color-gold);
 }
-.section {
-  padding: var(--sf-space-6);
-  border-radius: var(--sf-radius-lg);
-  background: var(--sf-color-surface);
-  border: 1px solid var(--sf-color-border);
+
+.title {
+  margin: 0;
+  padding-bottom: var(--sf-space-6);
+  border-bottom: 1px solid var(--sf-color-border-strong);
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-4xl);
+  font-weight: var(--sf-font-light);
+  line-height: var(--sf-leading-display);
+  letter-spacing: var(--sf-tracking-tight);
+  color: var(--sf-color-text);
 }
-.section h2 {
+
+/* Tracked capitals, quiet — a revision stamp, not a headline. */
+.updated {
+  margin: var(--sf-space-5) 0 0;
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  color: var(--sf-color-text-muted);
+}
+
+.standfirst {
+  margin: var(--sf-space-6) 0 0;
   font-family: var(--sf-font-display);
   font-size: var(--sf-text-xl);
-  font-weight: var(--sf-font-semibold);
-  color: var(--sf-color-text);
-  margin: 0 0 var(--sf-space-3);
-}
-.section h2 span {
-  /* Gold section numeral */
-  color: var(--sf-color-gold);
-  margin-right: var(--sf-space-2);
-}
-.section p {
+  font-weight: var(--sf-font-light);
+  line-height: var(--sf-leading-tight);
   color: var(--sf-color-text-secondary);
-  line-height: var(--sf-leading-normal);
-  font-size: var(--sf-text-base);
-  margin: 0;
 }
 
-/* ===== Closing contact line ===== */
-.contact {
-  text-align: center;
-  padding: var(--sf-space-6);
-  color: var(--sf-color-text-muted);
-  font-size: var(--sf-text-base);
+/* ═══ Clauses ══════════════════════════════════════════════════════════════ */
+
+.sections {
+  margin: var(--sf-space-16) 0 0;
 }
-.contact a {
-  color: var(--sf-color-gold-deep);
-  text-decoration: none;
+
+/* A hairline between clauses and nothing else — no cards, no fills. */
+.section {
+  position: relative;
+  padding-top: var(--sf-space-10);
+  border-top: 1px solid var(--sf-color-border);
+}
+
+.section:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+
+.section + .section {
+  margin-top: var(--sf-space-10);
+}
+
+/* The clause number. Inline above the heading on narrow screens; from 1024px
+   it hangs out into the left gutter beside the measure, where the container
+   has room to spare, so the prose keeps one clean edge top to bottom. */
+.sectionNum {
+  display: block;
+  margin: 0 0 var(--sf-space-3);
+  font-size: var(--sf-text-xs);
   font-weight: var(--sf-font-medium);
-  transition: color var(--sf-transition-fast);
+  font-variant-numeric: tabular-nums;
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wider);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-gold-deep);
 }
-.contact a:hover {
-  color: var(--sf-color-gold);
+
+@media (min-width: 1024px) {
+  .sectionNum {
+    position: absolute;
+    top: var(--sf-space-10);
+    right: calc(100% + var(--sf-space-8));
+    margin: 0;
+    padding-top: 0.4em;
+    white-space: nowrap;
+  }
+
+  .section:first-child .sectionNum {
+    top: 0;
+  }
+}
+
+.sectionTitle {
+  margin: 0 0 var(--sf-space-4);
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-2xl);
+  font-weight: var(--sf-font-normal);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text);
+}
+
+/* The reading body. 1.7 is the storefront's long-form setting. */
+.prose {
+  margin: 0;
+  font-size: var(--sf-text-md);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-secondary);
+}
+
+.prose + .prose {
+  margin-top: var(--sf-space-5);
+}
+
+/* ═══ Links in running text ════════════════════════════════════════════════
+   Gold, and underlined — colour is never the only cue. */
+
+.link {
+  color: var(--sf-color-gold-deep);
   text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  text-decoration-color: color-mix(in srgb, var(--sf-color-gold) 55%, transparent);
+  transition: color var(--sf-transition-fast),
+    text-decoration-color var(--sf-transition-fast);
 }
-.contact a:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
+
+.link:hover {
+  color: var(--sf-color-text);
+  text-decoration-color: var(--sf-color-text);
+}
+
+.link:focus-visible {
+  outline: 2px solid transparent;
   border-radius: var(--sf-radius-sm);
+  box-shadow: var(--sf-shadow-focus);
+}
+
+/* ═══ Editorial table ══════════════════════════════════════════════════════
+   Hairlines, tracked capitals in the head, generous cells, no zebra. The
+   wrapper is the scroller: it is focusable and labelled so the table can be
+   reached and panned from the keyboard, and the `min-width` on the table is
+   what makes it scroll INSIDE the wrapper instead of widening the page. */
+
+.tableWrap {
+  margin: var(--sf-space-8) 0 0;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tableWrap:focus-visible {
+  outline: 2px solid transparent;
+  border-radius: var(--sf-radius-sm);
+  box-shadow: var(--sf-shadow-focus);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: var(--sf-text-sm);
+}
+
+.table thead th {
+  padding: 0 var(--sf-space-6) var(--sf-space-3) 0;
+  border-bottom: 1px solid var(--sf-color-border-strong);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text-muted);
+  white-space: nowrap;
+}
+
+.table tbody th,
+.table tbody td {
+  padding: var(--sf-space-5) var(--sf-space-6) var(--sf-space-5) 0;
+  border-bottom: 1px solid var(--sf-color-border);
+  vertical-align: top;
+  font-weight: var(--sf-font-normal);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-secondary);
+}
+
+/* The row header carries the row's identity, so it takes the ink. */
+.table tbody th {
+  font-weight: var(--sf-font-medium);
+  color: var(--sf-color-text);
+  white-space: nowrap;
+}
+
+.table tbody tr:last-child th,
+.table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.table thead th:last-child,
+.table tbody th:last-child,
+.table tbody td:last-child {
+  padding-right: 0;
+}
+
+/* On a phone the tracked capitals in the head are the widest thing in some
+   columns, and holding them on one line buys a scrollbar for the sake of a few
+   pixels. Below the hint's breakpoint they are allowed to wrap, so a table
+   that can fit does fit and only a genuinely wide one is left to pan. */
+@media (max-width: 699px) {
+  .table thead th,
+  .table tbody th {
+    white-space: normal;
+  }
+}
+
+/* Shown only where the table actually has to be panned. */
+.tableHint {
+  margin: var(--sf-space-3) 0 0;
+  font-size: var(--sf-text-xs);
+  letter-spacing: 0.04em;
+  color: var(--sf-color-text-muted);
+}
+
+@media (min-width: 700px) {
+  .tableHint {
+    display: none;
+  }
+}
+
+/* ═══ Colophon ═════════════════════════════════════════════════════════════
+   How to reach a person about this document. */
+
+.colophon {
+  margin: var(--sf-space-16) 0 0;
+  padding-top: var(--sf-space-8);
+  border-top: 1px solid var(--sf-color-border-strong);
+}
+
+.colophonLabel {
+  margin: 0 0 var(--sf-space-3);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wider);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-gold-deep);
+}
+
+.colophonText {
+  margin: 0;
+  font-size: var(--sf-text-md);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-secondary);
+}
+
+.colophonText + .colophonText {
+  margin-top: var(--sf-space-3);
+}
+
+/* ═══ Narrow screens ═══════════════════════════════════════════════════════ */
+
+@media (max-width: 640px) {
+  .page {
+    padding: var(--sf-space-8) 0 var(--sf-space-16);
+  }
+
+  .container {
+    padding: 0 var(--sf-space-5);
+  }
+
+  .breadcrumb {
+    margin-bottom: var(--sf-space-8);
+  }
+
+  .sections {
+    margin-top: var(--sf-space-12);
+  }
+
+  .section {
+    padding-top: var(--sf-space-8);
+  }
+
+  .section + .section {
+    margin-top: var(--sf-space-8);
+  }
+
+  .colophon {
+    margin-top: var(--sf-space-12);
+  }
 }

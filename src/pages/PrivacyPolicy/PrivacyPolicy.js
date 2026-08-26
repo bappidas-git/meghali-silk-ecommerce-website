@@ -1,42 +1,202 @@
+// =============================================================================
+// PRIVACY POLICY  —  Meghali's Silk, route `/privacy`
+// =============================================================================
+// The first of the four policy pages (/privacy, /terms, /cookies, /refund),
+// which share one typeset "document" treatment: a tracked gold kicker, a serif
+// title over a hairline, the revision stamp, a standfirst, then numbered
+// clauses down a ~70-character measure with their numbers hung out into the
+// left gutter. See the stylesheet header for the shared vocabulary.
+//
+// WHAT THE REBUILD CORRECTED
+//   • THE PAGE WAS A STACK OF CARDS. Eight boxed panels on a 920px column, each
+//     with its own border and hover lift, is a dashboard pattern — it fights
+//     long-form reading. Legal copy wants a measure, hairlines and air.
+//   • THE COPY WAS GENERIC E-COMMERCE BOILERPLATE. It is now written for this
+//     house: the stitching measurements a made-to-measure blouse needs, the
+//     retention period Indian tax law actually imposes, and an explicit
+//     statement that card and UPI credentials are entered on the gateway's
+//     page and never reach us — which is what the checkout really does.
+//   • THE COOKIE CLAUSE WAS AN ORPHAN. It described cookies without pointing at
+//     the Cookie Policy that details them; it now links across.
+//
+// STATIC BY DESIGN
+//   No API calls and none needed — the page owns its copy. `APP_NAME`,
+//   `SUPPORT_EMAIL`, `SUPPORT_ADDRESS` and `POLICY_LAST_UPDATED` are the only
+//   values that come from outside, and `POLICY_LAST_UPDATED` is shared with the
+//   other three pages so the four can never disagree about their revision date.
+//
+// THEMING
+//   Tokens only. Every colour resolves through `--sf-*`, which flips under
+//   `body.dark`, so light and dark are one stylesheet. ThemeContext is consumed
+//   for nothing but the `color-scheme` hint that themes native scrollbars.
+// =============================================================================
 import React from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { useTheme } from "../../context/ThemeContext";
-import { APP_NAME, SUPPORT_EMAIL, POLICY_LAST_UPDATED } from "../../utils/constants";
+import {
+  APP_NAME,
+  SUPPORT_EMAIL,
+  SUPPORT_ADDRESS,
+  POLICY_LAST_UPDATED,
+} from "../../utils/constants";
 import styles from "./PrivacyPolicy.module.css";
 
 const PrivacyPolicy = () => {
   const { isDarkMode } = useTheme();
+  const prefersReducedMotion = useReducedMotion();
 
+  // A gentle fade and rise, staggered down the page and capped at six steps so
+  // the last clause never sits waiting behind a long queue. Disabled outright
+  // for anyone who asked for less motion — the clauses then paint at their
+  // final state on the first frame.
+  const reveal = (i) =>
+    prefersReducedMotion
+      ? {}
+      : {
+          initial: { opacity: 0, y: 12 },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0.55, delay: Math.min(i, 6) * 0.06 },
+        };
+
+  // Eight clauses, in the order a reader needs them: what we take, why, who
+  // else sees it, how it is kept, and how to get it back.
   const sections = [
-    { title: "Information We Collect", content: `When you use ${APP_NAME}, operated by Galleria Producer Company Limited (Kolkata, West Bengal), we may collect personal information such as your name, email address, phone number, shipping address, and payment details. We also collect browsing data, device information, and cookies to improve your shopping experience.` },
-    { title: "How We Use Your Information", content: "We use your information to process orders, provide customer support, send order updates, personalize your experience, improve our services, and comply with legal obligations. We may also use your data for marketing with your consent." },
-    { title: "Data Sharing", content: "We share your data with payment processors, shipping partners, and service providers necessary to fulfill your orders. We do not sell your personal information to third parties. Data may be shared with law enforcement if legally required." },
-    { title: "Data Security", content: "We implement industry-standard security measures including SSL encryption, secure payment processing, and regular security audits. Your payment information is never stored on our servers." },
-    { title: "Cookies & Tracking", content: "We use cookies and similar technologies to remember your preferences, analyze site traffic, and deliver personalized content. You can manage cookie preferences through your browser settings." },
-    { title: "Your Rights", content: "You have the right to access, correct, delete, or export your personal data. You can also opt out of marketing communications at any time. Contact us to exercise these rights." },
-    { title: "Data Retention", content: "We retain your data for as long as your account is active or as needed to provide services. Order data is retained for legal and tax compliance purposes." },
-    { title: "Changes to This Policy", content: "We may update this privacy policy from time to time. We will notify you of significant changes via email or through our platform." },
+    {
+      title: "What we collect",
+      body: [
+        `Galleria Producer Company Limited, the company behind ${APP_NAME}, collects the details you give us when you open an account, place an order or write to us: your name, email address, phone number, and your delivery and billing addresses. If you order a blouse stitched to measure, we also hold the measurements you send us for as long as that order is open.`,
+        "We record how the site is used — the pages you view, your device and browser, and an approximate location from your IP address — together with the cookies described in our Cookie Policy. Card, UPI and net-banking credentials are entered on our payment provider's own page and never reach our servers.",
+      ],
+    },
+    {
+      title: "Why we hold it",
+      body: [
+        "To take and fulfil your order, arrange delivery, handle returns and refunds, answer your questions, and keep the account and order history you see under My Orders.",
+        "We also use it to meet our obligations under Indian tax and consumer law, to detect and prevent fraud, and — only where you have asked for it — to send occasional word of new weaves and offers. You can withdraw that consent at any time without affecting anything else.",
+      ],
+    },
+    {
+      title: "Who else sees it",
+      body: [
+        "Only those who need it to get a parcel to you or money back to you: our courier partners, our payment gateways, the service that sends your order emails, and our accountants and auditors. Each is bound to use your data only for the work we have given them.",
+        "We do not sell your personal information and we do not trade it for advertising. We will disclose data where a law, a court or a regulator requires it of us.",
+      ],
+    },
+    {
+      title: "How we protect it",
+      body: [
+        "The site is served over TLS, payment is completed on the gateway's own PCI-DSS-compliant page, and access to customer records is limited to the staff whose work requires it. Full card numbers are never stored by us.",
+        "No system is beyond reach. If a breach ever affects your data, we will tell you and the relevant authority without undue delay, and we will tell you what we are doing about it.",
+      ],
+    },
+    {
+      title: "Cookies and tracking",
+      body: [
+        "We use cookies to keep your cart and your session, to remember preferences such as your theme, and to understand how the site is used.",
+      ],
+      // Rendered after the prose above so the cross-link reads as a closing line.
+      trailing: (
+        <>
+          What each cookie does and how long it lives is set out in our{" "}
+          <Link to="/cookies" className={styles.link}>
+            Cookie Policy
+          </Link>
+          . You can clear or block them from your browser at any time, though
+          the ones that hold your cart are needed for the site to work.
+        </>
+      ),
+    },
+    {
+      title: "Your rights",
+      body: [
+        "You may ask us for a copy of what we hold about you, have anything inaccurate corrected, ask for your data to be deleted, or object to a particular use of it. Write to us and we will respond within thirty days.",
+        "Closing your account does not erase the order and invoice records we are required by law to keep; everything not covered by that requirement is removed.",
+      ],
+    },
+    {
+      title: "How long we keep it",
+      body: [
+        "Your account and the data attached to it stay with us for as long as the account is open. Order, invoice and tax records are kept for the period Indian tax and company law requires — currently eight financial years — even after an account is closed.",
+        "Analytics data is retained in aggregate and is not tied back to you.",
+      ],
+    },
+    {
+      title: "Changes to this policy",
+      body: [
+        "If this policy changes, the revised version is posted here and the date at the head of the page moves with it. Where a change materially affects how we use your data, we will tell you by email before it takes effect.",
+      ],
+    },
   ];
 
   return (
-    <div className={`${styles.container} ${isDarkMode ? styles.dark : ""}`}>
-      <div className={styles.breadcrumb}><Link to="/">Home</Link> <span>/</span> <span>Privacy Policy</span></div>
-      <motion.div initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-        <h1 className={styles.title}>Privacy Policy</h1>
-        <p className={styles.subtitle}>Last updated: {POLICY_LAST_UPDATED}</p>
-        <p className={styles.intro}>At {APP_NAME}, we take your privacy seriously. This policy describes how we collect, use, and protect your personal information.</p>
-      </motion.div>
-      <div className={styles.sections}>
-        {sections.map((section, i) => (
-          <motion.div key={i} className={styles.section} initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: i * 0.05 }}>
-            <h2><span>{i + 1}.</span> {section.title}</h2>
-            <p>{section.content}</p>
+    <div className={`${styles.page} ${isDarkMode ? styles.dark : ""}`}>
+      <div className={styles.container}>
+        <div className={styles.doc}>
+          {/* ── Breadcrumb ───────────────────────────────────────────────── */}
+          <nav className={styles.breadcrumb} aria-label="Breadcrumb">
+            <Link to="/" className={styles.breadcrumbLink}>
+              Home
+            </Link>
+            <span className={styles.breadcrumbSep} aria-hidden="true">
+              /
+            </span>
+            <span className={styles.breadcrumbCurrent} aria-current="page">
+              Privacy Policy
+            </span>
+          </nav>
+
+          {/* ── Masthead ─────────────────────────────────────────────────── */}
+          <motion.div {...reveal(0)}>
+            <p className={styles.kicker}>Policies</p>
+            <h1 className={styles.title}>Privacy Policy</h1>
+            <p className={styles.updated}>
+              Last updated: {POLICY_LAST_UPDATED}
+            </p>
+            <p className={styles.standfirst}>
+              {APP_NAME} is a small house selling handwoven Assamese silk. This
+              policy sets out what we collect when you shop with us, why we hold
+              it, and how to have it corrected or removed.
+            </p>
           </motion.div>
-        ))}
-      </div>
-      <div className={styles.contact}>
-        <p>Questions? Contact us at <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a></p>
+
+          {/* ── The clauses ──────────────────────────────────────────────── */}
+          <div className={styles.sections}>
+            {sections.map((section, i) => (
+              <motion.section
+                key={section.title}
+                className={styles.section}
+                {...reveal(i + 1)}
+              >
+                <span className={styles.sectionNum} aria-hidden="true">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+                <h2 className={styles.sectionTitle}>{section.title}</h2>
+                {section.body.map((paragraph) => (
+                  <p key={paragraph.slice(0, 40)} className={styles.prose}>
+                    {paragraph}
+                  </p>
+                ))}
+                {section.trailing && (
+                  <p className={styles.prose}>{section.trailing}</p>
+                )}
+              </motion.section>
+            ))}
+          </div>
+
+          {/* ── Colophon ─────────────────────────────────────────────────── */}
+          <div className={styles.colophon}>
+            <p className={styles.colophonLabel}>Privacy questions</p>
+            <p className={styles.colophonText}>
+              Write to{" "}
+              <a href={`mailto:${SUPPORT_EMAIL}`} className={styles.link}>
+                {SUPPORT_EMAIL}
+              </a>{" "}
+              and mark your message for the privacy desk.
+            </p>
+            <p className={styles.colophonText}>{SUPPORT_ADDRESS}</p>
+          </div>
+        </div>
       </div>
     </div>
   );

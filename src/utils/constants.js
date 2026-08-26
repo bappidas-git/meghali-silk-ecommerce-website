@@ -126,7 +126,7 @@ export const SUPPORT_HOURS = "Mon – Sat: 10:00 AM – 7:00 PM IST";
 
 // Date the legal/policy pages were last reviewed. Single source so the Privacy,
 // Terms, Cookie and Refund pages never show contradictory "last updated" dates.
-export const POLICY_LAST_UPDATED = "June 1, 2026";
+export const POLICY_LAST_UPDATED = "August 26, 2026";
 
 // FAQs — one shared set, read on three surfaces: the Help Centre (/help), the
 // home FAQ block and the PDP's FAQ panel. The copy therefore has to work both
