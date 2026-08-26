@@ -1,192 +1,253 @@
-/* ==========================================================================
-   Products Page — Meghali's Silk listing / search results
-   Chip-forward, full-width grid of the shared storefront ProductCard.
-   ========================================================================== */
+/* ═══════════════════════════════════════════════════════════════════════════
+   PRODUCTS  —  the collection gallery
+   ═══════════════════════════════════════════════════════════════════════════
+   A gallery wall, not a results page. Three moves and nothing else:
 
-/* ---- Local aliases mapped onto the GLOBAL storefront design tokens ----------
-   The listing keeps its own variable names (used by the rules below) but their
-   values come from src/theme/storefront-tokens.css (--sf-*). A client re-skins
-   the whole storefront — listing included — from that one file. Dark mode is
-   inherited automatically because the --sf-* tokens flip under body.dark. */
+     1. A HEAD given real air — breadcrumb, tracked eyebrow, serif title, one
+        muted line of counts.
+     2. ONE HAIRLINE ROW carrying every control: Filter on the left, the chip
+        scroller in the middle, Sort as a quiet underline on the right. There is
+        no sidebar and no second toolbar.
+     3. THE WALL — a wide-gutter grid of unframed ProductCards on the ivory
+        ground. The gutters are the design; the cards bring no boxes of their
+        own, so nothing separates one garment from the next but light.
+
+   The filter panel is the only surface that ever floats: a bottom sheet on a
+   phone, a right-hand drawer from 769px up, both built from hairlines, tracked
+   capitals and the same near-square controls as the rest of the storefront.
+
+   TOKENS ONLY
+   Every colour, space, radius, shadow and type value comes from
+   storefront-tokens.css, and the buttons, chips and skeletons are the global
+   primitives from storefront-primitives.css. The only local variables are the
+   three that colour the inline empty-state artwork, and they are aliases onto
+   tokens — there is no hex in this file, and dark mode needs no rules of its
+   own because the tokens flip under `body.dark`.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 .page {
-  --bg: var(--sf-color-bg);
-  --card-bg: var(--sf-color-surface);
-  --text-primary: var(--sf-color-text);
-  --text-secondary: var(--sf-color-text-secondary);
-  --text-muted: var(--sf-color-text-muted);
-  --border: var(--sf-color-border);
-  --border-strong: var(--sf-color-border-strong);
-  --border-light: var(--sf-color-surface-2);
-  --accent: var(--sf-color-emerald);
-  --accent-contrast: var(--sf-color-emerald-contrast);
-  --gold: var(--sf-color-gold);
-  --link-color: var(--sf-color-secondary);
-  --link-hover: var(--sf-color-gold-deep);
-  --btn-primary-bg: var(--sf-color-emerald);
-  --btn-primary-hover: var(--sf-color-emerald-hover);
-  --btn-primary-text: var(--sf-color-emerald-contrast);
-  --chip-bg: var(--sf-color-surface-2);
-  --chip-hover: var(--sf-color-surface-hover);
-  --surface-2: var(--sf-color-surface-2);
-  --input-bg: var(--sf-color-surface);
-  --input-border: var(--sf-color-border-strong);
-  --toggle-bg: var(--sf-color-border-strong);
-  --toggle-on-bg: var(--sf-color-emerald);
-  --skeleton-bg: var(--sf-color-surface-2);
-  --skeleton-shimmer: var(--sf-color-surface-hover);
-  --overlay-bg: var(--sf-color-overlay);
-  --discount-text: var(--sf-color-discount);
-  --discount-badge-bg: var(--sf-color-danger);
-  --error-color: var(--sf-color-danger);
-  --empty-box: var(--sf-color-surface-2);
+  /* The line-art states paint through these two aliases so a single SVG can be
+     re-coloured from the token layer. Aliases, never values. */
   --empty-line: var(--sf-color-border-strong);
-  --empty-circle: var(--sf-color-text-muted);
-  --shadow-sm: var(--sf-shadow-sm);
-  --shadow-md: var(--sf-shadow-md);
-  --shadow-lg: var(--sf-shadow-lg);
-  --radius-sm: var(--sf-radius-sm);
-  --radius-md: var(--sf-radius-md);
-  --radius-lg: var(--sf-radius-lg);
-  --radius-pill: var(--sf-radius-pill);
+  --empty-gold: var(--sf-color-gold-deep);
 
   min-height: 100vh;
-  background: var(--bg);
-  color: var(--text-primary);
+  padding-bottom: var(--sf-space-24);
+  background: var(--sf-color-bg);
+  color: var(--sf-color-text);
   font-family: var(--sf-font-family);
-  padding-bottom: var(--sf-space-16);
 }
 
-/* ==========================================================================
-   Breadcrumb
-   ========================================================================== */
-.breadcrumb {
-  max-width: var(--sf-container-max);
-  margin: 0 auto;
-  padding: var(--sf-space-3) var(--sf-space-6);
-  font-size: var(--sf-text-sm);
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--sf-space-1);
-}
-
-.breadcrumbSep {
-  color: var(--text-muted);
-  margin: 0 2px;
-}
-
-.breadcrumbLink {
-  color: var(--link-color);
-  text-decoration: none;
-}
-
-.breadcrumbLink:hover {
-  color: var(--link-hover);
-  text-decoration: underline;
-}
-
-.breadcrumbLink:focus-visible {
-  outline: none;
-  border-radius: var(--radius-sm);
-  box-shadow: var(--sf-shadow-focus);
-}
-
-.breadcrumbCurrent {
-  color: var(--text-secondary);
-}
-
-/* ==========================================================================
-   Container — single full-width column
-   ========================================================================== */
 .container {
   max-width: var(--sf-container-max);
   margin: 0 auto;
   padding: 0 var(--sf-space-6);
 }
 
-/* ==========================================================================
-   Results header
-   ========================================================================== */
-.resultsHeader {
-  margin-bottom: var(--sf-space-5);
+/* ═══════════════════════════════════════════════════════════════════════════
+   1. BREADCRUMB  —  a whisper, set in the muted tone with a thin slash between
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.breadcrumb {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sf-space-2);
+  padding: var(--sf-space-10) 0 0;
+  font-size: var(--sf-text-xs);
+  letter-spacing: 0.04em;
+  color: var(--sf-color-text-muted);
 }
 
-.resultsHeading {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-3xl);
-  font-weight: var(--sf-font-bold);
-  line-height: var(--sf-leading-tight);
-  color: var(--text-primary);
-  margin: 0 0 var(--sf-space-2);
+.breadcrumbSep {
+  color: var(--sf-color-border-strong);
 }
 
-.resultsQuery {
-  color: var(--gold);
-  font-style: italic;
+/* The house link: no chrome, a gold hairline that grows in under it. */
+.breadcrumbLink {
+  position: relative;
+  color: var(--sf-color-text-secondary);
+  text-decoration: none;
+  transition: color var(--sf-transition-fast);
 }
 
-.resultsSub {
-  font-size: var(--sf-text-sm);
-  color: var(--text-secondary);
-  margin: 0;
+.breadcrumbLink::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 100%;
+  bottom: -3px;
+  height: 1px;
+  background: var(--sf-color-gold-deep);
+  transition: right var(--sf-transition);
 }
 
-.resultsSub strong {
-  color: var(--text-primary);
-  font-weight: var(--sf-font-semibold);
+.breadcrumbLink:hover {
+  color: var(--sf-color-text);
 }
 
-/* ==========================================================================
-   Filter / sort chip toolbar
-   ========================================================================== */
-.toolbar {
+.breadcrumbLink:hover::after {
+  right: 0;
+}
+
+.breadcrumbLink:focus-visible {
+  outline: 2px solid transparent;
+  border-radius: var(--sf-radius-sm);
+  box-shadow: var(--sf-shadow-focus);
+}
+
+.breadcrumbCurrent {
+  color: var(--sf-color-text);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   2. COLLECTION HEAD
+   The prompt-12 convention: a tracked eyebrow opened by a short gold rule, the
+   serif title, then one quiet line of real counts. Generous air below.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.collectionHead {
+  max-width: 60ch;
+  padding: var(--sf-space-10) 0 var(--sf-space-12);
+}
+
+.eyebrow {
   display: flex;
   align-items: center;
   gap: var(--sf-space-3);
-  margin-bottom: var(--sf-space-6);
-  padding-bottom: var(--sf-space-4);
-  border-bottom: 1px solid var(--border);
+  margin: 0 0 var(--sf-space-4);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wider);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-gold-deep);
 }
+
+.eyebrow::before {
+  content: "";
+  flex: none;
+  width: var(--sf-space-8);
+  height: 1px;
+  background: currentColor;
+}
+
+.collectionTitle {
+  margin: 0;
+  font-family: var(--sf-font-display);
+  font-size: clamp(2.25rem, 4.4vw, 3.25rem);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-display);
+  letter-spacing: var(--sf-tracking-tight);
+  color: var(--sf-color-text);
+}
+
+/* The echoed search query, set in the gold italic so the words the shopper
+   typed read as a quotation rather than as part of the headline. */
+.resultsQuery {
+  font-style: italic;
+  color: var(--sf-color-gold-deep);
+}
+
+.collectionSummary {
+  margin: var(--sf-space-4) 0 0;
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.collectionSummary strong {
+  font-weight: var(--sf-font-medium);
+  color: var(--sf-color-text);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   3. TOOLBAR  —  one rule band. Nothing here has a fill or a shadow; the two
+   hairlines and the tracked capitals do all the work.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-6);
+  padding: var(--sf-space-3) 0;
+  margin-bottom: var(--sf-space-12);
+  border-top: 1px solid var(--sf-color-border);
+  border-bottom: 1px solid var(--sf-color-border);
+}
+
+/* ── Filter: a text button, opened by the hairline mark ──────────────────── */
 
 .filterBtn {
   position: relative;
   display: inline-flex;
   align-items: center;
   gap: var(--sf-space-2);
-  flex-shrink: 0;
+  flex: none;
   min-height: var(--sf-tap-target);
-  padding: 0 var(--sf-space-4);
-  background: var(--card-bg);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-pill);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-  color: var(--text-primary);
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--sf-color-text);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
   cursor: pointer;
-  transition: border-color var(--sf-transition-fast), background var(--sf-transition-fast);
+  transition: color var(--sf-transition-fast);
 }
 
 .filterBtn:hover {
-  border-color: var(--accent);
-  background: var(--chip-hover);
+  color: var(--sf-color-gold-deep);
 }
 
 .filterBtn:focus-visible {
-  outline: none;
+  outline: 2px solid transparent;
+  border-radius: var(--sf-radius-sm);
   box-shadow: var(--sf-shadow-focus);
 }
 
-.filterBadge {
-  position: absolute;
-  top: 6px;
-  right: 10px;
-  width: 8px;
-  height: 8px;
-  background: var(--accent);
-  border-radius: 50%;
+.filterBtnText {
+  position: relative;
 }
 
-/* Horizontally scrollable strip of chip groups */
+.filterBtnText::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 100%;
+  bottom: -4px;
+  height: 1px;
+  background: var(--sf-color-gold-deep);
+  transition: right var(--sf-transition);
+}
+
+.filterBtn:hover .filterBtnText::after {
+  right: 0;
+}
+
+/* The count is a note, not a badge: a hairline square with tabular digits. */
+.filterBtnCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 var(--sf-space-1);
+  border: 1px solid var(--sf-color-border-strong);
+  border-radius: var(--sf-radius-sm);
+  font-size: 0.6875rem;
+  font-weight: var(--sf-font-medium);
+  letter-spacing: 0;
+  line-height: 1;
+  color: var(--sf-color-gold-deep);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── The chip scroller ───────────────────────────────────────────────────── */
+
 .chipScroller {
   flex: 1;
   min-width: 0;
@@ -194,303 +255,711 @@
   align-items: center;
   gap: var(--sf-space-4);
   overflow-x: auto;
-  padding-bottom: 2px;
+  overflow-y: hidden;
+  /* Room for the focus ring, which sits 4px outside the chip. */
+  padding: var(--sf-space-1) var(--sf-space-1);
+  margin: calc(var(--sf-space-1) * -1) calc(var(--sf-space-1) * -1);
   scrollbar-width: thin;
+  scrollbar-color: var(--sf-color-border-strong) transparent;
+  -webkit-overflow-scrolling: touch;
 }
 
 .chipScroller::-webkit-scrollbar {
-  height: 4px;
+  height: 3px;
+}
+
+.chipScroller::-webkit-scrollbar-track {
+  background: transparent;
 }
 
 .chipScroller::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: 4px;
+  background: var(--sf-color-border);
+  border-radius: var(--sf-radius-pill);
 }
 
 .chipGroup {
   display: flex;
   align-items: center;
   gap: var(--sf-space-2);
-  flex-shrink: 0;
+  flex: none;
 }
 
-/* Subtle divider between chip groups */
+/* A hairline, not a gap, separates one facet's chips from the next. */
 .chipGroup:not(:last-child)::after {
   content: "";
+  flex: none;
   width: 1px;
-  height: 22px;
+  height: 18px;
   margin-left: var(--sf-space-2);
-  background: var(--border);
+  background: var(--sf-color-border);
 }
 
+/* On top of the global .sf-chip primitive: one line, and a size down so a rule
+   of chips reads as a caption rather than a row of buttons. The primitive's own
+   `button.sf-chip` rule keeps the 44px tap target — deliberately not overridden
+   here, since these are the page's most-tapped controls on a phone. */
 .chip {
+  white-space: nowrap;
+  font-size: var(--sf-text-xs);
+  letter-spacing: 0.04em;
+}
+
+/* The primitive's own flex gap already sets this off from the label; the
+   negative right margin pulls it back toward the chip's edge. */
+.chipRemove {
+  flex: none;
+  margin-right: calc(var(--sf-space-1) * -1);
+  opacity: 0.75;
+}
+
+/* ── Sort: the native select, stripped back to a word and a hairline ─────── */
+
+.sortField {
   display: inline-flex;
   align-items: center;
+  gap: var(--sf-space-3);
+  flex: none;
   min-height: var(--sf-tap-target);
-  padding: 0 var(--sf-space-4);
-  background: var(--chip-bg);
-  border: 1px solid transparent;
-  border-radius: var(--radius-pill);
+}
+
+.sortLabelText {
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  color: var(--sf-color-text-muted);
+  white-space: nowrap;
+}
+
+/* Shared by both selects on the page. The wrapper draws the chevron, because a
+   <select> cannot carry a pseudo-element of its own. */
+.selectWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.selectWrap::after {
+  content: "";
+  position: absolute;
+  right: var(--sf-space-1);
+  width: 5px;
+  height: 5px;
+  border-right: 1px solid var(--sf-color-text-muted);
+  border-bottom: 1px solid var(--sf-color-text-muted);
+  transform: translateY(-2px) rotate(45deg);
+  pointer-events: none;
+  transition: border-color var(--sf-transition-fast);
+}
+
+.selectWrap:hover::after {
+  border-color: var(--sf-color-text);
+}
+
+.sortSelect,
+.perPageSelect {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  min-height: 32px;
+  padding: 0 var(--sf-space-6) 0 0;
+  border: none;
+  border-bottom: 1px solid var(--sf-color-border-strong);
+  border-radius: 0;
+  background: transparent;
+  color: var(--sf-color-text);
   font-family: var(--sf-font-family);
   font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-medium);
-  color: var(--text-secondary);
-  white-space: nowrap;
+  line-height: 1.4;
   cursor: pointer;
-  transition: background var(--sf-transition-fast), color var(--sf-transition-fast),
-    border-color var(--sf-transition-fast);
+  transition: border-color var(--sf-transition-fast), color var(--sf-transition-fast);
 }
 
-.chip:hover {
-  background: var(--chip-hover);
-  color: var(--text-primary);
-  border-color: var(--border-strong);
+.sortSelect:hover,
+.perPageSelect:hover {
+  border-bottom-color: var(--sf-color-gold-deep);
 }
 
-.chip:focus-visible {
-  outline: none;
+.sortSelect:focus-visible,
+.perPageSelect:focus-visible {
+  outline: 2px solid transparent;
+  border-radius: var(--sf-radius-sm);
   box-shadow: var(--sf-shadow-focus);
 }
 
-.chipActive {
-  background: var(--accent);
-  color: var(--accent-contrast);
-  border-color: var(--accent);
-  font-weight: var(--sf-font-semibold);
+/* The dropdown list itself is drawn by the OS — give it the page's ground so it
+   is not a white rectangle in the evening room. */
+.sortSelect option,
+.perPageSelect option {
+  background: var(--sf-color-surface);
+  color: var(--sf-color-text);
 }
 
-.chipActive:hover {
-  background: var(--btn-primary-hover);
-  color: var(--accent-contrast);
-  border-color: var(--btn-primary-hover);
-}
+/* ═══════════════════════════════════════════════════════════════════════════
+   4. THE WALL
+   Wide gutters, generous rows. The cards bring no frame, so the ONLY thing
+   separating two garments is this whitespace — which is why the row gap is
+   twice the column gap.
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Sort control */
-.sortLabel {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sf-space-2);
-  flex-shrink: 0;
-  font-size: var(--sf-text-sm);
-  color: var(--text-secondary);
-  white-space: nowrap;
-}
-
-.sortSelect {
-  min-height: var(--sf-tap-target);
-  padding: 0 var(--sf-space-8) 0 var(--sf-space-3);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-pill);
-  background: var(--input-bg);
-  color: var(--text-primary);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-medium);
-  cursor: pointer;
-  outline: none;
-  appearance: auto;
-}
-
-.sortSelect:hover {
-  border-color: var(--accent);
-}
-
-.sortSelect:focus-visible {
-  box-shadow: var(--sf-shadow-focus);
-}
-
-/* ==========================================================================
-   Product grid (shared ProductCard)
-   ========================================================================== */
 .grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--sf-space-5);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: var(--sf-space-8);
+  row-gap: var(--sf-space-16);
 }
 
-.cardWrap {
+.cell {
   display: flex;
+  min-width: 0;
 }
 
-.cardWrap > * {
+.cell > * {
   width: 100%;
 }
 
-/* ==========================================================================
-   Filter list controls (inside the sheet)
-   ========================================================================== */
-.filterContent {
+/* ── Skeletons — the card's silhouette on the shared primitive ───────────── */
+
+.skelCell {
   display: flex;
   flex-direction: column;
-  padding-bottom: var(--sf-space-4);
+  gap: var(--sf-space-4);
+  min-width: 0;
 }
 
-.filterSection {
-  padding: var(--sf-space-4) 0;
-  border-bottom: 1px solid var(--border-light);
+.skelMedia {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--sf-radius-sm);
 }
 
-.filterSection:last-child {
-  border-bottom: none;
+.skelBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-2);
 }
 
-.filterTitle {
-  font-size: var(--sf-text-xs);
-  font-weight: var(--sf-font-bold);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+.skelBrand { width: 32%; height: 8px; }
+.skelName  { width: 78%; height: 13px; }
+.skelStars { width: 46%; height: 9px; }
+.skelPrice { width: 38%; height: 13px; margin-top: var(--sf-space-1); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   5. EMPTY / ERROR  —  editorial moments, centred on the measure
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--sf-space-20) var(--sf-space-5) var(--sf-space-24);
+}
+
+.stateArt {
+  display: block;
+  margin-bottom: var(--sf-space-8);
+}
+
+.stateTitle {
   margin: 0 0 var(--sf-space-3);
-  color: var(--text-primary);
+  font-family: var(--sf-font-display);
+  font-size: clamp(1.5rem, 2.6vw, 2rem);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  letter-spacing: var(--sf-tracking-tight);
+  color: var(--sf-color-text);
 }
 
-.filterList {
+.stateText {
+  max-width: 46ch;
+  margin: 0 0 var(--sf-space-8);
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-secondary);
+}
+
+.stateBtn {
+  min-width: 200px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   6. PAGINATION  —  words and numbers on a hairline, then a quiet meta line
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.pager {
   display: flex;
   flex-direction: column;
-  gap: var(--sf-space-1);
-  max-height: 220px;
-  overflow-y: auto;
+  align-items: center;
+  gap: var(--sf-space-5);
+  margin-top: var(--sf-space-20);
+  padding-top: var(--sf-space-8);
+  border-top: 1px solid var(--sf-color-border);
 }
 
-.filterList::-webkit-scrollbar {
+.pagerRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--sf-space-4);
+}
+
+.pagerNums {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-1);
+}
+
+/* Prev / Next — words, set in the tracked capitals with a hairline mark. */
+.pagerStep {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sf-space-2);
+  min-height: var(--sf-tap-target);
+  padding: 0 var(--sf-space-2);
+  border: none;
+  background: transparent;
+  color: var(--sf-color-text-secondary);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  cursor: pointer;
+  transition: color var(--sf-transition-fast), opacity var(--sf-transition-fast);
+}
+
+.pagerStep:hover:not(:disabled) {
+  color: var(--sf-color-text);
+}
+
+.pagerStep:disabled {
+  opacity: 0.32;
+  cursor: not-allowed;
+}
+
+.pagerStep:focus-visible {
+  outline: 2px solid transparent;
+  border-radius: var(--sf-radius-sm);
+  box-shadow: var(--sf-shadow-focus);
+}
+
+/* A number is a number: no button chrome until it is the page you are on, and
+   then it is underlined in gold rather than filled. */
+.pagerNum {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-width: var(--sf-tap-target);
+  min-height: var(--sf-tap-target);
+  padding: 0 var(--sf-space-2);
+  border: none;
+  background: transparent;
+  color: var(--sf-color-text-secondary);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-sm);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: color var(--sf-transition-fast);
+}
+
+.pagerNum::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  right: 50%;
+  bottom: 11px;
+  height: 1px;
+  background: var(--sf-color-gold-deep);
+  transition: left var(--sf-transition), right var(--sf-transition);
+}
+
+.pagerNum:hover {
+  color: var(--sf-color-text);
+}
+
+.pagerNum:hover::after {
+  left: var(--sf-space-2);
+  right: var(--sf-space-2);
+}
+
+.pagerNum:focus-visible {
+  outline: 2px solid transparent;
+  border-radius: var(--sf-radius-sm);
+  box-shadow: var(--sf-shadow-focus);
+}
+
+.pagerNumActive {
+  color: var(--sf-color-text);
+  font-weight: var(--sf-font-medium);
+}
+
+.pagerNumActive::after {
+  left: var(--sf-space-2);
+  right: var(--sf-space-2);
+}
+
+.pagerGap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--sf-space-6);
+  height: var(--sf-tap-target);
+  color: var(--sf-color-text-muted);
+  font-size: var(--sf-text-sm);
+}
+
+.pagerMeta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--sf-space-4);
+  font-size: var(--sf-text-xs);
+  color: var(--sf-color-text-muted);
+}
+
+.pagerMetaSep {
+  width: var(--sf-space-6);
+  height: 1px;
+  background: var(--sf-color-border);
+}
+
+.pagerInfo {
+  letter-spacing: 0.04em;
+  font-variant-numeric: tabular-nums;
+}
+
+.perPage {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sf-space-3);
+}
+
+.perPageText {
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  white-space: nowrap;
+}
+
+.perPageSelect {
+  min-height: var(--sf-tap-target);
+  font-size: var(--sf-text-xs);
+  padding-right: var(--sf-space-5);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   7. FILTER PANEL
+   Bottom sheet on a phone, right-hand drawer from 769px. Hairline sections,
+   tracked titles, near-square controls — the drawer is the page's own language
+   at a smaller measure, not a different one.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  background: var(--sf-color-overlay);
+  /* Above the fixed Header and the mobile BottomNav, so the footer is never
+     covered by either. */
+  z-index: 1300;
+}
+
+.sheet {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: 86vh;
+  overflow: hidden;
+  background: var(--sf-color-bg);
+  color: var(--sf-color-text);
+  border-top: 1px solid var(--sf-color-border);
+  border-radius: var(--sf-radius-lg) var(--sf-radius-lg) 0 0;
+  box-shadow: var(--sf-shadow-lg);
+  outline: none;
+}
+
+.sheetHead {
+  flex: none;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sf-space-4);
+  padding: var(--sf-space-5) var(--sf-space-6);
+  border-bottom: 1px solid var(--sf-color-border);
+}
+
+.sheetHeading {
+  min-width: 0;
+}
+
+.sheetEyebrow {
+  margin: 0 0 var(--sf-space-1);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wider);
+  color: var(--sf-color-gold-deep);
+}
+
+.sheetTitle {
+  margin: 0;
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-2xl);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text);
+}
+
+.sheetClose {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--sf-tap-target);
+  height: var(--sf-tap-target);
+  margin: calc(var(--sf-space-2) * -1) calc(var(--sf-space-3) * -1) 0 0;
+  padding: 0;
+  border: none;
+  border-radius: var(--sf-radius-sm);
+  background: transparent;
+  color: var(--sf-color-text);
+  cursor: pointer;
+  transition: color var(--sf-transition-fast);
+}
+
+.sheetClose:hover {
+  color: var(--sf-color-gold-deep);
+}
+
+.sheetClose:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: var(--sf-shadow-focus);
+}
+
+.sheetBody {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 var(--sf-space-6);
+  overscroll-behavior: contain;
+}
+
+.sheetFoot {
+  flex: none;
+  display: flex;
+  gap: var(--sf-space-3);
+  padding: var(--sf-space-4) var(--sf-space-6);
+  border-top: 1px solid var(--sf-color-border);
+  background: var(--sf-color-bg);
+}
+
+.sheetClear,
+.sheetApply {
+  min-height: var(--sf-tap-target);
+  padding: var(--sf-space-3) var(--sf-space-4);
+  border-radius: var(--sf-radius-sm);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  cursor: pointer;
+  transition: background-color var(--sf-transition), border-color var(--sf-transition),
+    color var(--sf-transition), opacity var(--sf-transition);
+}
+
+.sheetClear {
+  flex: 1;
+  border: 1px solid var(--sf-color-border-strong);
+  background: transparent;
+  color: var(--sf-color-text);
+}
+
+.sheetClear:hover:not(:disabled) {
+  border-color: var(--sf-color-gold-deep);
+  color: var(--sf-color-gold-deep);
+}
+
+.sheetClear:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.sheetApply {
+  flex: 1.6;
+  border: 1px solid var(--sf-color-emerald);
+  background: var(--sf-color-emerald);
+  color: var(--sf-color-emerald-contrast);
+}
+
+.sheetApply:hover {
+  background: var(--sf-color-emerald-hover);
+  border-color: var(--sf-color-emerald-hover);
+}
+
+.sheetClear:focus-visible,
+.sheetApply:focus-visible {
+  outline: 2px solid transparent;
+  box-shadow: var(--sf-shadow-focus);
+}
+
+/* ── Facets ──────────────────────────────────────────────────────────────── */
+
+.facets {
+  display: flex;
+  flex-direction: column;
+}
+
+.facet {
+  padding: var(--sf-space-6) 0;
+  border-bottom: 1px solid var(--sf-color-border);
+}
+
+.facet:last-child {
+  border-bottom: none;
+  padding-bottom: var(--sf-space-8);
+}
+
+.facetTitle {
+  margin: 0 0 var(--sf-space-4);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  color: var(--sf-color-text-muted);
+}
+
+.facetList {
+  display: flex;
+  flex-direction: column;
+  max-height: 264px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--sf-color-border) transparent;
+  /* Room for the focus ring on the first and last rows, and for the overlay
+     scrollbar — which reserves no width of its own and would otherwise be
+     drawn straight over the counts in the right-hand column. */
+  margin: calc(var(--sf-space-1) * -1) 0;
+  padding: var(--sf-space-1) var(--sf-space-3) var(--sf-space-1) 0;
+}
+
+.facetList::-webkit-scrollbar {
   width: 3px;
 }
 
-.filterList::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 3px;
+.facetList::-webkit-scrollbar-thumb {
+  background: var(--sf-color-border);
+  border-radius: var(--sf-radius-pill);
 }
 
-.checkboxLabel,
-.radioLabel {
+/* ── One option row: a real input, visually hidden, plus the mark it drives ─
+   The native control keeps every bit of its semantics and keyboard behaviour;
+   the span beside it is the part we are allowed to draw. Hiding with opacity
+   (not display:none) keeps it focusable, and the focus ring is forwarded onto
+   the mark by the sibling selector below. */
+
+.option {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-3);
+  min-height: var(--sf-tap-target);
+  padding: var(--sf-space-1) 0;
+  cursor: pointer;
+  color: var(--sf-color-text-secondary);
+  transition: color var(--sf-transition-fast);
+}
+
+.option:hover {
+  color: var(--sf-color-text);
+}
+
+.control {
+  position: absolute;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.box {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--sf-color-border-strong);
+  border-radius: var(--sf-radius-sm);
+  background: var(--sf-color-surface);
+  color: transparent;
+  transition: background-color var(--sf-transition-fast),
+    border-color var(--sf-transition-fast), color var(--sf-transition-fast);
+}
+
+.boxRound {
+  border-radius: var(--sf-radius-pill);
+}
+
+.option:hover .box {
+  border-color: var(--sf-color-text-secondary);
+}
+
+.control:checked + .box {
+  background: var(--sf-color-emerald);
+  border-color: var(--sf-color-emerald);
+  color: var(--sf-color-emerald-contrast);
+}
+
+/* The radio's dot, drawn on the mark rather than shipped as an icon. */
+.control:checked + .boxRound::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: var(--sf-radius-pill);
+  background: currentColor;
+}
+
+.control:focus-visible + .box {
+  outline: 2px solid transparent;
+  box-shadow: var(--sf-shadow-focus);
+}
+
+.optionText {
+  flex: 1;
   display: flex;
   align-items: center;
   gap: var(--sf-space-2);
-  cursor: pointer;
+  min-width: 0;
   font-size: var(--sf-text-sm);
-  min-height: var(--sf-tap-target);
-  color: var(--text-primary);
-}
-
-.checkboxLabel:hover,
-.radioLabel:hover {
-  color: var(--link-hover);
-}
-
-.checkbox,
-.radio {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--accent);
-  cursor: pointer;
-  flex-shrink: 0;
-}
-
-.checkboxText {
-  flex: 1;
   line-height: var(--sf-leading-normal);
 }
 
-.filterCount {
-  color: var(--text-muted);
+/* Child categories sit a step back in tone as well as in space: the indent says
+   where they are, the muted colour says they are a subdivision of the row
+   above. Hover still lifts them, so the row never feels disabled. */
+.optionChild {
+  color: var(--sf-color-text-muted);
+}
+
+.option:hover .optionChild {
+  color: var(--sf-color-text-secondary);
+}
+
+.optionCount {
+  flex: none;
   font-size: var(--sf-text-xs);
-  flex-shrink: 0;
-}
-
-/* Price range */
-.priceInputRow {
-  display: flex;
-  align-items: center;
-  gap: var(--sf-space-2);
-  margin-bottom: var(--sf-space-3);
-}
-
-.priceInput {
-  width: 80px;
-  min-height: var(--sf-tap-target);
-  padding: 0 var(--sf-space-2);
-  border: 1px solid var(--input-border);
-  border-radius: var(--radius-sm);
-  font-size: var(--sf-text-sm);
-  background: var(--input-bg);
-  color: var(--text-primary);
-  outline: none;
-}
-
-.priceInput:focus-visible {
-  border-color: var(--accent);
-  box-shadow: var(--sf-shadow-focus);
-}
-
-.priceSeparator {
-  color: var(--text-muted);
-  font-size: var(--sf-text-xs);
-}
-
-.priceGoBtn {
-  min-height: var(--sf-tap-target);
-  padding: 0 var(--sf-space-4);
-  background: var(--btn-primary-bg);
-  color: var(--btn-primary-text);
-  border: none;
-  border-radius: var(--radius-sm);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-  cursor: pointer;
-}
-
-.priceGoBtn:hover {
-  background: var(--btn-primary-hover);
-}
-
-.priceGoBtn:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
-}
-
-.quickRanges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sf-space-2);
-}
-
-.quickRangeBtn {
-  min-height: var(--sf-tap-target);
-  padding: 0 var(--sf-space-3);
-  background: var(--chip-bg);
-  border: 1px solid transparent;
-  border-radius: var(--radius-pill);
-  color: var(--text-secondary);
-  font-size: var(--sf-text-sm);
-  cursor: pointer;
-  transition: background var(--sf-transition-fast), color var(--sf-transition-fast);
-}
-
-.quickRangeBtn:hover {
-  background: var(--chip-hover);
-  color: var(--text-primary);
-}
-
-.quickRangeBtn:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
-}
-
-.quickRangeBtnActive {
-  background: var(--accent);
-  color: var(--accent-contrast);
-  border-color: var(--accent);
-  font-weight: var(--sf-font-semibold);
-}
-
-/* Rating */
-.ratingOption {
-  display: flex;
-  align-items: center;
-  gap: var(--sf-space-1);
-}
-
-.ratingPlus {
-  font-size: var(--sf-text-xs);
-  color: var(--text-secondary);
+  color: var(--sf-color-text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 .stars {
@@ -500,511 +969,293 @@
   color: var(--sf-color-star);
 }
 
-/* Toggle */
-.toggleLabel {
+.ratingPlus {
+  font-size: var(--sf-text-xs);
+  color: var(--sf-color-text-muted);
+  white-space: nowrap;
+}
+
+/* ── Price facet ─────────────────────────────────────────────────────────── */
+
+.rangeChips {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  cursor: pointer;
-  min-height: var(--sf-tap-target);
-  font-size: var(--sf-text-sm);
-}
-
-.toggle {
-  position: relative;
-  width: 44px;
-  height: 24px;
-  background: var(--toggle-bg);
-  border: none;
-  border-radius: var(--radius-pill);
-  cursor: pointer;
-  transition: background var(--sf-transition-fast);
-  padding: 0;
-  flex-shrink: 0;
-}
-
-.toggle:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
-}
-
-.toggleOn {
-  background: var(--toggle-on-bg);
-}
-
-.toggleThumb {
-  position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 20px;
-  height: 20px;
-  background: var(--sf-color-surface);
-  border-radius: 50%;
-  transition: transform var(--sf-transition-fast);
-  box-shadow: var(--shadow-sm);
-}
-
-.toggleOn .toggleThumb {
-  transform: translateX(20px);
-}
-
-/* Clear All Filters button */
-.clearAllBtn {
-  display: block;
-  width: 100%;
-  margin-top: var(--sf-space-4);
-  min-height: var(--sf-tap-target);
-  padding: var(--sf-space-3);
-  background: none;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-md);
-  color: var(--discount-text);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-  cursor: pointer;
-  transition: background var(--sf-transition-fast), border-color var(--sf-transition-fast);
-}
-
-.clearAllBtn:hover {
-  background: var(--surface-2);
-  border-color: var(--discount-text);
-}
-
-.clearAllBtn:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
-}
-
-/* ==========================================================================
-   Skeleton Loading
-   ========================================================================== */
-.skeletonCard {
-  display: flex;
-  flex-direction: column;
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  overflow: hidden;
-}
-
-.skeletonBody {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sf-space-2);
-  padding: var(--sf-space-3);
-}
-
-.skeleton {
-  background: var(--skeleton-bg);
-  border-radius: var(--radius-sm);
-  position: relative;
-  overflow: hidden;
-}
-
-.skeleton::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    90deg,
-    transparent 0%,
-    var(--skeleton-shimmer) 50%,
-    transparent 100%
-  );
-  animation: shimmer 1.5s infinite;
-}
-
-@keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .skeleton::after {
-    animation: none;
-  }
-}
-
-.skeletonImage {
-  aspect-ratio: 3 / 4;
-  border-radius: 0;
-}
-
-.skeletonLine {
-  height: 14px;
-}
-
-/* ==========================================================================
-   Empty / error state
-   ========================================================================== */
-.emptyState {
-  text-align: center;
-  padding: var(--sf-space-16) var(--sf-space-5);
-}
-
-.emptyIllustration {
-  margin-bottom: var(--sf-space-6);
-}
-
-.emptyTitle {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-2xl);
-  font-weight: var(--sf-font-bold);
-  color: var(--text-primary);
-  margin: 0 0 var(--sf-space-2);
-}
-
-.emptyText {
-  font-size: var(--sf-text-sm);
-  color: var(--text-secondary);
-  margin: 0 auto var(--sf-space-6);
-  max-width: 420px;
-}
-
-.emptyBtn {
-  min-height: var(--sf-tap-target);
-  padding: 0 var(--sf-space-8);
-  background: var(--btn-primary-bg);
-  color: var(--btn-primary-text);
-  border: none;
-  border-radius: var(--radius-pill);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-  cursor: pointer;
-}
-
-.emptyBtn:hover {
-  background: var(--btn-primary-hover);
-}
-
-.emptyBtn:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
-}
-
-.errorIcon {
-  color: var(--error-color);
-  margin-bottom: var(--sf-space-4);
-}
-
-/* ==========================================================================
-   Pagination
-   ========================================================================== */
-.pagination {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
   flex-wrap: wrap;
-  gap: var(--sf-space-4);
-  margin-top: var(--sf-space-8);
-  padding: var(--sf-space-4);
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-}
-
-.paginationLeft,
-.paginationRight {
-  flex-shrink: 0;
-}
-
-.paginationCenter {
-  display: flex;
-  align-items: center;
-  gap: var(--sf-space-1);
-}
-
-.perPageLabel {
-  font-size: var(--sf-text-sm);
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
   gap: var(--sf-space-2);
+  margin-bottom: var(--sf-space-5);
 }
 
-.perPageSelect {
+.rangeChip {
+  font-size: var(--sf-text-xs);
+  letter-spacing: 0.04em;
+}
+
+.priceRow {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-3);
+}
+
+/* Underline fields, not boxes — the same hairline the selects sit on. */
+.priceInput {
+  flex: 1;
+  min-width: 0;
   min-height: var(--sf-tap-target);
-  padding: 0 var(--sf-space-2);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  background: var(--input-bg);
-  color: var(--text-primary);
+  padding: 0 var(--sf-space-1);
+  border: none;
+  border-bottom: 1px solid var(--sf-color-border-strong);
+  border-radius: 0;
+  background: transparent;
+  color: var(--sf-color-text);
+  font-family: var(--sf-font-family);
   font-size: var(--sf-text-sm);
-  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+  transition: border-color var(--sf-transition-fast);
 }
 
-.perPageSelect:focus-visible {
-  outline: none;
+.priceInput::placeholder {
+  color: var(--sf-color-text-muted);
+}
+
+.priceInput:hover {
+  border-bottom-color: var(--sf-color-text-secondary);
+}
+
+.priceInput:focus-visible {
+  outline: 2px solid transparent;
+  border-bottom-color: var(--sf-color-gold-deep);
+  border-radius: var(--sf-radius-sm);
   box-shadow: var(--sf-shadow-focus);
 }
 
-.pageBtn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sf-space-1);
-  min-width: var(--sf-tap-target);
+.priceDash {
+  flex: none;
+  color: var(--sf-color-text-muted);
+  font-size: var(--sf-text-xs);
+}
+
+.priceGo {
+  flex: none;
   min-height: var(--sf-tap-target);
-  padding: 0 var(--sf-space-3);
-  background: var(--card-bg);
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-sm);
-  color: var(--text-primary);
-  font-size: var(--sf-text-sm);
+  padding: 0 var(--sf-space-4);
+  border: 1px solid var(--sf-color-border-strong);
+  border-radius: var(--sf-radius-sm);
+  background: transparent;
+  color: var(--sf-color-text);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
   font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
   cursor: pointer;
   transition: border-color var(--sf-transition-fast), color var(--sf-transition-fast);
 }
 
-.pageBtn:hover:not(:disabled) {
-  border-color: var(--accent);
-  color: var(--accent);
+.priceGo:hover {
+  border-color: var(--sf-color-gold-deep);
+  color: var(--sf-color-gold-deep);
 }
 
-.pageBtn:focus-visible {
-  outline: none;
+.priceGo:focus-visible {
+  outline: 2px solid transparent;
   box-shadow: var(--sf-shadow-focus);
 }
 
-.pageBtn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
+/* ── Availability switch ─────────────────────────────────────────────────── */
 
-.pageBtnActive {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: var(--accent-contrast);
-  font-weight: var(--sf-font-bold);
-}
-
-.pageBtnActive:hover {
-  color: var(--accent-contrast);
-}
-
-.pageBtnText {
-  display: inline;
-}
-
-.pageEllipsis {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--sf-tap-target);
-  height: var(--sf-tap-target);
-  color: var(--text-muted);
-  font-size: var(--sf-text-base);
-}
-
-.pageInfo {
-  font-size: var(--sf-text-sm);
-  color: var(--text-secondary);
-}
-
-/* ==========================================================================
-   Filter sheet (bottom sheet on mobile, side drawer on desktop)
-   ========================================================================== */
-.overlay {
-  position: fixed;
-  inset: 0;
-  background: var(--overlay-bg);
-  /* Above the fixed Header and BottomNav so the sheet's footer is never covered. */
-  z-index: 1300;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-
-.bottomSheet {
-  width: 100%;
-  max-height: 85vh;
-  background: var(--card-bg);
-  border-top-left-radius: var(--radius-lg);
-  border-top-right-radius: var(--radius-lg);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  box-shadow: var(--shadow-lg);
-}
-
-.bottomSheetHeader {
+.switchRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: var(--sf-space-4) var(--sf-space-5);
-  border-bottom: 1px solid var(--border);
-  flex-shrink: 0;
-}
-
-.bottomSheetTitle {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-xl);
-  font-weight: var(--sf-font-bold);
-  margin: 0;
-}
-
-.bottomSheetClose {
-  width: var(--sf-tap-target);
-  height: var(--sf-tap-target);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--text-primary);
-  border-radius: 50%;
-  transition: background var(--sf-transition-fast);
-}
-
-.bottomSheetClose:hover {
-  background: var(--border-light);
-}
-
-.bottomSheetClose:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
-}
-
-.bottomSheetBody {
-  flex: 1;
-  overflow-y: auto;
-  padding: 0 var(--sf-space-5);
-}
-
-.bottomSheetFooter {
-  display: flex;
-  gap: var(--sf-space-3);
-  padding: var(--sf-space-4) var(--sf-space-5);
-  border-top: 1px solid var(--border);
-  flex-shrink: 0;
-}
-
-.bottomSheetClearBtn {
-  flex: 1;
+  gap: var(--sf-space-4);
   min-height: var(--sf-tap-target);
-  padding: var(--sf-space-3);
-  background: none;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-md);
-  color: var(--text-primary);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
   cursor: pointer;
+  color: var(--sf-color-text-secondary);
 }
 
-.bottomSheetClearBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
+.switchRow:hover {
+  color: var(--sf-color-text);
 }
 
-.bottomSheetClearBtn:focus-visible {
-  outline: none;
+.switch {
+  position: relative;
+  flex: none;
+  width: 40px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--sf-color-border-strong);
+  border-radius: var(--sf-radius-pill);
+  background: transparent;
+  cursor: pointer;
+  transition: background-color var(--sf-transition-fast),
+    border-color var(--sf-transition-fast);
+}
+
+.switch:focus-visible {
+  outline: 2px solid transparent;
   box-shadow: var(--sf-shadow-focus);
 }
 
-.bottomSheetApplyBtn {
-  flex: 2;
-  min-height: var(--sf-tap-target);
-  padding: var(--sf-space-3);
-  background: var(--btn-primary-bg);
-  border: none;
-  border-radius: var(--radius-md);
-  color: var(--btn-primary-text);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-bold);
-  cursor: pointer;
+.switchOn {
+  background: var(--sf-color-emerald);
+  border-color: var(--sf-color-emerald);
 }
 
-.bottomSheetApplyBtn:hover {
-  background: var(--btn-primary-hover);
+.switchThumb {
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  width: 14px;
+  height: 14px;
+  border-radius: var(--sf-radius-pill);
+  background: var(--sf-color-border-strong);
+  transform: translateY(-50%);
+  transition: transform var(--sf-transition-fast), background-color var(--sf-transition-fast);
 }
 
-.bottomSheetApplyBtn:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
+.switchOn .switchThumb {
+  background: var(--sf-color-emerald-contrast);
+  transform: translateY(-50%) translateX(16px);
 }
 
-/* ==========================================================================
-   Responsive
-   ========================================================================== */
+/* ═══════════════════════════════════════════════════════════════════════════
+   8. RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-/* Desktop: turn the bottom sheet into a right-hand drawer */
+/* From 769px the sheet stands up into a right-hand drawer. Matches the
+   `(min-width: 769px)` query the component uses to pick its entry direction —
+   keep the two in step. */
 @media (min-width: 769px) {
-  .overlay {
+  .scrim {
     align-items: stretch;
     justify-content: flex-end;
   }
 
-  .bottomSheet {
-    width: 380px;
-    max-width: 90vw;
+  .sheet {
+    width: 420px;
+    max-width: 92vw;
     max-height: 100vh;
+    border-top: none;
+    border-left: 1px solid var(--sf-color-border);
     border-radius: 0;
   }
 }
 
-/* Tablet */
+/* Tablet — three across, and the head steps down a size. */
 @media (max-width: 1024px) {
   .grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    row-gap: var(--sf-space-12);
   }
 
-  .resultsHeading {
-    font-size: var(--sf-text-2xl);
+  .collectionHead {
+    padding: var(--sf-space-8) 0 var(--sf-space-10);
   }
 }
 
-/* Mobile */
+/* Mobile — two across, and the toolbar folds: Filter and Sort keep the rule,
+   the chips drop to their own line beneath. */
 @media (max-width: 768px) {
   .container {
-    padding: 0 var(--sf-space-3);
+    padding: 0 var(--sf-space-4);
   }
 
   .breadcrumb {
-    padding: var(--sf-space-2) var(--sf-space-3);
+    padding-top: var(--sf-space-6);
+  }
+
+  .collectionHead {
+    padding: var(--sf-space-6) 0 var(--sf-space-8);
   }
 
   .toolbar {
     flex-wrap: wrap;
+    gap: var(--sf-space-3) var(--sf-space-4);
+    margin-bottom: var(--sf-space-8);
   }
 
   .chipScroller {
     order: 3;
-    width: 100%;
     flex-basis: 100%;
+    width: 100%;
+    padding-top: var(--sf-space-2);
+    border-top: 1px solid var(--sf-color-border);
+  }
+
+  .sortField {
+    margin-left: auto;
   }
 
   .grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--sf-space-3);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--sf-space-4);
+    row-gap: var(--sf-space-10);
   }
 
-  .sortLabelText {
-    display: none;
+  .pager {
+    margin-top: var(--sf-space-12);
   }
 
-  .pageBtnText {
-    display: none;
-  }
-
-  .pagination {
-    justify-content: center;
-  }
-
-  .paginationLeft,
-  .paginationRight {
-    display: none;
-  }
-}
-
-/* Small mobile */
-@media (max-width: 480px) {
-  .grid {
+  .pagerRow {
     gap: var(--sf-space-2);
   }
 
-  .resultsHeading {
-    font-size: var(--sf-text-xl);
+  .state {
+    padding: var(--sf-space-16) var(--sf-space-4) var(--sf-space-20);
+  }
+
+  .sheetHead,
+  .sheetBody,
+  .sheetFoot {
+    padding-left: var(--sf-space-5);
+    padding-right: var(--sf-space-5);
+  }
+}
+
+/* Small phones — the prev/next words give way to their marks, and the meta
+   line stacks rather than wrapping mid-phrase. */
+@media (max-width: 480px) {
+  .pagerStepText {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .pagerNum {
+    min-width: 38px;
+  }
+
+  .pagerMeta {
+    flex-direction: column;
+    gap: var(--sf-space-3);
+  }
+
+  .grid {
+    column-gap: var(--sf-space-3);
+    row-gap: var(--sf-space-8);
+  }
+
+  .stateBtn {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   9. REDUCED MOTION
+   The token layer already zeroes the shared durations; these are the local
+   hairline reveals, which animate a length rather than a transition property.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  .breadcrumbLink::after,
+  .filterBtnText::after,
+  .pagerNum::after {
+    transition: none;
   }
 }
