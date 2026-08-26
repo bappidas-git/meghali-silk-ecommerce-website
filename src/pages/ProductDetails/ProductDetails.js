@@ -587,7 +587,7 @@ const ProductDetails = () => {
         transition: { duration: 0.25 },
       };
 
-  // 4-card trust row — owner-attested promises. The free-shipping line resolves
+  // The promises band — owner-attested. The free-shipping line resolves
   // its threshold from LIVE shipping data, so any number shown is never invented.
   const freeShipThresholds = (Array.isArray(shipping) ? shipping : [])
     .map((m) => Number(m.freeAbove))
@@ -598,7 +598,6 @@ const ProductDetails = () => {
   const trustCards = [
     {
       key: "offers",
-      accent: styles.trustGold,
       title: "Offers",
       text: "Seasonal offers & savings",
       icon: (
@@ -613,7 +612,6 @@ const ProductDetails = () => {
     },
     {
       key: "shipping",
-      accent: styles.trustEmerald,
       title: "Free shipping",
       text: minFreeShip
         ? `Free above ₹${minFreeShip.toLocaleString("en-IN")}`
@@ -629,7 +627,6 @@ const ProductDetails = () => {
     },
     {
       key: "authentic",
-      accent: styles.trustOrange,
       title: "100% authentic",
       text: "Certified genuine silk",
       icon: (
@@ -641,7 +638,6 @@ const ProductDetails = () => {
     },
     {
       key: "artisans",
-      accent: styles.trustPurple,
       title: "Handwoven by artisans",
       text: "Crafted on the handloom",
       icon: (
@@ -666,7 +662,9 @@ const ProductDetails = () => {
           <Link to="/" className={styles.breadcrumbLink}>
             Home
           </Link>
-          <span className={styles.breadcrumbSep}>&rsaquo;</span>
+          <span className={styles.breadcrumbSep} aria-hidden="true">
+            /
+          </span>
           {category ? (
             <>
               <Link
@@ -675,16 +673,20 @@ const ProductDetails = () => {
               >
                 {category.name}
               </Link>
-              <span className={styles.breadcrumbSep}>&rsaquo;</span>
+              <span className={styles.breadcrumbSep} aria-hidden="true">
+                /
+              </span>
             </>
           ) : null}
           <span className={styles.breadcrumbCurrent}>{product.name}</span>
         </nav>
 
-        {/* ── Above the fold: media + buy box ───────────────────────────── */}
+        {/* ═══ Above the fold — the plate on the left, the buy box on the right.
+            The gallery column scrolls; the buy box is a sticky rail from 981px
+            up so the price and the CTA stay with the shopper. ═══════════════ */}
         <div className={styles.mainLayout}>
           <div className={styles.gallerySection}>
-            {/* PREMIUM ribbon + In-Stock pill bind to REAL flags only (default off) */}
+            {/* PREMIUM ribbon + In-Stock mark bind to REAL flags only (default off) */}
             <ProductGallery
               images={images}
               alt={product.name}
@@ -695,19 +697,22 @@ const ProductDetails = () => {
           </div>
 
           <div className={styles.infoSection}>
-            {categoryLabel && (
-              <span className={styles.categoryLabel}>{categoryLabel}</span>
-            )}
-            <h1 className={styles.productName}>{product.name}</h1>
+            {/* ── The head: eyebrow, the name in the serif, one line of fact ── */}
+            <header className={styles.buyHead}>
+              {categoryLabel && (
+                <span className={styles.categoryLabel}>{categoryLabel}</span>
+              )}
+              <h1 className={styles.productName}>{product.name}</h1>
 
-            {/* Social proof — real ratings only, jumps to reviews */}
-            <SocialProof
-              rating={displayAvg}
-              count={totalRatingsCount}
-              onReviewsClick={scrollToReviews}
-            />
+              {/* Social proof — real ratings only, jumps to the reviews */}
+              <SocialProof
+                rating={displayAvg}
+                count={totalRatingsCount}
+                onReviewsClick={scrollToReviews}
+              />
+            </header>
 
-            {/* Price — honest compare/discount + transparent tax note */}
+            {/* ── The price moment — honest compare/discount + tax note ────── */}
             <div className={styles.pricePanel}>
               <PriceBlock
                 price={currentPrice}
@@ -720,29 +725,27 @@ const ProductDetails = () => {
                     : "Inclusive of all taxes"
                 }
               />
+              {currentSku && (
+                <div className={styles.skuLine}>
+                  <span className={styles.skuLabel}>SKU</span>
+                  <span className={styles.skuValue}>{currentSku}</span>
+                </div>
+              )}
             </div>
-
-            {currentSku && (
-              <div className={styles.skuLine}>
-                SKU: <span>{currentSku}</span>
-              </div>
-            )}
 
             {product.shortDescription && (
               <p className={styles.shortDescription}>{product.shortDescription}</p>
             )}
 
-            {/* KEY FEATURES — real spec-derived bullets only (omitted if none) */}
+            {/* KEY FEATURES — real spec-derived bullets only (omitted if none),
+                set as a ruled list rather than a boxed panel. */}
             {keyFeatures.length > 0 && (
               <div className={styles.featuresPanel}>
                 <span className={styles.featuresTitle}>Key Features</span>
                 <ul className={styles.featuresList}>
                   {keyFeatures.map((feature, i) => (
                     <li key={i} className={styles.featureItem}>
-                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                      <span>{feature}</span>
+                      {feature}
                     </li>
                   ))}
                 </ul>
@@ -751,13 +754,15 @@ const ProductDetails = () => {
 
             {/* Variant selection — visible swatches/tiles, never a dropdown */}
             {product.variants && product.variants.length > 0 && (
-              <VariantSelector
-                variants={product.variants}
-                value={selectedVariant}
-                onChange={setSelectedVariant}
-                productStock={product.stock}
-                currency="INR"
-              />
+              <div className={styles.variantBlock}>
+                <VariantSelector
+                  variants={product.variants}
+                  value={selectedVariant}
+                  onChange={setSelectedVariant}
+                  productStock={product.stock}
+                  currency="INR"
+                />
+              </div>
             )}
 
             {/* Quantity + honest stock status */}
@@ -776,62 +781,66 @@ const ProductDetails = () => {
                 {isOutOfStock ? (
                   <span className={styles.stockOut}>Out of Stock</span>
                 ) : isLowStock ? (
-                  <span className={styles.stockLow}>
-                    Only {currentStock} left — order soon!
-                  </span>
+                  <span className={styles.stockLow}>Only {currentStock} left</span>
                 ) : hasStockInfo ? (
                   <span className={styles.stockIn}>In Stock</span>
                 ) : null}
               </div>
             </div>
 
-            {/* Primary / secondary CTAs — Buy Now (gold) + Add to Cart (emerald) */}
+            {/* Primary / secondary CTAs. This row is ALSO the anchor the sticky
+                mobile bar observes — keep the ref here. */}
             <div className={styles.actionButtons} ref={buyBoxRef}>
               <button
-                className={styles.buyNowBtn}
+                type="button"
+                className={`sf-btn sf-btn--emerald sf-btn--lg ${styles.buyNowBtn}`}
                 onClick={handleBuyNow}
                 disabled={isOutOfStock}
               >
                 {isOutOfStock ? "Out of Stock" : "Buy Now"}
               </button>
               <button
-                className={`${styles.addToCartBtn} ${added ? styles.addToCartDone : ""}`}
+                type="button"
+                className={`sf-btn sf-btn--lg ${styles.addToCartBtn} ${
+                  added ? styles.addToCartDone : ""
+                }`}
                 onClick={handleAddClick}
                 disabled={isOutOfStock}
               >
-                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <circle cx="9" cy="21" r="1" />
-                  <circle cx="20" cy="21" r="1" />
-                  <path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6" />
-                </svg>
-                {isOutOfStock ? "Out of Stock" : added ? "Added to Cart ✓" : "Add to Cart"}
+                {isOutOfStock ? "Out of Stock" : added ? "Added ✓" : "Add to Cart"}
               </button>
               <button
-                className={`${styles.wishlistBtn} ${wishlisted ? styles.wishlistBtnActive : ""}`}
+                type="button"
+                className={`${styles.wishlistBtn} ${
+                  wishlisted ? styles.wishlistBtnActive : ""
+                }`}
                 onClick={() => toggleWishlist(product)}
                 aria-label={wishlisted ? "Remove from wishlist" : "Add to wishlist"}
                 aria-pressed={wishlisted}
               >
-                <svg viewBox="0 0 24 24" width="22" height="22" fill={wishlisted ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill={wishlisted ? "currentColor" : "none"} stroke="currentColor" strokeWidth="1.6" aria-hidden="true">
                   <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
                 </svg>
               </button>
             </div>
 
-            {/* Trust signals near the decision point (config + live data) */}
-            <TrustBadges settings={settings} shipping={shipping} variant="grid" />
-
-            {/* Transparent delivery, COD & returns — REAL data, shown upfront */}
-            <DeliveryReturnsInfo shipping={shipping} settings={settings} currency="INR" />
+            {/* ── The assurance block: the promises and the delivery note read
+                as ONE ruled block, every number resolved from live data. ──── */}
+            <div className={styles.assurance}>
+              <TrustBadges settings={settings} shipping={shipping} variant="grid" />
+              <DeliveryReturnsInfo shipping={shipping} settings={settings} currency="INR" />
+            </div>
           </div>
         </div>
 
-        {/* ── 4-card trust row — owner-attested promises (spans both columns) ── */}
+        {/* ── The promises band — owner-attested, ruled across the page. The
+            free-shipping line resolves its threshold from LIVE shipping data,
+            so any number shown here is never invented. ──────────────────── */}
         <ul className={styles.trustRow} aria-label="Our promises">
           {trustCards.map((card) => (
             <li className={styles.trustCard} key={card.key}>
-              <span className={`${styles.trustIcon} ${card.accent}`} aria-hidden="true">
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+              <span className={styles.trustIcon} aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
                   {card.icon}
                 </svg>
               </span>

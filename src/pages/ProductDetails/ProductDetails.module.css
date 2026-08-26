@@ -1,167 +1,283 @@
 /* ═══════════════════════════════════════════════════════════════════════════
- * ProductDetails — page shell only. The buy-box widgets, gallery, variants,
- * trust signals, reviews and AOV modules are reusable components that style
- * themselves from the design tokens (src/theme/storefront-tokens.css). This
- * file therefore only lays out the page and styles a few page-level atoms — and
- * uses tokens throughout, so it re-skins with the rest of the storefront.
- * ═══════════════════════════════════════════════════════════════════════════ */
+   PRODUCT DETAIL  —  the plate and the buy box
+   ═══════════════════════════════════════════════════════════════════════════
+   The garment gets the room; the decision gets the quiet.
+
+     1. A BREADCRUMB set as a whisper, in the same tone as the collection page.
+     2. AN ASYMMETRIC PAIR — the gallery holds ~57% on the left and scrolls; the
+        buy box is a sticky rail on the right, pinned under the masthead so the
+        price and the CTA stay with the shopper as the photographs pass.
+     3. THE BUY BOX ITSELF as an editorial stack: tracked eyebrow, the name in
+        the display serif, one line of rating, the price as a serif moment above
+        a hairline, then the options, the purchase row and — closing it — ONE
+        assurance block where the promises and the delivery note read as a
+        single ruled thing rather than two boxes stacked.
+     4. THE PROMISES BAND under both columns: four facts divided by hairlines,
+        no cards, no tinted discs.
+
+   Nothing above the fold is a card. The only surfaces are the page ground and
+   the sunken sand plate behind the photograph; everything else is a hairline,
+   a piece of tracked type, or air.
+
+   TOKENS ONLY — every colour, space, radius and type value comes from
+   storefront-tokens.css, and the buttons are the global primitives. Dark mode
+   needs no rules of its own: the tokens flip under `body.dark`.
+
+   The regions below the promises band (tabs, panels, reviews, rails) belong to
+   the next prompt and are left as they are.
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 .page {
+  /* Measured height of the sticky masthead + nav band at desktop widths.
+     The rail clears it by --sf-space-6. */
+  --pdp-header-h: 118px;
+
   min-height: 100vh;
   background: var(--sf-color-bg);
   color: var(--sf-color-text);
+  font-family: var(--sf-font-family);
   transition: background var(--sf-transition), color var(--sf-transition);
+}
+
+/* Header.js drops the nav band at 1024px (useMediaQuery "(max-width:1024px)"),
+   leaving the masthead alone — so the rail's clearance follows it. */
+@media (max-width: 1024px) {
+  .page {
+    --pdp-header-h: 69px;
+  }
 }
 
 .container {
   max-width: var(--sf-container-max);
   margin: 0 auto;
-  padding: var(--sf-space-5) var(--sf-space-6) var(--sf-space-16);
+  padding: 0 var(--sf-space-6) var(--sf-space-24);
 }
 
-/* ── Breadcrumb ──────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   1. BREADCRUMB  —  a whisper, with a thin slash between (matches Products)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 .breadcrumb {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: var(--sf-space-2);
-  padding: var(--sf-space-4) 0;
-  font-size: var(--sf-text-sm);
+  padding: var(--sf-space-10) 0 var(--sf-space-8);
+  font-size: var(--sf-text-xs);
+  letter-spacing: 0.04em;
+  color: var(--sf-color-text-muted);
 }
 
+.breadcrumbSep {
+  color: var(--sf-color-border-strong);
+}
+
+/* The house link: no chrome, a gold hairline that grows in under it. */
 .breadcrumbLink {
-  color: var(--sf-color-text-muted);
+  position: relative;
+  color: var(--sf-color-text-secondary);
   text-decoration: none;
   transition: color var(--sf-transition-fast);
 }
 
-.breadcrumbLink:hover {
-  color: var(--sf-color-gold);
+.breadcrumbLink::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 100%;
+  bottom: -3px;
+  height: 1px;
+  background: var(--sf-color-gold-deep);
+  transition: right var(--sf-transition);
 }
 
-.breadcrumbSep {
-  color: var(--sf-color-text-muted);
-  opacity: 0.7;
+.breadcrumbLink:hover {
+  color: var(--sf-color-text);
+}
+
+.breadcrumbLink:hover::after {
+  right: 0;
+}
+
+.breadcrumbLink:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  border-radius: var(--sf-radius-sm);
+  box-shadow: var(--sf-shadow-focus);
 }
 
 .breadcrumbCurrent {
   color: var(--sf-color-text);
-  font-weight: var(--sf-font-medium);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  max-width: 320px;
+  max-width: 42ch;
 }
 
-/* ── Main layout ─────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   2. THE ASYMMETRIC PAIR
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 .mainLayout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: var(--sf-space-10);
-  margin-bottom: var(--sf-space-12);
+  grid-template-columns: minmax(0, 1.22fr) minmax(0, 1fr);
+  gap: var(--sf-space-16);
+  margin-bottom: var(--sf-space-20);
+  align-items: start;
 }
 
 .gallerySection {
-  position: sticky;
-  top: var(--sf-space-6);
-  align-self: start;
-}
-
-.infoSection {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sf-space-5);
   min-width: 0;
 }
 
-/* Category label (replaces the old .brand line — small, uppercase, gold) */
+/* The right rail. `align-self: start` is what lets it pin at all: a stretched
+   grid item is exactly as tall as its row and has nothing to stick within.
+
+   HOW FAR IT ACTUALLY PINS, and why that is on purpose. A sticky box only has
+   room to travel when the OTHER column is the taller one, and with this
+   catalogue the buy box (name, price, features, a variant matrix, the assurance
+   block) is reliably taller than the plate — so on a laptop it mostly rides
+   with the page and pins only when a short product, or a tall display, leaves
+   slack. That is the wanted behaviour, not a shortfall: the obvious way to
+   force it — stacking the photographs into a gallery column taller than the
+   rail — would pin a box taller than the viewport, and everything below the
+   fold of that box (the delivery note, the promises) would be unreachable for
+   the whole length of the stack. A rail that pins only when all of it can be
+   read beats one that pins by hiding its own bottom half. */
+.infoSection {
+  position: sticky;
+  top: calc(var(--pdp-header-h) + var(--sf-space-6));
+  align-self: start;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-6);
+  min-width: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   3. THE BUY BOX
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.buyHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-3);
+}
+
+/* The eyebrow — the same tracked gold label that opens every section of the
+   storefront, minus the rule (the name below it is doing the anchoring). */
 .categoryLabel {
   font-size: var(--sf-text-xs);
-  font-weight: var(--sf-font-semibold);
+  font-weight: var(--sf-font-medium);
   text-transform: uppercase;
-  letter-spacing: 0.16em;
+  letter-spacing: var(--sf-tracking-wider);
+  line-height: var(--sf-leading-tight);
   color: var(--sf-color-gold-deep);
 }
 
+/* The name — the display serif, sized to break comfortably over two lines. */
 .productName {
   margin: 0;
   font-family: var(--sf-font-display);
-  font-size: var(--sf-text-3xl);
-  font-weight: var(--sf-font-bold);
-  line-height: var(--sf-leading-tight);
+  font-size: clamp(2rem, 3.2vw, 2.75rem);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-display);
+  letter-spacing: var(--sf-tracking-tight);
   color: var(--sf-color-text);
 }
 
+/* ---- The price moment ---------------------------------------------------- */
+/* Hairlines above and below, so the number sits in its own band of the stack.
+   No fill, no left accent bar — the rules are the frame. */
+.pricePanel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-3);
+  padding: var(--sf-space-5) 0;
+  border-top: 1px solid var(--sf-color-border);
+  border-bottom: 1px solid var(--sf-color-border);
+}
+
 .skuLine {
-  font-size: var(--sf-text-sm);
+  display: flex;
+  align-items: baseline;
+  gap: var(--sf-space-2);
+  font-size: var(--sf-text-xs);
   color: var(--sf-color-text-muted);
 }
 
-.skuLine span {
+.skuLabel {
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+}
+
+/* The code itself is set in tabular figures — it is a serial number, and it
+   should look like one. */
+.skuValue {
   color: var(--sf-color-text-secondary);
-  font-weight: var(--sf-font-medium);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
 }
 
 .shortDescription {
   margin: 0;
+  max-width: 52ch;
   font-size: var(--sf-text-base);
-  line-height: var(--sf-leading-normal);
+  line-height: var(--sf-leading-relaxed);
   color: var(--sf-color-text-secondary);
 }
 
-/* ── Price panel ─────────────────────────────────────────────────────────── */
-.pricePanel {
-  padding: var(--sf-space-4) var(--sf-space-5);
-  border: 1px solid var(--sf-color-border);
-  border-left: 3px solid var(--sf-color-gold);
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-surface-2);
-}
+/* ---- Key features — a ruled list, not a boxed panel ---------------------- */
 
-/* ── KEY FEATURES ────────────────────────────────────────────────────────── */
 .featuresPanel {
   display: flex;
   flex-direction: column;
   gap: var(--sf-space-3);
-  padding: var(--sf-space-4) var(--sf-space-5);
-  border: 1px solid var(--sf-color-border);
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-surface);
 }
 
 .featuresTitle {
   font-size: var(--sf-text-xs);
-  font-weight: var(--sf-font-bold);
+  font-weight: var(--sf-font-medium);
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--sf-color-gold-deep);
+  letter-spacing: var(--sf-tracking-wide);
+  color: var(--sf-color-text-muted);
 }
 
 .featuresList {
   list-style: none;
   margin: 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--sf-space-2);
+  border-top: 1px solid var(--sf-color-border);
 }
 
+/* Each fact on its own ruled line, opened by a short gold tick. */
 .featureItem {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--sf-space-2);
+  position: relative;
+  padding: var(--sf-space-3) 0 var(--sf-space-3) var(--sf-space-6);
+  border-bottom: 1px solid var(--sf-color-border);
   font-size: var(--sf-text-sm);
   line-height: var(--sf-leading-normal);
   color: var(--sf-color-text-secondary);
 }
 
-.featureItem svg {
-  flex-shrink: 0;
-  margin-top: 2px;
-  color: var(--sf-color-emerald);
+.featureItem::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: calc(var(--sf-space-3) + 0.6em);
+  width: var(--sf-space-4);
+  height: 1px;
+  background: var(--sf-color-gold-deep);
 }
 
-/* ── Quantity + stock ────────────────────────────────────────────────────── */
+/* ---- Variants ------------------------------------------------------------ */
+
+.variantBlock {
+  padding-top: var(--sf-space-1);
+}
+
+/* ---- Quantity + the honest stock line ------------------------------------ */
+
 .purchaseRow {
   display: flex;
   align-items: center;
@@ -172,116 +288,88 @@
 .quantityBlock {
   display: flex;
   align-items: center;
-  gap: var(--sf-space-3);
+  gap: var(--sf-space-4);
 }
 
 .quantityLabel {
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-  color: var(--sf-color-text);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  color: var(--sf-color-text-muted);
 }
 
+/* Three states, one type treatment — tracked capitals in the semantic tone.
+   Every one of them is printed from real stock; none is ever a pill. */
 .stockStatus {
-  font-size: var(--sf-text-sm);
+  font-size: var(--sf-text-xs);
   font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
 }
 
 .stockIn {
-  display: inline-flex;
-  align-items: center;
-  padding: 4px 12px;
-  border-radius: var(--sf-radius-pill);
-  background: var(--sf-color-discount-bg);
   color: var(--sf-color-discount);
-  font-weight: var(--sf-font-semibold);
-}
-.stockLow {
-  color: var(--sf-color-warning);
-  font-weight: var(--sf-font-semibold);
-}
-.stockOut {
-  color: var(--sf-color-danger);
-  font-weight: var(--sf-font-semibold);
 }
 
-/* ── Action buttons ──────────────────────────────────────────────────────── */
+.stockLow {
+  color: var(--sf-color-warning);
+}
+
+.stockOut {
+  color: var(--sf-color-danger);
+}
+
+/* ---- The actions --------------------------------------------------------- */
+/* Buy Now takes the ink fill; Add to Cart stands beside it as a hairline, so
+   the box carries ONE filled control. Both are the global .sf-btn. */
+
 .actionButtons {
   display: flex;
+  flex-wrap: wrap;
   gap: var(--sf-space-3);
   align-items: stretch;
 }
 
-.addToCartBtn,
-.buyNowBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sf-space-2);
-  flex: 1;
-  min-height: 52px;
-  border-radius: var(--sf-radius-md);
-  font-size: var(--sf-text-base);
-  font-weight: var(--sf-font-semibold);
-  cursor: pointer;
-  transition: filter var(--sf-transition-fast), transform var(--sf-transition-fast),
-    background var(--sf-transition-fast), color var(--sf-transition-fast);
+.buyNowBtn,
+.addToCartBtn {
+  flex: 1 1 0;
+  min-width: 0;
 }
 
-/* Add to Cart — emerald */
 .addToCartBtn {
-  border: none;
-  background: var(--sf-color-emerald);
-  color: var(--sf-color-emerald-contrast);
+  border-color: var(--sf-color-border-strong);
+  color: var(--sf-color-text);
 }
 
 .addToCartBtn:hover:not(:disabled) {
-  background: var(--sf-color-emerald-hover);
-  transform: translateY(-1px);
+  border-color: var(--sf-color-text);
+  background: var(--sf-color-primary-soft);
 }
 
-.addToCartDone {
+/* The confirmation moment — the outline fills with the success tone, briefly. */
+.addToCartDone,
+.addToCartDone:hover:not(:disabled) {
+  border-color: var(--sf-color-success);
   background: var(--sf-color-success);
   color: var(--sf-color-primary-contrast);
 }
 
-/* Buy Now — gold */
-.buyNowBtn {
-  border: none;
-  background: var(--sf-gradient-gold);
-  color: var(--sf-color-emerald-contrast);
-}
-
-.buyNowBtn:hover:not(:disabled) {
-  filter: brightness(1.05);
-  transform: translateY(-1px);
-}
-
-.addToCartBtn:focus-visible,
-.buyNowBtn:focus-visible,
-.wishlistBtn:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
-}
-
-.addToCartBtn:disabled,
-.buyNowBtn:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
+/* The heart — a hairline square holding the mark, matching the button height. */
 .wishlistBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  flex: none;
   width: 52px;
   min-height: 52px;
-  flex-shrink: 0;
-  border: 1.5px solid var(--sf-color-border-strong);
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-surface);
-  color: var(--sf-color-text-muted);
+  padding: 0;
+  border: 1px solid var(--sf-color-border-strong);
+  border-radius: var(--sf-radius-sm);
+  background: transparent;
+  color: var(--sf-color-text-secondary);
   cursor: pointer;
-  transition: color var(--sf-transition-fast), border-color var(--sf-transition-fast);
+  transition: color var(--sf-transition), border-color var(--sf-transition);
 }
 
 .wishlistBtn:hover {
@@ -292,78 +380,95 @@
 .wishlistBtnActive {
   color: var(--sf-color-accent);
   border-color: var(--sf-color-accent);
-  background: var(--sf-color-primary-soft);
 }
 
-/* ── 4-card trust row (spans beneath both columns) ───────────────────────── */
+.wishlistBtn:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--sf-shadow-focus);
+}
+
+/* ---- The assurance block ------------------------------------------------- */
+/* <TrustBadges/> and <DeliveryReturnsInfo/> both come frameless, so this rule
+   is what makes them read as one closing block: a hairline above, a hairline
+   between them, and the same air on either side. */
+
+.assurance {
+  margin-top: var(--sf-space-2);
+  border-top: 1px solid var(--sf-color-border);
+}
+
+.assurance > * + * {
+  padding-top: var(--sf-space-5);
+  border-top: 1px solid var(--sf-color-border);
+}
+
+.assurance > *:last-child {
+  padding-bottom: var(--sf-space-2);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   4. THE PROMISES BAND  —  four facts, divided by hairlines
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 .trustRow {
   list-style: none;
-  margin: 0 0 var(--sf-space-8);
-  padding: 0;
+  margin: 0 0 var(--sf-space-16);
+  padding: var(--sf-space-8) 0;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: var(--sf-space-4);
+  gap: 0;
+  border-top: 1px solid var(--sf-color-border);
+  border-bottom: 1px solid var(--sf-color-border);
 }
 
 .trustCard {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--sf-space-3);
-  padding: var(--sf-space-4);
-  border: 1px solid var(--sf-color-border);
-  border-radius: var(--sf-radius-lg);
-  background: var(--sf-color-surface);
-  transition: border-color var(--sf-transition-fast), transform var(--sf-transition-fast);
+  min-width: 0;
+  padding: 0 var(--sf-space-6);
+  border-left: 1px solid var(--sf-color-border);
 }
 
-.trustCard:hover {
-  border-color: var(--sf-color-border-strong);
-  transform: translateY(-2px);
+.trustCard:first-child {
+  padding-left: 0;
+  border-left: none;
 }
 
+.trustCard:last-child {
+  padding-right: 0;
+}
+
+/* Line-art in gold at type scale — no disc, no tint behind it. */
 .trustIcon {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 44px;
-  height: 44px;
-  border-radius: var(--sf-radius-pill);
-}
-
-.trustGold {
-  background: var(--sf-color-badge-bg);
+  flex: none;
+  margin-top: 1px;
   color: var(--sf-color-gold-deep);
-}
-.trustEmerald {
-  background: var(--sf-color-discount-bg);
-  color: var(--sf-color-emerald);
-}
-.trustOrange {
-  background: rgba(245, 158, 11, 0.14);
-  color: var(--sf-cat-orange);
-}
-.trustPurple {
-  background: rgba(139, 92, 246, 0.14);
-  color: var(--sf-cat-purple);
 }
 
 .trustText {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
   min-width: 0;
 }
 
 .trustTitle {
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: var(--sf-leading-tight);
   color: var(--sf-color-text);
 }
 
 .trustDetail {
   font-size: var(--sf-text-xs);
+  line-height: var(--sf-leading-normal);
   color: var(--sf-color-text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 /* ── Tabs ────────────────────────────────────────────────────────────────── */
@@ -597,11 +702,11 @@
   color: var(--sf-color-text-secondary);
 }
 
-/* ── Skeleton ────────────────────────────────────────────────────────────── */
+/* ── Skeleton — the same asymmetric pair, before the data lands ──────────── */
 .skeletonPage {
   max-width: var(--sf-container-max);
   margin: 0 auto;
-  padding: var(--sf-space-6);
+  padding: var(--sf-space-10) var(--sf-space-6) var(--sf-space-24);
 }
 
 .skeletonPage > *,
@@ -618,31 +723,32 @@
 }
 
 .skeletonBreadcrumb {
-  height: 16px;
+  height: 12px;
   width: 220px;
-  margin-bottom: var(--sf-space-6);
+  margin-bottom: var(--sf-space-8);
 }
 
 .skeletonLayout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: var(--sf-space-10);
+  grid-template-columns: minmax(0, 1.22fr) minmax(0, 1fr);
+  gap: var(--sf-space-16);
 }
 
+/* The plate, at the ratio the real gallery will fill. */
 .skeletonMainImage {
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 3 / 4;
 }
 
 .skeletonRight {
   display: flex;
   flex-direction: column;
-  gap: var(--sf-space-4);
+  gap: var(--sf-space-5);
 }
 
-.skeletonTitle { height: 34px; width: 80%; }
-.skeletonRating { height: 18px; width: 40%; }
-.skeletonPrice { height: 30px; width: 50%; }
-.skeletonDesc { height: 14px; width: 100%; }
+.skeletonTitle { height: 40px; width: 84%; }
+.skeletonRating { height: 14px; width: 38%; }
+.skeletonPrice { height: 34px; width: 46%; }
+.skeletonDesc { height: 12px; width: 100%; }
 .skeletonButtons { height: 52px; width: 100%; margin-top: var(--sf-space-3); }
 
 @keyframes sfShimmer {
@@ -690,19 +796,41 @@
 }
 
 /* ── Responsive ──────────────────────────────────────────────────────────── */
+
+/* Below ~980px the pair collapses: the plate first, the buy box under it, and
+   the rail stops pinning (there is no second column left for it to pin beside). */
 @media (max-width: 980px) {
   .mainLayout {
     grid-template-columns: minmax(0, 1fr);
-    gap: var(--sf-space-6);
+    gap: var(--sf-space-10);
+    margin-bottom: var(--sf-space-16);
   }
-  .gallerySection {
+  .infoSection {
     position: static;
+    top: auto;
   }
-  .trustRow {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  .productName {
+    max-width: 20ch;
   }
   .skeletonLayout {
     grid-template-columns: minmax(0, 1fr);
+    gap: var(--sf-space-10);
+  }
+
+  /* The promises band folds to two columns; the divider follows. */
+  .trustRow {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    row-gap: var(--sf-space-6);
+  }
+  .trustCard,
+  .trustCard:first-child,
+  .trustCard:last-child {
+    padding: 0 var(--sf-space-5) 0 0;
+    border-left: none;
+  }
+  .trustCard:nth-child(even) {
+    padding: 0 0 0 var(--sf-space-5);
+    border-left: 1px solid var(--sf-color-border);
   }
 
   /* Spec table → 2 columns of pairs; re-stripe in bands of 2. */
@@ -721,23 +849,27 @@
 }
 
 @media (max-width: 768px) {
+  /* Bottom padding clears the sticky Add-to-Cart bar and the global BottomNav. */
   .container {
-    padding: var(--sf-space-3) var(--sf-space-4) 96px;
+    padding: 0 var(--sf-space-4) 112px;
   }
-  .productName {
-    font-size: var(--sf-text-2xl);
+  .breadcrumb {
+    padding: var(--sf-space-6) 0 var(--sf-space-5);
   }
-  .actionButtons {
-    flex-wrap: wrap;
+  .mainLayout {
+    gap: var(--sf-space-8);
   }
-  .addToCartBtn,
+  .skeletonPage {
+    padding: var(--sf-space-6) var(--sf-space-4) var(--sf-space-16);
+  }
+
+  /* Buy Now takes the full width; Add to Cart and the heart share the line
+     below it, both still clearing the 44px minimum. */
   .buyNowBtn {
     flex: 1 1 100%;
-    order: 2;
   }
-  .wishlistBtn {
-    order: 1;
-    width: 100%;
+  .addToCartBtn {
+    flex: 1 1 auto;
   }
 
   /* Spec table → single column of pairs; stripe every other row. */
@@ -760,8 +892,24 @@
 }
 
 @media (max-width: 520px) {
+  /* The band becomes a ruled list — one promise per line. */
   .trustRow {
     grid-template-columns: minmax(0, 1fr);
+    row-gap: 0;
+    padding: 0;
+    border-top: none;
+    border-bottom: none;
+  }
+  .trustCard,
+  .trustCard:first-child,
+  .trustCard:last-child,
+  .trustCard:nth-child(even) {
+    padding: var(--sf-space-4) 0;
+    border-left: none;
+    border-top: 1px solid var(--sf-color-border);
+  }
+  .trustCard:last-child {
+    border-bottom: 1px solid var(--sf-color-border);
   }
 
   /* Narrowest: stack label above value for readability. */

@@ -4,26 +4,32 @@ import { STOREFRONT_CONFIG } from "../../theme/tokens";
 import styles from "./ProductGallery.module.css";
 
 // =============================================================================
-// ProductGallery — trustworthy product media
+// ProductGallery — the plate and its contact strip
 // =============================================================================
-// Multiple angles via a thumbnail strip (beside the image on desktop, below on
-// mobile), desktop hover-zoom, lazy-loaded + alt-texted images, and graceful
-// handling when a product has only one image (the strip hides). Thumbnails are
-// real buttons with arrow-key navigation for keyboard users.
+// One large 3:4 stage carrying the garment, with the other views printed
+// underneath as a quiet contact strip — the way a photographer lays out frames,
+// rather than a webshop's boxed carousel. Desktop keeps the hover-zoom (subtle,
+// ~1.8×), images stay lazy-loaded and alt-texted, and a single-image product
+// simply loses the strip.
 //
-// Props:
+// The stage comes FIRST in the DOM so keyboard order reads stage → frames, in
+// the order they are seen; the strip keeps its `role="tablist"` semantics and
+// the stage keeps its arrow keys.
+//
+// Props (unchanged — other prompts and pages consume this contract):
 //   images    string[]  image URLs (falls back to a placeholder)
 //   alt       string    base alt text (the product name)
-//   discount  number    optional honest discount % → corner badge
+//   discount  number    optional honest discount % → corner mark
 //   zoom      boolean   enable hover-zoom (default from STOREFRONT_CONFIG)
 //   ribbon    string    OPTIONAL, additive (default null/off). When a non-empty
-//                       string is passed (e.g. "PREMIUM") a gold ribbon is drawn
-//                       over the TOP-LEFT of the main image. The caller decides
-//                       whether the flag is genuine — the component never invents
-//                       it. Backward-compatible: omit it and nothing changes.
-//   inStock   boolean   OPTIONAL, additive (default false/off). When true, an
-//                       "In Stock" pill is drawn over the TOP-RIGHT of the main
-//                       image. Caller passes only a real, in-stock selection.
+//                       string is passed (e.g. "PREMIUM") a hairline gold label
+//                       is drawn over the TOP-RIGHT of the stage. The caller
+//                       decides whether the flag is genuine — the component
+//                       never invents it. Omit it and nothing changes.
+//   inStock   boolean   OPTIONAL, additive (default false/off). When true, a
+//                       quiet "In Stock" mark is drawn on the RIGHT of the
+//                       stage, under the ribbon when there is one. Caller passes
+//                       only a real, in-stock selection.
 // =============================================================================
 const ProductGallery = ({
   images = [],
@@ -70,6 +76,62 @@ const ProductGallery = ({
 
   return (
     <div className={styles.gallery}>
+      <div
+        className={styles.main}
+        onMouseEnter={() => zoom && setIsZooming(true)}
+        onMouseLeave={() => setIsZooming(false)}
+        onMouseMove={zoom ? handleMove : undefined}
+        onKeyDown={onKeyDown}
+        tabIndex={0}
+        role="group"
+        aria-label={`${alt} — image ${index + 1} of ${pics.length}`}
+      >
+        <img
+          src={pics[index] || PLACEHOLDER_IMG}
+          alt={`${alt}${multi ? ` — view ${index + 1}` : ""}`}
+          className={styles.mainImg}
+          onError={onImageError}
+          style={
+            isZooming
+              ? { transform: "scale(1.8)", transformOrigin: `${pos.x}% ${pos.y}%` }
+              : undefined
+          }
+        />
+
+        {/* ── Marks. Hairlines printed on the plate, never stickers. Placed to
+            match the storefront card: discount top-left, PREMIUM top-right,
+            with the In-Stock note stepping under the ribbon when both show. ── */}
+        {discount > 0 && (
+          <span className={`sf-badge-discount ${styles.discountBadge}`}>
+            {discount}% off
+          </span>
+        )}
+        {ribbon && (
+          <span className={`sf-ribbon-premium ${styles.premiumRibbon}`}>
+            {ribbon}
+          </span>
+        )}
+        {inStock && (
+          <span
+            className={`${styles.stockPill} ${ribbon ? styles.stockPillLower : ""}`}
+          >
+            <span className={styles.stockDot} aria-hidden="true" />
+            In Stock
+          </span>
+        )}
+
+        {multi && (
+          <div className={styles.dots} aria-hidden="true">
+            {pics.map((_, i) => (
+              <span
+                key={i}
+                className={`${styles.dot} ${index === i ? styles.dotActive : ""}`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
       {multi && (
         <div className={styles.thumbs} role="tablist" aria-label="Product images">
           {pics.map((img, i) => (
@@ -88,60 +150,6 @@ const ProductGallery = ({
           ))}
         </div>
       )}
-
-      <div
-        className={styles.main}
-        onMouseEnter={() => zoom && setIsZooming(true)}
-        onMouseLeave={() => setIsZooming(false)}
-        onMouseMove={zoom ? handleMove : undefined}
-        onKeyDown={onKeyDown}
-        tabIndex={0}
-        role="group"
-        aria-label={`${alt} — image ${index + 1} of ${pics.length}`}
-      >
-        {ribbon && (
-          <span className={styles.premiumRibbon}>
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor" aria-hidden="true">
-              <path d="M12 2l2.4 5.6L20 8.3l-4 4 1 5.7L12 15.4 7 18l1-5.7-4-4 5.6-.7z" />
-            </svg>
-            {ribbon}
-          </span>
-        )}
-        {inStock && (
-          <span className={styles.stockPill}>
-            <span className={styles.stockDot} aria-hidden="true" />
-            In Stock
-          </span>
-        )}
-        {discount > 0 && (
-          <span
-            className={`${styles.discountBadge} ${ribbon ? styles.discountBadgeLower : ""}`}
-          >
-            -{discount}%
-          </span>
-        )}
-        <img
-          src={pics[index] || PLACEHOLDER_IMG}
-          alt={`${alt}${multi ? ` — view ${index + 1}` : ""}`}
-          className={styles.mainImg}
-          onError={onImageError}
-          style={
-            isZooming
-              ? { transform: "scale(2)", transformOrigin: `${pos.x}% ${pos.y}%` }
-              : undefined
-          }
-        />
-        {multi && (
-          <div className={styles.dots} aria-hidden="true">
-            {pics.map((_, i) => (
-              <span
-                key={i}
-                className={`${styles.dot} ${index === i ? styles.dotActive : ""}`}
-              />
-            ))}
-          </div>
-        )}
-      </div>
     </div>
   );
 };

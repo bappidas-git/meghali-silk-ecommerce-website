@@ -1,11 +1,20 @@
+/* =============================================================================
+ * DeliveryReturnsInfo — the delivery note
+ * =============================================================================
+ * Set like the shipping note on the back of an order card: a tracked heading,
+ * the real methods ruled one per line with their ETA and cost, then the facts
+ * (COD, returns, tax) beneath a closing hairline. No panel, no fill — the PDP
+ * wraps this and <TrustBadges/> in one assurance block, and a box of its own
+ * would break that block in two.
+ *
+ * Every line here is live data; when a source is empty its line is not printed.
+ * ========================================================================== */
+
 .panel {
-  border: 1px solid var(--sf-color-border);
-  border-radius: var(--sf-radius-lg);
-  background: var(--sf-color-surface);
-  padding: var(--sf-space-4);
   display: flex;
   flex-direction: column;
-  gap: var(--sf-space-3);
+  gap: var(--sf-space-4);
+  font-family: var(--sf-font-family);
 }
 
 .title {
@@ -13,14 +22,22 @@
   align-items: center;
   gap: var(--sf-space-2);
   margin: 0;
-  font-size: var(--sf-text-md);
-  font-weight: var(--sf-font-semibold);
-  color: var(--sf-color-text);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text-muted);
 }
 
 .title svg {
-  color: var(--sf-color-primary);
+  flex: none;
+  width: 14px;
+  height: 14px;
+  color: var(--sf-color-gold-deep);
 }
+
+/* ---- The methods ---------------------------------------------------------- */
 
 .list {
   list-style: none;
@@ -32,47 +49,53 @@
 
 .row {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   justify-content: space-between;
-  gap: var(--sf-space-3);
+  gap: var(--sf-space-4);
   padding: var(--sf-space-3) 0;
   border-bottom: 1px solid var(--sf-color-border);
 }
 
-.row:last-child {
-  border-bottom: none;
+.row:first-child {
+  padding-top: 0;
 }
 
 .rowMain {
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
   min-width: 0;
 }
 
 .rowName {
   font-size: var(--sf-text-sm);
   font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
   color: var(--sf-color-text);
 }
 
 .rowEta {
   font-size: var(--sf-text-xs);
+  line-height: var(--sf-leading-tight);
   color: var(--sf-color-text-muted);
 }
 
+/* The cost sits at the right margin, tabular, so the column reads as a column. */
 .rowCost {
+  flex: none;
   font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-  color: var(--sf-color-text);
-  white-space: nowrap;
+  font-weight: var(--sf-font-medium);
+  color: var(--sf-color-text-secondary);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
 }
+
+/* ---- The facts ------------------------------------------------------------ */
 
 .facts {
   list-style: none;
   margin: 0;
-  padding: var(--sf-space-3) 0 0;
-  border-top: 1px solid var(--sf-color-border);
+  padding: 0;
   display: flex;
   flex-direction: column;
   gap: var(--sf-space-2);
@@ -80,13 +103,17 @@
 
 .fact {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--sf-space-2);
-  font-size: var(--sf-text-sm);
+  font-size: var(--sf-text-xs);
+  line-height: var(--sf-leading-normal);
   color: var(--sf-color-text-secondary);
 }
 
 .fact svg {
-  color: var(--sf-color-success);
   flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  margin-top: 2px;
+  color: var(--sf-color-discount);
 }

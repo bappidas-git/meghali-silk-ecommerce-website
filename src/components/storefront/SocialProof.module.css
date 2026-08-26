@@ -1,64 +1,119 @@
+/* =============================================================================
+ * SocialProof — one quiet line of fact
+ * =============================================================================
+ * The figure set in the display serif, the gold marks beside it, then the count
+ * as a note that underlines itself when it is a link to the reviews. Nothing
+ * here is filled, tinted or boxed — the number carries its own weight.
+ * ========================================================================== */
+
 .wrap {
   display: inline-flex;
   align-items: center;
-  gap: var(--sf-space-2);
+  /* In a column stack this would otherwise stretch to the full width, making a
+     click anywhere on the line jump the page. It is as wide as its words. */
+  align-self: flex-start;
+  gap: var(--sf-space-3);
   flex-wrap: wrap;
   background: none;
   border: none;
   padding: 0;
   margin: 0;
-  font: inherit;
+  font-family: var(--sf-font-family);
   color: inherit;
   text-align: left;
 }
 
+/* The line is type, not a button — but when it links to the reviews it is still
+   a target, so it takes padding for the hit area and gives the space straight
+   back with a matching negative margin. Nothing in the stack moves. */
 .clickable {
   cursor: pointer;
   border-radius: var(--sf-radius-sm);
+  padding: var(--sf-space-2) var(--sf-space-1);
+  margin: calc(var(--sf-space-2) * -1) calc(var(--sf-space-1) * -1);
 }
 
-.clickable:hover .count {
-  color: var(--sf-color-primary);
-  text-decoration: underline;
+/* On touch it takes the full 44px minimum (WCAG 2.5.5), the same way. */
+@media (pointer: coarse) {
+  .clickable {
+    min-height: var(--sf-tap-target);
+    padding-top: var(--sf-space-3);
+    padding-bottom: var(--sf-space-3);
+    margin-top: calc(var(--sf-space-3) * -1);
+    margin-bottom: calc(var(--sf-space-3) * -1);
+  }
 }
 
 .clickable:focus-visible {
-  outline: none;
+  outline: 2px solid transparent;
+  outline-offset: 3px;
   box-shadow: var(--sf-shadow-focus);
 }
 
+/* The figure — serif, because it is a number the shopper is meant to believe. */
 .badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-  background: var(--sf-color-success);
-  color: var(--sf-color-primary-contrast);
-  font-weight: var(--sf-font-semibold);
-  border-radius: var(--sf-radius-sm);
-  padding: 2px 8px;
-  font-size: var(--sf-text-sm);
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-lg);
+  font-weight: var(--sf-font-medium);
+  line-height: 1;
+  letter-spacing: var(--sf-tracking-normal);
+  color: var(--sf-color-text);
+  font-variant-numeric: tabular-nums;
 }
 
-.badgeStar {
-  font-size: 0.85em;
-}
-
+/* The count — a note in the muted tone, with the house gold hairline growing in
+   under it on hover so it reads as the way through to the reviews. */
 .count {
-  color: var(--sf-color-text-muted);
+  position: relative;
   font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text-muted);
   transition: color var(--sf-transition-fast);
 }
 
+.count::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 100%;
+  bottom: -3px;
+  height: 1px;
+  background: var(--sf-color-gold-deep);
+  transition: right var(--sf-transition);
+}
+
+.clickable:hover .count {
+  color: var(--sf-color-text);
+}
+
+.clickable:hover .count::after {
+  right: 0;
+}
+
+/* No ratings — say so plainly, in the same muted tone. */
 .empty {
-  color: var(--sf-color-text-muted);
   font-size: var(--sf-text-sm);
-  font-style: italic;
+  letter-spacing: 0.02em;
+  color: var(--sf-color-text-muted);
+}
+
+/* ---- sm — dense surfaces (cards, bundle rows) ---------------------------- */
+.sm {
+  gap: var(--sf-space-2);
 }
 
 .sm .badge {
-  font-size: var(--sf-text-xs);
-  padding: 1px 6px;
+  font-size: var(--sf-text-base);
 }
-.sm .count {
+
+.sm .count,
+.sm .empty {
   font-size: var(--sf-text-xs);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .count,
+  .count::after {
+    transition: none;
+  }
 }

@@ -1,9 +1,23 @@
+/* =============================================================================
+ * TrustBadges — the promises, ruled rather than boxed
+ * =============================================================================
+ * Four small facts printed on the page ground and separated by hairlines, the
+ * way a spec block is set in a catalogue. No cards, no tinted circles: a small
+ * gold line-mark, the promise, and — when live data backs it — the real number
+ * underneath.
+ *
+ * `grid` (the PDP buy box) rules them two-up; `row` scrolls them in one line.
+ * The dividers are drawn per cell so the block needs no wrapper rules and works
+ * with any badge count.
+ * ========================================================================== */
+
 .badges {
   list-style: none;
   margin: 0;
   padding: 0;
   display: grid;
-  gap: var(--sf-space-3);
+  gap: 0;
+  font-family: var(--sf-font-family);
 }
 
 .grid {
@@ -12,46 +26,111 @@
 
 .row {
   grid-auto-flow: column;
-  grid-auto-columns: max-content;
+  grid-auto-columns: minmax(max-content, 1fr);
   overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.row::-webkit-scrollbar {
+  display: none;
 }
 
 .badge {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--sf-space-3);
-  padding: var(--sf-space-3);
-  border: 1px solid var(--sf-color-border);
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-surface);
+  min-width: 0;
+  padding: var(--sf-space-4) var(--sf-space-4) var(--sf-space-4) 0;
 }
 
+/* Two-up: a hairline down the middle and one under every row but the last. */
+.grid .badge {
+  border-bottom: 1px solid var(--sf-color-border);
+}
+
+.grid .badge:nth-child(odd) {
+  padding-right: var(--sf-space-4);
+  border-right: 1px solid var(--sf-color-border);
+}
+
+.grid .badge:nth-child(even) {
+  padding-left: var(--sf-space-4);
+}
+
+/* The last full row of two (and a trailing odd cell) closes without a rule. */
+.grid .badge:nth-last-child(-n + 2):nth-child(odd),
+.grid .badge:last-child {
+  border-bottom: none;
+}
+
+/* In a row the divider is vertical, between cells only. */
+.row .badge {
+  padding: 0 var(--sf-space-5);
+  border-left: 1px solid var(--sf-color-border);
+}
+
+.row .badge:first-child {
+  padding-left: 0;
+  border-left: none;
+}
+
+/* The mark — gold line-art at type scale, aligned to the label's cap height. */
 .iconWrap {
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  width: 38px;
-  height: 38px;
-  border-radius: var(--sf-radius-pill);
-  background: var(--sf-color-badge-bg);
+  flex: none;
+  margin-top: 1px;
   color: var(--sf-color-gold-deep);
+}
+
+.iconWrap svg {
+  width: 18px;
+  height: 18px;
 }
 
 .text {
   display: flex;
   flex-direction: column;
-  line-height: 1.25;
+  gap: 3px;
   min-width: 0;
 }
 
 .label {
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: var(--sf-leading-tight);
   color: var(--sf-color-text);
 }
 
+/* The live value — only ever rendered when real data resolved one. */
 .detail {
   font-size: var(--sf-text-xs);
+  line-height: var(--sf-leading-tight);
   color: var(--sf-color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Narrow buy boxes and phones: one promise per line, ruled top to bottom. */
+@media (max-width: 420px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .grid .badge:nth-child(odd) {
+    padding-right: 0;
+    border-right: none;
+  }
+
+  .grid .badge:nth-child(even) {
+    padding-left: 0;
+  }
+
+  .grid .badge:nth-last-child(-n + 2):nth-child(odd) {
+    border-bottom: 1px solid var(--sf-color-border);
+  }
+
+  .grid .badge:last-child {
+    border-bottom: none;
+  }
 }

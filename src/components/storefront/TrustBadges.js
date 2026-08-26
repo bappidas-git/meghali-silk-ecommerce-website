@@ -99,7 +99,7 @@ const TrustBadges = ({
                 height="22"
                 fill="none"
                 stroke="currentColor"
-                strokeWidth="1.6"
+                strokeWidth="1.4"
                 strokeLinecap="round"
                 strokeLinejoin="round"
               >
