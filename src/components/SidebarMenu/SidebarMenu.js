@@ -342,7 +342,7 @@ const SidebarMenu = ({ open, onClose, onOpenAuth }) => {
           />
 
           {/* ===== Panel ===== */}
-          <motion.aside
+          <motion.div
             ref={panelRef}
             className={styles.panel}
             variants={panelVariants}
@@ -671,7 +671,7 @@ const SidebarMenu = ({ open, onClose, onOpenAuth }) => {
                 </p>
               </div>
             </div>
-          </motion.aside>
+          </motion.div>
         </>
       )}
     </AnimatePresence>

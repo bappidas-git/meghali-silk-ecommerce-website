@@ -436,7 +436,15 @@ const SearchModal = ({ open, onClose }) => {
           e.preventDefault();
           last.focus();
         }
-      } else if (document.activeElement === last) {
+      } else if (
+        document.activeElement === last ||
+        !modal.contains(document.activeElement)
+      ) {
+        // The `!contains` half matters as much as the `=== last` half: results
+        // re-render as you type, and when the focused row is replaced focus
+        // falls to <body>. Without this the next Tab walked out into the page
+        // behind the overlay. The Shift branch above already guarded it, and
+        // AuthModal / ReviewModal guard both — this one was the odd trap out.
         e.preventDefault();
         first.focus();
       }

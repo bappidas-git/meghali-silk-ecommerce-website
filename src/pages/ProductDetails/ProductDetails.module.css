@@ -70,8 +70,11 @@
   color: var(--sf-color-text-muted);
 }
 
+/* The glyph between the crumbs is TYPE, so it takes a type token. It used to
+   take --sf-color-border-strong, which is a hairline colour: 1.5:1 on ivory and
+   about 2:1 on the evening ground, i.e. a separator you could not see. */
 .breadcrumbSep {
-  color: var(--sf-color-border-strong);
+  color: var(--sf-color-text-muted);
 }
 
 /* The house link: no chrome, a gold hairline that grows in under it. */
@@ -1061,5 +1064,35 @@
   }
   .faqAnswer {
     margin-left: 0;
+  }
+}
+
+/* ── Touch targets ────────────────────────────────────────────────────────────
+   Two controls in this page measure under 44px in one axis. Neither can simply
+   grow its box: the crumb's hover hairline and the tab's active underline are
+   both ::after rules pinned to the element box, so widening or padding the
+   element drags the rule off the word. An invisible ::before takes the tap
+   instead and nothing moves. WCAG 2.5.5, --sf-tap-target. */
+@media (pointer: coarse) {
+  .breadcrumbLink::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: var(--sf-tap-target);
+    transform: translateY(-50%);
+  }
+
+  /* "FAQs" is only 38px wide at this type size. */
+  .tabButton::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 50%;
+    min-width: var(--sf-tap-target);
+    width: 100%;
+    transform: translateX(-50%);
   }
 }

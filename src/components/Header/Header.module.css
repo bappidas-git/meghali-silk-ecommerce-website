@@ -264,6 +264,13 @@
   .navLink {
     min-height: var(--sf-tap-target);
   }
+
+  /* The lockup is an inline-flex wrapper around the logo image, so its box was
+     only as tall as the artwork (34px) — the first target on every page and the
+     one under the thumb. Growing the box, not the mark. */
+  .logoLink {
+    min-height: var(--sf-tap-target);
+  }
 }
 
 .navLink::after {

@@ -97,6 +97,15 @@ const OrderConfirmation = () => {
       colors: CONFETTI_COLORS,
       disableForReducedMotion: true,
     });
+    // canvas-confetti appends its own fixed, full-viewport <canvas> to <body>,
+    // outside every landmark and with no way to configure attributes on it. To
+    // assistive tech that is a stray region of unclassified content sitting
+    // over the page; it is pure decoration, so label it as such once it exists.
+    const shimmer = document.querySelector("body > canvas");
+    if (shimmer) {
+      shimmer.setAttribute("aria-hidden", "true");
+      shimmer.setAttribute("role", "presentation");
+    }
   }, [order]);
 
   const fetchOrder = async () => {

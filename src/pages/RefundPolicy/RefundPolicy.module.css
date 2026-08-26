@@ -82,8 +82,11 @@
   color: var(--sf-color-text-muted);
 }
 
+/* The glyph between the crumbs is TYPE, so it takes a type token. It used to
+   take --sf-color-border-strong, which is a hairline colour: 1.5:1 on ivory and
+   about 2:1 on the evening ground, i.e. a separator you could not see. */
 .breadcrumbSep {
-  color: var(--sf-color-border-strong);
+  color: var(--sf-color-text-muted);
 }
 
 /* No chrome; a gold hairline grows in under the link on hover. */
@@ -633,4 +636,20 @@
    another paragraph, so the shared `.prose + .prose` rule does not reach it. */
 .proseAfterTable {
   margin-top: var(--sf-space-6);
+}
+
+/* ── Touch targets ────────────────────────────────────────────────────────────
+   The crumbs are 18px-tall inline type. Vertical padding would drag the hover
+   hairline (::after, pinned to the padding box) away from the words, so the
+   44px tap area is an invisible band instead. WCAG 2.5.5, --sf-tap-target. */
+@media (pointer: coarse) {
+  .breadcrumbLink::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: var(--sf-tap-target);
+    transform: translateY(-50%);
+  }
 }

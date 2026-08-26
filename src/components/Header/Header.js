@@ -411,8 +411,13 @@ const Header = () => {
                 aria-haspopup={isAuthenticated ? "menu" : undefined}
               >
                 {isAuthenticated && user ? (
+                  /* The initial is a portrait, not a label: left exposed it
+                     became the button's visible text ("B"), which the
+                     "Account menu" name cannot contain — so voice control had
+                     nothing to match on (WCAG 2.5.3). */
                   <Avatar
                     className={styles.avatar}
+                    aria-hidden="true"
                     sx={{ width: 28, height: 28 }}
                   >
                     {(user.firstName || user.name || "U").charAt(0).toUpperCase()}

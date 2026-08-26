@@ -272,7 +272,7 @@ const CartDrawer = ({ open, onClose }) => {
           <motion.div className={styles.scrim} {...scrim} onClick={onClose} />
 
           {/* ===== The tray ===== */}
-          <motion.aside
+          <motion.div
             ref={panelRef}
             className={`${styles.drawer} ${themeClass}`}
             role="dialog"
@@ -649,7 +649,7 @@ const CartDrawer = ({ open, onClose }) => {
                 </div>
               </>
             )}
-          </motion.aside>
+          </motion.div>
         </>
       )}
     </AnimatePresence>

@@ -23,8 +23,11 @@ const TrustStrip = ({ items = TRUST_ITEMS, className = "" }) => {
   const list = items && items.length ? items : TRUST_ITEMS;
 
   return (
-    <div className={`${styles.strip} ${className}`.trim()} aria-label="Store guarantees">
-      <ul className={styles.list}>
+    // The name belongs on the <ul>, not on the wrapper: aria-label on a plain
+    // <div> with no role is ignored by most assistive tech, so the strip was
+    // announcing as an unnamed list of four stray phrases.
+    <div className={`${styles.strip} ${className}`.trim()}>
+      <ul className={styles.list} aria-label="Store guarantees">
         {list.map((item) => (
           <li key={item.id} className={styles.item}>
             <Icon icon={item.icon} className={styles.icon} aria-hidden="true" />

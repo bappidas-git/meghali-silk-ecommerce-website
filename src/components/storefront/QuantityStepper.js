@@ -31,9 +31,11 @@ const QuantityStepper = ({
   const atMin = value <= min;
   const atMax = value >= max;
 
+  // Only "sm" carries a size class; the default "md" IS the base rule, so
+  // styles[size] is undefined there and used to render class="undefined".
   return (
     <div
-      className={`${styles.stepper} ${styles[size]} ${
+      className={`${styles.stepper} ${styles[size] || ""} ${
         disabled ? styles.disabled : ""
       }`}
     >
