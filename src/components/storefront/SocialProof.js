@@ -13,6 +13,10 @@ import styles from "./SocialProof.module.css";
 //   will not show a hollow "0.0 (0)". Callers must pass values derived from the
 //   real reviews system, so what shows is always backed by data.
 //
+// Editorially it is ONE quiet line — the figure, the gold marks, then the count
+// as a link-toned note. No filled pill: a rating is a fact to be read, not a
+// score to be shouted.
+//
 // Props:
 //   rating         number  aggregate rating 0–5 (real)
 //   count          number  number of real ratings/reviews behind it
@@ -33,31 +37,31 @@ const SocialProof = ({
   // Honest empty state — no ratings, so claim nothing.
   if (ratingsCount <= 0) {
     return (
-      <div className={`${styles.wrap} ${styles[size]} ${className}`}>
+      <div className={`${styles.wrap} ${styles[size] || ""} ${className}`}>
         <span className={styles.empty}>No ratings yet</span>
       </div>
     );
   }
 
-  const starSize = size === "sm" ? 14 : 18;
+  const starSize = size === "sm" ? 13 : 15;
   const countLabel = `${ratingsCount.toLocaleString()} ${
     ratingsCount === 1 ? "rating" : "Ratings & Reviews"
   }`;
+
+  const sizeClass = styles[size] || "";
 
   const Tag = onReviewsClick ? "button" : "div";
 
   return (
     <Tag
       type={onReviewsClick ? "button" : undefined}
-      className={`${styles.wrap} ${styles[size]} ${
+      className={`${styles.wrap} ${sizeClass} ${
         onReviewsClick ? styles.clickable : ""
       } ${className}`}
       onClick={onReviewsClick}
       aria-label={`Rated ${value.toFixed(1)} out of 5 from ${countLabel}`}
     >
-      <span className={styles.badge}>
-        {value.toFixed(1)} <span className={styles.badgeStar} aria-hidden="true">★</span>
-      </span>
+      <span className={styles.badge}>{value.toFixed(1)}</span>
       <StarRating rating={value} size={starSize} />
       <span className={styles.count}>{countLabel}</span>
     </Tag>

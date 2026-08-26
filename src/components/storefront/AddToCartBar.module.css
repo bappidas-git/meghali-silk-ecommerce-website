@@ -1,22 +1,33 @@
+/* =============================================================================
+ * AddToCartBar — the thumb rail
+ * =============================================================================
+ * A slim ivory band on a hairline, holding the frame, the name, the real price
+ * and the actions. Mobile only: it exists because on a phone the primary CTA
+ * has to stay a thumb away once the buy box has scrolled off. It slides up from
+ * the foot of the screen and is otherwise invisible.
+ *
+ * Note the two `display` declarations on .bar — none by default, flex inside the
+ * phone query. That is deliberate: this is a phone device, not a small viewport
+ * treatment of a desktop one.
+ * ========================================================================== */
+
 .bar {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: var(--sf-z-stickybar); /* see note below for mobile override */
-  display: flex;
+  z-index: var(--sf-z-stickybar); /* raised inside the phone query below */
+  display: none;
   align-items: center;
   justify-content: space-between;
   gap: var(--sf-space-3);
-  padding: var(--sf-space-3) var(--sf-space-4);
-  padding-bottom: calc(var(--sf-space-3) + env(safe-area-inset-bottom));
-  background: var(--sf-color-surface);
-  border-top: 1px solid var(--sf-color-border);
-  box-shadow: 0 -4px 20px rgba(15, 23, 42, 0.12);
+  padding: var(--sf-space-2) var(--sf-space-4);
+  padding-bottom: calc(var(--sf-space-2) + env(safe-area-inset-bottom));
+  background: var(--sf-color-bg);
+  border-top: 1px solid var(--sf-color-border-strong);
+  font-family: var(--sf-font-family);
   transform: translateY(110%);
   transition: transform var(--sf-transition);
-  /* Hidden by default on desktop; this is a mobile-first device. */
-  display: none;
 }
 
 .visible {
@@ -31,27 +42,29 @@
 }
 
 .thumb {
-  width: 44px;
-  height: 44px;
-  border-radius: var(--sf-radius-sm);
-  object-fit: cover;
-  background: var(--sf-color-surface-2);
+  width: 40px;
+  height: 52px;
   flex-shrink: 0;
+  object-fit: cover;
+  border-radius: var(--sf-radius-sm);
+  background: var(--sf-color-surface-2);
 }
 
 .priceWrap {
   display: flex;
   flex-direction: column;
+  gap: 2px;
   min-width: 0;
 }
 
 .name {
   font-size: var(--sf-text-xs);
+  line-height: var(--sf-leading-tight);
   color: var(--sf-color-text-muted);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 38vw;
+  max-width: 34vw;
 }
 
 .priceRow {
@@ -60,16 +73,22 @@
   gap: var(--sf-space-2);
 }
 
+/* The same serif figure the buy box shows, one step down. */
 .price {
-  font-size: var(--sf-text-md);
-  font-weight: var(--sf-font-bold);
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-lg);
+  font-weight: var(--sf-font-medium);
+  line-height: 1;
   color: var(--sf-color-price);
+  font-variant-numeric: tabular-nums;
 }
 
 .compare {
-  font-size: var(--sf-text-sm);
+  font-size: var(--sf-text-xs);
   color: var(--sf-color-compare);
   text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  font-variant-numeric: tabular-nums;
 }
 
 .actions {
@@ -79,64 +98,106 @@
   flex-shrink: 0;
 }
 
+/* Both actions are the house button: tracked capitals, near-square, hairline.
+   Add to Cart takes the ink fill; Buy Now stands beside it as an outline, so
+   the bar carries one filled control and not two. */
 .addBtn,
 .buyNow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-height: var(--sf-tap-target);
-  padding: 0 var(--sf-space-5);
-  border-radius: var(--sf-radius-md);
-  font-weight: var(--sf-font-semibold);
-  font-size: var(--sf-text-sm);
-  cursor: pointer;
-  transition: filter var(--sf-transition-fast), background var(--sf-transition-fast),
-    color var(--sf-transition-fast);
+  padding: 0 var(--sf-space-4);
+  border: 1px solid transparent;
+  border-radius: var(--sf-radius-sm);
+  font-family: inherit;
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
   white-space: nowrap;
+  cursor: pointer;
+  transition: background-color var(--sf-transition),
+    border-color var(--sf-transition), color var(--sf-transition);
 }
 
-/* Add to Cart — emerald (matches the in-page buy box) */
 .addBtn {
-  border: none;
   background: var(--sf-color-emerald);
+  border-color: var(--sf-color-emerald);
   color: var(--sf-color-emerald-contrast);
 }
 
 .addBtn:hover:not(:disabled) {
-  background: var(--sf-color-emerald-hover);
+  background: var(--sf-color-gold-deep);
+  border-color: var(--sf-color-gold-deep);
 }
 
+/* The confirmation moment — the fill warms to the success tone, briefly. */
 .addBtnDone {
   background: var(--sf-color-success);
+  border-color: var(--sf-color-success);
   color: var(--sf-color-primary-contrast);
 }
 
-/* Buy Now — gold (matches the in-page buy box) */
 .buyNow {
-  border: none;
-  background: var(--sf-gradient-gold);
-  color: var(--sf-color-emerald-contrast);
+  background: transparent;
+  border-color: var(--sf-color-border-strong);
+  color: var(--sf-color-text);
 }
 
 .buyNow:hover:not(:disabled) {
-  filter: brightness(1.05);
+  border-color: var(--sf-color-text);
 }
 
 .addBtn:focus-visible,
 .buyNow:focus-visible {
-  outline: none;
+  outline: 2px solid transparent;
+  outline-offset: 2px;
   box-shadow: var(--sf-shadow-focus);
 }
 
 .addBtn:disabled,
 .buyNow:disabled {
-  opacity: 0.55;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
-/* Mobile-first: the bar only exists on phones/large-phones. It intentionally
+/* Mobile-first: the bar only exists on phones/large phones. It intentionally
    sits ABOVE the global BottomNav (z 1200) so the PDP's primary CTA is never
    hidden while a shopper is deciding. */
 @media (max-width: 768px) {
   .bar {
     display: flex;
     z-index: 1300;
+  }
+}
+
+/* The bar sheds its parts in order of how little the shopper needs them, so the
+   two actions never drop below the 44px minimum on a narrow phone.
+
+   First to go is the struck compare price — the real price and the CTA are what
+   the bar exists for, and the saving is stated in full a scroll away. */
+@media (max-width: 520px) {
+  .compare {
+    display: none;
+  }
+}
+
+/* Then the frame: the photograph it repeats is directly above the bar. The name
+   keeps its ellipsis and is the last thing to shrink. */
+@media (max-width: 420px) {
+  .thumb {
+    display: none;
+  }
+
+  .addBtn,
+  .buyNow {
+    padding: 0 var(--sf-space-3);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar {
+    transition: none;
   }
 }
