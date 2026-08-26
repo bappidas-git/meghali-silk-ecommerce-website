@@ -128,37 +128,60 @@ export const SUPPORT_HOURS = "Mon – Sat: 10:00 AM – 7:00 PM IST";
 // Terms, Cookie and Refund pages never show contradictory "last updated" dates.
 export const POLICY_LAST_UPDATED = "June 1, 2026";
 
-// FAQs
+// FAQs — one shared set, read on three surfaces: the Help Centre (/help), the
+// home FAQ block and the PDP's FAQ panel. The copy therefore has to work both
+// beside a single product and on its own, and every number in it is one the
+// store actually runs on — the windows and thresholds come from the shipping
+// methods, the Cash-on-Delivery ceiling from the payment settings, and the
+// return window from the Refund Policy page. Nothing here is invented.
 export const FAQ_ITEMS = [
   {
     id: 1,
-    question: "How long does delivery take, and is shipping free?",
+    question: "How should I care for Muga, Pat and Eri silk?",
     answer:
-      "Standard delivery takes 5-7 business days, and shipping is free on all orders above ₹999. Express delivery is available in 2-3 business days, with same-day delivery in select metro cities. Every silk piece is carefully packed to reach you in perfect condition.",
+      "Dry-clean for the first couple of years, then a gentle cold hand wash with a mild detergent — Muga in particular grows softer and deepens in lustre each time it is washed. Dry in the shade, never in direct sun, and press on the reverse with a warm iron. Store the piece folded in unbleached muslin rather than plastic, refold it along a different line every few months so no crease ever sets, and keep perfume and deodorant off the fabric.",
   },
   {
     id: 2,
-    question: "What is your return policy?",
+    question: "Is the silk really handwoven in Assam?",
     answer:
-      "We offer a 7-day hassle-free return policy. If your silk saree or outfit isn't quite right, you can request a return within 7 days of delivery as long as it's unworn, unwashed and has its original tags intact. Refunds are processed within 5-7 business days of inspection.",
+      "Yes. Every piece is woven on a handloom and bought directly from weaving families in and around Sualkuchi, the weaving village on the north bank of the Brahmaputra. Undyed Muga is sold undyed — the deep honey gold is the fibre's own colour and not a dye — and Eri is handspun before it is woven. Each product page carries the details the weaver gave us for that particular piece.",
   },
   {
     id: 3,
-    question: "Is payment secure?",
+    question: "What is the difference between Muga, Pat, Eri and Nuni silk?",
     answer:
-      "Yes, all payments are processed through industry-standard SSL encryption. We support UPI, credit/debit cards, net banking, and Cash on Delivery.",
+      "Muga is the golden silk unique to Assam — undyed, unusually strong, and it only improves with age. Pat is the bright ivory-to-white mulberry silk, the one most often woven with zari for weddings and festivals. Eri is soft, matte and handspun; it behaves more like a fine wool and is warm to wear, which is why it is used for shawls and stoles. Nuni is a mulberry silk with a quieter, everyday finish. Every listing states which of them the piece is woven in.",
   },
   {
     id: 4,
-    question: "Do you offer Cash on Delivery?",
+    question: "What comes in a Mekhela Chador set, and does it arrive stitched?",
     answer:
-      "Yes, Cash on Delivery is available on orders up to ₹50,000 in most pin codes across India.",
+      "A set is the two-piece drape: the mekhela, worn as the lower wrap, and the chador that goes over it. Both arrive unstitched and unpleated so your tailor can pleat, hem and finish them to your own measurements. A matching blouse piece is listed separately where one has been woven for the set. Lengths and widths appear on the product page wherever the weaver has supplied them — if a measurement you need is not listed, write to us before you order.",
   },
   {
     id: 5,
+    question: "How long does delivery take, and is shipping free?",
+    answer:
+      "Standard delivery reaches most of India in 5-7 business days and is free on orders above ₹999. Express delivery arrives in 2-3 business days, and same-day delivery is available within select Kolkata pin codes. Every order is packed in insured silk packaging, and the exact delivery charge for your address is shown at checkout before you pay.",
+  },
+  {
+    id: 6,
+    question: "What is your return policy?",
+    answer:
+      "We offer a 7-day return. Request one from My Orders within 7 days of delivery and send the piece back unworn, unwashed and with its original tags and packaging intact. Once it reaches us and passes inspection, the refund is processed to your original payment method within 5-7 business days. Blouses stitched to measure and made-to-order pieces cannot be returned, since they were finished to your own measurements.",
+  },
+  {
+    id: 7,
+    question: "Which payments do you accept, and is Cash on Delivery available?",
+    answer:
+      "UPI, credit and debit cards, net banking and wallets are all accepted, and every payment is handled over an encrypted connection by the payment gateway. Cash on Delivery is available on orders up to ₹50,000 across most pin codes in India. Prices are shown exclusive of GST, which is calculated at checkout.",
+  },
+  {
+    id: 8,
     question: "How do I track my order?",
     answer:
-      "Once your order is shipped, you'll receive an email with a tracking number. You can track your order from the 'My Orders' section in your account.",
+      "You will receive an email with a tracking number as soon as your order is dispatched. You can also follow it at any time from the My Orders section of your account, where the current stage of every order is shown.",
   },
 ];
 

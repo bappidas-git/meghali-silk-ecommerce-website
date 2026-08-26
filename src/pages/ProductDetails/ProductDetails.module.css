@@ -14,6 +14,11 @@
         single ruled thing rather than two boxes stacked.
      4. THE PROMISES BAND under both columns: four facts divided by hairlines,
         no cards, no tinted discs.
+     5. THE STORY BELOW the band — the tablist re-set as an index line and the
+        panels un-framed: the description as long-form prose, the specification
+        as a hairline table, the loom story as a pull-quote interlude, the
+        reviews as their own letters page, the FAQs as a hairline accordion.
+        The two AOV rails close the page as curation, never as statistics.
 
    Nothing above the fold is a card. The only surfaces are the page ground and
    the sunken sand plate behind the photograph; everything else is a hairline,
@@ -22,9 +27,6 @@
    TOKENS ONLY — every colour, space, radius and type value comes from
    storefront-tokens.css, and the buttons are the global primitives. Dark mode
    needs no rules of its own: the tokens flip under `body.dark`.
-
-   The regions below the promises band (tabs, panels, reviews, rails) belong to
-   the next prompt and are left as they are.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 .page {
@@ -471,18 +473,41 @@
   font-variant-numeric: tabular-nums;
 }
 
-/* ── Tabs ────────────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   5. THE STORY BELOW  —  the index, the panels, the interludes
+   ═══════════════════════════════════════════════════════════════════════════
+   Under the promises band the page stops selling and starts telling. Nothing
+   in this half is a card either:
+
+     THE INDEX — the tablist re-set as an index line. Tracked capitals standing
+     on ONE hairline, the open one inked and underlined in gold. No pills, no
+     fills, no second rule.
+     THE PANELS — frameless. A serif title, then the thing itself: the
+     description as long-form prose with a drop cap at a 68ch measure; the
+     specification as a hairline table, zebra-free, tracked labels against ink
+     values; the loom story as a pull-quote interlude over a ruled facts grid;
+     the reviews as their own letters page (ReviewsSection); the FAQs as a
+     hairline accordion, numbered, opened by a thin plus that loses its upright.
+
+   TOKENS ONLY — every colour, space and type value comes from
+   storefront-tokens.css, and dark mode needs no rules of its own.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 .tabsSection {
-  margin-top: var(--sf-space-10);
-  scroll-margin-top: 90px;
+  margin-top: var(--sf-space-16);
+  /* The reviews jump (SocialProof → here) has to clear the sticky masthead, so
+     it lands against the same measured height the buy-box rail pins to. */
+  scroll-margin-top: calc(var(--pdp-header-h) + var(--sf-space-6));
 }
 
-/* Tab bar — scrolls horizontally on mobile; gold active state. */
+/* ---- The index line ------------------------------------------------------ */
+/* Scrolls horizontally on narrow plates; the scrollbar itself stays hidden so
+   the hairline reads unbroken. */
+
 .tabNav {
   display: flex;
-  gap: var(--sf-space-1);
+  gap: var(--sf-space-8);
   border-bottom: 1px solid var(--sf-color-border);
-  margin-bottom: var(--sf-space-6);
   overflow-x: auto;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
@@ -494,17 +519,21 @@
 
 .tabButton {
   position: relative;
-  flex-shrink: 0;
+  flex: none;
   min-height: var(--sf-tap-target);
-  padding: var(--sf-space-3) var(--sf-space-5);
+  padding: var(--sf-space-4) 0;
   border: none;
   background: none;
-  font-size: var(--sf-text-base);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
   font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: var(--sf-leading-tight);
   white-space: nowrap;
-  color: var(--sf-color-text-secondary);
+  color: var(--sf-color-text-muted);
   cursor: pointer;
-  transition: color var(--sf-transition-fast);
+  transition: color var(--sf-transition);
 }
 
 .tabButton:hover {
@@ -512,19 +541,19 @@
 }
 
 .tabButtonActive {
-  color: var(--sf-color-gold);
-  font-weight: var(--sf-font-semibold);
+  color: var(--sf-color-text);
 }
 
+/* The mark of the open panel: one gold hairline laid exactly over the rule,
+   the width of the label and nothing more. */
 .tabButtonActive::after {
   content: "";
   position: absolute;
-  left: var(--sf-space-3);
-  right: var(--sf-space-3);
+  left: 0;
+  right: 0;
   bottom: -1px;
-  height: 2px;
-  background: var(--sf-color-gold);
-  border-radius: var(--sf-radius-pill);
+  height: 1px;
+  background: var(--sf-color-gold-deep);
 }
 
 .tabButton:focus-visible {
@@ -533,150 +562,221 @@
   border-radius: var(--sf-radius-sm);
 }
 
-/* ── Tab panels ──────────────────────────────────────────────────────────── */
+/* ---- The panels ---------------------------------------------------------- */
+
+.tabContent {
+  padding-top: var(--sf-space-10);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sf-space-6);
+}
+
 .panelTitle {
-  margin: 0 0 var(--sf-space-4);
+  margin: 0;
   font-family: var(--sf-font-display);
-  font-size: var(--sf-text-xl);
-  font-weight: var(--sf-font-bold);
+  font-size: var(--sf-text-2xl);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-display);
+  letter-spacing: var(--sf-tracking-tight);
   color: var(--sf-color-text);
 }
 
-.prose {
+/* The honest note when a panel has nothing real to show. */
+.panelNote {
   margin: 0;
-  max-width: 70ch;
-  line-height: var(--sf-leading-normal);
+  font-size: var(--sf-text-sm);
+  color: var(--sf-color-text-muted);
+}
+
+/* ---- Description — long-form, one measure, one ornament ------------------ */
+
+.prose {
+  max-width: 68ch;
+}
+
+.prose p {
+  margin: 0;
+  font-size: var(--sf-text-md);
+  line-height: var(--sf-leading-relaxed);
   color: var(--sf-color-text-secondary);
   white-space: pre-line;
 }
 
-.descriptionPanel,
-.fabricPanel,
-.faqPanel {
-  max-width: 880px;
+.prose p + p {
+  margin-top: var(--sf-space-5);
 }
 
-/* ── Specifications — silk spec table ───────────────────────────────────── */
-.specPanel {
-  padding: var(--sf-space-5) var(--sf-space-6);
-  border: 1px solid var(--sf-color-border);
-  border-radius: var(--sf-radius-lg);
-  background: var(--sf-color-surface);
+/* The drop cap: the display serif, three lines deep, in gold. The only
+   ornament anywhere in the panel. */
+.proseLead::first-letter {
+  float: left;
+  margin: 0.06em var(--sf-space-3) 0 0;
+  font-family: var(--sf-font-display);
+  font-size: 3.4em;
+  font-weight: var(--sf-font-medium);
+  line-height: 0.82;
+  color: var(--sf-color-gold-deep);
 }
 
-.specGrid {
+/* ---- Specification — a hairline table, zebra-free ------------------------ */
+/* Two ruled lists side by side on wide plates; one below 900px. The rules stop
+   at the column edge, so the pair reads as two lists rather than a boxed grid. */
+
+.specTable {
   margin: 0;
+  width: 100%;
+  max-width: 940px;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  border: 1px solid var(--sf-color-border);
-  border-radius: var(--sf-radius-md);
-  overflow: hidden;
-  background: var(--sf-color-surface);
+  grid-template-columns: minmax(0, 1fr);
+  column-gap: var(--sf-space-12);
+  border-top: 1px solid var(--sf-color-border);
 }
 
-.specPair {
+.specRow {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
-  gap: var(--sf-space-2);
+  grid-template-columns: minmax(0, 130px) minmax(0, 1fr);
+  gap: var(--sf-space-4);
   align-items: baseline;
-  padding: var(--sf-space-3) var(--sf-space-4);
+  padding: var(--sf-space-4) 0;
   border-bottom: 1px solid var(--sf-color-border);
-  border-right: 1px solid var(--sf-color-border);
 }
 
 .specLabel {
   margin: 0;
-  font-size: var(--sf-text-sm);
-  color: var(--sf-color-text-secondary);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-muted);
 }
 
 .specValue {
   margin: 0;
   font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
+  line-height: var(--sf-leading-normal);
   color: var(--sf-color-text);
   overflow-wrap: anywhere;
 }
 
-/* Zebra striping by visual row (3 columns → bands of 3). */
-.specGrid .specPair:nth-child(6n + 4),
-.specGrid .specPair:nth-child(6n + 5),
-.specGrid .specPair:nth-child(6n + 6) {
-  background: var(--sf-color-surface-2);
+@media (min-width: 900px) {
+  .specTable {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
-.specNote {
+/* ---- Fabric & Craft — the interlude -------------------------------------- */
+
+.craftQuote {
+  position: relative;
   margin: 0;
-  color: var(--sf-color-text-muted);
-  font-style: italic;
+  padding-top: var(--sf-space-6);
+  max-width: 30em;
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-lg);
+  font-weight: var(--sf-font-light);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text);
+  white-space: pre-line;
 }
 
-/* ── Fabric & Craft ──────────────────────────────────────────────────────── */
-.fabricPanel {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sf-space-5);
+/* A short gold rule opens the quote — the same device as the section eyebrows. */
+.craftQuote::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--sf-space-12);
+  height: 1px;
+  background: var(--sf-color-gold-deep);
 }
 
+/* The facts as a ruled grid. The hairlines are 1px GAPS over a border ground,
+   so the rules stay clean however the cells wrap. */
 .craftFacts {
   margin: 0;
+  width: 100%;
+  max-width: 940px;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: var(--sf-space-3);
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 1px;
+  border: 1px solid var(--sf-color-border);
+  background: var(--sf-color-border);
 }
 
 .craftFact {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: var(--sf-space-3) var(--sf-space-4);
-  border: 1px solid var(--sf-color-border);
-  border-left: 3px solid var(--sf-color-gold);
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-surface);
+  gap: var(--sf-space-2);
+  padding: var(--sf-space-5);
+  background: var(--sf-color-bg);
 }
 
-.craftFact .specLabel {
+.craftFactLabel {
+  margin: 0;
   font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: var(--sf-leading-tight);
   color: var(--sf-color-gold-deep);
 }
 
-/* ── FAQ accordion ───────────────────────────────────────────────────────── */
+.craftFactValue {
+  margin: 0;
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text);
+  overflow-wrap: anywhere;
+}
+
+/* ---- FAQs — a hairline accordion ---------------------------------------- */
+
 .faqList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sf-space-2);
+  --pdp-faq-index: 2.4rem;
+
+  width: 100%;
+  max-width: 940px;
+  border-top: 1px solid var(--sf-color-border);
 }
 
 .faqItem {
-  border: 1px solid var(--sf-color-border);
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-surface);
-  overflow: hidden;
+  border-bottom: 1px solid var(--sf-color-border);
+}
+
+/* The question is a real heading, so the list is navigable by heading as well
+   as by Tab — the button keeps all the behaviour. */
+.faqHeading {
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
 }
 
 .faqQuestion {
-  width: 100%;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--sf-space-3);
+  align-items: baseline;
+  gap: var(--sf-space-4);
+  width: 100%;
   min-height: var(--sf-tap-target);
-  padding: var(--sf-space-3) var(--sf-space-4);
+  padding: var(--sf-space-5) 0;
   border: none;
   background: none;
   text-align: left;
-  font-size: var(--sf-text-base);
-  font-weight: var(--sf-font-medium);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-md);
+  font-weight: var(--sf-font-normal);
+  line-height: var(--sf-leading-normal);
   color: var(--sf-color-text);
   cursor: pointer;
-  transition: color var(--sf-transition-fast);
+  transition: color var(--sf-transition);
 }
 
 .faqQuestion:hover {
-  color: var(--sf-color-gold);
+  color: var(--sf-color-gold-deep);
 }
 
 .faqQuestion:focus-visible {
@@ -685,20 +785,72 @@
   border-radius: var(--sf-radius-sm);
 }
 
-.faqIcon {
-  flex-shrink: 0;
+/* The tracked ordinal — the small label the design asks for, in tabular gold. */
+.faqIndex {
+  flex: none;
+  width: var(--pdp-faq-index);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  letter-spacing: var(--sf-tracking-wide);
   color: var(--sf-color-gold-deep);
-  transition: transform var(--sf-transition-fast);
+  font-variant-numeric: tabular-nums;
 }
 
-.faqIconOpen {
-  transform: rotate(180deg);
+.faqText {
+  flex: 1;
+  min-width: 0;
 }
 
+/* A thin plus that loses its upright as the answer opens — no rotating
+   chevron, no glyph borrowed from the body font. */
+.faqIcon {
+  position: relative;
+  flex: none;
+  align-self: center;
+  width: 12px;
+  height: 12px;
+}
+
+.faqIcon::before,
+.faqIcon::after {
+  content: "";
+  position: absolute;
+  background: var(--sf-color-text-muted);
+  transition: transform var(--sf-transition), background-color var(--sf-transition);
+}
+
+.faqIcon::before {
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  margin-top: -0.5px;
+}
+
+.faqIcon::after {
+  left: 50%;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  margin-left: -0.5px;
+}
+
+.faqItemOpen .faqIcon::before,
+.faqItemOpen .faqIcon::after {
+  background: var(--sf-color-gold-deep);
+}
+
+.faqItemOpen .faqIcon::after {
+  transform: scaleY(0);
+}
+
+/* The answer hangs under the question, indented past the ordinal. */
 .faqAnswer {
-  padding: 0 var(--sf-space-4) var(--sf-space-4);
+  margin-left: calc(var(--pdp-faq-index) + var(--sf-space-4));
+  padding: 0 0 var(--sf-space-6);
+  max-width: 68ch;
   font-size: var(--sf-text-sm);
-  line-height: var(--sf-leading-normal);
+  line-height: var(--sf-leading-relaxed);
   color: var(--sf-color-text-secondary);
 }
 
@@ -833,18 +985,12 @@
     border-left: 1px solid var(--sf-color-border);
   }
 
-  /* Spec table → 2 columns of pairs; re-stripe in bands of 2. */
-  .specGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+  /* The story below closes up with the rest of the page. */
+  .tabsSection {
+    margin-top: var(--sf-space-12);
   }
-  .specGrid .specPair:nth-child(6n + 4),
-  .specGrid .specPair:nth-child(6n + 5),
-  .specGrid .specPair:nth-child(6n + 6) {
-    background: transparent;
-  }
-  .specGrid .specPair:nth-child(4n + 3),
-  .specGrid .specPair:nth-child(4n + 4) {
-    background: var(--sf-color-surface-2);
+  .tabContent {
+    padding-top: var(--sf-space-8);
   }
 }
 
@@ -872,22 +1018,15 @@
     flex: 1 1 auto;
   }
 
-  /* Spec table → single column of pairs; stripe every other row. */
-  .specPanel {
-    padding: var(--sf-space-4);
+  /* The index line tightens; the panels keep their air. */
+  .tabNav {
+    gap: var(--sf-space-6);
   }
-  .specGrid {
-    grid-template-columns: minmax(0, 1fr);
+  .panelTitle {
+    font-size: var(--sf-text-xl);
   }
-  .specGrid .specPair {
-    border-right: none;
-  }
-  .specGrid .specPair:nth-child(4n + 3),
-  .specGrid .specPair:nth-child(4n + 4) {
-    background: transparent;
-  }
-  .specGrid .specPair:nth-child(even) {
-    background: var(--sf-color-surface-2);
+  .craftQuote {
+    font-size: var(--sf-text-md);
   }
 }
 
@@ -912,9 +1051,20 @@
     border-bottom: 1px solid var(--sf-color-border);
   }
 
-  /* Narrowest: stack label above value for readability. */
-  .specPair {
+  /* Narrowest: the spec rows stack label over value, and the FAQ answer gives
+     up its hanging indent so the measure stays usable. */
+  .specRow {
     grid-template-columns: minmax(0, 1fr);
     gap: 2px;
+  }
+  .faqList {
+    --pdp-faq-index: 2rem;
+  }
+  .faqQuestion {
+    gap: var(--sf-space-3);
+    font-size: var(--sf-text-base);
+  }
+  .faqAnswer {
+    margin-left: 0;
   }
 }

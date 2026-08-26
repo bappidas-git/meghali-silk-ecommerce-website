@@ -12,14 +12,25 @@ import {
 import styles from "./FrequentlyBoughtTogether.module.css";
 
 // =============================================================================
-// FrequentlyBoughtTogether — data-driven bundle (raises AOV, honestly)
+// FrequentlyBoughtTogether — "Completes the look" (raises AOV, honestly)
 // =============================================================================
 // Shows the current product plus REAL companion products (passed by the caller,
-// derived from real catalogue relationships). The shopper ticks what they want;
-// the combined total is computed from real prices — never a fabricated "bundle
-// discount". If there are no real companions, the module renders nothing.
+// resolved from the merchant's own curated `frequentlyBoughtTogetherIds`). The
+// shopper ticks what they want; the combined total is computed from real prices
+// — never a fabricated "bundle discount". If there are no real companions, the
+// module renders nothing.
 //
-// Props:
+// STRUCTURAL HONESTY
+//   The heading is "Completes the look", not "Frequently bought together". The
+//   list is a CURATION the merchant set by hand; it is not a co-purchase
+//   statistic, and this surface must never phrase it as one.
+//
+// EDITORIAL SET
+//   A hairline rule opens the block, the plates run left with thin plus marks
+//   between them, and the checklist stands as a ruled column on the right —
+//   ticks, real prices, a live total over a hairline, then the ink button.
+//
+// Props (unchanged contract):
 //   anchor       object  the product being viewed (always included, locked)
 //   companions   array   real companion products (selectable)
 //   onAddToCart  fn      (cartItem) => void — called once per selected item
@@ -57,27 +68,42 @@ const FrequentlyBoughtTogether = ({
     chosen.forEach((p) => onAddToCart?.(buildCartItem(p)));
   };
 
+  // The plate, then a caption under it — the anchor says where you are, the
+  // companions name themselves.
   const renderTile = (p, locked) => (
     <Link to={productPath(p)} className={styles.tile} key={p.id}>
-      <img
-        src={p.images?.[0] || p.image || PLACEHOLDER_IMG}
-        alt={p.name}
-        loading="lazy"
-        onError={onImageError}
-      />
-      {locked && <span className={styles.thisItem}>This item</span>}
+      <span className={styles.plate}>
+        <img
+          src={p.images?.[0] || p.image || PLACEHOLDER_IMG}
+          alt={p.name}
+          loading="lazy"
+          onError={onImageError}
+        />
+      </span>
+      <span className={locked ? styles.thisItem : styles.tileName}>
+        {locked ? "This item" : truncateText(p.name, 26)}
+      </span>
     </Link>
   );
 
   return (
-    <section className={styles.section} aria-label="Frequently bought together">
-      <h2 className={styles.title}>Frequently bought together</h2>
+    <section className={styles.section} aria-label="Completes the look">
+      <header className={styles.head}>
+        <span className={styles.eyebrow}>Curated pairing</span>
+        <h2 className={styles.title}>Completes the look</h2>
+        <p className={styles.note}>
+          Pieces our studio pairs with this one. Untick anything you already own.
+        </p>
+      </header>
+
       <div className={styles.layout}>
         <div className={styles.visual}>
           {renderTile(anchor, true)}
           {items.map((p) => (
             <React.Fragment key={p.id}>
-              <span className={styles.plus} aria-hidden="true">+</span>
+              <span className={styles.plus} aria-hidden="true">
+                +
+              </span>
               {renderTile(p, false)}
             </React.Fragment>
           ))}
@@ -125,7 +151,7 @@ const FrequentlyBoughtTogether = ({
           </div>
           <button
             type="button"
-            className={styles.addBtn}
+            className={`sf-btn sf-btn--emerald sf-btn--block ${styles.addBtn}`}
             onClick={handleAddAll}
             disabled={chosen.length === 0}
           >

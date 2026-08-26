@@ -554,6 +554,14 @@ const ProductDetails = () => {
   const fabricCraft = deriveFabricCraft(product);
   const faqs = buildFaqs(product);
 
+  // The description is typeset, not dumped: blank lines become real paragraphs
+  // so the panel can lead with a drop cap and hold a comfortable measure. A
+  // single-paragraph description (the usual case) simply becomes one <p>.
+  const descriptionParagraphs = String(product.description || "")
+    .split(/\n\s*\n/)
+    .map((para) => para.trim())
+    .filter(Boolean);
+
   // Tabs in the design order; Fabric & Craft / FAQs appear only with real data.
   const tabs = [
     { id: "description", label: "Description" },
@@ -852,7 +860,11 @@ const ProductDetails = () => {
           ))}
         </ul>
 
-        {/* ── Below the fold: brand tabbed section (5 tabs, accessible) ──── */}
+        {/* ═══ Below the fold — the product's own story ═══════════════════
+            The tab strip is the index of the story, not a row of buttons:
+            tracked labels standing on one hairline, the open one inked and
+            underlined in gold. Roving Left/Right/Home/End move between them
+            and the panels below carry no frames at all. ═══════════════════ */}
         <div className={styles.tabsSection} ref={tabsRef}>
           <div className={styles.tabNav} role="tablist" aria-label="Product information">
             {tabs.map((tab, idx) => {
@@ -878,66 +890,79 @@ const ProductDetails = () => {
           </div>
 
           <div className={styles.tabContent}>
-            {/* Description */}
+            {/* ── Description — long-form, one comfortable measure ──────── */}
             {activeTab === "description" && (
               <motion.div
                 {...panelMotion}
                 role="tabpanel"
                 id="pdp-panel-description"
                 aria-labelledby="pdp-tab-description"
-                className={styles.descriptionPanel}
+                className={styles.panel}
               >
-                <h3 className={styles.panelTitle}>Product Description</h3>
-                <p className={styles.prose}>
-                  {product.description || "No description available."}
-                </p>
+                <h3 className={styles.panelTitle}>About this piece</h3>
+                {descriptionParagraphs.length > 0 ? (
+                  <div className={styles.prose}>
+                    {descriptionParagraphs.map((para, i) => (
+                      <p key={i} className={i === 0 ? styles.proseLead : undefined}>
+                        {para}
+                      </p>
+                    ))}
+                  </div>
+                ) : (
+                  <p className={styles.panelNote}>No description available.</p>
+                )}
               </motion.div>
             )}
 
-            {/* Specifications — silk spec table (real data, missing rows omitted) */}
+            {/* ── Specification — the silk table, rows the product really
+                carries; the generic set when it carries none ───────────── */}
             {activeTab === "specifications" && (
               <motion.div
                 {...panelMotion}
                 role="tabpanel"
                 id="pdp-panel-specifications"
                 aria-labelledby="pdp-tab-specifications"
-                className={styles.specPanel}
+                className={styles.panel}
               >
-                <h3 className={styles.panelTitle}>Product Specification</h3>
+                <h3 className={styles.panelTitle}>Specification</h3>
                 {specRows.length > 0 ? (
-                  <dl className={styles.specGrid}>
+                  <dl className={styles.specTable}>
                     {specRows.map((row) => (
-                      <div className={styles.specPair} key={row.label}>
+                      <div className={styles.specRow} key={row.label}>
                         <dt className={styles.specLabel}>{row.label}</dt>
                         <dd className={styles.specValue}>{row.value}</dd>
                       </div>
                     ))}
                   </dl>
                 ) : (
-                  <p className={styles.specNote}>Full specifications coming soon.</p>
+                  <p className={styles.panelNote}>Full specifications coming soon.</p>
                 )}
               </motion.div>
             )}
 
-            {/* Fabric & Craft — only rendered when the tab exists (real data) */}
+            {/* ── Fabric & Craft — the loom story as an interlude. Only ever
+                rendered when the tab exists, i.e. when there is real craft
+                content behind it ───────────────────────────────────────── */}
             {activeTab === "fabric" && fabricCraft && (
               <motion.div
                 {...panelMotion}
                 role="tabpanel"
                 id="pdp-panel-fabric"
                 aria-labelledby="pdp-tab-fabric"
-                className={styles.fabricPanel}
+                className={styles.panel}
               >
                 <h3 className={styles.panelTitle}>Fabric &amp; Craft</h3>
                 {fabricCraft.story && (
-                  <p className={styles.prose}>{fabricCraft.story}</p>
+                  <blockquote className={styles.craftQuote}>
+                    {fabricCraft.story}
+                  </blockquote>
                 )}
                 {fabricCraft.facts.length > 0 && (
                   <dl className={styles.craftFacts}>
                     {fabricCraft.facts.map((f) => (
                       <div className={styles.craftFact} key={f.label}>
-                        <dt className={styles.specLabel}>{f.label}</dt>
-                        <dd className={styles.specValue}>{f.value}</dd>
+                        <dt className={styles.craftFactLabel}>{f.label}</dt>
+                        <dd className={styles.craftFactValue}>{f.value}</dd>
                       </div>
                     ))}
                   </dl>
@@ -945,14 +970,16 @@ const ProductDetails = () => {
               </motion.div>
             )}
 
-            {/* Reviews */}
+            {/* ── Reviews — approved only, honest states, no derived stats ─ */}
             {activeTab === "reviews" && (
               <motion.div
                 {...panelMotion}
                 role="tabpanel"
                 id="pdp-panel-reviews"
                 aria-labelledby="pdp-tab-reviews"
+                className={styles.panel}
               >
+                <h3 className={styles.panelTitle}>What buyers wrote</h3>
                 <ReviewsSection
                   reviews={reviews}
                   displayAvg={displayAvg}
@@ -964,45 +991,41 @@ const ProductDetails = () => {
               </motion.div>
             )}
 
-            {/* FAQs — accessible accordion */}
+            {/* ── FAQs — a hairline accordion. Each question is a heading, so
+                the list is navigable by heading as well as by Tab ───────── */}
             {activeTab === "faqs" && faqs.length > 0 && (
               <motion.div
                 {...panelMotion}
                 role="tabpanel"
                 id="pdp-panel-faqs"
                 aria-labelledby="pdp-tab-faqs"
-                className={styles.faqPanel}
+                className={styles.panel}
               >
-                <h3 className={styles.panelTitle}>Frequently Asked Questions</h3>
+                <h3 className={styles.panelTitle}>Questions, answered</h3>
                 <div className={styles.faqList}>
                   {faqs.map((faq, i) => {
                     const isOpen = openFaq === i;
                     return (
-                      <div className={styles.faqItem} key={i}>
-                        <button
-                          type="button"
-                          className={styles.faqQuestion}
-                          aria-expanded={isOpen}
-                          aria-controls={`pdp-faq-answer-${i}`}
-                          id={`pdp-faq-question-${i}`}
-                          onClick={() => setOpenFaq(isOpen ? null : i)}
-                        >
-                          <span>{faq.question}</span>
-                          <svg
-                            className={`${styles.faqIcon} ${isOpen ? styles.faqIconOpen : ""}`}
-                            viewBox="0 0 24 24"
-                            width="18"
-                            height="18"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2.2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            aria-hidden="true"
+                      <div
+                        className={`${styles.faqItem} ${isOpen ? styles.faqItemOpen : ""}`}
+                        key={i}
+                      >
+                        <h4 className={styles.faqHeading}>
+                          <button
+                            type="button"
+                            className={styles.faqQuestion}
+                            aria-expanded={isOpen}
+                            aria-controls={`pdp-faq-answer-${i}`}
+                            id={`pdp-faq-question-${i}`}
+                            onClick={() => setOpenFaq(isOpen ? null : i)}
                           >
-                            <polyline points="6 9 12 15 18 9" />
-                          </svg>
-                        </button>
+                            <span className={styles.faqIndex} aria-hidden="true">
+                              {String(i + 1).padStart(2, "0")}
+                            </span>
+                            <span className={styles.faqText}>{faq.question}</span>
+                            <span className={styles.faqIcon} aria-hidden="true" />
+                          </button>
+                        </h4>
                         {isOpen && (
                           <div
                             className={styles.faqAnswer}
@@ -1022,7 +1045,10 @@ const ProductDetails = () => {
           </div>
         </div>
 
-        {/* ── AOV: curated bundle, then similar products (data-driven) ──── */}
+        {/* ── AOV: the curated pairing, then the farewell rail. Both are pure
+            catalogue data — the bundle comes from the merchant's own curated
+            ids and hides itself when there are none, and the rail renders the
+            same product cards the collection page uses. ─────────────────── */}
         <FrequentlyBoughtTogether
           anchor={product}
           companions={bundle}
@@ -1031,7 +1057,7 @@ const ProductDetails = () => {
         />
 
         <RelatedProducts
-          title="You May Also Like"
+          title="You may also like"
           products={relatedProducts}
           onAddToCart={addToCart}
           onToggleWishlist={toggleWishlist}
