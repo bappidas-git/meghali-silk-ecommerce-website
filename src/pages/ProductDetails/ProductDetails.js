@@ -7,6 +7,7 @@ import { useWishlist } from "../../context/WishlistContext";
 import apiService from "../../services/api";
 import { categoryParam } from "../../utils/categories";
 import { STOREFRONT_CONFIG } from "../../theme/tokens";
+import { DURATION, RISE, tween } from "../../theme/motion";
 import { FAQ_ITEMS } from "../../utils/constants";
 import {
   ProductGallery,
@@ -35,18 +36,21 @@ import styles from "./ProductDetails.module.css";
 // =============================================================================
 
 // ─── Loading Skeleton ───────────────────────────────────────────────────────
+// The page's silhouette, drawn on the shared `sf-skeleton` primitive — the same
+// warm sand sweep every other loading surface on the storefront uses. The
+// stylesheet below supplies only the shapes.
 const Skeleton = () => (
-  <div className={styles.skeletonPage}>
-    <div className={styles.skeletonBreadcrumb} />
+  <div className={styles.skeletonPage} aria-hidden="true">
+    <div className={`sf-skeleton ${styles.skeletonBreadcrumb}`} />
     <div className={styles.skeletonLayout}>
-      <div className={styles.skeletonMainImage} />
+      <div className={`sf-skeleton ${styles.skeletonMainImage}`} />
       <div className={styles.skeletonRight}>
-        <div className={styles.skeletonTitle} />
-        <div className={styles.skeletonRating} />
-        <div className={styles.skeletonPrice} />
-        <div className={styles.skeletonDesc} />
-        <div className={styles.skeletonDesc} />
-        <div className={styles.skeletonButtons} />
+        <div className={`sf-skeleton ${styles.skeletonTitle}`} />
+        <div className={`sf-skeleton ${styles.skeletonRating}`} />
+        <div className={`sf-skeleton ${styles.skeletonPrice}`} />
+        <div className={`sf-skeleton ${styles.skeletonDesc}`} />
+        <div className={`sf-skeleton ${styles.skeletonDesc}`} />
+        <div className={`sf-skeleton ${styles.skeletonButtons}`} />
       </div>
     </div>
   </div>
@@ -586,13 +590,15 @@ const ProductDetails = () => {
     tabRefs.current[next]?.focus();
   };
 
-  // Framer Motion panel transition — disabled under reduced-motion.
+  // Tab panels swap on the shared in-place treatment (theme/motion.js) — the
+  // same fade-and-short-rise Checkout's steps and Profile's sections use.
+  // There is no AnimatePresence around these panels, so only the arrival runs.
   const panelMotion = prefersReducedMotion
     ? {}
     : {
-        initial: { opacity: 0, y: 10 },
+        initial: { opacity: 0, y: RISE.micro },
         animate: { opacity: 1, y: 0 },
-        transition: { duration: 0.25 },
+        transition: tween(DURATION.base),
       };
 
   // The promises band — owner-attested. The free-shipping line resolves
@@ -657,13 +663,10 @@ const ProductDetails = () => {
   ];
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
-      className={`${styles.page} ${isDarkMode ? styles.dark : ""}`}
-    >
+    // No page-level fade here: the route transition is applied once, to the
+    // keyed wrapper around <Routes> in App.js, so every storefront route —
+    // and every one of this page's own branches — arrives the same way.
+    <div className={`${styles.page} ${isDarkMode ? styles.dark : ""}`}>
       <div className={styles.container}>
         {/* ── Breadcrumb (orientation) ──────────────────────────────────── */}
         <nav className={styles.breadcrumb} aria-label="Breadcrumb">
@@ -1077,7 +1080,7 @@ const ProductDetails = () => {
         onAddToCart={handleAddClick}
         onBuyNow={handleBuyNow}
       />
-    </motion.div>
+    </div>
   );
 };
 

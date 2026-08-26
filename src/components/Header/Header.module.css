@@ -97,12 +97,20 @@
   min-width: var(--sf-tap-target);
   min-height: var(--sf-tap-target);
   border-radius: var(--sf-radius-sm) !important;
-  transition: color var(--sf-transition-fast) !important;
+  transition: color var(--sf-transition-fast),
+    transform var(--sf-transition-fast),
+    opacity var(--sf-transition-fast) !important;
 }
 
 .actionIcon:hover {
   color: var(--sf-color-accent) !important;
   background: transparent !important;
+}
+
+/* The shared icon-button press: the mark settles a hair under the finger. */
+.actionIcon:active {
+  transform: scale(0.98);
+  opacity: 0.85;
 }
 
 .actionIcon svg {
@@ -173,6 +181,9 @@
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
+  /* MUI ships this badge its own 195ms Material curve; the count is a
+     storefront surface, so it arrives on the house one instead. */
+  transition: transform var(--sf-transition-fast) !important;
 }
 
 .avatar {
@@ -303,7 +314,7 @@
   border-top: 1px solid var(--sf-color-border);
   border-bottom: 1px solid var(--sf-color-border);
   box-shadow: var(--sf-shadow-sm);
-  animation: panelIn 0.24s var(--sf-ease);
+  animation: panelIn var(--sf-duration) var(--sf-ease);
 }
 
 @keyframes panelIn {
@@ -320,6 +331,11 @@
 @media (prefers-reduced-motion: reduce) {
   .collectionPanel {
     animation: none;
+  }
+
+  /* The press dims but no longer moves. */
+  .actionIcon:active {
+    transform: none;
   }
 }
 

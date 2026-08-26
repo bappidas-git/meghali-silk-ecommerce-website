@@ -132,11 +132,16 @@
   border-color: var(--sf-color-gold-deep);
 }
 
-/* The confirmation moment — the fill warms to the success tone, briefly. */
-.addBtnDone {
-  background: var(--sf-color-success);
-  border-color: var(--sf-color-success);
-  color: var(--sf-color-primary-contrast);
+/* The confirmation moment — the SAME "Added ✓" microstate the product card
+   gives (ProductCard.module.css `.addBtn.added`): the fill drops away and the
+   button becomes a gold hairline for a beat. It used to flip to a solid
+   success green here, which was the only place on the storefront where a
+   confirmed add looked like that. */
+.addBtnDone,
+.addBtnDone:hover:not(:disabled) {
+  background: var(--sf-color-surface);
+  border-color: var(--sf-color-gold-deep);
+  color: var(--sf-color-gold-deep);
 }
 
 .buyNow {

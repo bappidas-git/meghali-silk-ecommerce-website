@@ -32,12 +32,19 @@
   color: var(--sf-color-text-secondary);
   cursor: pointer;
   transition: background-color var(--sf-transition-fast),
-    color var(--sf-transition-fast);
+    color var(--sf-transition-fast), transform var(--sf-transition-fast),
+    opacity var(--sf-transition-fast);
 }
 
 .btn:hover:not(:disabled) {
   background: var(--sf-color-primary-soft);
   color: var(--sf-color-text);
+}
+
+/* The shared icon-button press. */
+.btn:active:not(:disabled) {
+  transform: scale(0.98);
+  opacity: 0.85;
 }
 
 .btn:focus-visible {
@@ -100,5 +107,12 @@
   }
   .sm .value {
     min-width: 44px;
+  }
+}
+
+/* The press dims but no longer moves. */
+@media (prefers-reduced-motion: reduce) {
+  .btn:active:not(:disabled) {
+    transform: none;
   }
 }

@@ -427,12 +427,19 @@
   line-height: 1;
   cursor: pointer;
   transition: border-color var(--sf-transition-fast),
-    color var(--sf-transition-fast), opacity var(--sf-transition-fast);
+    color var(--sf-transition-fast), opacity var(--sf-transition-fast),
+    transform var(--sf-transition-fast);
 }
 
 .railBtn:hover:not(:disabled) {
   border-color: var(--sf-color-gold-deep);
   color: var(--sf-color-text);
+}
+
+/* The shared icon-button press. */
+.railBtn:active:not(:disabled) {
+  transform: scale(0.98);
+  opacity: 0.85;
 }
 
 .railBtn:disabled {
@@ -826,7 +833,8 @@
    growth) for the same users. */
 @media (prefers-reduced-motion: reduce) {
   .storyImg,
-  .story:hover .storyImg {
+  .story:hover .storyImg,
+  .railBtn:active:not(:disabled) {
     transition: none;
     transform: none;
   }

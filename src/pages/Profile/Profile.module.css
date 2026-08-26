@@ -1628,11 +1628,18 @@ button.figure:focus-visible {
   font-size: var(--sf-text-lg);
   line-height: 1;
   cursor: pointer;
-  transition: color var(--sf-transition-fast);
+  transition: color var(--sf-transition-fast),
+    transform var(--sf-transition-fast), opacity var(--sf-transition-fast);
 }
 
 .feedbackClose:hover {
   color: var(--sf-color-text);
+}
+
+/* The shared icon-button press. */
+.feedbackClose:active {
+  transform: scale(0.98);
+  opacity: 0.85;
 }
 
 .feedbackClose:focus-visible {
@@ -1736,14 +1743,15 @@ button.figure:focus-visible {
    REDUCED MOTION
    ═══════════════════════════════════════════════════════════════════════════
    Every resting state above is the finished state, so removing the movement
-   removes nothing but the movement. The framer-motion entrances are opacity +
-   a few pixels and are honoured by the library's own reduced-motion handling;
-   what is stopped here is the chrome that slides on hover.
+   removes nothing but the movement. The framer-motion entrances ask
+   `useReducedMotion()` in the component and collapse to an instant swap; what
+   is stopped here is the chrome that slides on hover and the press scale.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 @media (prefers-reduced-motion: reduce) {
   .indexRow:hover .indexChevron,
-  .backBtn:hover svg {
+  .backBtn:hover svg,
+  .feedbackClose:active {
     transform: none;
   }
 

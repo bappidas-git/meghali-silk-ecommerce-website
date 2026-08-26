@@ -34,8 +34,10 @@
   --sf-hero-ink-faint: color-mix(in srgb, var(--sf-color-primary-contrast) 45%, transparent);
   --sf-hero-rule: color-mix(in srgb, var(--sf-color-primary-contrast) 26%, transparent);
   --sf-hero-gold: var(--sf-color-gold-light);
-  /* The crossfade. Slow and decelerating — the only motion in the opening. */
-  --sf-hero-fade: 1.1s;
+  /* The crossfade. Slow and decelerating — the only motion in the opening, and
+     now the shared slow tier rather than a hero-only 1.1s, so the stage speaks
+     the same motion language as the rest of the storefront. */
+  --sf-hero-fade: var(--sf-duration-slow);
   /* Overrides the global ring for everything on the stage, so the gap layer is
      the stage itself rather than the page ivory. */
   --sf-shadow-focus: 0 0 0 2px var(--sf-hero-ground), 0 0 0 4px var(--sf-hero-gold);

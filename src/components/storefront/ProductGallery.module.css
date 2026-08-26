@@ -208,6 +208,17 @@
   box-shadow: var(--sf-shadow-focus);
 }
 
+/* The shared icon-button press — a thumbnail is a mark you tap. */
+.thumb {
+  transition: transform var(--sf-transition-fast),
+    opacity var(--sf-transition-fast);
+}
+
+.thumb:active {
+  transform: scale(0.98);
+  opacity: 0.85;
+}
+
 /* =============================================================================
  * 4. TOUCH & REDUCED MOTION
  * ========================================================================== */
@@ -226,9 +237,15 @@
 
 @media (prefers-reduced-motion: reduce) {
   .mainImg,
+  .thumb,
   .thumb img,
   .thumb::after,
   .dot {
     transition: none;
+  }
+
+  /* The press dims but no longer moves. */
+  .thumb:active {
+    transform: none;
   }
 }

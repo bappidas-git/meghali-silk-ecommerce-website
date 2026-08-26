@@ -4,9 +4,11 @@ import {
   Routes,
   Route,
   Navigate,
+  useLocation,
 } from "react-router-dom";
 import CssBaseline from "@mui/material/CssBaseline";
-import { AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
+import { getPageMotion } from "./theme/motion";
 
 // Context Providers
 import { ThemeContextProvider } from "./context/ThemeContext";
@@ -61,6 +63,64 @@ import AdminSettings from "./pages/Admin/AdminSettings";
 import ErrorBoundary from "./components/ErrorBoundary/ErrorBoundary";
 import "./App.css";
 
+// =============================================================================
+// The storefront shell.
+//
+// Lifted out of the <Route element> below so it can hold hooks — specifically
+// useLocation(), which is what makes the route transition real. AnimatePresence
+// only runs an exit animation when its child's KEY changes; keyed on the
+// pathname (not the whole location), a route change plays one quiet fade out
+// and one fade-and-rise in, while a query change (`/products?category=…`) or a
+// hash jump (`/help#returns`) leaves the page exactly where it is.
+//
+// The transition lives here, once, rather than on sixteen page roots: that is
+// what guarantees every storefront route arrives and leaves identically,
+// including each page's own loading, empty and error branches.
+// =============================================================================
+function StorefrontShell() {
+  const location = useLocation();
+  const reduceMotion = useReducedMotion();
+  const pageMotion = getPageMotion(reduceMotion);
+
+  return (
+    <DealsConfigProvider>
+      <div className="App">
+        <Header />
+        <main className="main-content">
+          <AnimatePresence mode="wait" initial={false}>
+            <motion.div key={location.pathname} {...pageMotion}>
+              <Routes location={location}>
+                <Route path="/" element={<Home />} />
+                <Route path="/products" element={<Products />} />
+                {/* Product detail resolves by human-readable slug;
+                    legacy numeric /products/:id still resolves and
+                    redirects to the canonical slug URL. */}
+                <Route path="/products/:slug" element={<ProductDetails />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/order-confirmation/:orderNumber" element={<OrderConfirmation />} />
+                <Route path="/orders" element={<OrderHistory />} />
+                <Route path="/profile" element={<Profile />} />
+                <Route path="/wishlist" element={<Wishlist />} />
+                <Route path="/special-offers" element={<SpecialOffers />} />
+                <Route path="/help" element={<HelpCenter />} />
+                <Route path="/support" element={<Support />} />
+                <Route path="/about" element={<AboutUs />} />
+                <Route path="/privacy" element={<PrivacyPolicy />} />
+                <Route path="/terms" element={<TermsOfService />} />
+                <Route path="/cookies" element={<CookiePolicy />} />
+                <Route path="/refund" element={<RefundPolicy />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </motion.div>
+          </AnimatePresence>
+        </main>
+        <Footer />
+        <BottomNav />
+      </div>
+    </DealsConfigProvider>
+  );
+}
+
 function App() {
   return (
     <ErrorBoundary>
@@ -95,44 +155,7 @@ function App() {
                     </Route>
 
                     {/* Storefront Routes */}
-                    <Route
-                      path="/*"
-                      element={
-                        <DealsConfigProvider>
-                        <div className="App">
-                          <Header />
-                          <main className="main-content">
-                            <AnimatePresence mode="wait">
-                              <Routes>
-                                <Route path="/" element={<Home />} />
-                                <Route path="/products" element={<Products />} />
-                                {/* Product detail resolves by human-readable slug;
-                                    legacy numeric /products/:id still resolves and
-                                    redirects to the canonical slug URL. */}
-                                <Route path="/products/:slug" element={<ProductDetails />} />
-                                <Route path="/checkout" element={<Checkout />} />
-                                <Route path="/order-confirmation/:orderNumber" element={<OrderConfirmation />} />
-                                <Route path="/orders" element={<OrderHistory />} />
-                                <Route path="/profile" element={<Profile />} />
-                                <Route path="/wishlist" element={<Wishlist />} />
-                                <Route path="/special-offers" element={<SpecialOffers />} />
-                                <Route path="/help" element={<HelpCenter />} />
-                                <Route path="/support" element={<Support />} />
-                                <Route path="/about" element={<AboutUs />} />
-                                <Route path="/privacy" element={<PrivacyPolicy />} />
-                                <Route path="/terms" element={<TermsOfService />} />
-                                <Route path="/cookies" element={<CookiePolicy />} />
-                                <Route path="/refund" element={<RefundPolicy />} />
-                                <Route path="*" element={<Navigate to="/" replace />} />
-                              </Routes>
-                            </AnimatePresence>
-                          </main>
-                          <Footer />
-                          <BottomNav />
-                        </div>
-                        </DealsConfigProvider>
-                      }
-                    />
+                    <Route path="/*" element={<StorefrontShell />} />
                   </Routes>
                 </Router>
               </OrderProvider>

@@ -19,6 +19,7 @@ import {
   onImageError,
 } from "../../utils/helpers";
 import { resolveCountdownTarget, diffToParts } from "../../utils/dealsConfig";
+import { RISE, reveal } from "../../theme/motion";
 import styles from "./SpecialOffers.module.css";
 
 // =============================================================================
@@ -62,9 +63,6 @@ import styles from "./SpecialOffers.module.css";
 //   hover-revealed add — without importing it. The one thing that IS imported is
 //   the shared StarRating, because a star is a star.
 // =============================================================================
-
-// The editorial curve, shared with Home / Products / Wishlist.
-const EASE = [0.22, 1, 0.36, 1];
 
 // ── Coupon display helpers ───────────────────────────────────────────────────
 // Coupons shown here come from the same store the Admin manages and Checkout
@@ -368,13 +366,7 @@ const DealFeature = ({ product, categoryName, onAddToCart, index, reduceMotion }
   return (
     <motion.article
       className={`${styles.feature} ${outOfStock ? styles.isOut : ""}`}
-      initial={reduceMotion ? false : { opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{
-        duration: reduceMotion ? 0 : 0.55,
-        ease: EASE,
-        delay: reduceMotion ? 0 : Math.min(index * 0.08, 0.32),
-      }}
+      {...reveal(reduceMotion, { index })}
     >
       <div className={styles.featureMedia}>
         <Link to={productPath(product)} className={styles.plate} aria-label={product.name}>
@@ -461,14 +453,8 @@ const ProductCard = React.forwardRef(
       <motion.article
         ref={ref}
         className={`${styles.card} ${outOfStock ? styles.isOut : ""}`}
-        initial={reduceMotion ? false : { opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
-        transition={{
-          duration: reduceMotion ? 0 : 0.5,
-          ease: EASE,
-          delay: reduceMotion ? 0 : Math.min(index * 0.04, 0.4),
-        }}
+        {...reveal(reduceMotion, { index })}
+        exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: RISE.micro }}
         layout
       >
         <div className={styles.cardMedia}>

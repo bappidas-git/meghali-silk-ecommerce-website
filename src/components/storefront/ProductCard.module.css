@@ -193,7 +193,14 @@
   color: var(--sf-color-text-secondary);
   cursor: pointer;
   transition: color var(--sf-transition-fast),
-    border-color var(--sf-transition-fast);
+    border-color var(--sf-transition-fast),
+    transform var(--sf-transition-fast), opacity var(--sf-transition-fast);
+}
+
+/* The shared icon-button press: the heart settles a hair under the finger. */
+.wishlist:active {
+  transform: scale(0.98);
+  opacity: 0.85;
 }
 
 /* The visible button is 34px for the sake of the composition; the tap target
@@ -419,6 +426,11 @@
   }
 
   .addBtn {
+    transform: none;
+  }
+
+  /* The press dims but no longer moves. */
+  .wishlist:active {
     transform: none;
   }
 }

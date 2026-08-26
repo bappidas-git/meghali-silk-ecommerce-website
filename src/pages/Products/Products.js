@@ -12,6 +12,7 @@ import {
   orderCategoriesHierarchically,
 } from "../../utils/categories";
 import { getProductMinPrice, getDeviceType } from "../../utils/helpers";
+import { overlay, panel, reveal } from "../../theme/motion";
 import styles from "./Products.module.css";
 
 // =============================================================================
@@ -87,11 +88,6 @@ const PRICE_RANGES = [
 const RATING_OPTIONS = [4, 3, 2, 1];
 const DISCOUNT_OPTIONS = [50, 30, 20, 10];
 const PER_PAGE_OPTIONS = [12, 24, 48];
-
-// The house easing, mirrored from `--sf-ease` in storefront-tokens.css — framer
-// motion cannot read a CSS custom property, so the curve is restated here. Keep
-// the two in sync if the curve is ever retuned.
-const EASE = [0.22, 1, 0.36, 1];
 
 // The panel's own focus ring, for the Tab trap. Same selector list the cart tray
 // uses; the panel itself is excluded by the [tabindex="-1"] guard.
@@ -1191,16 +1187,18 @@ const Products = () => {
     typeof window.matchMedia === "function" &&
     window.matchMedia("(min-width: 769px)").matches;
 
-  const panelMotion = shouldReduceMotion
-    ? { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 } }
-    : asDrawer
-    ? { initial: { x: "100%" }, animate: { x: 0 }, exit: { x: "100%" } }
-    : { initial: { y: "100%" }, animate: { y: 0 }, exit: { y: "100%" } };
+  // The shared drawer treatment: a right-hand drawer above 768, a bottom sheet
+  // below it — in on the slow tier, out on the base one, like every other
+  // overlay on the storefront.
+  const panelMotion = panel(shouldReduceMotion, asDrawer ? "right" : "bottom");
+  const scrimMotion = overlay(shouldReduceMotion);
 
   // ============================
   // RENDER
   // ============================
   return (
+    // The route transition is applied once, to the keyed wrapper around
+    // <Routes> in App.js — this page adds no fade of its own.
     <div className={styles.page}>
       {/* ===== Page head — breadcrumb, then the collection's own title ===== */}
       <div className={styles.container}>
@@ -1343,13 +1341,7 @@ const Products = () => {
               <motion.div
                 key={product.id}
                 className={styles.cell}
-                initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{
-                  duration: shouldReduceMotion ? 0 : 0.5,
-                  ease: EASE,
-                  delay: shouldReduceMotion ? 0 : Math.min(index * 0.04, 0.4),
-                }}
+                {...reveal(shouldReduceMotion, { index })}
               >
                 <ProductCard
                   product={product}
@@ -1469,10 +1461,7 @@ const Products = () => {
           <motion.div
             className={styles.scrim}
             onClick={() => setMobileFiltersOpen(false)}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: shouldReduceMotion ? 0 : 0.3, ease: EASE }}
+            {...scrimMotion}
           >
             <motion.aside
               className={styles.sheet}
@@ -1480,10 +1469,7 @@ const Products = () => {
               role="dialog"
               aria-modal="true"
               aria-label="Filter the collection"
-              initial={panelMotion.initial}
-              animate={panelMotion.animate}
-              exit={panelMotion.exit}
-              transition={{ duration: shouldReduceMotion ? 0 : 0.42, ease: EASE }}
+              {...panelMotion}
               onClick={(e) => e.stopPropagation()}
             >
               <header className={styles.sheetHead}>

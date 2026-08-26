@@ -21,6 +21,15 @@ import apiService from "../../services/api";
 import { categoryParam } from "../../utils/categories";
 import { APP_NAME } from "../../utils/constants";
 import TrustStrip from "../TrustStrip";
+import {
+  DURATION,
+  RISE,
+  overlay,
+  panel,
+  staggerDelay,
+  t,
+  tween,
+} from "../../theme/motion";
 import styles from "./SidebarMenu.module.css";
 
 // Both wordmarks are gold/white on a TRANSPARENT ground, so they sit straight on
@@ -34,12 +43,10 @@ const LOGO_WHITE =
 const LOGO_W = 520;
 const LOGO_H = 162;
 
-// framer-motion needs JS values, so the Prompt 01 motion tokens are mirrored
-// here: EASE is --sf-ease, and the durations sit on the --sf-transition tier.
-// Keep these in sync with storefront-tokens.css if the curve is ever retuned.
-const EASE = [0.22, 1, 0.36, 1];
-const STAGGER_STEP = 0.03; // subtle, per the editorial motion brief
-const STAGGER_MAX = 12; // cap so a long menu never trails off
+// The panel's stagger is capped by index rather than by seconds so that the
+// leading 0.08s hand-off (the panel settling before its rows begin) is not
+// counted twice; staggerDelay() in theme/motion.js caps the rest.
+const STAGGER_MAX_ROWS = 8;
 
 // Tab-cycling needs the panel's own focusables; every control in here is a
 // plain <button>, so the standard selector covers the lot.
@@ -246,24 +253,21 @@ const SidebarMenu = ({ open, onClose, onOpenAuth }) => {
     });
 
   // ---------------------------------------------------------------------------
-  // MOTION — the same slide-in, slowed and softened onto the editorial curve.
+  // MOTION — the shared drawer treatment from theme/motion.js. The panel used
+  // to arrive on a spring (damping 36 / stiffness 220); it is a tween now, in
+  // on the slow tier and out on the base one, which is the same language every
+  // other overlay on the storefront speaks.
   // ---------------------------------------------------------------------------
-  const panelVariants = reduceMotion
-    ? {
-        hidden: { opacity: 0 },
-        visible: { opacity: 1, transition: { duration: 0 } },
-        exit: { opacity: 0, transition: { duration: 0 } },
-      }
-    : {
-        hidden: { x: "-100%" },
-        visible: {
-          x: 0,
-          transition: { type: "spring", damping: 36, stiffness: 220, mass: 1 },
-        },
-        exit: { x: "-100%", transition: { duration: 0.35, ease: EASE } },
-      };
+  const drawer = panel(reduceMotion, "left");
+  const panelVariants = {
+    hidden: drawer.initial,
+    visible: drawer.animate,
+    exit: drawer.exit,
+  };
 
-  const collapse = { duration: reduceMotion ? 0 : 0.35, ease: EASE };
+  const scrim = overlay(reduceMotion);
+
+  const collapse = t(reduceMotion, DURATION.base);
 
   // Rows fade up one after another as the panel settles. Only rows that exist at
   // open time are staggered — accordion contents are revealed by their own
@@ -272,14 +276,15 @@ const SidebarMenu = ({ open, onClose, onOpenAuth }) => {
     reduceMotion
       ? {}
       : {
-          initial: { opacity: 0, y: 8 },
+          initial: { opacity: 0, y: RISE.micro },
           animate: {
             opacity: 1,
             y: 0,
             transition: {
-              delay: 0.08 + Math.min(i, STAGGER_MAX) * STAGGER_STEP,
-              duration: 0.45,
-              ease: EASE,
+              ...tween(DURATION.base),
+              // The panel is still travelling for its first beat; the rows wait
+              // it out, then follow on the shared step.
+              delay: 0.08 + staggerDelay(Math.min(i, STAGGER_MAX_ROWS)),
             },
           },
         };
@@ -332,15 +337,7 @@ const SidebarMenu = ({ open, onClose, onOpenAuth }) => {
           {/* ===== Backdrop — the token scrim, nothing more ===== */}
           <motion.div
             className={styles.backdrop}
-            initial={{ opacity: 0 }}
-            animate={{
-              opacity: 1,
-              transition: { duration: reduceMotion ? 0 : 0.4, ease: EASE },
-            }}
-            exit={{
-              opacity: 0,
-              transition: { duration: reduceMotion ? 0 : 0.3, ease: EASE },
-            }}
+            {...scrim}
             onClick={onClose}
           />
 

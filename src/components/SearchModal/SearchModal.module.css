@@ -181,12 +181,20 @@
   background: none;
   cursor: pointer;
   color: var(--sf-color-text-muted);
-  transition: color var(--sf-transition-fast), border-color var(--sf-transition-fast);
+  transition: color var(--sf-transition-fast),
+    border-color var(--sf-transition-fast),
+    transform var(--sf-transition-fast), opacity var(--sf-transition-fast);
 }
 
 .clearBtn:hover {
   color: var(--sf-color-text);
   border-color: var(--sf-color-border-strong);
+}
+
+/* The shared icon-button press. */
+.clearBtn:active {
+  transform: scale(0.98);
+  opacity: 0.85;
 }
 
 /* Indeterminate hairline that sweeps the rule while a search is in flight —
@@ -421,7 +429,7 @@
 .card:focus-visible .thumbImg,
 .railItem:hover .thumbImg,
 .railItem:focus-visible .thumbImg {
-  transform: scale(1.04);
+  transform: scale(1.03);
 }
 
 .cardName {
@@ -626,11 +634,18 @@
   background: none;
   cursor: pointer;
   color: var(--sf-color-text-muted);
-  transition: color var(--sf-transition-fast);
+  transition: color var(--sf-transition-fast),
+    transform var(--sf-transition-fast), opacity var(--sf-transition-fast);
 }
 
 .removeBtn:hover {
   color: var(--sf-color-text);
+}
+
+/* The shared icon-button press. */
+.removeBtn:active {
+  transform: scale(0.98);
+  opacity: 0.85;
 }
 
 /* ---- Trending rail ----------------------------------------------------- */
@@ -780,7 +795,9 @@
   .railItem:hover .thumbImg,
   .railItem:focus-visible .thumbImg,
   .textLink:hover svg,
-  .emptyLink:hover svg {
+  .emptyLink:hover svg,
+  .clearBtn:active,
+  .removeBtn:active {
     transform: none;
   }
 

@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import Swal from "sweetalert2";
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../hooks/useAuth";
 import { useWishlist } from "../../context/WishlistContext";
 import apiService from "../../services/api";
 import { formatDate, formatCurrency, getInitials, generateId, isValidPhone } from "../../utils/helpers";
+import { collapse, reveal } from "../../theme/motion";
 import styles from "./Profile.module.css";
 
 // Orders carry paymentStatus / fulfillmentStatus / shippingStatus (the shape
@@ -153,6 +154,10 @@ const Seal = () => (
 
 const Profile = () => {
   const navigate = useNavigate();
+  // This page used to run its fades unconditionally — the one storefront
+  // surface that never asked. Every motion prop below now goes through the
+  // shared factories in theme/motion.js with this boolean.
+  const shouldReduceMotion = useReducedMotion();
   const { isDarkMode, toggleTheme } = useTheme();
   const { user, isAuthenticated, isLoading: authLoading, logout, updateUser, openAuthModal } = useAuth();
   const { wishlistItems } = useWishlist();
@@ -599,9 +604,7 @@ const Profile = () => {
         <div className={styles.container}>
           <motion.div
             className={styles.gate}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            {...reveal(shouldReduceMotion)}
           >
             <span className={styles.gateMark}>
               <Icon name="person" size={30} strokeWidth={1} />
@@ -1235,9 +1238,7 @@ const Profile = () => {
               className={`${styles.feedback} ${styles[`feedback_${feedback.type}`]}`}
               role="status"
               aria-live="polite"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 20 }}
+              {...collapse(shouldReduceMotion)}
             >
               <span>{feedback.message}</span>
               <button
@@ -1254,12 +1255,7 @@ const Profile = () => {
 
         {activeSection ? (
           /* ===================== Section view ===================== */
-          <motion.div
-            key={activeSection}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.25 }}
-          >
+          <motion.div key={activeSection} {...collapse(shouldReduceMotion)}>
             <div className={styles.sectionTop}>
               <button type="button" className={styles.backBtn} onClick={backToDashboard}>
                 <Icon name="back" size={15} />
@@ -1271,7 +1267,7 @@ const Profile = () => {
           </motion.div>
         ) : (
           /* ===================== Dashboard view ===================== */
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+          <motion.div {...collapse(shouldReduceMotion)}>
             {/* 1. THE GREETING */}
             <section className={styles.greet}>
               <div className={styles.greetText}>

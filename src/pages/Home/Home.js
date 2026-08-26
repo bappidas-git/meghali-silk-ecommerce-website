@@ -8,6 +8,7 @@ import { useDealsConfig } from "../../context/DealsConfigContext";
 import apiService from "../../services/api";
 import { categoryParam } from "../../utils/categories";
 import { resolveCountdownTarget, diffToParts } from "../../utils/dealsConfig";
+import { reveal as sharedReveal } from "../../theme/motion";
 import HeroSection from "../../components/HeroSection/HeroSection";
 import ProductCard from "../../components/storefront/ProductCard";
 import { TRUST_BADGES } from "../../utils/constants";
@@ -333,16 +334,11 @@ const Home = () => {
     [toggleWishlist]
   );
 
-  // ── Reduced-motion-safe reveal props ──────────────────────────────────────
+  // ── Reveal — the shared in-view treatment from theme/motion.js, so a home
+  // section arrives with exactly the weight an About chapter or a policy
+  // clause does. Returns {} under reduced motion: no props, no timeline.
   const reveal = (i = 0) =>
-    prefersReducedMotion
-      ? {}
-      : {
-          initial: { opacity: 0, y: 18 },
-          whileInView: { opacity: 1, y: 0 },
-          viewport: { once: true, amount: 0.1 },
-          transition: { delay: Math.min(i, 7) * 0.05, duration: 0.5 },
-        };
+    sharedReveal(prefersReducedMotion, { index: i, inView: true, amount: 0.1 });
 
   // ── Skeletons — the sf-skeleton primitive, shaped like the editorial card ──
 
@@ -387,12 +383,10 @@ const Home = () => {
     // No `dark` class hook: this stylesheet is entirely token-driven and the
     // tokens already flip under body.dark, so there is nothing left for a
     // mode-specific selector to say.
-    <motion.div
-      className={styles.homePage}
-      initial={prefersReducedMotion ? false : { opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.4 }}
-    >
+    // No page-level fade here: the route transition is applied once, to the
+    // keyed wrapper around <Routes> in App.js, so every storefront route
+    // arrives the same way.
+    <div className={styles.homePage}>
       {/* Hero — full-bleed cinematic opening. It escapes nothing: .main-content
           and .homePage set no max-width, so the section spans the viewport.
           The old promises strip that sat here is gone: the header already
@@ -564,17 +558,7 @@ const Home = () => {
       >
         <div className={styles.heritageWeave} aria-hidden="true" />
         <div className={styles.container}>
-          <motion.div
-            className={styles.heritageInner}
-            {...(prefersReducedMotion
-              ? {}
-              : {
-                  initial: { opacity: 0, y: 20 },
-                  whileInView: { opacity: 1, y: 0 },
-                  viewport: { once: true, amount: 0.15 },
-                  transition: { duration: 0.6 },
-                })}
-          >
+          <motion.div className={styles.heritageInner} {...reveal()}>
             <div className={styles.heritageLead}>
               <p className={`${styles.eyebrow} ${styles.eyebrowInk}`}>
                 Our craft
@@ -700,7 +684,7 @@ const Home = () => {
           </ul>
         </div>
       </section>
-    </motion.div>
+    </div>
   );
 };
 

@@ -73,10 +73,16 @@
   line-height: 1;
   cursor: pointer;
   opacity: 0.6;
-  transition: opacity var(--sf-transition-fast);
+  transition: opacity var(--sf-transition-fast),
+    transform var(--sf-transition-fast);
 }
 .close:hover {
   opacity: 1;
+}
+/* The shared icon-button press: settles a hair, dims a touch. */
+.close:active {
+  transform: scale(0.98);
+  opacity: 0.85;
 }
 .close:focus-visible {
   outline: 1px solid var(--sf-color-primary-contrast);
@@ -101,6 +107,14 @@
 @media (max-width: 380px) {
   .message {
     letter-spacing: 0.08em;
+  }
+}
+
+/* The crossfade is already switched off in the component; the press scale is a
+   transform, so it has to be cancelled here rather than merely hurried. */
+@media (prefers-reduced-motion: reduce) {
+  .close:active {
+    transform: none;
   }
 }
 

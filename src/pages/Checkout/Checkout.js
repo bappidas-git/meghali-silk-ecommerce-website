@@ -12,6 +12,7 @@ import {
   onImageError,
 } from "../../utils/helpers";
 import { STOREFRONT_CONFIG } from "../../theme/tokens";
+import { collapse } from "../../theme/motion";
 import styles from "./Checkout.module.css";
 
 // =============================================================================
@@ -62,10 +63,6 @@ import styles from "./Checkout.module.css";
 // =============================================================================
 
 const STEPS = ["Cart", "Shipping", "Payment", "Review"];
-
-// framer-motion needs JS values, so the Prompt 01 motion token is mirrored
-// here: EASE is --sf-ease. Keep in sync with storefront-tokens.css.
-const EASE = [0.22, 1, 0.36, 1];
 
 // Discount for an applied coupon at the current subtotal. Derived (never
 // stored), so qty changes can't leave a stale amount and re-applying a coupon
@@ -616,20 +613,11 @@ const Checkout = () => {
     return null;
   };
 
-  // Soft fade + slide between steps; reduced motion swaps instantly.
-  const stepMotion = shouldReduceMotion
-    ? {
-        initial: { opacity: 0 },
-        animate: { opacity: 1 },
-        exit: { opacity: 0 },
-        transition: { duration: 0 },
-      }
-    : {
-        initial: { opacity: 0, y: 12 },
-        animate: { opacity: 1, y: 0 },
-        exit: { opacity: 0, y: -8 },
-        transition: { duration: 0.34, ease: EASE },
-      };
+  // The shared in-place swap from theme/motion.js — the same fade-and-short-
+  // rise the PDP's tab panels and Profile's sections use. Reduced motion swaps
+  // instantly. The AnimatePresence around the steps is untouched: only the
+  // timing moved.
+  const stepMotion = collapse(shouldReduceMotion);
 
   // The assurance line under the rail. Store-attested facts ONLY — the returns
   // window from STOREFRONT_CONFIG, COD from the live payment settings, the

@@ -11,6 +11,22 @@
  * actions, gold used as seasoning — never as a large fill. Motion is slow and
  * decelerating (--sf-transition), never bouncy, never glowing.
  *
+ * THE HOVER / PRESS VOCABULARY — three treatments, storefront-wide:
+ *
+ *   CARDS         the photograph breathes: `transform: scale(1.03)` on the
+ *                 image over --sf-transition-slow, plus a hairline underline
+ *                 under the caption. The card itself never moves.
+ *   TEXT BUTTONS  colour and underline only — background, border, text,
+ *                 underline-colour on --sf-transition. On press, `opacity:
+ *                 0.9`. They never translate and never lift.
+ *   ICON BUTTONS  colour on hover; on press `transform: scale(0.98)` with
+ *                 `opacity: 0.85` over --sf-transition-fast — the mark settles
+ *                 a hair under the finger and springs back.
+ *
+ * Modules restate the icon-button press against their own class names (a mark
+ * button is local to its component), but the VALUES are these — 0.98 / 0.85 /
+ * --sf-transition-fast — and nothing on the storefront presses differently.
+ *
  * RULES
  *   • Consume design tokens by name only (var(--sf-*) / var(--brand-*)). Never
  *     hardcode hex, gradients, shadows, radius, or spacing here.
@@ -117,6 +133,12 @@
   .sf-btn--sm {
     min-height: var(--sf-tap-target);
   }
+}
+
+/* Press — the button settles, it does not sink. No transform: a text button
+   that moves under the cursor is the lift dressed up as feedback. */
+.sf-btn:active:not(:disabled):not([aria-disabled="true"]) {
+  opacity: 0.9;
 }
 
 /* Disabled */
@@ -245,19 +267,29 @@ a.sf-chip {
 /* =============================================================================
  * A3. CARD SURFACE
  * Flat by default — editorial pages sit on the page, they don't float above it.
+ * On hover the surface answers in place: the hairline firms, a soft shadow
+ * arrives. It does NOT lift; the motion on a card belongs to its photograph
+ * (`.sf-card--hover:hover img` below, and the same rule in ProductCard).
  * ========================================================================== */
 .sf-card {
   background: var(--sf-color-surface);
   border: 1px solid var(--sf-color-border);
   border-radius: var(--sf-radius-md);
   overflow: hidden;
-  transition: transform var(--sf-transition), box-shadow var(--sf-transition),
+  transition: box-shadow var(--sf-transition),
     border-color var(--sf-transition);
 }
 .sf-card--hover:hover {
   border-color: var(--sf-color-border-strong);
   box-shadow: var(--sf-shadow-sm);
-  transform: translateY(-3px);
+}
+
+/* The card's one piece of motion: the image breathing, slowly. */
+.sf-card img {
+  transition: transform var(--sf-transition-slow);
+}
+.sf-card--hover:hover img {
+  transform: scale(1.03);
 }
 
 /* =============================================================================
@@ -303,7 +335,11 @@ a.sf-chip {
     background-image: none;
     background-color: var(--sf-color-surface-2);
   }
-  .sf-card--hover:hover {
+  /* The token layer zeroes the durations; this animates a transform, so the
+     end state has to be cancelled outright rather than merely hurried. The
+     press states stay: they dim rather than move, and feedback under the
+     finger is not decoration. */
+  .sf-card--hover:hover img {
     transform: none;
   }
 }

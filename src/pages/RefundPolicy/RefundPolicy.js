@@ -38,6 +38,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
+import { reveal as sharedReveal } from "../../theme/motion";
 import { useTheme } from "../../context/ThemeContext";
 import { STOREFRONT_CONFIG } from "../../theme/tokens";
 import {
@@ -99,16 +100,10 @@ const RefundPolicy = () => {
   const { isDarkMode } = useTheme();
   const prefersReducedMotion = useReducedMotion();
 
-  // Gentle fade and rise, staggered, disabled outright for anyone who asked for
-  // less motion.
-  const reveal = (i) =>
-    prefersReducedMotion
-      ? {}
-      : {
-          initial: { opacity: 0, y: 12 },
-          animate: { opacity: 1, y: 0 },
-          transition: { duration: 0.55, delay: Math.min(i, 6) * 0.06 },
-        };
+  // The shared reveal from theme/motion.js: one gentle fade and rise, stepped
+  // down the page and capped. It returns nothing at all under reduced motion,
+  // so the clauses paint at their final state on the first frame.
+  const reveal = (i) => sharedReveal(prefersReducedMotion, { index: i });
 
   return (
     <div className={`${styles.page} ${isDarkMode ? styles.dark : ""}`}>

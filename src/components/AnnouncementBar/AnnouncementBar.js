@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Icon } from "@iconify/react";
 import { FREE_SHIPPING_THRESHOLD, DEFAULT_CURRENCY } from "../../utils/constants";
+import { DURATION, tween } from "../../theme/motion";
 import styles from "./AnnouncementBar.module.css";
 
 /**
@@ -135,7 +136,7 @@ const AnnouncementBar = ({ messages = ANNOUNCEMENTS, className = "" }) => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.6, ease: "easeInOut" }}
+                transition={tween(DURATION.slow)}
               >
                 {active.text}
               </motion.span>

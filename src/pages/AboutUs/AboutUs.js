@@ -57,6 +57,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
+import { reveal as sharedReveal } from "../../theme/motion";
 import { onImageError } from "../../utils/helpers";
 import styles from "./AboutUs.module.css";
 
@@ -196,17 +197,11 @@ const Arrow = () => (
 const AboutUs = () => {
   const prefersReducedMotion = useReducedMotion();
 
-  // Gentle fade and rise, disabled outright for anyone who asked for less
-  // motion — the sections then paint at their final state on the first frame.
-  const reveal = () =>
-    prefersReducedMotion
-      ? {}
-      : {
-          initial: { opacity: 0, y: 18 },
-          whileInView: { opacity: 1, y: 0 },
-          viewport: { once: true, amount: 0.15 },
-          transition: { duration: 0.6 },
-        };
+  // The shared in-view reveal from theme/motion.js — the same gentle fade and
+  // rise a home section or a policy clause gets. It returns nothing at all
+  // under reduced motion, so the chapters paint at their final state on the
+  // first frame.
+  const reveal = () => sharedReveal(prefersReducedMotion, { inView: true });
 
   return (
     <div className={styles.page}>
@@ -227,15 +222,11 @@ const AboutUs = () => {
 
       {/* ── 1. THE OPENING ─────────────────────────────────────────────── */}
       <header className={styles.opening}>
+        {/* The opening is above the fold, so it arrives on mount rather than
+            on scroll — the same reveal, without the viewport trigger. */}
         <motion.div
           className={styles.container}
-          {...(prefersReducedMotion
-            ? {}
-            : {
-                initial: { opacity: 0, y: 16 },
-                animate: { opacity: 1, y: 0 },
-                transition: { duration: 0.7 },
-              })}
+          {...sharedReveal(prefersReducedMotion)}
         >
           <p className={styles.eyebrow}>Our story</p>
           <h1 className={styles.title}>
