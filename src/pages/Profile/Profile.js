@@ -31,6 +31,9 @@ const deriveOrderStatus = (order) => {
   return order.status || "processing";
 };
 
+// Same words, same four tones as the Order History ledger (Prompt 21) — the
+// dashboard's mini-records must never label an order differently from the page
+// they link to.
 const STATUS_CONFIG = {
   processing: { label: "Processing", className: "statusProcessing" },
   shipped: { label: "Shipped", className: "statusShipped" },
@@ -41,6 +44,12 @@ const STATUS_CONFIG = {
 
 const getStatusInfo = (order) =>
   STATUS_CONFIG[deriveOrderStatus(order)] || STATUS_CONFIG.processing;
+
+// SweetAlert2 takes a colour VALUE, not a token — it renders outside the React
+// tree, and a per-call confirmButtonColor is set as an inline variable on the
+// button (see the Swal block in App.css). This mirrors --sf-color-danger from
+// storefront-tokens.css; keep the two in sync if that token is ever retuned.
+const DANGER_HEX = "#9E3B2E";
 
 // Only render a membership badge when it's real or derivable from the user
 // object. The seeded user shape carries no membership/tier field, so we never
@@ -56,11 +65,17 @@ const getMembership = (user) => {
   return { label: "Member", premium: false };
 };
 
-// ---- Inline icon set (stroke = currentColor so the coloured tiles tint them) ----
-const Icon = ({ name }) => {
+// ---- Inline icon set ----------------------------------------------------
+// Drawn at hairline weight (1.4) so the index rows read as an editorial list
+// of marks, not a tray of app tiles. stroke = currentColor throughout.
+const Icon = ({ name, size = 18, strokeWidth = 1.4 }) => {
   const icons = {
     orders: (
-      <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z M3 6h18 M16 10a4 4 0 0 1-8 0" />
+      <>
+        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z" />
+        <path d="M3 6h18" />
+        <path d="M16 10a4 4 0 0 1-8 0" />
+      </>
     ),
     location: (
       <>
@@ -93,12 +108,6 @@ const Icon = ({ name }) => {
         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
       </>
     ),
-    heart: (
-      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-    ),
-    star: (
-      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-    ),
     lock: (
       <>
         <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
@@ -107,36 +116,40 @@ const Icon = ({ name }) => {
     ),
     chevron: <polyline points="9 18 15 12 9 6" />,
     back: <polyline points="15 18 9 12 15 6" />,
-    logout: (
-      <>
-        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-        <polyline points="16 17 21 12 16 7" />
-        <line x1="21" y1="12" x2="9" y2="12" />
-      </>
-    ),
     person: (
       <>
         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
         <circle cx="12" cy="7" r="4" />
       </>
     ),
+    check: <polyline points="20 6 9 17 4 12" />,
   };
   return (
     <svg
-      width="20"
-      height="20"
+      width={size}
+      height={size}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth="2"
+      strokeWidth={strokeWidth}
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
+      focusable="false"
     >
       {icons[name] || null}
     </svg>
   );
 };
+
+// The gold seal that marks the default address — a hairline rosette rather than
+// a filled pill, so "default" reads as a mark on the card, not a tag stuck to it.
+const Seal = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden="true" focusable="false">
+    <circle cx="12" cy="12" r="9" />
+    <path d="M8.5 12.2l2.4 2.4 4.6-4.8" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -144,7 +157,7 @@ const Profile = () => {
   const { user, isAuthenticated, isLoading: authLoading, logout, updateUser, openAuthModal } = useAuth();
   const { wishlistItems } = useWishlist();
 
-  // null = dashboard (header + stats + menu + recent orders + logout).
+  // null = dashboard (greeting + figures + index + recent orders + logout).
   // Otherwise one of: profile | addresses | payment | wallet | notifications | settings
   const [activeSection, setActiveSection] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -221,9 +234,9 @@ const Profile = () => {
   }, [feedback]);
 
   // Load account stats (orders + reviews) once the user is known. Orders feed
-  // both the Orders stat tile and the Recent Orders list; reviews feed the
-  // Reviews tile. Counts are honest: 0 when empty, "—" while loading, and a
-  // failed fetch leaves the tiles at 0 rather than inventing numbers.
+  // both the Orders figure and the Recent Orders list; reviews feed the Reviews
+  // figure. Counts are honest: 0 when empty, "—" while loading, and a failed
+  // fetch leaves the figures at 0 rather than inventing numbers.
   useEffect(() => {
     if (!user?.id) return;
     let active = true;
@@ -507,7 +520,7 @@ const Profile = () => {
       text: "This address will be removed from your account.",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#dc2626",
+      confirmButtonColor: DANGER_HEX,
       confirmButtonText: "Delete",
       cancelButtonText: "Keep",
     });
@@ -559,7 +572,7 @@ const Profile = () => {
       text: "You'll need to sign in again to access your account.",
       icon: "question",
       showCancelButton: true,
-      confirmButtonColor: "#dc2626",
+      confirmButtonColor: DANGER_HEX,
       confirmButtonText: "Log Out",
       cancelButtonText: "Stay Signed In",
     });
@@ -585,26 +598,33 @@ const Profile = () => {
       <div className={`${styles.page} ${isDarkMode ? styles.dark : ""}`}>
         <div className={styles.container}>
           <motion.div
-            className={styles.loginPrompt}
-            initial={{ opacity: 0, y: 30 }}
+            className={styles.gate}
+            initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
           >
-            <div className={styles.loginIcon}>
-              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-            </div>
-            <h2 className={styles.loginTitle}>Sign in to view your account</h2>
-            <p className={styles.loginSubtext}>
-              Access your orders, addresses, store credit and more once you sign in.
+            <span className={styles.gateMark}>
+              <Icon name="person" size={30} strokeWidth={1} />
+            </span>
+            <p className={styles.eyebrow}>Your account</p>
+            <h1 className={styles.gateTitle}>Sign in to your account</h1>
+            <p className={styles.gateText}>
+              Your orders, your addresses and your store credit are kept here,
+              waiting for you.
             </p>
-            <div className={styles.loginActions}>
-              <button className={styles.btnPrimary} onClick={() => openAuthModal("login")}>
-                Log In
+            <div className={styles.gateActions}>
+              <button
+                type="button"
+                className={`sf-btn sf-btn--emerald ${styles.gateBtn}`}
+                onClick={() => openAuthModal("login")}
+              >
+                Sign In
               </button>
-              <button className={styles.linkSecondary} onClick={() => navigate("/")}>
+              <button
+                type="button"
+                className={`sf-btn sf-btn--ghost ${styles.gateBtn}`}
+                onClick={() => navigate("/")}
+              >
                 Back to Home
               </button>
             </div>
@@ -617,15 +637,24 @@ const Profile = () => {
   const membership = getMembership(user);
   const passwordStrength = getPasswordStrength(passwordForm.newPassword);
   const recentOrders = orders.slice(0, 3);
+  const greetingName = (user.firstName || "").trim();
 
   const statValue = (count) => (statsLoading ? "—" : count);
 
-  // ---- Menu rows (each opens an in-page section or navigates) ----
+  const statusChip = (statusInfo) => (
+    <span className={`${styles.chip} ${styles[statusInfo.className]}`}>
+      <span className={styles.chipDot} aria-hidden="true" />
+      {statusInfo.label}
+    </span>
+  );
+
+  // ---- Index rows (each opens an in-page section or navigates) ------------
+  // One uniform list. No per-row tone: the only things that vary down the
+  // column are the mark, the words, and whether there is a real count to show.
   const menuRows = [
     {
       id: "orders",
       icon: "orders",
-      tone: "teal",
       label: "My Orders",
       sub: "Track, return or buy again",
       badge: !statsLoading && orders.length > 0 ? orders.length : null,
@@ -634,15 +663,14 @@ const Profile = () => {
     {
       id: "addresses",
       icon: "location",
-      tone: "blue",
       label: "Addresses",
-      sub: "Manage delivery addresses",
+      sub: "Where your parcels go",
+      badge: addresses.length > 0 ? addresses.length : null,
       onClick: () => openSection("addresses"),
     },
     {
       id: "payment",
       icon: "card",
-      tone: "purple",
       label: "Payment Methods",
       sub: "Saved cards & UPI",
       onClick: () => openSection("payment"),
@@ -650,7 +678,6 @@ const Profile = () => {
     {
       id: "wallet",
       icon: "wallet",
-      tone: "orange",
       label: "Store Credit",
       sub: "Wallet balance & history",
       onClick: () => openSection("wallet"),
@@ -658,7 +685,6 @@ const Profile = () => {
     {
       id: "notifications",
       icon: "bell",
-      tone: "pink",
       label: "Notifications",
       sub: "Offers, updates & more",
       onClick: () => openSection("notifications"),
@@ -666,7 +692,6 @@ const Profile = () => {
     {
       id: "settings",
       icon: "settings",
-      tone: "red",
       label: "Settings",
       sub: "Password, appearance & privacy",
       onClick: () => openSection("settings"),
@@ -674,107 +699,116 @@ const Profile = () => {
   ];
 
   // =====================================================================
-  // Section renderers (reachable from the menu / header card)
+  // Section renderers (reachable from the index / greeting card)
   // =====================================================================
   const renderProfileSection = () => (
-    <div className={styles.sectionCard}>
-      <div className={styles.sectionHeading}>
-        <h2 className={styles.sectionTitle}>Personal Information</h2>
-        <p className={styles.sectionSubtitle}>Manage your personal details</p>
-      </div>
+    <div className={styles.section}>
+      <p className={styles.sectionLead}>
+        The name and number we use on your orders and deliveries.
+      </p>
 
       <div className={styles.formGrid}>
-        <div className={styles.formGroup}>
-          <label className={styles.formLabel} htmlFor="pf-first">First Name *</label>
+        <div className={styles.field}>
+          <label htmlFor="pf-first">First Name *</label>
           <input
             id="pf-first"
             type="text"
             name="firstName"
+            autoComplete="given-name"
             value={profileForm.firstName}
             onChange={handleProfileChange}
-            className={styles.formInput}
             placeholder="Enter first name"
           />
         </div>
-        <div className={styles.formGroup}>
-          <label className={styles.formLabel} htmlFor="pf-last">Last Name *</label>
+        <div className={styles.field}>
+          <label htmlFor="pf-last">Last Name *</label>
           <input
             id="pf-last"
             type="text"
             name="lastName"
+            autoComplete="family-name"
             value={profileForm.lastName}
             onChange={handleProfileChange}
-            className={styles.formInput}
             placeholder="Enter last name"
           />
         </div>
-        <div className={styles.formGroup}>
-          <label className={styles.formLabel} htmlFor="pf-email">Email Address</label>
+        <div className={styles.field}>
+          <label htmlFor="pf-email">Email Address</label>
           <input
             id="pf-email"
             type="email"
             name="email"
+            autoComplete="email"
             value={profileForm.email}
-            className={`${styles.formInput} ${styles.readOnly}`}
+            className={styles.readOnly}
             readOnly
           />
-          <span className={styles.fieldHint}>Email cannot be changed</span>
+          <span className={styles.hint}>Email cannot be changed</span>
         </div>
-        <div className={styles.formGroup}>
-          <label className={styles.formLabel} htmlFor="pf-phone">Phone Number</label>
+        <div className={styles.field}>
+          <label htmlFor="pf-phone">Phone Number</label>
           <input
             id="pf-phone"
             type="tel"
             name="phone"
+            autoComplete="tel"
             value={profileForm.phone}
             onChange={handleProfileChange}
-            className={styles.formInput}
-            placeholder="Enter phone number"
+            placeholder="10-digit mobile number"
           />
         </div>
       </div>
 
-      <div className={styles.formActions}>
-        <button className={styles.btnPrimary} onClick={handleProfileSave} disabled={loading}>
-          {loading ? "Saving..." : "Save Changes"}
+      <div className={styles.actions}>
+        <button
+          type="button"
+          className="sf-btn sf-btn--emerald"
+          onClick={handleProfileSave}
+          disabled={loading}
+        >
+          {loading ? "Saving…" : "Save Changes"}
         </button>
       </div>
     </div>
   );
 
   const renderAddressesSection = () => (
-    <div className={styles.sectionCard}>
-      <div className={styles.sectionHeading}>
-        <div>
-          <h2 className={styles.sectionTitle}>My Addresses</h2>
-          <p className={styles.sectionSubtitle}>Manage your delivery addresses</p>
-        </div>
+    <div className={styles.section}>
+      <div className={styles.sectionBar}>
+        <p className={styles.sectionLead}>
+          {addresses.length === 0
+            ? "Save an address once and checkout will know where to send it."
+            : `${addresses.length} address${addresses.length === 1 ? "" : "es"} on file. The default is offered first at checkout.`}
+        </p>
         {!showAddressForm && (
           <button
-            className={styles.btnOutline}
+            type="button"
+            className={styles.addBtn}
             onClick={() => {
               resetAddressForm();
               setShowAddressForm(true);
             }}
           >
-            + Add New Address
+            Add an address
           </button>
         )}
       </div>
 
       {showAddressForm && (
-        <div className={styles.addressFormCard}>
-          <h3 className={styles.addressFormTitle}>
-            {editingAddressIndex !== null ? "Edit Address" : "Add New Address"}
+        <div className={styles.addrForm}>
+          <h3 className={styles.addrFormTitle}>
+            {editingAddressIndex !== null ? "Edit address" : "New address"}
           </h3>
 
-          <div className={styles.labelSelector}>
+          <div className={styles.labelChips} role="group" aria-label="Address label">
             {["Home", "Work", "Other"].map((label) => (
               <button
                 key={label}
+                type="button"
                 className={`${styles.labelChip} ${
-                  addressForm.label === label ? styles.labelChipActive : ""
+                  addressForm.label === label ? styles.labelChipOn : ""
                 }`}
+                aria-pressed={addressForm.label === label}
                 onClick={() => setAddressForm((prev) => ({ ...prev, label }))}
               >
                 {label}
@@ -783,65 +817,63 @@ const Profile = () => {
           </div>
 
           <div className={styles.formGrid}>
-            <div className={styles.formGroup}>
-              <label className={styles.formLabel} htmlFor="af-first">First Name *</label>
-              <input id="af-first" type="text" name="firstName" value={addressForm.firstName} onChange={handleAddressChange} className={styles.formInput} placeholder="Enter first name" />
+            <div className={styles.field}>
+              <label htmlFor="af-first">First Name *</label>
+              <input id="af-first" type="text" name="firstName" autoComplete="given-name" value={addressForm.firstName} onChange={handleAddressChange} placeholder="Enter first name" />
             </div>
-            <div className={styles.formGroup}>
-              <label className={styles.formLabel} htmlFor="af-last">Last Name *</label>
-              <input id="af-last" type="text" name="lastName" value={addressForm.lastName} onChange={handleAddressChange} className={styles.formInput} placeholder="Enter last name" />
+            <div className={styles.field}>
+              <label htmlFor="af-last">Last Name *</label>
+              <input id="af-last" type="text" name="lastName" autoComplete="family-name" value={addressForm.lastName} onChange={handleAddressChange} placeholder="Enter last name" />
             </div>
-            <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-              <label className={styles.formLabel} htmlFor="af-phone">Phone Number *</label>
-              <input id="af-phone" type="tel" name="phone" value={addressForm.phone} onChange={handleAddressChange} className={styles.formInput} placeholder="10-digit mobile number" />
+            <div className={`${styles.field} ${styles.fieldWide}`}>
+              <label htmlFor="af-phone">Phone Number *</label>
+              <input id="af-phone" type="tel" name="phone" autoComplete="tel" value={addressForm.phone} onChange={handleAddressChange} placeholder="10-digit mobile number" />
             </div>
-            <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-              <label className={styles.formLabel} htmlFor="af-line1">Address Line 1 *</label>
-              <input id="af-line1" type="text" name="addressLine1" value={addressForm.addressLine1} onChange={handleAddressChange} className={styles.formInput} placeholder="House/Flat No., Building, Street" />
+            <div className={`${styles.field} ${styles.fieldWide}`}>
+              <label htmlFor="af-line1">Address Line 1 *</label>
+              <input id="af-line1" type="text" name="addressLine1" autoComplete="address-line1" value={addressForm.addressLine1} onChange={handleAddressChange} placeholder="House/Flat No., Building, Street" />
             </div>
-            <div className={`${styles.formGroup} ${styles.fullWidth}`}>
-              <label className={styles.formLabel} htmlFor="af-line2">Address Line 2</label>
-              <input id="af-line2" type="text" name="addressLine2" value={addressForm.addressLine2} onChange={handleAddressChange} className={styles.formInput} placeholder="Landmark, Area (optional)" />
+            <div className={`${styles.field} ${styles.fieldWide}`}>
+              <label htmlFor="af-line2">Address Line 2</label>
+              <input id="af-line2" type="text" name="addressLine2" autoComplete="address-line2" value={addressForm.addressLine2} onChange={handleAddressChange} placeholder="Landmark, Area (optional)" />
             </div>
-            <div className={styles.formGroup}>
-              <label className={styles.formLabel} htmlFor="af-city">City *</label>
-              <input id="af-city" type="text" name="city" value={addressForm.city} onChange={handleAddressChange} className={styles.formInput} placeholder="Enter city" />
+            <div className={styles.field}>
+              <label htmlFor="af-city">City *</label>
+              <input id="af-city" type="text" name="city" autoComplete="address-level2" value={addressForm.city} onChange={handleAddressChange} placeholder="Enter city" />
             </div>
-            <div className={styles.formGroup}>
-              <label className={styles.formLabel} htmlFor="af-state">State *</label>
-              <input id="af-state" type="text" name="state" value={addressForm.state} onChange={handleAddressChange} className={styles.formInput} placeholder="Enter state" />
+            <div className={styles.field}>
+              <label htmlFor="af-state">State *</label>
+              <input id="af-state" type="text" name="state" autoComplete="address-level1" value={addressForm.state} onChange={handleAddressChange} placeholder="Enter state" />
             </div>
-            <div className={styles.formGroup}>
-              <label className={styles.formLabel} htmlFor="af-postal">Postal Code *</label>
-              <input id="af-postal" type="text" name="postalCode" value={addressForm.postalCode} onChange={handleAddressChange} className={styles.formInput} placeholder="Enter postal code" />
+            <div className={styles.field}>
+              <label htmlFor="af-postal">Postal Code *</label>
+              <input id="af-postal" type="text" name="postalCode" autoComplete="postal-code" inputMode="numeric" value={addressForm.postalCode} onChange={handleAddressChange} placeholder="Enter postal code" />
             </div>
-            <div className={styles.formGroup}>
-              <label className={styles.formLabel} htmlFor="af-country">Country</label>
-              <input id="af-country" type="text" name="country" value={addressForm.country} className={`${styles.formInput} ${styles.readOnly}`} readOnly />
-              <span className={styles.fieldHint}>Currently shipping within India only</span>
+            <div className={styles.field}>
+              <label htmlFor="af-country">Country</label>
+              <input id="af-country" type="text" name="country" autoComplete="country-name" value={addressForm.country} className={styles.readOnly} readOnly />
+              <span className={styles.hint}>Currently shipping within India only</span>
             </div>
           </div>
 
-          <div className={styles.checkboxGroup}>
-            <label className={styles.checkboxLabel}>
-              <input
-                type="checkbox"
-                name="isDefault"
-                checked={addressForm.isDefault}
-                onChange={handleAddressChange}
-                className={styles.checkbox}
-              />
-              <span>Set as default address</span>
-            </label>
-          </div>
+          <label className={styles.checkRow}>
+            <input
+              type="checkbox"
+              name="isDefault"
+              checked={addressForm.isDefault}
+              onChange={handleAddressChange}
+              className={styles.checkbox}
+            />
+            <span>Set as default address</span>
+          </label>
 
-          <div className={styles.formActions}>
-            <button className={styles.btnSecondary} onClick={resetAddressForm} disabled={loading}>
+          <div className={styles.actions}>
+            <button type="button" className="sf-btn sf-btn--ghost" onClick={resetAddressForm} disabled={loading}>
               Cancel
             </button>
-            <button className={styles.btnPrimary} onClick={handleAddressSave} disabled={loading}>
+            <button type="button" className="sf-btn sf-btn--emerald" onClick={handleAddressSave} disabled={loading}>
               {loading
-                ? "Saving..."
+                ? "Saving…"
                 : editingAddressIndex !== null
                 ? "Update Address"
                 : "Save Address"}
@@ -850,147 +882,159 @@ const Profile = () => {
         </div>
       )}
 
-      <div className={styles.addressList}>
-        {addresses.length === 0 && !showAddressForm ? (
-          <div className={styles.emptyState}>
-            <div className={styles.emptyIcon}><Icon name="location" /></div>
-            <p className={styles.emptyText}>No addresses saved yet</p>
-            <p className={styles.emptySubtext}>Add an address to make checkout faster</p>
-          </div>
-        ) : (
-          addresses.map((addr, index) => (
-            <div
+      {addresses.length === 0 && !showAddressForm ? (
+        <div className={styles.state}>
+          <span className={styles.stateMark}><Icon name="location" size={26} strokeWidth={1} /></span>
+          <p className={styles.stateTitle}>No addresses saved yet</p>
+          <p className={styles.stateText}>Add one and checkout will offer it first, every time.</p>
+        </div>
+      ) : (
+        <div className={styles.addrList}>
+          {addresses.map((addr, index) => (
+            <article
               key={addr.id || index}
-              className={`${styles.addressCard} ${addr.isDefault ? styles.addressCardDefault : ""}`}
+              className={`${styles.addrCard} ${addr.isDefault ? styles.addrCardDefault : ""}`}
             >
-              <div className={styles.addressCardHeader}>
-                <div className={styles.addressLabelRow}>
-                  <span className={styles.addressLabel}>{addr.label}</span>
-                  {addr.isDefault && <span className={styles.defaultBadge}>Default</span>}
+              <div className={styles.addrTop}>
+                <div className={styles.addrLabelRow}>
+                  <span className={styles.addrLabel}>{addr.label || "Address"}</span>
+                  {addr.isDefault && (
+                    <span className={styles.seal}>
+                      <Seal />
+                      Default
+                    </span>
+                  )}
                 </div>
-                <div className={styles.addressActions}>
+                <div className={styles.addrActions}>
                   {!addr.isDefault && (
-                    <button className={styles.actionLink} onClick={() => handleSetDefaultAddress(index)} disabled={loading}>
+                    <button type="button" className={styles.textBtn} onClick={() => handleSetDefaultAddress(index)} disabled={loading}>
                       Set Default
                     </button>
                   )}
-                  <button className={styles.actionLink} onClick={() => handleAddressEdit(index)} disabled={loading}>
+                  <button type="button" className={styles.textBtn} onClick={() => handleAddressEdit(index)} disabled={loading}>
                     Edit
                   </button>
-                  <button className={`${styles.actionLink} ${styles.actionLinkDanger}`} onClick={() => handleAddressDelete(index)} disabled={loading}>
+                  <button type="button" className={`${styles.textBtn} ${styles.textBtnDanger}`} onClick={() => handleAddressDelete(index)} disabled={loading}>
                     Delete
                   </button>
                 </div>
               </div>
-              <div className={styles.addressCardBody}>
-                <p className={styles.addressName}>
+              <div className={styles.addrBody}>
+                <p className={styles.addrName}>
                   {[addr.firstName, addr.lastName].filter(Boolean).join(" ") || addr.fullName || ""}
                 </p>
-                <p className={styles.addressText}>
+                <p className={styles.addrLine}>
                   {addr.addressLine1}
                   {addr.addressLine2 ? `, ${addr.addressLine2}` : ""}
                 </p>
-                <p className={styles.addressText}>
+                <p className={styles.addrLine}>
                   {addr.city}, {addr.state} {addr.postalCode || addr.zipCode || ""}
                 </p>
-                <p className={styles.addressText}>{addr.country}</p>
-                <p className={styles.addressPhone}>Phone: {addr.phone}</p>
+                <p className={styles.addrLine}>{addr.country}</p>
+                <p className={styles.addrPhone}>{addr.phone}</p>
               </div>
-            </div>
-          ))
-        )}
-      </div>
+            </article>
+          ))}
+        </div>
+      )}
     </div>
   );
 
   const renderPaymentSection = () => (
-    <div className={styles.sectionCard}>
-      <div className={styles.sectionHeading}>
-        <h2 className={styles.sectionTitle}>Payment Methods</h2>
-        <p className={styles.sectionSubtitle}>Your saved cards and UPI</p>
-      </div>
+    <div className={styles.section}>
       {/* No payment-method API exists — render an honest empty state rather than
           fabricating saved cards. Payment is collected securely at checkout. */}
-      <div className={styles.emptyState}>
-        <div className={styles.emptyIcon}><Icon name="card" /></div>
-        <p className={styles.emptyText}>No saved payment methods yet</p>
-        <p className={styles.emptySubtext}>
-          For your security, payment details are entered fresh at checkout and aren't stored on your account.
+      <div className={styles.state}>
+        <span className={styles.stateMark}><Icon name="card" size={26} strokeWidth={1} /></span>
+        <p className={styles.stateTitle}>Nothing saved here — by design</p>
+        <p className={styles.stateText}>
+          Payment details are entered fresh at checkout and are never stored on
+          your account. There is nothing kept on this page for anyone to take.
         </p>
       </div>
     </div>
   );
 
   const renderWalletSection = () => (
-    <div className={styles.sectionCard}>
-      <div className={styles.sectionHeading}>
-        <h2 className={styles.sectionTitle}>Store Credit</h2>
-        <p className={styles.sectionSubtitle}>Your wallet balance and transaction history</p>
+    <div className={styles.section}>
+      <div className={styles.walletBand}>
+        <span className={styles.walletBandLabel}>Available balance</span>
+        <span className={styles.walletBandValue}>
+          {walletLoading ? "—" : formatCurrency(walletBalance)}
+        </span>
+        <p className={styles.walletBandHint}>
+          Apply your store credit at checkout, toward any order.
+        </p>
       </div>
 
-      <div className={styles.walletBalanceCard}>
-        <div className={styles.walletBalanceIcon}><Icon name="wallet" /></div>
-        <div className={styles.walletBalanceText}>
-          <span className={styles.walletBalanceLabel}>Available Balance</span>
-          <span className={styles.walletBalanceValue}>{formatCurrency(walletBalance)}</span>
-        </div>
-        <p className={styles.walletBalanceHint}>Apply your store credit at checkout toward any order.</p>
-      </div>
-
-      <h3 className={styles.walletHistoryTitle}>Transaction History</h3>
+      <h3 className={styles.ledgerTitle}>Statement</h3>
 
       {walletLoading ? (
-        <div className={styles.walletLoading}>
-          <div className={styles.spinner} />
-          <p>Loading your transactions…</p>
+        <div className={styles.ledger} aria-hidden="true">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className={styles.ledgerSkeleton}>
+              <span className={`sf-skeleton ${styles.skelMark}`} />
+              <span className={styles.skelLines}>
+                <span className="sf-skeleton sf-skeleton--text" />
+                <span className="sf-skeleton sf-skeleton--text" />
+              </span>
+            </div>
+          ))}
         </div>
       ) : walletTx.length === 0 ? (
-        <div className={styles.emptyState}>
-          <div className={styles.emptyIcon}><Icon name="wallet" /></div>
-          <p className={styles.emptyText}>No store-credit transactions yet</p>
-          <p className={styles.emptySubtext}>
-            Refunds issued to store credit, and credit you spend at checkout, will appear here.
+        <div className={styles.state}>
+          <span className={styles.stateMark}><Icon name="wallet" size={26} strokeWidth={1} /></span>
+          <p className={styles.stateTitle}>No store credit yet</p>
+          <p className={styles.stateText}>
+            Refunds issued to store credit, and credit you spend at checkout,
+            are written here — each line with the order it belongs to.
           </p>
         </div>
       ) : (
-        <div className={styles.walletTxList}>
+        <div className={styles.ledger}>
           {walletTx.map((t) => {
             const isCredit = t.type === "credit";
             return (
-              <div key={t.id} className={styles.walletTxRow}>
-                <div
-                  className={`${styles.walletTxBadge} ${
-                    isCredit ? styles.walletTxBadgeCredit : styles.walletTxBadgeDebit
+              <div key={t.id} className={styles.ledgerRow}>
+                <span
+                  className={`${styles.ledgerMark} ${
+                    isCredit ? styles.ledgerMarkCredit : styles.ledgerMarkDebit
                   }`}
-                  aria-hidden
+                  aria-hidden="true"
                 >
                   {isCredit ? "+" : "−"}
-                </div>
-                <div className={styles.walletTxBody}>
-                  <span className={styles.walletTxReason}>
+                </span>
+                <span className={styles.ledgerBody}>
+                  <span className={styles.ledgerReason}>
                     {t.reason || (isCredit ? "Store credit added" : "Store credit used")}
                   </span>
-                  <span className={styles.walletTxMeta}>
+                  <span className={styles.ledgerMeta}>
                     {formatDate(t.createdAt, "medium")}
                     {t.orderNumber && (
                       <>
-                        {" · "}
-                        <button type="button" className={styles.walletTxLink} onClick={() => navigate("/orders")}>
+                        <span className={styles.metaSep} aria-hidden="true">·</span>
+                        <button
+                          type="button"
+                          className={styles.ledgerLink}
+                          onClick={() => navigate("/orders")}
+                        >
                           {t.orderNumber}
                         </button>
                       </>
                     )}
                   </span>
-                </div>
-                <div className={styles.walletTxAmountWrap}>
-                  <span className={isCredit ? styles.walletTxAmountCredit : styles.walletTxAmountDebit}>
+                </span>
+                <span className={styles.ledgerAmounts}>
+                  <span className={isCredit ? styles.amountCredit : styles.amountDebit}>
                     {isCredit ? "+" : "−"}
                     {formatCurrency(t.amount)}
                   </span>
                   {t.balanceAfter != null && (
-                    <span className={styles.walletTxBalance}>Bal: {formatCurrency(t.balanceAfter)}</span>
+                    <span className={styles.ledgerBalance}>
+                      Balance {formatCurrency(t.balanceAfter)}
+                    </span>
                   )}
-                </div>
+                </span>
               </div>
             );
           })}
@@ -1000,142 +1044,172 @@ const Profile = () => {
   );
 
   const renderNotificationsSection = () => (
-    <div className={styles.sectionCard}>
-      <div className={styles.sectionHeading}>
-        <h2 className={styles.sectionTitle}>Notifications</h2>
-        <p className={styles.sectionSubtitle}>Manage how we keep in touch</p>
-      </div>
+    <div className={styles.section}>
       {/* No notification-preference fields exist on the user yet — show an honest
           "coming soon" state rather than toggles that wouldn't persist. */}
-      <div className={styles.emptyState}>
-        <div className={styles.emptyIcon}><Icon name="bell" /></div>
-        <p className={styles.emptyText}>Notification preferences are coming soon</p>
-        <p className={styles.emptySubtext}>
-          For now, important order updates are always sent to <strong>{user.email}</strong>. You'll be able to fine-tune offers and reminders here shortly.
+      <div className={styles.state}>
+        <span className={styles.stateMark}><Icon name="bell" size={26} strokeWidth={1} /></span>
+        <p className={styles.stateTitle}>Preferences are coming soon</p>
+        <p className={styles.stateText}>
+          For now, order updates are always sent to <strong>{user.email}</strong>.
+          Fine-tuning offers and reminders will live here shortly.
         </p>
       </div>
     </div>
   );
 
   const renderSettingsSection = () => (
-    <div className={styles.sectionCard}>
-      <div className={styles.sectionHeading}>
-        <h2 className={styles.sectionTitle}>Settings</h2>
-        <p className={styles.sectionSubtitle}>Security and appearance</p>
-      </div>
-
+    <div className={styles.section}>
       {/* Appearance */}
       <div className={styles.settingRow}>
-        <div className={styles.settingRowText}>
-          <span className={styles.settingRowLabel}>Appearance</span>
-          <span className={styles.settingRowSub}>
+        <span className={styles.settingText}>
+          <span className={styles.settingLabel}>Appearance</span>
+          <span className={styles.settingSub}>
             {isDarkMode ? "Dark mode is on" : "Light mode is on"}
           </span>
-        </div>
+        </span>
         <button
           type="button"
-          className={`${styles.themeToggle} ${isDarkMode ? styles.themeToggleOn : ""}`}
+          className={`${styles.switch} ${isDarkMode ? styles.switchOn : ""}`}
           onClick={toggleTheme}
           role="switch"
           aria-checked={isDarkMode}
           aria-label="Toggle dark mode"
         >
-          <span className={styles.themeToggleKnob} />
+          <span className={styles.switchKnob} />
         </button>
       </div>
 
       {/* Change Password */}
-      <h3 className={styles.subHeading}>
-        <Icon name="lock" /> Change Password
+      <h3 className={styles.subHead}>
+        <Icon name="lock" size={16} />
+        Change password
       </h3>
-      <div className={styles.passwordFormWrapper}>
-        <div className={styles.formGroupStacked}>
-          <label className={styles.formLabel} htmlFor="pw-current">Current Password *</label>
-          <div className={styles.passwordInputWrapper}>
+
+      <div className={styles.pwForm}>
+        <div className={styles.field}>
+          <label htmlFor="pw-current">Current Password *</label>
+          <div className={styles.pwWrap}>
             <input
               id="pw-current"
               type={showPasswords.current ? "text" : "password"}
               name="currentPassword"
+              autoComplete="current-password"
               value={passwordForm.currentPassword}
               onChange={handlePasswordChange}
-              className={styles.formInput}
               placeholder="Enter current password"
             />
-            <button type="button" className={styles.passwordToggle} onClick={() => setShowPasswords((p) => ({ ...p, current: !p.current }))}>
+            <button
+              type="button"
+              className={styles.pwToggle}
+              onClick={() => setShowPasswords((p) => ({ ...p, current: !p.current }))}
+              aria-label={showPasswords.current ? "Hide current password" : "Show current password"}
+            >
               {showPasswords.current ? "Hide" : "Show"}
             </button>
           </div>
         </div>
 
-        <div className={styles.formGroupStacked}>
-          <label className={styles.formLabel} htmlFor="pw-new">New Password *</label>
-          <div className={styles.passwordInputWrapper}>
+        <div className={styles.field}>
+          <label htmlFor="pw-new">New Password *</label>
+          <div className={styles.pwWrap}>
             <input
               id="pw-new"
               type={showPasswords.new ? "text" : "password"}
               name="newPassword"
+              autoComplete="new-password"
               value={passwordForm.newPassword}
               onChange={handlePasswordChange}
-              className={styles.formInput}
               placeholder="Enter new password"
             />
-            <button type="button" className={styles.passwordToggle} onClick={() => setShowPasswords((p) => ({ ...p, new: !p.new }))}>
+            <button
+              type="button"
+              className={styles.pwToggle}
+              onClick={() => setShowPasswords((p) => ({ ...p, new: !p.new }))}
+              aria-label={showPasswords.new ? "Hide new password" : "Show new password"}
+            >
               {showPasswords.new ? "Hide" : "Show"}
             </button>
           </div>
           {passwordForm.newPassword && (
-            <div className={`${styles.strengthMeter} ${styles[`strength_${passwordStrength.key}`]}`}>
-              <div className={styles.strengthBar}>
+            <div className={`${styles.meter} ${styles[`strength_${passwordStrength.key}`]}`}>
+              <span className={styles.meterBar} aria-hidden="true">
                 {[1, 2, 3, 4].map((seg) => (
-                  <div
+                  <span
                     key={seg}
-                    className={`${styles.strengthSegment} ${
-                      seg <= passwordStrength.level ? styles.strengthSegmentFilled : ""
+                    className={`${styles.meterSeg} ${
+                      seg <= passwordStrength.level ? styles.meterSegOn : ""
                     }`}
                   />
                 ))}
-              </div>
-              <span className={styles.strengthLabel}>{passwordStrength.label}</span>
+              </span>
+              <span className={styles.meterLabel} role="status">
+                <span className={styles.srOnly}>Password strength: </span>
+                {passwordStrength.label}
+              </span>
             </div>
           )}
         </div>
 
-        <div className={styles.formGroupStacked}>
-          <label className={styles.formLabel} htmlFor="pw-confirm">Confirm New Password *</label>
-          <div className={styles.passwordInputWrapper}>
+        <div className={styles.field}>
+          <label htmlFor="pw-confirm">Confirm New Password *</label>
+          <div className={styles.pwWrap}>
             <input
               id="pw-confirm"
               type={showPasswords.confirm ? "text" : "password"}
               name="confirmPassword"
+              autoComplete="new-password"
               value={passwordForm.confirmPassword}
               onChange={handlePasswordChange}
-              className={styles.formInput}
               placeholder="Confirm new password"
             />
-            <button type="button" className={styles.passwordToggle} onClick={() => setShowPasswords((p) => ({ ...p, confirm: !p.confirm }))}>
+            <button
+              type="button"
+              className={styles.pwToggle}
+              onClick={() => setShowPasswords((p) => ({ ...p, confirm: !p.confirm }))}
+              aria-label={showPasswords.confirm ? "Hide confirmed password" : "Show confirmed password"}
+            >
               {showPasswords.confirm ? "Hide" : "Show"}
             </button>
           </div>
           {passwordForm.confirmPassword &&
             passwordForm.newPassword !== passwordForm.confirmPassword && (
-              <span className={styles.fieldError}>Passwords do not match</span>
+              <span className={styles.fieldError} role="alert">Passwords do not match</span>
             )}
         </div>
 
-        <div className={styles.passwordRequirements}>
-          <p className={styles.requirementsTitle}>Password Requirements:</p>
-          <ul className={styles.requirementsList}>
-            <li className={passwordForm.newPassword.length >= 8 ? styles.requirementMet : ""}>At least 8 characters</li>
-            <li className={/[A-Z]/.test(passwordForm.newPassword) ? styles.requirementMet : ""}>One uppercase letter</li>
-            <li className={/[a-z]/.test(passwordForm.newPassword) ? styles.requirementMet : ""}>One lowercase letter</li>
-            <li className={/[0-9]/.test(passwordForm.newPassword) ? styles.requirementMet : ""}>One number</li>
-            <li className={/[^A-Za-z0-9]/.test(passwordForm.newPassword) ? styles.requirementMet : ""}>One special character</li>
+        {/* Live checklist. Each item carries its state in words as well as in the
+            mark, so it is never colour-alone — and the list is polite-live, so a
+            requirement being met is announced as you type. */}
+        <div className={styles.reqs}>
+          <p className={styles.reqsTitle}>A good password has</p>
+          <ul className={styles.reqsList} aria-live="polite">
+            {[
+              { text: "At least 8 characters", met: passwordForm.newPassword.length >= 8 },
+              { text: "One uppercase letter", met: /[A-Z]/.test(passwordForm.newPassword) },
+              { text: "One lowercase letter", met: /[a-z]/.test(passwordForm.newPassword) },
+              { text: "One number", met: /[0-9]/.test(passwordForm.newPassword) },
+              { text: "One special character", met: /[^A-Za-z0-9]/.test(passwordForm.newPassword) },
+            ].map((req) => (
+              <li key={req.text} className={`${styles.req} ${req.met ? styles.reqOn : ""}`}>
+                <span className={styles.reqMark} aria-hidden="true">
+                  {req.met ? <Icon name="check" size={12} strokeWidth={2} /> : null}
+                </span>
+                {req.text}
+                <span className={styles.srOnly}>{req.met ? " — met" : " — not met yet"}</span>
+              </li>
+            ))}
           </ul>
         </div>
 
-        <div className={styles.formActions}>
-          <button className={styles.btnPrimary} onClick={handlePasswordSubmit} disabled={loading}>
-            {loading ? "Updating..." : "Update Password"}
+        <div className={styles.actions}>
+          <button
+            type="button"
+            className="sf-btn sf-btn--emerald"
+            onClick={handlePasswordSubmit}
+            disabled={loading}
+          >
+            {loading ? "Updating…" : "Update Password"}
           </button>
         </div>
       </div>
@@ -1143,10 +1217,10 @@ const Profile = () => {
   );
 
   const SECTION_META = {
-    profile: { title: "Edit Profile", render: renderProfileSection },
+    profile: { title: "Personal details", render: renderProfileSection },
     addresses: { title: "Addresses", render: renderAddressesSection },
-    payment: { title: "Payment Methods", render: renderPaymentSection },
-    wallet: { title: "Store Credit", render: renderWalletSection },
+    payment: { title: "Payment methods", render: renderPaymentSection },
+    wallet: { title: "Store credit", render: renderWalletSection },
     notifications: { title: "Notifications", render: renderNotificationsSection },
     settings: { title: "Settings", render: renderSettingsSection },
   };
@@ -1166,7 +1240,12 @@ const Profile = () => {
               exit={{ opacity: 0, y: 20 }}
             >
               <span>{feedback.message}</span>
-              <button className={styles.feedbackClose} onClick={() => setFeedback({ type: "", message: "" })} aria-label="Dismiss">
+              <button
+                type="button"
+                className={styles.feedbackClose}
+                onClick={() => setFeedback({ type: "", message: "" })}
+                aria-label="Dismiss"
+              >
                 ×
               </button>
             </motion.div>
@@ -1177,123 +1256,131 @@ const Profile = () => {
           /* ===================== Section view ===================== */
           <motion.div
             key={activeSection}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25 }}
           >
-            <div className={styles.sectionTopBar}>
-              <button className={styles.backBtn} onClick={backToDashboard} aria-label="Back to account">
-                <Icon name="back" />
+            <div className={styles.sectionTop}>
+              <button type="button" className={styles.backBtn} onClick={backToDashboard}>
+                <Icon name="back" size={15} />
                 <span>Account</span>
               </button>
-              <h1 className={styles.sectionPageTitle}>{SECTION_META[activeSection]?.title}</h1>
+              <h1 className={styles.sectionTitle}>{SECTION_META[activeSection]?.title}</h1>
             </div>
             {SECTION_META[activeSection]?.render()}
           </motion.div>
         ) : (
           /* ===================== Dashboard view ===================== */
-          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-            {/* Header card */}
-            <section className={styles.headerCard}>
-              <div className={styles.headerAvatarWrap}>
-                {user.avatar ? (
-                  <img className={styles.headerAvatarImg} src={user.avatar} alt="" loading="lazy" />
-                ) : (
-                  <span className={styles.headerAvatarInitials}>
-                    {getInitials(user.firstName, user.lastName)}
-                  </span>
-                )}
-              </div>
-              <div className={styles.headerInfo}>
-                <h1 className={styles.headerName}>
-                  {user.firstName} {user.lastName}
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+            {/* 1. THE GREETING */}
+            <section className={styles.greet}>
+              <div className={styles.greetText}>
+                <p className={styles.eyebrow}>Your account</p>
+                <h1 className={styles.greetTitle}>
+                  {greetingName ? `Good to see you, ${greetingName}` : "Good to see you"}
                 </h1>
-                <p className={styles.headerEmail}>{user.email}</p>
-                <span
-                  className={`${styles.memberBadge} ${
-                    membership.premium ? styles.memberBadgePremium : ""
-                  }`}
-                >
-                  <Icon name="star" />
-                  {membership.label}
+                <p className={styles.greetEmail}>{user.email}</p>
+                <p className={styles.greetMeta}>
+                  <span className={`${styles.badge} ${membership.premium ? styles.badgeGold : ""}`}>
+                    {membership.label}
+                  </span>
+                  {user.createdAt && (
+                    <>
+                      <span className={styles.metaSep} aria-hidden="true">·</span>
+                      <span>Since {formatDate(user.createdAt, "medium")}</span>
+                    </>
+                  )}
+                </p>
+              </div>
+
+              <div className={styles.greetAside}>
+                <span className={styles.avatar}>
+                  {user.avatar ? (
+                    <img className={styles.avatarImg} src={user.avatar} alt="" loading="lazy" />
+                  ) : (
+                    <span className={styles.avatarInitials}>
+                      {getInitials(user.firstName, user.lastName)}
+                    </span>
+                  )}
                 </span>
-                {user.createdAt && (
-                  <p className={styles.memberSince}>Member since {formatDate(user.createdAt, "medium")}</p>
-                )}
-              </div>
-              <button
-                className={styles.headerEditBtn}
-                onClick={() => openSection("profile")}
-                aria-label="Edit profile"
-              >
-                <Icon name="person" />
-              </button>
-            </section>
-
-            {/* Stats row */}
-            <section className={styles.statsRow} aria-label="Account summary">
-              <button className={styles.statTile} onClick={() => navigate("/orders")} aria-label={`${statValue(orders.length)} orders`}>
-                <span className={`${styles.statIcon} ${styles.toneTeal}`}><Icon name="orders" /></span>
-                <span className={styles.statValue}>{statValue(orders.length)}</span>
-                <span className={styles.statLabel}>Orders</span>
-              </button>
-              <button className={styles.statTile} onClick={() => navigate("/wishlist")} aria-label={`${wishlistItems.length} wishlist items`}>
-                <span className={`${styles.statIcon} ${styles.tonePink}`}><Icon name="heart" /></span>
-                <span className={styles.statValue}>{wishlistItems.length}</span>
-                <span className={styles.statLabel}>Wishlist</span>
-              </button>
-              <div className={styles.statTile}>
-                <span className={`${styles.statIcon} ${styles.toneGold}`}><Icon name="star" /></span>
-                <span className={styles.statValue}>{statValue(reviewsCount ?? 0)}</span>
-                <span className={styles.statLabel}>Reviews</span>
+                <button type="button" className={styles.editLink} onClick={() => openSection("profile")}>
+                  Edit details
+                </button>
               </div>
             </section>
 
-            {/* Menu list */}
-            <nav className={styles.menuList} aria-label="Account menu">
+            {/* 2. THE FIGURES */}
+            <section className={styles.figures} aria-label="Account summary">
+              <button type="button" className={styles.figure} onClick={() => navigate("/orders")}>
+                <span className={styles.figureValue}>{statValue(orders.length)}</span>
+                <span className={styles.figureLabel}>Orders</span>
+              </button>
+              <button type="button" className={styles.figure} onClick={() => navigate("/wishlist")}>
+                <span className={styles.figureValue}>{wishlistItems.length}</span>
+                <span className={styles.figureLabel}>Wishlist</span>
+              </button>
+              <div className={styles.figure}>
+                <span className={styles.figureValue}>{statValue(reviewsCount ?? 0)}</span>
+                <span className={styles.figureLabel}>Reviews</span>
+              </div>
+            </section>
+
+            {/* 3. THE INDEX */}
+            <nav className={styles.index} aria-label="Account menu">
               {menuRows.map((row) => (
-                <button key={row.id} className={styles.menuRow} onClick={row.onClick} aria-label={row.label}>
-                  <span className={`${styles.menuIcon} ${styles[`tone${row.tone[0].toUpperCase()}${row.tone.slice(1)}`]}`}>
+                <button key={row.id} type="button" className={styles.indexRow} onClick={row.onClick}>
+                  <span className={styles.indexIcon}>
                     <Icon name={row.icon} />
                   </span>
-                  <span className={styles.menuRowText}>
-                    <span className={styles.menuLabel}>
+                  <span className={styles.indexText}>
+                    <span className={styles.indexLabel}>
                       {row.label}
-                      {row.badge != null && <span className={styles.menuBadge}>{row.badge}</span>}
+                      {row.badge != null && <span className={styles.indexCount}>{row.badge}</span>}
                     </span>
-                    <span className={styles.menuSub}>{row.sub}</span>
+                    <span className={styles.indexSub}>{row.sub}</span>
                   </span>
-                  <span className={styles.menuChevron}><Icon name="chevron" /></span>
+                  <span className={styles.indexChevron}><Icon name="chevron" size={16} /></span>
                 </button>
               ))}
             </nav>
 
-            {/* Recent Orders */}
-            <section className={styles.recentSection}>
-              <div className={styles.recentHeader}>
-                <h2 className={styles.recentTitle}>Recent Orders</h2>
+            {/* 4. RECENT ORDERS */}
+            <section className={styles.recent}>
+              <div className={styles.recentHead}>
+                <h2 className={styles.recentTitle}>Recent orders</h2>
                 {orders.length > 0 && (
-                  <button className={styles.viewAllLink} onClick={() => navigate("/orders")}>
-                    View All
+                  <button type="button" className={styles.viewAll} onClick={() => navigate("/orders")}>
+                    View all
                   </button>
                 )}
               </div>
 
               {statsLoading ? (
-                <div className={styles.recentList}>
+                <div className={styles.recentList} aria-hidden="true">
                   {[0, 1, 2].map((i) => (
-                    <div key={i} className={`${styles.recentRow} ${styles.recentRowSkeleton}`} aria-hidden>
-                      <span className={styles.skeletonThumb} />
-                      <span className={styles.skeletonLines} />
+                    <div key={i} className={styles.recentSkeleton}>
+                      <span className={`sf-skeleton ${styles.skelPlate}`} />
+                      <span className={styles.skelLines}>
+                        <span className="sf-skeleton sf-skeleton--text" />
+                        <span className="sf-skeleton sf-skeleton--text" />
+                      </span>
                     </div>
                   ))}
                 </div>
               ) : recentOrders.length === 0 ? (
-                <div className={styles.recentEmpty}>
-                  <div className={styles.emptyIcon}><Icon name="orders" /></div>
-                  <p className={styles.emptyText}>No orders yet</p>
-                  <p className={styles.emptySubtext}>When you place an order, it'll show up here.</p>
-                  <button className={styles.btnPrimary} onClick={() => navigate("/")}>Start Shopping</button>
+                <div className={styles.state}>
+                  <span className={styles.stateMark}><Icon name="orders" size={26} strokeWidth={1} /></span>
+                  <p className={styles.stateTitle}>No orders yet</p>
+                  <p className={styles.stateText}>
+                    When you order a piece, it is recorded here — and kept.
+                  </p>
+                  <button
+                    type="button"
+                    className={`sf-btn sf-btn--emerald ${styles.stateBtn}`}
+                    onClick={() => navigate("/products")}
+                  >
+                    Browse the collection
+                  </button>
                 </div>
               ) : (
                 <div className={styles.recentList}>
@@ -1303,27 +1390,26 @@ const Profile = () => {
                     return (
                       <button
                         key={order.id || order.orderNumber}
+                        type="button"
                         className={styles.recentRow}
                         onClick={() => navigate("/orders")}
                         aria-label={`Order ${order.orderNumber || order.id}, ${statusInfo.label}`}
                       >
-                        <span className={styles.recentThumb}>
-                          <img
-                            src={firstItem.image || "https://placehold.co/64x64?text=Item"}
-                            alt={firstItem.name || "Product"}
-                            loading="lazy"
-                          />
+                        <span className={styles.recentPlate}>
+                          {firstItem.image ? <img src={firstItem.image} alt="" loading="lazy" /> : null}
                         </span>
-                        <span className={styles.recentInfo}>
-                          <span className={styles.recentOrderNo}>{order.orderNumber || `#${order.id}`}</span>
+                        <span className={styles.recentBody}>
+                          <span className={styles.recentNumber}>
+                            {order.orderNumber || `#${order.id}`}
+                          </span>
                           <span className={styles.recentMeta}>
                             {formatDate(order.createdAt, "medium")}
                           </span>
-                          <span className={`${styles.statusBadge} ${styles[statusInfo.className]}`}>
-                            {statusInfo.label}
-                          </span>
                         </span>
-                        <span className={styles.recentTotal}>{formatCurrency(order.total)}</span>
+                        <span className={styles.recentEnd}>
+                          {statusChip(statusInfo)}
+                          <span className={styles.recentTotal}>{formatCurrency(order.total)}</span>
+                        </span>
                       </button>
                     );
                   })}
@@ -1331,11 +1417,12 @@ const Profile = () => {
               )}
             </section>
 
-            {/* Logout */}
-            <button className={styles.logoutBtn} onClick={handleLogout}>
-              <Icon name="logout" />
-              Logout
-            </button>
+            {/* 5. THE DOOR */}
+            <div className={styles.logoutRow}>
+              <button type="button" className={styles.logoutBtn} onClick={handleLogout}>
+                Log out
+              </button>
+            </div>
           </motion.div>
         )}
       </div>
