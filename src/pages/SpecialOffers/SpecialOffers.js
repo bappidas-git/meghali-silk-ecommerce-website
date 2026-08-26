@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { Link, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useTheme } from "../../context/ThemeContext";
 import { useCart } from "../../hooks/useCart";
 import { useWishlist } from "../../context/WishlistContext";
 import { useDealsConfig } from "../../context/DealsConfigContext";
+import StarRating from "../../components/storefront/StarRating";
 import apiService from "../../services/api";
 import {
   formatCurrency,
@@ -14,10 +15,56 @@ import {
   productPath,
   copyToClipboard,
   truncateText,
+  PLACEHOLDER_IMG,
   onImageError,
 } from "../../utils/helpers";
 import { resolveCountdownTarget, diffToParts } from "../../utils/dealsConfig";
 import styles from "./SpecialOffers.module.css";
+
+// =============================================================================
+// SPECIAL OFFERS  —  the season's offers, set editorially
+// =============================================================================
+// A boutique does not shout about a sale; it posts a card by the door. This page
+// is that card. Four movements on the ivory ground, and nothing between them but
+// air and hairlines:
+//
+//   1. THE OPENING BAND — the admin's own eyebrow / headline / line, and one
+//      tracked countdown line instead of a wall of digit tiles.
+//   2. THE VOUCHERS — hairline cards, the figure set in the display serif, the
+//      honest small print underneath, the code on a dashed chip with Copy.
+//   3. THE CHOSEN — the admin's Deal of the Day picks as large, image-led
+//      features with a real savings line derived from comparePrice.
+//   4. THE MARKDOWNS — a hairline category strip over a wall of cards drawn in
+//      the Prompt 09 language.
+//
+// EVERYTHING HERE IS ADMIN-STEERED
+//   `useDealsConfig` is the single source of truth: the master `enabled` gate,
+//   the hero copy, the countdown window (including the "endOfDay" rollover), and
+//   the three ordered id selections. `pickByIds` renders a selection in exactly
+//   the admin's order and quietly drops ids that no longer exist; an EMPTY
+//   selection falls back to the discount-derived automatic set. No copy, price
+//   or urgency on this page is written in code.
+//
+// HONESTY RULES (the reason several obvious "conversion" devices are missing)
+//   • The countdown counts down to the admin's window and nothing else. There is
+//     no per-product timer, because there is no per-product window.
+//   • Savings come from real price vs comparePrice. A feature the admin picked
+//     that is NOT reduced simply shows its price with no savings line.
+//   • Coupons are filtered by the same gates checkout enforces (active, not
+//     expired, not usage-exhausted) and come from the same `coupons` store the
+//     Admin manages — so every code printed here actually redeems.
+//   • No stock scares, no "12 people are viewing", no invented scarcity.
+//
+// THE LOCAL CARD
+//   The grid card, the tab strip and the skeletons are all local to this page on
+//   purpose (they always have been). They are drawn to MATCH the shared Prompt 09
+//   card — 3:4 plate, tracked eyebrow, serif name, gold stars, quiet price row,
+//   hover-revealed add — without importing it. The one thing that IS imported is
+//   the shared StarRating, because a star is a star.
+// =============================================================================
+
+// The editorial curve, shared with Home / Products / Wishlist.
+const EASE = [0.22, 1, 0.36, 1];
 
 // ── Coupon display helpers ───────────────────────────────────────────────────
 // Coupons shown here come from the same store the Admin manages and Checkout
@@ -42,6 +89,21 @@ const isCouponValid = (c, now = new Date()) =>
   (!c.expiresAt || new Date(c.expiresAt) > now) &&
   !(c.usageLimit && c.usedCount >= c.usageLimit);
 
+// The small print, built ONLY from fields the coupon actually carries — every
+// row is a condition checkout will really apply, and nothing is padded in to
+// make the card look fuller.
+const couponTerms = (c) => {
+  const rows = [];
+  rows.push(
+    c.minOrderAmount > 0 ? `Minimum order ${rupees(c.minOrderAmount)}` : "No minimum order"
+  );
+  if (c.type === "percentage" && c.maxDiscount) {
+    rows.push(`Capped at ${rupees(c.maxDiscount)}`);
+  }
+  rows.push(c.expiresAt ? `Valid through ${formatExpiry(c.expiresAt)}` : "No expiry date");
+  return rows;
+};
+
 // Resolve an ordered id selection against a list, preserving the admin order and
 // dropping ids that no longer exist.
 const pickByIds = (items, ids) => {
@@ -50,6 +112,19 @@ const pickByIds = (items, ids) => {
 };
 
 const pad = (n) => String(n).padStart(2, "0");
+
+// The countdown said out loud. The digits tick every second, which is unbearable
+// on a screen reader, so the visual pairs are aria-hidden and this coarse form —
+// hours and minutes only — is what actually gets read.
+const countdownSpeech = ({ hours, minutes }) => {
+  const h = Number(hours) || 0;
+  const m = Number(minutes) || 0;
+  if (h <= 0 && m <= 0) return "less than a minute";
+  const said = [];
+  if (h > 0) said.push(`${h} hour${h === 1 ? "" : "s"}`);
+  if (m > 0) said.push(`${m} minute${m === 1 ? "" : "s"}`);
+  return `about ${said.join(" and ")}`;
+};
 
 // ── Countdown Hook (admin-configured) ────────────────────────────────────────
 // Targets the admin's window (fixed end date, or end-of-day when none) and
@@ -80,36 +155,103 @@ const useDealsCountdown = (timer) => {
   return state;
 };
 
-// ── Star Rating ──────────────────────────────────────────────────────────────
-
-const StarRating = ({ rating, reviewCount }) => {
-  const fullStars = Math.floor(rating);
-  const hasHalf = rating - fullStars >= 0.5;
-  const emptyStars = 5 - fullStars - (hasHalf ? 1 : 0);
-
-  return (
-    <div className={styles.starRating}>
-      {Array.from({ length: fullStars }, (_, i) => (
-        <span key={`f${i}`} className={styles.starFull}>&#9733;</span>
-      ))}
-      {hasHalf && <span className={styles.starHalf}>&#9733;</span>}
-      {Array.from({ length: Math.max(0, emptyStars) }, (_, i) => (
-        <span key={`e${i}`} className={styles.starEmpty}>&#9733;</span>
-      ))}
-      <span className={styles.reviewCount}>({reviewCount?.toLocaleString() || 0})</span>
-    </div>
-  );
+// Brief "Added" confirmation after a successful add — the same reassurance the
+// shared card and the PDP give, so an offers add doesn't feel like it went
+// nowhere. Purely visual; the cart is updated by the caller either way.
+const useAddedFlash = (ms = 1400) => {
+  const [added, setAdded] = useState(false);
+  const timer = useRef(null);
+  useEffect(() => () => clearTimeout(timer.current), []);
+  const flash = useCallback(() => {
+    setAdded(true);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => setAdded(false), ms);
+  }, [ms]);
+  return [added, flash];
 };
 
-// ── Responsive Category Tabs ─────────────────────────────────────────────────
-// Horizontally scrollable strip that never hides a tab: edge-fade affordances +
-// scroll buttons appear when there's more off-screen, and the active tab is
-// scrolled into view. Buttons are hidden on touch/mobile (CSS) where the strip
-// scrolls by swipe.
+// ── Marks ────────────────────────────────────────────────────────────────────
+// Hairline line art in the brand's drawing style: one stroke weight, no fills,
+// a single gold thread. The artwork reads its colours from the local --offer-*
+// aliases, which resolve to tokens, so it inverts with the page.
+
+const HeartMark = ({ filled }) => (
+  <svg
+    viewBox="0 0 24 24"
+    width="17"
+    height="17"
+    fill={filled ? "currentColor" : "none"}
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 000-7.78z" />
+  </svg>
+);
+
+const ChevronMark = ({ dir }) => (
+  <svg
+    viewBox="0 0 24 24"
+    width="15"
+    height="15"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="1.5"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+  >
+    <polyline points={dir === "left" ? "15 6 9 12 15 18" : "9 6 15 12 9 18"} />
+  </svg>
+);
+
+// A hanging price tag with its thread — the page's one piece of artwork, shared
+// by the "nothing reduced" and the "offers are off" states.
+const TagMark = () => (
+  <svg className={styles.stateArt} width="152" height="116" viewBox="0 0 152 116" fill="none" aria-hidden="true">
+    <g stroke="var(--offer-line)" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M58 30 L130 30 L130 90 L58 90 L24 60 Z" />
+      <circle cx="47" cy="60" r="5.5" />
+      <line x1="76" y1="50" x2="114" y2="50" />
+      <line x1="76" y1="64" x2="100" y2="64" />
+    </g>
+    {/* the thread, out of the eyelet */}
+    <path d="M44 55 C 33 36, 45 20, 66 18" stroke="var(--offer-gold)" strokeWidth="1.25" strokeLinecap="round" fill="none" />
+  </svg>
+);
+
+// ── The countdown line ───────────────────────────────────────────────────────
+// One tracked line, not a wall of tiles. Each pair is a fixed 2ch box set in
+// tabular figures, so the second ticking from 09 to 10 cannot shove the colons
+// sideways once a second for the life of the page.
+const CountdownLine = ({ parts, label, className }) => (
+  <p className={`${styles.countdown} ${className || ""}`}>
+    <span className={styles.countdownLabel}>{label}</span>
+    <span className={styles.countdownDigits} aria-hidden="true">
+      <span className={styles.countdownPair}>{pad(parts.hours)}</span>
+      <span className={styles.countdownSep}>:</span>
+      <span className={styles.countdownPair}>{pad(parts.minutes)}</span>
+      <span className={styles.countdownSep}>:</span>
+      <span className={styles.countdownPair}>{pad(parts.seconds)}</span>
+    </span>
+    <span className={styles.srOnly}>{countdownSpeech(parts)}</span>
+  </p>
+);
+
+// ── Category strip ───────────────────────────────────────────────────────────
+// A hairline strip of words, not a row of pills. It never hides a tab: edge
+// fades and scroll marks appear when there is more off-screen, and the active
+// word is scrolled into view. The marks are hidden on touch (CSS), where the
+// strip is swiped instead. These are toggle buttons rather than a tab widget —
+// Tab reaches every word in order, and `aria-pressed` says which filter is on.
 const CategoryTabs = ({ categories, activeTab, onChange }) => {
   const scrollRef = useRef(null);
   const [atStart, setAtStart] = useState(true);
   const [atEnd, setAtEnd] = useState(true);
+  const reduceMotion = useReducedMotion();
+  const behavior = reduceMotion ? "auto" : "smooth";
 
   const updateEdges = useCallback(() => {
     const el = scrollRef.current;
@@ -131,37 +273,46 @@ const CategoryTabs = ({ categories, activeTab, onChange }) => {
     };
   }, [updateEdges, categories.length]);
 
-  // Keep the active tab visible when it changes.
+  // Keep the active word visible when it changes.
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
     const active = el.querySelector('[data-active="true"]');
-    if (active) active.scrollIntoView({ inline: "center", block: "nearest", behavior: "smooth" });
-  }, [activeTab]);
+    if (active) active.scrollIntoView({ inline: "center", block: "nearest", behavior });
+  }, [activeTab, behavior]);
 
   const scrollByDir = (dir) => {
     const el = scrollRef.current;
     if (!el) return;
-    el.scrollBy({ left: dir * Math.max(180, el.clientWidth * 0.6), behavior: "smooth" });
+    el.scrollBy({ left: dir * Math.max(180, el.clientWidth * 0.6), behavior });
   };
 
   return (
-    <div className={styles.tabBarWrap}>
+    <div className={styles.tabsWrap}>
       <button
         type="button"
-        className={`${styles.tabScrollBtn} ${styles.tabScrollLeft} ${atStart ? styles.tabScrollHidden : ""}`}
+        className={`${styles.tabScroll} ${styles.tabScrollLeft} ${atStart ? styles.tabScrollHidden : ""}`}
         onClick={() => scrollByDir(-1)}
         aria-label="Scroll categories left"
         tabIndex={atStart ? -1 : 0}
       >
-        &#8249;
+        <ChevronMark dir="left" />
       </button>
-      <div className={`${styles.tabFade} ${styles.tabFadeLeft} ${atStart ? styles.tabFadeHidden : ""}`} />
+      <span
+        className={`${styles.tabFade} ${styles.tabFadeLeft} ${atStart ? styles.tabFadeHidden : ""}`}
+        aria-hidden="true"
+      />
 
-      <div className={styles.tabBar} ref={scrollRef}>
+      <div
+        className={styles.tabStrip}
+        ref={scrollRef}
+        role="group"
+        aria-label="Filter the markdowns by category"
+      >
         <button
           type="button"
           data-active={activeTab === "all"}
+          aria-pressed={activeTab === "all"}
           className={`${styles.tab} ${activeTab === "all" ? styles.tabActive : ""}`}
           onClick={() => onChange("all")}
         >
@@ -172,6 +323,7 @@ const CategoryTabs = ({ categories, activeTab, onChange }) => {
             key={cat.id}
             type="button"
             data-active={activeTab === cat.id}
+            aria-pressed={activeTab === cat.id}
             className={`${styles.tab} ${activeTab === cat.id ? styles.tabActive : ""}`}
             onClick={() => onChange(cat.id)}
           >
@@ -180,131 +332,249 @@ const CategoryTabs = ({ categories, activeTab, onChange }) => {
         ))}
       </div>
 
-      <div className={`${styles.tabFade} ${styles.tabFadeRight} ${atEnd ? styles.tabFadeHidden : ""}`} />
+      <span
+        className={`${styles.tabFade} ${styles.tabFadeRight} ${atEnd ? styles.tabFadeHidden : ""}`}
+        aria-hidden="true"
+      />
       <button
         type="button"
-        className={`${styles.tabScrollBtn} ${styles.tabScrollRight} ${atEnd ? styles.tabScrollHidden : ""}`}
+        className={`${styles.tabScroll} ${styles.tabScrollRight} ${atEnd ? styles.tabScrollHidden : ""}`}
         onClick={() => scrollByDir(1)}
         aria-label="Scroll categories right"
         tabIndex={atEnd ? -1 : 0}
       >
-        &#8250;
+        <ChevronMark dir="right" />
       </button>
     </div>
   );
 };
 
-// ── Product Card ─────────────────────────────────────────────────────────────
+// ── The feature (Deal of the Day) ────────────────────────────────────────────
+// The page's one large gesture: a 4:5 plate, the name in the display serif, the
+// price cluster, and — only where the arithmetic supports it — the savings line.
+// A feature the admin picked that carries no markdown simply prints its price.
+const DealFeature = ({ product, categoryName, onAddToCart, index, reduceMotion }) => {
+  const { sellingPrice, originalPrice, discount } = getProductMinPrice(product);
+  const saving = originalPrice - sellingPrice;
+  const outOfStock = product.stock === 0;
+  const [added, flashAdded] = useAddedFlash();
 
-// forwardRef so AnimatePresence's popLayout child (PopChild) can attach its
-// measurement ref without a React warning.
-const ProductCard = React.forwardRef(({ product, categoryName, onAddToCart, onToggleWishlist, isWishlisted, index }, ref) => {
-  const navigate = useNavigate();
-  const minPrice = getProductMinPrice(product);
-  const maxDiscount = getProductMaxDiscount(product);
-
-  const handleAddToCart = (e) => {
-    e.stopPropagation();
+  const handleAdd = () => {
+    if (outOfStock) return;
     onAddToCart(product);
-  };
-
-  const handleWishlist = (e) => {
-    e.stopPropagation();
-    onToggleWishlist(product);
+    flashAdded();
   };
 
   return (
-    <motion.div
-      ref={ref}
-      className={styles.productCard}
-      initial={{ opacity: 0, y: 24 }}
+    <motion.article
+      className={`${styles.feature} ${outOfStock ? styles.isOut : ""}`}
+      initial={reduceMotion ? false : { opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -16 }}
-      transition={{ duration: 0.3, delay: Math.min(index * 0.04, 0.4) }}
-      layout
-      onClick={() => navigate(productPath(product))}
+      transition={{
+        duration: reduceMotion ? 0 : 0.55,
+        ease: EASE,
+        delay: reduceMotion ? 0 : Math.min(index * 0.08, 0.32),
+      }}
     >
-      <div className={styles.productImageWrap}>
-        <img
-          src={product.images?.[0] || product.image || "https://placehold.co/600x400?text=No+Image"}
-          alt={product.name}
-          className={styles.productImage}
-          loading="lazy"
-          onError={onImageError}
-        />
-        {maxDiscount > 0 && (
-          <span className={styles.discountBadge}>-{maxDiscount}%</span>
+      <div className={styles.featureMedia}>
+        <Link to={productPath(product)} className={styles.plate} aria-label={product.name}>
+          <img
+            src={product.images?.[0] || product.image || PLACEHOLDER_IMG}
+            alt={product.name}
+            loading="lazy"
+            onError={onImageError}
+          />
+        </Link>
+        {discount > 0 && (
+          <span className={`sf-badge-discount ${styles.badge}`}>{discount}% off</span>
         )}
-        <button
-          className={`${styles.wishlistBtn} ${isWishlisted ? styles.wishlisted : ""}`}
-          onClick={handleWishlist}
-          aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
-        >
-          {isWishlisted ? "❤" : "♡"}
-        </button>
-        <div className={styles.productOverlay}>
-          <button
-            className={styles.quickViewBtn}
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(productPath(product));
-            }}
-          >
-            Quick View
-          </button>
-        </div>
+        {outOfStock && <span className={styles.stockTag}>Out of Stock</span>}
       </div>
 
-      <div className={styles.productInfo}>
-        {categoryName && <span className={styles.productCategory}>{categoryName}</span>}
-        <h3 className={styles.productName}>{truncateText(product.name, 48)}</h3>
-        <StarRating rating={product.rating || 0} reviewCount={product.totalReviews || 0} />
+      <div className={styles.featureBody}>
+        {categoryName && <span className={styles.cardEyebrow}>{categoryName}</span>}
+        <Link to={productPath(product)} className={styles.featureName}>
+          {product.name}
+        </Link>
 
         <div className={styles.priceRow}>
-          <span className={styles.salePrice}>
-            {formatCurrency(minPrice.sellingPrice, minPrice.currency)}
-          </span>
-          {maxDiscount > 0 && (
+          <span className={styles.price}>{formatCurrency(sellingPrice, product.currency)}</span>
+          {discount > 0 && (
             <>
-              <span className={styles.originalPrice}>
-                {formatCurrency(minPrice.originalPrice, minPrice.currency)}
+              <span className={styles.compare}>
+                {formatCurrency(originalPrice, product.currency)}
               </span>
-              <span className={styles.discountPercent}>{maxDiscount}% off</span>
+              <span className={styles.percentOff}>{discount}% off</span>
             </>
           )}
         </div>
 
-        <button className={styles.addToCartBtn} onClick={handleAddToCart}>
-          Add to Cart
-        </button>
+        {/* Printed only where comparePrice genuinely exceeds the price paid. */}
+        {saving > 0 && (
+          <p className={styles.savings}>You save {formatCurrency(saving, product.currency)}</p>
+        )}
       </div>
-    </motion.div>
+
+      {/* Outside the body, so the growing body pushes it to the foot of the
+          card and the three features line their buttons up whatever the names
+          do to the stack above. */}
+      <button
+        type="button"
+        className={`${styles.featureBtn} ${added ? styles.btnAdded : ""}`}
+        onClick={handleAdd}
+        disabled={outOfStock}
+      >
+        {outOfStock ? "Out of Stock" : added ? "Added ✓" : "Add to Cart"}
+      </button>
+    </motion.article>
   );
-});
+};
+
+// ── The grid card ────────────────────────────────────────────────────────────
+// Local to this page, drawn to the Prompt 09 card language: a 3:4 photograph on
+// the sunken panel, then air, then a quiet stack — tracked category, serif name,
+// the gold star line, the price. The plate and the name are real links (the old
+// click-anywhere div was invisible to the keyboard, and the "Quick View" button
+// that sat over the photograph only ever went to the same place), and the add
+// affordance is last in the DOM so it is the last tab stop; the stylesheet
+// decides whether it sits over the foot of the plate or in a row of its own.
+//
+// forwardRef so AnimatePresence's popLayout child can attach its measurement ref.
+const ProductCard = React.forwardRef(
+  (
+    { product, categoryName, onAddToCart, onToggleWishlist, isWishlisted, index, reduceMotion },
+    ref
+  ) => {
+    const { sellingPrice, originalPrice, discount } = getProductMinPrice(product);
+    const ratingCount = Number(product.totalReviews) || 0;
+    const rating = Number(product.rating) || 0;
+    const outOfStock = product.stock === 0;
+    const [added, flashAdded] = useAddedFlash();
+
+    const handleAdd = () => {
+      if (outOfStock) return;
+      onAddToCart(product);
+      flashAdded();
+    };
+
+    return (
+      <motion.article
+        ref={ref}
+        className={`${styles.card} ${outOfStock ? styles.isOut : ""}`}
+        initial={reduceMotion ? false : { opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
+        transition={{
+          duration: reduceMotion ? 0 : 0.5,
+          ease: EASE,
+          delay: reduceMotion ? 0 : Math.min(index * 0.04, 0.4),
+        }}
+        layout
+      >
+        <div className={styles.cardMedia}>
+          <Link to={productPath(product)} className={styles.plate} aria-label={product.name}>
+            <img
+              src={product.images?.[0] || product.image || PLACEHOLDER_IMG}
+              alt={product.name}
+              loading="lazy"
+              onError={onImageError}
+            />
+          </Link>
+
+          {discount > 0 && (
+            <span className={`sf-badge-discount ${styles.badge}`}>{discount}% off</span>
+          )}
+
+          {outOfStock && <span className={styles.stockTag}>Out of Stock</span>}
+
+          <button
+            type="button"
+            className={`${styles.wishlist} ${isWishlisted ? styles.wishlisted : ""}`}
+            onClick={() => onToggleWishlist(product)}
+            aria-label={isWishlisted ? "Remove from wishlist" : "Add to wishlist"}
+            aria-pressed={isWishlisted}
+          >
+            <HeartMark filled={isWishlisted} />
+          </button>
+        </div>
+
+        <div className={styles.cardBody}>
+          {categoryName && <span className={styles.cardEyebrow}>{categoryName}</span>}
+
+          <Link to={productPath(product)} className={styles.cardName}>
+            {truncateText(product.name, 48)}
+          </Link>
+
+          {/* Stars only where there are real ratings — never a hollow "(0)". */}
+          {ratingCount > 0 ? (
+            <span className={styles.rating}>
+              <StarRating rating={rating} size={12} />
+              <span className={styles.ratingCount}>({ratingCount.toLocaleString()})</span>
+            </span>
+          ) : (
+            <span className={styles.noRating}>No ratings yet</span>
+          )}
+
+          <div className={styles.priceRow}>
+            <span className={styles.price}>{formatCurrency(sellingPrice, product.currency)}</span>
+            {discount > 0 && (
+              <>
+                <span className={styles.compare}>
+                  {formatCurrency(originalPrice, product.currency)}
+                </span>
+                <span className={styles.percentOff}>{discount}% off</span>
+              </>
+            )}
+          </div>
+        </div>
+
+        <button
+          type="button"
+          className={`${styles.addBtn} ${added ? styles.btnAdded : ""}`}
+          onClick={handleAdd}
+          disabled={outOfStock}
+        >
+          {outOfStock ? "Out of Stock" : added ? "Added ✓" : "Add to Cart"}
+        </button>
+      </motion.article>
+    );
+  }
+);
 ProductCard.displayName = "ProductCard";
 
-// ── Skeleton Loaders ─────────────────────────────────────────────────────────
+// ── Skeletons ────────────────────────────────────────────────────────────────
+// The silhouette of the thing that is coming, drawn on the shared `sf-skeleton`
+// primitive — the warm sand sweep, not a grey block.
 
-const ProductSkeleton = () => (
-  <div className={styles.productCard}>
-    <div className={`${styles.productImageWrap} ${styles.skeletonImage}`} />
-    <div className={styles.productInfo}>
-      <div className={`${styles.skeletonLine} ${styles.skeletonShort}`} />
-      <div className={`${styles.skeletonLine} ${styles.skeletonMedium}`} />
-      <div className={`${styles.skeletonLine} ${styles.skeletonShort}`} />
-      <div className={`${styles.skeletonLine} ${styles.skeletonFull}`} />
+const CardSkeleton = () => (
+  <div className={styles.skelCard}>
+    <div className={`sf-skeleton ${styles.skelPlate}`} />
+    <div className={styles.skelBody}>
+      <div className={`sf-skeleton ${styles.skelEyebrow}`} />
+      <div className={`sf-skeleton ${styles.skelName}`} />
+      <div className={`sf-skeleton ${styles.skelStars}`} />
+      <div className={`sf-skeleton ${styles.skelPrice}`} />
     </div>
   </div>
 );
 
-const CouponSkeleton = () => (
-  <div className={styles.couponCard}>
-    <div className={styles.couponSkeletonLeft} />
-    <div className={styles.couponRight}>
-      <div className={`${styles.skeletonLine} ${styles.skeletonMedium}`} />
-      <div className={`${styles.skeletonLine} ${styles.skeletonShort}`} />
-      <div className={`${styles.skeletonLine} ${styles.skeletonFull}`} />
-    </div>
+const VoucherSkeleton = () => (
+  <div className={styles.skelVoucher}>
+    <div className={`sf-skeleton ${styles.skelFigure}`} />
+    <div className={`sf-skeleton ${styles.skelLineWide}`} />
+    <div className={`sf-skeleton ${styles.skelLineMid}`} />
+    <div className={styles.skelRule} />
+    <div className={`sf-skeleton ${styles.skelLineShort}`} />
+    <div className={`sf-skeleton ${styles.skelLineShort}`} />
+    <div className={`sf-skeleton ${styles.skelChip}`} />
+  </div>
+);
+
+const HeadSkeleton = () => (
+  <div className={styles.skelHead}>
+    <div className={`sf-skeleton ${styles.skelHeadEyebrow}`} />
+    <div className={`sf-skeleton ${styles.skelHeadTitle}`} />
+    <div className={`sf-skeleton ${styles.skelHeadLine}`} />
   </div>
 );
 
@@ -315,6 +585,7 @@ const SpecialOffers = () => {
   const { isDarkMode } = useTheme();
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
+  const reduceMotion = useReducedMotion();
   // The whole page is admin-managed via this config (master toggle, hero,
   // timer, featured coupon/product selections).
   const { config, loading: configLoading } = useDealsConfig();
@@ -325,7 +596,11 @@ const SpecialOffers = () => {
   const [coupons, setCoupons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
-  const [copiedCode, setCopiedCode] = useState(null);
+  // { code, ok } — drives the button's own label AND the polite announcement,
+  // including the honest failure case where the clipboard is unavailable.
+  const [copied, setCopied] = useState({ code: null, ok: true });
+  const copyTimer = useRef(null);
+  useEffect(() => () => clearTimeout(copyTimer.current), []);
 
   const countdown = useDealsCountdown(config.timer);
 
@@ -424,10 +699,9 @@ const SpecialOffers = () => {
   // Handlers
   const handleCopyCode = useCallback(async (code) => {
     const ok = await copyToClipboard(code);
-    if (ok) {
-      setCopiedCode(code);
-      setTimeout(() => setCopiedCode(null), 2000);
-    }
+    setCopied({ code, ok });
+    clearTimeout(copyTimer.current);
+    copyTimer.current = setTimeout(() => setCopied({ code: null, ok: true }), 2400);
   }, []);
 
   const handleAddToCart = useCallback(
@@ -444,14 +718,21 @@ const SpecialOffers = () => {
     [toggleWishlist]
   );
 
-  // ── Master toggle: page hidden ───────────────────────────────────────────────
-  // While the config is still loading we show a neutral loader so a disabled
-  // page never flashes its content first.
+  // Spoken once per copy — never once per tick of the clock.
+  const copyAnnouncement = copied.code
+    ? copied.ok
+      ? `Code ${copied.code} copied to your clipboard.`
+      : `Could not copy ${copied.code}. Select the code and copy it manually.`
+    : "";
+
+  // ── Master toggle: page hidden ─────────────────────────────────────────────
+  // While the config is still loading we show the head's own silhouette so a
+  // disabled page never flashes its content first.
   if (configLoading) {
     return (
       <div className={`${styles.page} ${isDarkMode ? styles.dark : ""}`}>
-        <div className={styles.pageLoader}>
-          <div className={styles.spinner} aria-label="Loading" />
+        <div className={styles.container}>
+          <HeadSkeleton />
         </div>
       </div>
     );
@@ -459,236 +740,183 @@ const SpecialOffers = () => {
 
   if (!enabled) {
     return (
-      <motion.div
-        className={`${styles.page} ${isDarkMode ? styles.dark : ""}`}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
-      >
+      <div className={`${styles.page} ${isDarkMode ? styles.dark : ""}`}>
         <div className={styles.container}>
-          <section className={styles.unavailableState}>
-            <div className={styles.unavailableIcon}>&#128276;</div>
-            <h1 className={styles.unavailableTitle}>No Deals Right Now</h1>
-            <p className={styles.unavailableText}>
-              Our special offers page is taking a short break. Great deals are on their way back —
-              in the meantime, explore our full collection.
+          <section className={styles.state}>
+            <TagMark />
+            <p className={styles.eyebrow}>Offers</p>
+            <h1 className={styles.stateTitle}>No Deals Right Now</h1>
+            <p className={styles.stateText}>
+              The offers desk is quiet for the moment. When the next markdowns are ready they
+              will be posted here — the full collection stays open in the meantime.
             </p>
-            <button className={styles.emptyBtn} onClick={() => navigate("/products")}>
-              Browse All Products
-            </button>
+            <Link className={`sf-btn sf-btn--emerald ${styles.stateBtn}`} to="/products">
+              Browse the Collection
+            </Link>
           </section>
         </div>
-      </motion.div>
+      </div>
     );
   }
 
   const showCountdown = config.timer?.enabled !== false && countdown.show;
   const timerEnded = config.timer?.enabled !== false && countdown.ended;
+  const nothingToShow = !loading && gridProducts.length === 0 && dealOfTheDay.length === 0;
 
   // ── Render ─────────────────────────────────────────────────────────────────
 
   return (
-    <motion.div
-      className={`${styles.page} ${isDarkMode ? styles.dark : ""}`}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
-    >
-      {/* ── Banner ──────────────────────────────────────────────────────── */}
-      <section className={styles.heroBanner}>
-        <div className={styles.heroContent}>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className={styles.heroInner}
-          >
-            {config.hero?.tag && <span className={styles.heroTag}>{config.hero.tag}</span>}
-            <motion.h1
-              className={styles.heroTitle}
-              initial={{ opacity: 0, scale: 0.94 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
-              {config.hero?.title || "Special Offers & Deals"}
-            </motion.h1>
-            {config.hero?.subtitle && (
-              <p className={styles.heroSubtitle}>{config.hero.subtitle}</p>
-            )}
+    <div className={`${styles.page} ${isDarkMode ? styles.dark : ""}`}>
+      {/* One polite region, for the copy confirmations. The countdown is
+          deliberately NOT live — a per-second announcement is unusable. */}
+      <p className={styles.srOnly} role="status" aria-live="polite">
+        {copyAnnouncement}
+      </p>
+
+      {/* ── 1. The opening band ───────────────────────────────────────────── */}
+      <header className={styles.band}>
+        <div className={styles.container}>
+          <div className={styles.bandInner}>
+            {config.hero?.tag && <p className={styles.eyebrow}>{config.hero.tag}</p>}
+            <h1 className={styles.title}>{config.hero?.title || "Special Offers & Deals"}</h1>
+            {config.hero?.subtitle && <p className={styles.lede}>{config.hero.subtitle}</p>}
+
             {showCountdown ? (
-              <div className={styles.heroCountdown}>
-                <span className={styles.countdownLabel}>Deals end in:</span>
-                <div className={styles.countdownBoxes}>
-                  <div className={styles.countdownUnit}>
-                    <span className={styles.countdownNumber}>{pad(countdown.parts.hours)}</span>
-                    <span className={styles.countdownText}>Hours</span>
-                  </div>
-                  <span className={styles.countdownSep}>:</span>
-                  <div className={styles.countdownUnit}>
-                    <span className={styles.countdownNumber}>{pad(countdown.parts.minutes)}</span>
-                    <span className={styles.countdownText}>Min</span>
-                  </div>
-                  <span className={styles.countdownSep}>:</span>
-                  <div className={styles.countdownUnit}>
-                    <span className={styles.countdownNumber}>{pad(countdown.parts.seconds)}</span>
-                    <span className={styles.countdownText}>Sec</span>
-                  </div>
-                </div>
-              </div>
+              <CountdownLine parts={countdown.parts} label="Ends in" />
             ) : timerEnded ? (
-              <div className={styles.heroEnded}>These deals have ended — fresh offers coming soon!</div>
+              <p className={styles.ended}>
+                This offer window has closed. New markdowns are being prepared.
+              </p>
             ) : null}
-          </motion.div>
+          </div>
         </div>
-      </section>
+      </header>
 
       <div className={styles.container}>
-        {/* ── Coupons Section ───────────────────────────────────────────── */}
-        <section className={styles.section}>
-          <div className={styles.sectionHeader}>
-            <h2 className={styles.sectionTitle}>Active Coupons</h2>
-            <p className={styles.sectionSubtitle}>Copy a code and apply it at checkout</p>
+        {/* ── 2. The vouchers ────────────────────────────────────────────── */}
+        <section className={styles.section} aria-labelledby="offers-vouchers">
+          <div className={styles.sectionHead}>
+            <div className={styles.sectionHeadText}>
+              <p className={styles.eyebrow}>Vouchers</p>
+              <h2 id="offers-vouchers" className={styles.sectionTitle}>
+                Codes You Can Use
+              </h2>
+              <p className={styles.sectionLede}>
+                Copy a code and apply it in the cart or at checkout. Every code listed here is
+                live in our system — nothing is printed for show.
+              </p>
+            </div>
           </div>
 
           {loading ? (
-            <div className={styles.couponGrid}>
-              {Array.from({ length: 4 }, (_, i) => (
-                <CouponSkeleton key={i} />
+            <div className={styles.voucherGrid}>
+              {Array.from({ length: 3 }, (_, i) => (
+                <VoucherSkeleton key={i} />
               ))}
             </div>
           ) : featuredCoupons.length > 0 ? (
-            <div className={styles.couponGrid}>
-              {featuredCoupons.map((coupon) => (
-                <motion.div
-                  key={coupon.id ?? coupon.code}
-                  className={styles.couponCard}
-                  whileHover={{ y: -4 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <div className={styles.couponLeft}>
-                    <span className={styles.couponDiscount}>{couponHeadline(coupon)}</span>
-                    <span className={styles.couponLabel}>OFF</span>
-                  </div>
-                  <div className={styles.couponRight}>
-                    <p className={styles.couponDesc}>{coupon.description || `${couponHeadline(coupon)} off`}</p>
-                    <p className={styles.couponMeta}>
-                      {coupon.minOrderAmount > 0 ? `Min order ${rupees(coupon.minOrderAmount)}` : "No minimum order"}
-                      {coupon.type === "percentage" && coupon.maxDiscount
-                        ? ` · Up to ${rupees(coupon.maxDiscount)} off`
-                        : ""}
+            <div className={styles.voucherGrid}>
+              {featuredCoupons.map((coupon) => {
+                const isCopied = copied.code === coupon.code && copied.ok;
+                return (
+                  <article key={coupon.id ?? coupon.code} className={styles.voucher}>
+                    <p className={styles.voucherFigure}>
+                      <span className={styles.voucherValue}>{couponHeadline(coupon)}</span>
+                      <span className={styles.voucherOff}>off</span>
                     </p>
-                    <p className={styles.couponMeta}>
-                      {coupon.expiresAt ? `Expires ${formatExpiry(coupon.expiresAt)}` : "No expiry"}
-                    </p>
-                    <div className={styles.couponCodeRow}>
-                      <code className={styles.couponCode}>{coupon.code}</code>
+
+                    {coupon.description && (
+                      <p className={styles.voucherDesc}>{coupon.description}</p>
+                    )}
+
+                    {/* The small print — every row a condition checkout applies. */}
+                    <ul className={styles.voucherTerms}>
+                      {couponTerms(coupon).map((row) => (
+                        <li key={row}>{row}</li>
+                      ))}
+                    </ul>
+
+                    <div className={styles.voucherFoot}>
+                      <code className={styles.voucherCode}>{coupon.code}</code>
                       <button
-                        className={`${styles.copyBtn} ${copiedCode === coupon.code ? styles.copied : ""}`}
+                        type="button"
+                        className={`${styles.copyBtn} ${isCopied ? styles.copyBtnDone : ""}`}
                         onClick={() => handleCopyCode(coupon.code)}
                         aria-label={`Copy coupon code ${coupon.code}`}
                       >
-                        {copiedCode === coupon.code ? "Copied!" : "Copy Code"}
+                        {isCopied ? "Copied" : "Copy"}
                       </button>
                     </div>
-                  </div>
-                </motion.div>
-              ))}
+                  </article>
+                );
+              })}
             </div>
           ) : (
-            <p className={styles.couponEmpty}>
-              No active coupons right now — check back soon for fresh codes!
+            /* Says nothing about the markdowns below — this note also shows on a
+               page where nothing is reduced either. */
+            <p className={styles.quietNote}>
+              No codes are running at the moment — the prices shown are the prices you pay.
             </p>
           )}
         </section>
 
-        {/* ── Deal of the Day ───────────────────────────────────────────── */}
+        {/* ── 3. The chosen (Deal of the Day) ────────────────────────────── */}
         {!loading && dealOfTheDay.length > 0 && (
-          <section className={styles.section}>
-            <div className={styles.sectionHeader}>
-              <div className={styles.sectionTitleRow}>
-                <h2 className={styles.sectionTitle}>Deal of the Day</h2>
-                {showCountdown && (
-                  <div className={styles.dotdTimer}>
-                    <span className={styles.timerIcon}>&#9200;</span>
-                    <span>
-                      {pad(countdown.parts.hours)}:{pad(countdown.parts.minutes)}:{pad(countdown.parts.seconds)}
-                    </span>
-                  </div>
-                )}
+          <section className={styles.section} aria-labelledby="offers-chosen">
+            <div className={styles.sectionHead}>
+              <div className={styles.sectionHeadText}>
+                <p className={styles.eyebrow}>Chosen Today</p>
+                <h2 id="offers-chosen" className={styles.sectionTitle}>
+                  Deal of the Day
+                </h2>
+                <p className={styles.sectionLede}>
+                  Put forward by the studio for this window, at the prices shown.
+                </p>
               </div>
-              <p className={styles.sectionSubtitle}>Today's top picks at the lowest prices</p>
+              {showCountdown && (
+                <div className={styles.sectionHeadAside}>
+                  <CountdownLine
+                    parts={countdown.parts}
+                    label="Ends in"
+                    className={styles.countdownChip}
+                  />
+                </div>
+              )}
             </div>
-            <div className={styles.dotdGrid}>
-              {dealOfTheDay.map((product, idx) => {
-                const minPrice = getProductMinPrice(product);
-                const maxDiscount = getProductMaxDiscount(product);
-                const saving = minPrice.originalPrice - minPrice.sellingPrice;
-                return (
-                  <motion.div
-                    key={product.id}
-                    className={styles.dotdCard}
-                    initial={{ opacity: 0, scale: 0.95 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.4, delay: idx * 0.1 }}
-                    onClick={() => navigate(productPath(product))}
-                  >
-                    <div className={styles.dotdImageWrap}>
-                      <img
-                        src={product.images?.[0] || product.image || "https://placehold.co/600x400?text=No+Image"}
-                        alt={product.name}
-                        className={styles.dotdImage}
-                        onError={onImageError}
-                      />
-                      {maxDiscount > 0 && <span className={styles.dotdBadge}>-{maxDiscount}%</span>}
-                    </div>
-                    <div className={styles.dotdInfo}>
-                      <h3 className={styles.dotdName}>{product.name}</h3>
-                      <div className={styles.dotdPriceRow}>
-                        <span className={styles.dotdSalePrice}>
-                          {formatCurrency(minPrice.sellingPrice, minPrice.currency)}
-                        </span>
-                        {maxDiscount > 0 && (
-                          <span className={styles.dotdOriginalPrice}>
-                            {formatCurrency(minPrice.originalPrice, minPrice.currency)}
-                          </span>
-                        )}
-                      </div>
-                      {saving > 0 && (
-                        <p className={styles.dotdSavings}>
-                          You save{" "}
-                          <span className={styles.dotdSavingsAmount}>
-                            {formatCurrency(saving, minPrice.currency)}
-                          </span>
-                        </p>
-                      )}
-                      <button
-                        className={styles.dotdBtn}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleAddToCart(product);
-                        }}
-                      >
-                        Add to Cart
-                      </button>
-                    </div>
-                  </motion.div>
-                );
-              })}
+
+            <div className={styles.featureGrid}>
+              {dealOfTheDay.map((product, idx) => (
+                <DealFeature
+                  key={product.id}
+                  product={product}
+                  categoryName={categoryMap[product.categoryId]}
+                  onAddToCart={handleAddToCart}
+                  index={idx}
+                  reduceMotion={reduceMotion}
+                />
+              ))}
             </div>
           </section>
         )}
 
-        {/* ── Deals by Category ─────────────────────────────────────────── */}
+        {/* ── 4. The markdowns ───────────────────────────────────────────── */}
         {!loading && gridProducts.length > 0 && (
-          <section className={styles.section}>
-            <div className={styles.sectionHeader}>
-              <h2 className={styles.sectionTitle}>
-                {dealCategories.length > 0 ? "Deals by Category" : "All Deals"}
-              </h2>
-              <p className={styles.sectionSubtitle}>
-                {filteredProducts.length} deal{filteredProducts.length !== 1 ? "s" : ""} available
-              </p>
+          <section className={styles.section} aria-labelledby="offers-markdowns">
+            <div className={styles.sectionHead}>
+              <div className={styles.sectionHeadText}>
+                <p className={styles.eyebrow}>The Markdowns</p>
+                <h2 id="offers-markdowns" className={styles.sectionTitle}>
+                  {dealCategories.length > 0 ? "Reduced by Category" : "Reduced Right Now"}
+                </h2>
+                <p className={styles.sectionLede} aria-live="polite">
+                  {filteredProducts.length}{" "}
+                  {filteredProducts.length === 1 ? "piece" : "pieces"} on this list
+                  {activeTab !== "all" && categoryMap[activeTab]
+                    ? ` in ${categoryMap[activeTab]}`
+                    : ""}
+                  .
+                </p>
+              </div>
             </div>
 
             {dealCategories.length > 0 && (
@@ -699,8 +927,7 @@ const SpecialOffers = () => {
               />
             )}
 
-            {/* ── Products Grid ─────────────────────────────────────────── */}
-            <div className={styles.productsGrid}>
+            <div className={styles.cardGrid}>
               <AnimatePresence mode="popLayout">
                 {filteredProducts.map((product, index) => (
                   <ProductCard
@@ -708,6 +935,7 @@ const SpecialOffers = () => {
                     product={product}
                     categoryName={categoryMap[product.categoryId]}
                     index={index}
+                    reduceMotion={reduceMotion}
                     onAddToCart={handleAddToCart}
                     onToggleWishlist={handleToggleWishlist}
                     isWishlisted={isInWishlist(product.id)}
@@ -718,32 +946,38 @@ const SpecialOffers = () => {
           </section>
         )}
 
-        {/* ── Loading Skeletons ─────────────────────────────────────────── */}
+        {/* ── Loading: the wall's silhouette ─────────────────────────────── */}
         {loading && (
           <section className={styles.section}>
-            <div className={styles.productsGrid}>
+            <div className={styles.cardGrid}>
               {Array.from({ length: 8 }, (_, i) => (
-                <ProductSkeleton key={i} />
+                <CardSkeleton key={i} />
               ))}
             </div>
           </section>
         )}
 
-        {/* ── Empty State ───────────────────────────────────────────────── */}
-        {!loading && gridProducts.length === 0 && dealOfTheDay.length === 0 && (
-          <section className={styles.emptyState}>
-            <div className={styles.emptyIcon}>&#127991;</div>
-            <h2 className={styles.emptyTitle}>No Deals Available</h2>
-            <p className={styles.emptyText}>
-              There are no active deals right now. Check back soon for exciting offers!
+        {/* ── Nothing reduced ────────────────────────────────────────────── */}
+        {nothingToShow && (
+          <section className={styles.state}>
+            <TagMark />
+            <p className={styles.eyebrow}>The Markdowns</p>
+            <h2 className={styles.stateTitle}>Nothing Is Reduced Today</h2>
+            <p className={styles.stateText}>
+              No piece in the catalogue is currently marked below its original price. Rather
+              than pad this page, we would rather show you the whole collection.
             </p>
-            <button className={styles.emptyBtn} onClick={() => navigate("/products")}>
-              Browse All Products
+            <button
+              type="button"
+              className={`sf-btn sf-btn--emerald ${styles.stateBtn}`}
+              onClick={() => navigate("/products")}
+            >
+              Browse the Collection
             </button>
           </section>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 };
 
