@@ -325,11 +325,14 @@ const Header = () => {
 
             {/* Right actions */}
             <div className={styles.actions}>
-              {/* Search — ONE honest affordance opening the search modal. */}
+              {/* Search — ONE honest affordance opening the search modal.
+                  Below 340px the icon steps out of the masthead (see the
+                  small-phone block in Header.module.css); the BottomNav's
+                  Search tab is on screen throughout, so nothing is lost. */}
               {isMobile ? (
                 <IconButton
                   onClick={handleSearchClick}
-                  className={styles.actionIcon}
+                  className={`${styles.actionIcon} ${styles.actionSearch}`}
                   aria-label="Search"
                 >
                   <SearchOutlined />
