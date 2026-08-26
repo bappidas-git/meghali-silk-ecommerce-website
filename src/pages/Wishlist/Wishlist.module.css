@@ -1,20 +1,41 @@
-/* =============================================================================
- * Wishlist — Meghali's Silk re-skin (tokens only; no hardcoded hex)
- * =============================================================================
- * Consumes the shared ProductCard for the grid + the rail; this stylesheet owns
- * only the page chrome (header, sort/clear, guest banner, empty state, skeletons,
- * the per-item Move-to-Cart affordance and the recommendation-rail wrapper).
- * Colours come from src/theme/storefront-tokens.css. The `.dark` class is kept
- * for parity, but every token is already theme-aware via `body.dark`.
- * ========================================================================== */
+/* ═══════════════════════════════════════════════════════════════════════════
+   WISHLIST  —  the private collection
+   ═══════════════════════════════════════════════════════════════════════════
+   The saved pieces read as a personal gallery, not an account screen. Four
+   moves and nothing else:
 
-/* ===== Page Layout ===== */
+     1. A HEAD given air — a tracked eyebrow opened by a gold rule, the serif
+        title, one honest line of counts.
+     2. THE INVITATION — a hairline band, a serif line and a text button. It
+        says where the collection is currently kept and offers to keep it
+        somewhere better; it never blocks, dims or nags, and a guest's own
+        pieces sit right underneath it.
+     3. ONE HAIRLINE ROW carrying the two controls: Clear All as a text button
+        on the left, Sort as a word over a hairline on the right.
+     4. THE WALL — wide-gutter, unframed ProductCards on the ivory ground, each
+        with one quiet full-width hairline button beneath it.
+
+   The card, the rail and the skeleton shimmer are shared components and
+   primitives; this stylesheet owns only the page chrome around them.
+
+   TOKENS ONLY
+   Every colour, space, radius and type value resolves through `--sf-*`, which
+   flips under `body.dark` — so light and dark are one stylesheet and there is
+   no hex in this file. The only local variables are the two aliases colouring
+   the inline empty-state artwork and the one timing the removal fade, and all
+   three are aliases onto tokens, never values.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 .page {
-  min-height: calc(100vh - 64px);
-  padding: var(--sf-space-8) 0 var(--sf-space-16);
+  /* Aliases, so a single inline SVG can be re-coloured from the token layer. */
+  --empty-line: var(--sf-color-border-strong);
+  --empty-gold: var(--sf-color-gold-deep);
+
+  min-height: 100vh;
+  padding-bottom: var(--sf-space-24);
   background: var(--sf-color-bg);
   color: var(--sf-color-text);
-  transition: background var(--sf-transition), color var(--sf-transition);
+  font-family: var(--sf-font-family);
 }
 
 .container {
@@ -23,398 +44,589 @@
   padding: 0 var(--sf-space-6);
 }
 
-/* ===== Header ===== */
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--sf-space-4);
-  margin-bottom: var(--sf-space-6);
+/* ═══════════════════════════════════════════════════════════════════════════
+   1. HEAD  —  the prompt-12/14 convention: eyebrow, serif title, quiet counts
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.head {
+  max-width: 60ch;
+  padding: var(--sf-space-10) 0 var(--sf-space-8);
 }
 
-.headerLeft {
+.eyebrow {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--sf-space-3);
+  margin: 0 0 var(--sf-space-4);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wider);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-gold-deep);
+}
+
+.eyebrow::before {
+  content: "";
+  flex: none;
+  width: var(--sf-space-8);
+  height: 1px;
+  background: currentColor;
 }
 
 .title {
+  margin: 0;
   font-family: var(--sf-font-display);
-  font-size: var(--sf-text-3xl);
-  font-weight: var(--sf-font-bold);
-  letter-spacing: 0.01em;
+  font-size: clamp(2.25rem, 4.4vw, 3.25rem);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-display);
+  letter-spacing: var(--sf-tracking-tight);
   color: var(--sf-color-text);
+}
+
+/* Real counts, set in tabular digits so the line does not jitter as pieces
+   leave the collection. */
+.countLine {
+  margin: var(--sf-space-4) 0 0;
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.countLine strong {
+  font-weight: var(--sf-font-medium);
+  color: var(--sf-color-text);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   2. THE INVITATION BAND
+   Hairlines, a serif line and a text button — no fill, no icon badge, nothing
+   that reads as an alert. A guest's collection already works completely; this
+   only says where it lives and offers to keep it with the account.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.guestBand {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-5);
+  padding: var(--sf-space-5) 0;
+  /* Clear of the toolbar's own top rule below — two hairlines meeting would
+     read as one heavy line. */
+  margin-bottom: var(--sf-space-6);
+  border-top: 1px solid var(--sf-color-border);
+  border-bottom: 1px solid var(--sf-color-border);
+}
+
+.guestBandMark {
+  flex: none;
+  color: var(--sf-color-gold-deep);
+}
+
+.guestBandText {
+  flex: 1;
+  min-width: 0;
   margin: 0;
 }
 
-.itemCount {
+.guestBandLead {
+  display: block;
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-xl);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  letter-spacing: var(--sf-tracking-tight);
+  color: var(--sf-color-text);
+}
+
+.guestBandNote {
+  display: block;
+  margin-top: var(--sf-space-1);
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-muted);
+}
+
+/* A word with a gold hairline that grows in under it — the house link. */
+.guestBandBtn {
+  position: relative;
+  flex: none;
   display: inline-flex;
   align-items: center;
-  padding: var(--sf-space-1) var(--sf-space-3);
-  border: 1px solid var(--sf-color-border);
-  border-radius: var(--sf-radius-pill);
-  background: var(--sf-color-badge-bg);
-  font-size: var(--sf-text-sm);
+  min-height: var(--sf-tap-target);
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--sf-color-text);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
   font-weight: var(--sf-font-medium);
-  color: var(--sf-color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  cursor: pointer;
+  transition: color var(--sf-transition-fast);
 }
 
-.headerActions {
+.guestBandBtn::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 100%;
+  bottom: 11px;
+  height: 1px;
+  background: var(--sf-color-gold-deep);
+  transition: right var(--sf-transition);
+}
+
+.guestBandBtn:hover {
+  color: var(--sf-color-gold-deep);
+}
+
+.guestBandBtn:hover::after {
+  right: 0;
+}
+
+.guestBandBtn:focus-visible {
+  outline: 2px solid transparent;
+  border-radius: var(--sf-radius-sm);
+  box-shadow: var(--sf-shadow-focus);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   3. TOOLBAR  —  one rule band. Nothing here has a fill or a shadow.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.toolbar {
   display: flex;
   align-items: center;
-  gap: var(--sf-space-4);
+  justify-content: space-between;
+  gap: var(--sf-space-6);
+  padding: var(--sf-space-3) 0;
+  margin-bottom: var(--sf-space-12);
+  border-top: 1px solid var(--sf-color-border);
+  border-bottom: 1px solid var(--sf-color-border);
 }
 
-/* Sort */
-.sortWrapper {
-  display: flex;
+/* ── Clear All: a text button. Destructive, so it warms toward the danger
+   token on approach rather than sitting there in red. The confirmation is the
+   context's own dialog — this is only the way in. ───────────────────────── */
+
+.clearBtn {
+  display: inline-flex;
   align-items: center;
   gap: var(--sf-space-2);
+  flex: none;
+  min-height: var(--sf-tap-target);
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--sf-color-text-secondary);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  cursor: pointer;
+  transition: color var(--sf-transition-fast);
 }
 
-.sortLabel {
-  font-size: var(--sf-text-sm);
+.clearBtn:hover {
+  color: var(--sf-color-danger);
+}
+
+.clearBtn:focus-visible {
+  outline: 2px solid transparent;
+  border-radius: var(--sf-radius-sm);
+  box-shadow: var(--sf-shadow-focus);
+}
+
+.clearBtnText {
+  position: relative;
+}
+
+.clearBtnText::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 100%;
+  bottom: -4px;
+  height: 1px;
+  background: currentColor;
+  transition: right var(--sf-transition);
+}
+
+.clearBtn:hover .clearBtnText::after {
+  right: 0;
+}
+
+/* ── Sort: the native select, stripped back to a word and a hairline ─────── */
+
+.sortField {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sf-space-3);
+  flex: none;
+  min-height: var(--sf-tap-target);
+}
+
+.sortLabelText {
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
   color: var(--sf-color-text-muted);
   white-space: nowrap;
 }
 
+/* The wrapper draws the chevron, because a <select> cannot carry a
+   pseudo-element of its own. */
+.selectWrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.selectWrap::after {
+  content: "";
+  position: absolute;
+  right: var(--sf-space-1);
+  width: 5px;
+  height: 5px;
+  border-right: 1px solid var(--sf-color-text-muted);
+  border-bottom: 1px solid var(--sf-color-text-muted);
+  transform: translateY(-2px) rotate(45deg);
+  pointer-events: none;
+  transition: border-color var(--sf-transition-fast);
+}
+
+.selectWrap:hover::after {
+  border-color: var(--sf-color-text);
+}
+
 .sortSelect {
-  min-height: var(--sf-tap-target);
-  padding: var(--sf-space-2) var(--sf-space-8) var(--sf-space-2) var(--sf-space-3);
-  border: 1px solid var(--sf-color-border-strong);
-  border-radius: var(--sf-radius-md);
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  min-height: 32px;
+  padding: 0 var(--sf-space-6) 0 0;
+  border: none;
+  border-bottom: 1px solid var(--sf-color-border-strong);
+  border-radius: 0;
+  background: transparent;
+  color: var(--sf-color-text);
   font-family: var(--sf-font-family);
   font-size: var(--sf-text-sm);
-  color: var(--sf-color-text);
-  background-color: var(--sf-color-surface);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%237A837E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right var(--sf-space-3) center;
-  appearance: none;
+  line-height: 1.4;
   cursor: pointer;
-  transition: border-color var(--sf-transition-fast), box-shadow var(--sf-transition-fast);
+  transition: border-color var(--sf-transition-fast), color var(--sf-transition-fast);
+}
+
+.sortSelect:hover {
+  border-bottom-color: var(--sf-color-gold-deep);
 }
 
 .sortSelect:focus-visible {
-  outline: none;
-  border-color: var(--sf-color-gold);
+  outline: 2px solid transparent;
+  border-radius: var(--sf-radius-sm);
   box-shadow: var(--sf-shadow-focus);
 }
 
-/* Clear All */
-.clearAllBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sf-space-2);
-  min-height: var(--sf-tap-target);
-  padding: var(--sf-space-2) var(--sf-space-4);
-  border: 1px solid var(--sf-color-border-strong);
-  border-radius: var(--sf-radius-md);
-  background: transparent;
-  color: var(--sf-color-danger);
-  font-family: var(--sf-font-family);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-medium);
-  cursor: pointer;
-  transition: background var(--sf-transition-fast), border-color var(--sf-transition-fast);
+/* The dropdown list itself is drawn by the OS — give it the page's surface so
+   it is not a white rectangle in the evening room. */
+.sortSelect option {
+  background: var(--sf-color-surface);
+  color: var(--sf-color-text);
 }
 
-.clearAllBtn:hover {
-  background: var(--sf-color-danger-bg);
-  border-color: var(--sf-color-danger);
-}
+/* ═══════════════════════════════════════════════════════════════════════════
+   4. THE WALL
+   Wide gutters, generous rows. The cards bring no frame of their own, so the
+   whitespace is the only thing separating one saved piece from the next.
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-.clearAllBtn:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
-}
-
-/* ===== Product Grid ===== */
 .grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: var(--sf-space-5);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: var(--sf-space-8);
+  row-gap: var(--sf-space-12);
 }
 
-/* Each cell stacks the shared ProductCard + the page-owned Move-to-Cart button. */
-.cardCell {
+/* Cell = the card plus its own action beneath it. The card takes the slack, so
+   every Move-to-Cart button in a row sits on the same line however tall the
+   names above them run. */
+.cell {
   display: flex;
   flex-direction: column;
-  gap: var(--sf-space-2);
+  min-width: 0;
 }
 
+.cell > :first-child {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+/* The 300ms exit. The fade itself is driven from the component (it is the
+   entrance animation run backwards, and it has to honour reduced motion through
+   the same hook), which writes an inline opacity this class could never win
+   against — so the class owns the one thing the animation cannot express: a
+   piece on its way out must stop accepting clicks immediately. */
 .cardRemoving {
-  opacity: 0.5;
   pointer-events: none;
 }
 
-/* Per-item Move to Cart (secondary to the card's own Add to Cart). */
-.moveToCartBtn {
+/* ── Move to Cart — the page's own affordance, one step quieter than the
+   card's Add so the two never compete on a phone, where both are visible. ── */
+
+.moveBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: var(--sf-space-2);
   width: 100%;
   min-height: var(--sf-tap-target);
+  margin-top: var(--sf-space-3);
   padding: var(--sf-space-2) var(--sf-space-4);
-  border: 1px solid var(--sf-color-gold-deep);
-  border-radius: var(--sf-radius-md);
+  border: 1px solid var(--sf-color-border);
+  border-radius: var(--sf-radius-sm);
   background: transparent;
-  color: var(--sf-color-price);
+  color: var(--sf-color-text-secondary);
   font-family: var(--sf-font-family);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
   cursor: pointer;
-  transition: background var(--sf-transition-fast), color var(--sf-transition-fast),
-    border-color var(--sf-transition-fast);
+  transition: color var(--sf-transition), border-color var(--sf-transition);
 }
 
-.moveToCartBtn:hover:not(:disabled) {
-  background: var(--sf-color-primary-soft);
-  border-color: var(--sf-color-gold);
+.moveBtn:hover:not(:disabled) {
+  color: var(--sf-color-gold-deep);
+  border-color: var(--sf-color-gold-deep);
 }
 
-.moveToCartBtn:focus-visible {
-  outline: none;
+.moveBtn:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
   box-shadow: var(--sf-shadow-focus);
 }
 
-.moveToCartBtn:disabled {
-  border-color: var(--sf-color-border);
-  color: var(--sf-color-text-muted);
+/* Nothing to move: the button keeps its place and its size, but reads as
+   unavailable rather than vanishing and reflowing the cell. */
+.moveBtn:disabled {
   cursor: not-allowed;
+  color: var(--sf-color-text-muted);
+  border-color: var(--sf-color-border);
+  opacity: 0.55;
 }
 
-/* ===== Guest Sync Banner ===== */
-.guestBanner {
+/* ═══════════════════════════════════════════════════════════════════════════
+   5. EMPTY STATE  —  an editorial moment, centred on the measure
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.state {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: var(--sf-space-3);
-  padding: var(--sf-space-3) var(--sf-space-4);
-  margin-bottom: var(--sf-space-5);
-  border: 1px solid var(--sf-color-border-strong);
-  border-radius: var(--sf-radius-lg);
-  background: var(--sf-color-surface-2);
+  text-align: center;
+  padding: var(--sf-space-16) var(--sf-space-5) var(--sf-space-20);
+}
+
+.stateArt {
+  display: block;
+  margin-bottom: var(--sf-space-8);
+}
+
+.stateTitle {
+  margin: 0 0 var(--sf-space-3);
+  font-family: var(--sf-font-display);
+  font-size: clamp(1.5rem, 2.6vw, 2rem);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  letter-spacing: var(--sf-tracking-tight);
+  color: var(--sf-color-text);
+}
+
+.stateText {
+  max-width: 46ch;
+  margin: 0 0 var(--sf-space-8);
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-relaxed);
   color: var(--sf-color-text-secondary);
 }
 
-.guestBanner svg {
-  flex-shrink: 0;
-  color: var(--sf-color-gold);
+.stateBtn {
+  min-width: 220px;
 }
 
-.guestBannerText {
-  flex: 1;
-  margin: 0;
-  font-size: var(--sf-text-sm);
-  line-height: var(--sf-leading-normal);
+/* ═══════════════════════════════════════════════════════════════════════════
+   6. SKELETONS  —  the card's silhouette on the shared `sf-skeleton` primitive
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.skelCell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-4);
+  min-width: 0;
 }
 
-.guestBannerBtn {
-  flex-shrink: 0;
-  min-height: var(--sf-tap-target);
-  padding: var(--sf-space-2) var(--sf-space-5);
-  border: none;
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-emerald);
-  color: var(--sf-color-emerald-contrast);
-  font-family: var(--sf-font-family);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-  cursor: pointer;
-  transition: background var(--sf-transition-fast), transform var(--sf-transition-fast);
+.skelMedia {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--sf-radius-sm);
 }
 
-.guestBannerBtn:hover {
-  background: var(--sf-color-emerald-hover);
-  transform: translateY(-1px);
+.skelBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-2);
 }
 
-.guestBannerBtn:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
+.skelBrand { width: 32%; height: 8px; }
+.skelName  { width: 78%; height: 13px; }
+.skelStars { width: 46%; height: 9px; }
+.skelPrice { width: 38%; height: 13px; margin-top: var(--sf-space-1); }
+
+/* The Move-to-Cart line, so the loading grid stands as tall as the real one and
+   nothing below it jumps when the pieces arrive. */
+.skelAction {
+  width: 100%;
+  height: var(--sf-tap-target);
+  margin-top: auto;
+  border-radius: var(--sf-radius-sm);
 }
 
-/* ===== Empty State ===== */
-.emptyState {
-  text-align: center;
-  padding: var(--sf-space-16) var(--sf-space-6);
-  max-width: 440px;
-  margin: 0 auto;
+/* ── The rail shell while the recommendations resolve. Mirrors
+   RelatedProducts.module.css so the loading and the loaded rail are the same
+   object: hairline rule, serif heading, cards with air between them. ─────── */
+
+.recsSkeleton {
+  margin-top: var(--sf-space-16);
+  padding-top: var(--sf-space-8);
+  border-top: 1px solid var(--sf-color-border);
 }
 
-.emptyHeart {
-  color: var(--sf-color-border-strong);
-  margin-bottom: var(--sf-space-5);
-}
-
-.emptyTitle {
+.recsSkeletonTitle {
+  margin: 0 0 var(--sf-space-8);
   font-family: var(--sf-font-display);
   font-size: var(--sf-text-2xl);
-  font-weight: var(--sf-font-semibold);
-  color: var(--sf-color-text);
-  margin: 0 0 var(--sf-space-2);
-}
-
-.emptyText {
-  font-size: var(--sf-text-base);
-  color: var(--sf-color-text-muted);
-  margin: 0 0 var(--sf-space-6);
-  line-height: var(--sf-leading-normal);
-}
-
-.shopButton {
-  display: inline-block;
-  min-height: var(--sf-tap-target);
-  padding: var(--sf-space-3) var(--sf-space-10);
-  border: none;
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-emerald);
-  color: var(--sf-color-emerald-contrast);
-  font-family: var(--sf-font-family);
-  font-size: var(--sf-text-base);
-  font-weight: var(--sf-font-semibold);
-  cursor: pointer;
-  transition: background var(--sf-transition-fast), transform var(--sf-transition-fast);
-}
-
-.shopButton:hover {
-  background: var(--sf-color-emerald-hover);
-  transform: translateY(-2px);
-}
-
-.shopButton:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
-}
-
-/* ===== Recommendation Rail wrapper ===== */
-.recsSection {
-  margin-top: var(--sf-space-12);
-}
-
-.recsTitle {
-  margin: 0 0 var(--sf-space-5);
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-2xl);
-  font-weight: var(--sf-font-bold);
-  letter-spacing: 0.01em;
+  font-weight: var(--sf-font-medium);
+  letter-spacing: var(--sf-tracking-normal);
+  line-height: var(--sf-leading-display);
   color: var(--sf-color-text);
 }
 
 .recsSkeletonRail {
   display: grid;
   grid-auto-flow: column;
-  grid-auto-columns: minmax(210px, 1fr);
-  gap: var(--sf-space-4);
-  overflow-x: auto;
-  padding-bottom: var(--sf-space-3);
-}
-
-/* ===== Skeleton Loading ===== */
-.skeletonCard {
-  background: var(--sf-color-surface);
-  border: 1px solid var(--sf-color-border);
-  border-radius: var(--sf-radius-lg);
+  grid-auto-columns: minmax(220px, 1fr);
+  gap: var(--sf-space-8);
   overflow: hidden;
+  padding-bottom: var(--sf-space-5);
 }
 
-.skeletonImage {
-  width: 100%;
-  padding-top: 100%;
-  background: linear-gradient(
-    90deg,
-    var(--sf-color-surface-2) 25%,
-    var(--sf-color-surface-hover) 50%,
-    var(--sf-color-surface-2) 75%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-.skeletonBody {
-  padding: var(--sf-space-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--sf-space-3);
-}
-
-.skeletonLine {
-  height: 14px;
-  border-radius: var(--sf-radius-sm);
-  background: linear-gradient(
-    90deg,
-    var(--sf-color-surface-2) 25%,
-    var(--sf-color-surface-hover) 50%,
-    var(--sf-color-surface-2) 75%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
+@media (min-width: 1024px) {
+  .recsSkeletonRail {
+    grid-auto-columns: calc((100% - 4 * var(--sf-space-8)) / 4.4);
   }
 }
 
-/* ===== Responsive ===== */
-@media (max-width: 900px) {
-  .header {
-    flex-direction: column;
-    align-items: flex-start;
+/* ═══════════════════════════════════════════════════════════════════════════
+   7. RESPONSIVE  —  four across, then three, then two, then one
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Tablet — three across, and the head steps down a size. */
+@media (max-width: 1024px) {
+  .grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    row-gap: var(--sf-space-10);
   }
 
-  .headerActions {
-    width: 100%;
-    flex-wrap: wrap;
+  .head {
+    padding: var(--sf-space-8) 0 var(--sf-space-6);
   }
 }
 
-@media (max-width: 560px) {
-  .page {
-    padding: var(--sf-space-5) 0 var(--sf-space-12);
-  }
-
+/* Mobile — two across; the invitation folds so its button spans the measure
+   instead of being squeezed against the right edge. */
+@media (max-width: 768px) {
   .container {
     padding: 0 var(--sf-space-4);
   }
 
-  .grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--sf-space-3);
+  .head {
+    padding: var(--sf-space-6) 0 var(--sf-space-5);
   }
 
-  .title {
-    font-size: var(--sf-text-2xl);
-  }
-
-  .guestBanner {
+  .guestBand {
     flex-wrap: wrap;
+    gap: var(--sf-space-3) var(--sf-space-4);
   }
 
-  .guestBannerText {
-    flex-basis: calc(100% - 32px);
+  .guestBandText {
+    flex-basis: calc(100% - var(--sf-space-8) - var(--sf-space-4));
   }
 
-  .guestBannerBtn {
+  .guestBandBtn {
+    flex-basis: 100%;
+    justify-content: center;
+    min-height: 40px;
+    border: 1px solid var(--sf-color-border-strong);
+    border-radius: var(--sf-radius-sm);
+  }
+
+  /* The grown hairline would sit under the border on a phone; there, the frame
+     is the affordance. */
+  .guestBandBtn::after {
+    content: none;
+  }
+
+  .toolbar {
+    gap: var(--sf-space-4);
+    margin-bottom: var(--sf-space-8);
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--sf-space-4);
+    row-gap: var(--sf-space-10);
+  }
+
+  .recsSkeletonRail {
+    gap: var(--sf-space-5);
+    grid-auto-columns: minmax(150px, 62%);
+  }
+
+  .state {
+    padding: var(--sf-space-12) var(--sf-space-4) var(--sf-space-16);
+  }
+}
+
+/* Small phones — one piece at a time, the way you would lay them out on a bed.
+   The card is a 3:4 photograph, so a single column is a full plate. */
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--sf-space-10);
+  }
+
+  .stateBtn {
+    min-width: 0;
     width: 100%;
   }
+}
 
-  .sortWrapper {
-    width: 100%;
-  }
+/* ═══════════════════════════════════════════════════════════════════════════
+   8. REDUCED MOTION
+   The token layer already zeroes the shared durations, and the grid's entrance
+   and removal animations ask framer-motion's own `useReducedMotion` hook. What
+   is left here are the two hairline reveals, which animate a length rather than
+   a transition property and so are not covered by either.
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-  .sortSelect {
-    flex: 1;
-  }
-
-  .clearAllBtn {
-    width: 100%;
+@media (prefers-reduced-motion: reduce) {
+  .guestBandBtn::after,
+  .clearBtnText::after {
+    transition: none;
   }
 }
