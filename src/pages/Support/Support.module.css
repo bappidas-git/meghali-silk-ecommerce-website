@@ -438,14 +438,23 @@
   color: var(--sf-color-text-muted);
 }
 
+/* Underlined at rest, not just on hover. These sit inside a run of muted
+   prose, and colour alone is all that separated them: gold against muted ink
+   is 1.8:1 in the evening palette, under the 3:1 that WCAG 1.4.1 asks of a
+   difference carried by colour. The rule is hairline and set off the
+   baseline, so the line still reads as editorial rather than as a hyperlink
+   from 1998; hover firms it to the text colour. */
 .formNote a {
   color: var(--sf-color-gold-deep);
-  text-decoration: none;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in srgb, var(--sf-color-gold-deep) 55%, transparent);
+  text-underline-offset: 0.25em;
+  transition: text-decoration-color var(--sf-transition-fast);
 }
 
 .formNote a:hover {
-  text-decoration: underline;
-  text-underline-offset: 0.25em;
+  text-decoration-color: currentColor;
 }
 
 .formNote a:focus-visible {
@@ -627,14 +636,23 @@
   color: var(--sf-color-text-muted);
 }
 
+/* Underlined at rest, not just on hover. These sit inside a run of muted
+   prose, and colour alone is all that separated them: gold against muted ink
+   is 1.8:1 in the evening palette, under the 3:1 that WCAG 1.4.1 asks of a
+   difference carried by colour. The rule is hairline and set off the
+   baseline, so the line still reads as editorial rather than as a hyperlink
+   from 1998; hover firms it to the text colour. */
 .railFoot a {
   color: var(--sf-color-gold-deep);
-  text-decoration: none;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-decoration-color: color-mix(in srgb, var(--sf-color-gold-deep) 55%, transparent);
+  text-underline-offset: 0.25em;
+  transition: text-decoration-color var(--sf-transition-fast);
 }
 
 .railFoot a:hover {
-  text-decoration: underline;
-  text-underline-offset: 0.25em;
+  text-decoration-color: currentColor;
 }
 
 .railFoot a:focus-visible {

@@ -976,7 +976,7 @@ const Products = () => {
     <div className={styles.facets}>
       {/* Categories — hierarchical, each count already includes its children */}
       <section className={styles.facet}>
-        <h4 className={styles.facetTitle}>Categories</h4>
+        <h3 className={styles.facetTitle}>Categories</h3>
         <div className={styles.facetList}>
           {orderedCategories.ordered.map((cat) => {
             const depth = orderedCategories.depthOf(cat.id);
@@ -1011,7 +1011,7 @@ const Products = () => {
 
       {/* Price — four quick ranges, then the manual pair */}
       <section className={styles.facet}>
-        <h4 className={styles.facetTitle}>Price</h4>
+        <h3 className={styles.facetTitle}>Price</h3>
         <div className={styles.rangeChips}>
           {PRICE_RANGES.map((range) => {
             const active = isPriceRangeActive(range);
@@ -1057,7 +1057,7 @@ const Products = () => {
       {/* Fabric — present only when the catalogue actually exposes one */}
       {availableFabrics.length > 0 && (
         <section className={styles.facet}>
-          <h4 className={styles.facetTitle}>Fabric</h4>
+          <h3 className={styles.facetTitle}>Fabric</h3>
           <div className={styles.facetList}>
             {availableFabrics.map((fabric) => (
               <label key={fabric} className={styles.option}>
@@ -1079,7 +1079,7 @@ const Products = () => {
 
       {/* Customer rating */}
       <section className={styles.facet}>
-        <h4 className={styles.facetTitle}>Customer Rating</h4>
+        <h3 className={styles.facetTitle}>Customer Rating</h3>
         <div className={styles.facetList}>
           {RATING_OPTIONS.map((r) => (
             <label key={r} className={styles.option}>
@@ -1103,7 +1103,7 @@ const Products = () => {
 
       {/* Discount */}
       <section className={styles.facet}>
-        <h4 className={styles.facetTitle}>Discount</h4>
+        <h3 className={styles.facetTitle}>Discount</h3>
         <div className={styles.facetList}>
           {DISCOUNT_OPTIONS.map((d) => (
             <label key={d} className={styles.option}>
@@ -1124,8 +1124,12 @@ const Products = () => {
 
       {/* Availability */}
       <section className={styles.facet}>
-        <h4 className={styles.facetTitle}>Availability</h4>
-        <label className={styles.switchRow}>
+        <h3 className={styles.facetTitle}>Availability</h3>
+        {/* A <button> is not a labelable control, so the <label> that used to
+            wrap this row named nothing and forwarded no clicks — the switch
+            reached screen readers unnamed. A plain row plus an aria-label that
+            repeats the visible words (WCAG 2.5.3) is what it always meant. */}
+        <div className={styles.switchRow}>
           <span className={styles.optionText}>In stock only</span>
           <button
             className={`${styles.switch} ${inStockOnly ? styles.switchOn : ""}`}
@@ -1133,16 +1137,17 @@ const Products = () => {
             type="button"
             role="switch"
             aria-checked={inStockOnly}
+            aria-label="In stock only"
           >
             <span className={styles.switchThumb} />
           </button>
-        </label>
+        </div>
       </section>
 
       {/* Brand */}
       {availableBrands.length > 0 && (
         <section className={styles.facet}>
-          <h4 className={styles.facetTitle}>Brand</h4>
+          <h3 className={styles.facetTitle}>Brand</h3>
           <div className={styles.facetList}>
             {availableBrands.map((brand) => (
               <label key={brand} className={styles.option}>
@@ -1463,7 +1468,7 @@ const Products = () => {
             onClick={() => setMobileFiltersOpen(false)}
             {...scrimMotion}
           >
-            <motion.aside
+            <motion.div
               className={styles.sheet}
               ref={sheetRef}
               role="dialog"
@@ -1508,7 +1513,7 @@ const Products = () => {
                   {filteredProducts.length === 1 ? "Result" : "Results"}
                 </button>
               </footer>
-            </motion.aside>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

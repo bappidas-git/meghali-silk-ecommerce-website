@@ -59,8 +59,11 @@
   color: var(--sf-color-text-muted);
 }
 
+/* The glyph between the crumbs is TYPE, so it takes a type token. It used to
+   take --sf-color-border-strong, which is a hairline colour: 1.5:1 on ivory and
+   about 2:1 on the evening ground, i.e. a separator you could not see. */
 .breadcrumbSep {
-  color: var(--sf-color-border-strong);
+  color: var(--sf-color-text-muted);
 }
 
 /* The house link: no chrome, a gold hairline that grows in under it. */
@@ -1083,13 +1086,20 @@
   color: var(--sf-color-text);
 }
 
+/* OFF is the state this control spends most of its life in, and it is drawn
+   entirely by the track and the thumb — there is no label change to fall back
+   on. Both used --sf-color-border-strong, a hairline colour that reads 1.5:1 on
+   ivory (and, in the dark room, gold at 30% alpha), so an unset switch was very
+   nearly not there. WCAG 1.4.11 wants 3:1 for the parts that identify a control
+   and its state; the muted TYPE token clears that in both modes and is the same
+   one the review picker's empty stars now take. ON is unchanged: an ink fill. */
 .switch {
   position: relative;
   flex: none;
   width: 40px;
   height: 22px;
   padding: 0;
-  border: 1px solid var(--sf-color-border-strong);
+  border: 1px solid var(--sf-color-text-muted);
   border-radius: var(--sf-radius-pill);
   background: transparent;
   cursor: pointer;
@@ -1114,7 +1124,7 @@
   width: 14px;
   height: 14px;
   border-radius: var(--sf-radius-pill);
-  background: var(--sf-color-border-strong);
+  background: var(--sf-color-text-muted);
   transform: translateY(-50%);
   transition: transform var(--sf-transition-fast), background-color var(--sf-transition-fast);
 }
@@ -1254,7 +1264,59 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   9. REDUCED MOTION
+   9. TOUCH TARGETS
+   Nothing here changes what is drawn. The editorial toolbar is built from
+   hairline-underlined type rather than buttons, so several controls measure
+   well under 44px in one axis; on a coarse pointer they grow their BOX (or,
+   where a box would drag the underline with it, an invisible ::before) to the
+   44px minimum. --sf-tap-target, WCAG 2.5.5.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (pointer: coarse) {
+  /* Was 32px tall — .perPageSelect already had this; .sortSelect was missed. */
+  .sortSelect {
+    min-height: var(--sf-tap-target);
+  }
+
+  /* Short labels ("12") and the arrow-only steps left these under 44px wide. */
+  .perPageSelect,
+  .pagerStep,
+  .pagerNum {
+    min-width: var(--sf-tap-target);
+  }
+
+  /* The toggle is a drawn 40×22 pill. Growing it would make it a lozenge, so
+     an invisible square takes the tap and the pill stays the size it looks. */
+  .switch::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--sf-tap-target);
+    height: var(--sf-tap-target);
+    transform: translate(-50%, -50%);
+  }
+
+  /* The crumbs are 18px-tall inline type. Padding would push the hover
+     hairline (::after, pinned to the padding box) away from the words, so the
+     tap area is an invisible band instead. */
+  .breadcrumbLink {
+    position: relative;
+  }
+
+  .breadcrumbLink::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: var(--sf-tap-target);
+    transform: translateY(-50%);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   10. REDUCED MOTION
    The token layer already zeroes the shared durations; these are the local
    hairline reveals, which animate a length rather than a transition property.
    ═══════════════════════════════════════════════════════════════════════════ */

@@ -53,6 +53,40 @@ body {
 }
 
 /* =============================================================================
+ * SKIP LINK
+ * The masthead carries an announcement bar, a lockup, four actions and a ten-
+ * item nav before the page begins — about twenty stops to tab past on every
+ * route. This is the way out, and it is the first thing in the DOM. Off-canvas
+ * until focused (never display:none, which would take it out of the tab order
+ * and defeat the point), then it arrives as an ink chip in the top-left.
+ * ========================================================================== */
+.skip-link {
+  position: absolute;
+  top: var(--sf-space-2);
+  left: var(--sf-space-2);
+  z-index: calc(var(--sf-z-modal) + 1);
+  padding: var(--sf-space-3) var(--sf-space-5);
+  border-radius: var(--sf-radius-sm);
+  background: var(--sf-color-emerald);
+  color: var(--sf-color-emerald-contrast);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  text-decoration: none;
+  transform: translateY(-200%);
+  transition: transform var(--sf-transition-fast);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--sf-shadow-focus);
+}
+
+/* =============================================================================
  * SCROLLBARS
  * Quiet and editorial: 8px, the page ground as the track, a warm sand thumb
  * that settles to muted ink on hover. The tokens flip under body.dark, so one
@@ -171,6 +205,17 @@ body.admin-area.dark *::-webkit-scrollbar-thumb:hover {
   border-top-color: var(--sf-color-gold-deep);
   border-radius: 50%;
   animation: spin 0.9s linear infinite;
+}
+
+/* The one spinner in the app that was missing this: the storefront's other five
+   (AuthModal, ReviewModal, OrderConfirmation, OrderHistory ×2) all slow the
+   same 0.9s turn to 2.4s under reduced motion, because a "working" signal still
+   has to turn but need not race. This file had no reduced-motion block at all,
+   so .loading-spinner kept spinning at full speed. */
+@media (prefers-reduced-motion: reduce) {
+  .loading-spinner {
+    animation-duration: 2.4s;
+  }
 }
 
 /* The route transition is NOT here. It lives in one place — the keyed wrapper

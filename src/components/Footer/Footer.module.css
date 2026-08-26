@@ -599,3 +599,40 @@
   outline-offset: 3px;
   border-radius: var(--sf-radius-sm);
 }
+
+/* =============================================================================
+ * TOUCH TARGETS
+ * The close is a directory of small type — 26–29px tall links at 12–14px. On a
+ * coarse pointer each one takes an invisible 44px band (WCAG 2.5.5). The bands
+ * would otherwise touch, so the two stacked lists open their row gap by one
+ * step first: the type moves 3–4px, the tap area doubles. `.socialLink` is
+ * already a 44px square and needs nothing.
+ * ========================================================================== */
+
+@media (pointer: coarse) {
+  .linkList {
+    gap: var(--sf-space-4);
+  }
+
+  .legalLinks {
+    gap: var(--sf-space-5) var(--sf-space-6);
+  }
+
+  .footerLink,
+  .legalLink,
+  .contactLink {
+    position: relative;
+  }
+
+  .footerLink::before,
+  .legalLink::before,
+  .contactLink::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: var(--sf-tap-target);
+    transform: translateY(-50%);
+  }
+}

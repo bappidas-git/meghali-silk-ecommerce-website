@@ -439,7 +439,13 @@ const Footer = () => {
                 Policies last updated {POLICY_LAST_UPDATED}.
               </span>
             </p>
-            <nav className={styles.legalLinks} aria-label="Legal">
+            {/* Not a landmark. These three links are already the "Legal"
+                column above, which is a <nav> named by its own <h2> — so this
+                row was a second navigation landmark with the identical name,
+                and a screen-reader user cycling landmarks met "Legal" twice
+                with no way to tell them apart. The links stay; the duplicate
+                signpost goes. */}
+            <div className={styles.legalLinks}>
               <Link to="/terms" className={styles.legalLink}>
                 Terms of Service
               </Link>
@@ -449,7 +455,7 @@ const Footer = () => {
               <Link to="/cookies" className={styles.legalLink}>
                 Cookie Policy
               </Link>
-            </nav>
+            </div>
           </div>
         </div>
       </div>

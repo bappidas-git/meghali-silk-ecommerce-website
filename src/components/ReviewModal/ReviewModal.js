@@ -214,9 +214,9 @@ const ReviewModal = ({ open, onClose, product, existing, onSubmit }) => {
         </button>
 
         <p className={styles.eyebrow}>{existing ? "Edit your review" : "Write a review"}</p>
-        <h3 className={styles.heading} id="review-modal-title">
+        <h2 className={styles.heading} id="review-modal-title">
           Share your thoughts
-        </h3>
+        </h2>
 
         <div className={styles.productRow}>
           <span className={styles.productThumb}>

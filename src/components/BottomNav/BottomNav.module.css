@@ -166,8 +166,12 @@
   font-weight: var(--sf-font-semibold);
   line-height: 16px;
   text-align: center;
-  background: var(--sf-color-discount);
-  color: var(--sf-color-primary-contrast);
+  /* The same ink-on-ivory / ivory-on-charcoal pair the masthead badge uses, so
+     the two counts match and both stay legible. It used to be ivory on
+     --sf-color-discount, which is fine on the light green (5.6:1) but drops to
+     2.03:1 once the evening palette lifts that green to #6FBF95. */
+  background: var(--sf-color-emerald);
+  color: var(--sf-color-emerald-contrast);
   border: 2px solid var(--sf-color-bg);
 }
 

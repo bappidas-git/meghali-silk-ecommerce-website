@@ -95,8 +95,13 @@ const BottomNav = () => {
       <>
         <span className={styles.iconWrap}>
           <Icon className={styles.icon} aria-hidden="true" />
+          {/* The count is already spoken in the tab's aria-label, and it sits
+              in the DOM ahead of the word with no whitespace between them — so
+              to a machine the tab read "3Wishlist", which no voice-control user
+              can say (WCAG 2.5.3). Hidden here, the visible label is the plain
+              word again and the aria-label contains it. */}
           {item.key === "wishlist" && wishlistCount > 0 && (
-            <span className={styles.badge}>
+            <span className={styles.badge} aria-hidden="true">
               {wishlistCount > 99 ? "99+" : wishlistCount}
             </span>
           )}

@@ -85,8 +85,14 @@ function StorefrontShell() {
   return (
     <DealsConfigProvider>
       <div className="App">
+        {/* First stop on every route, so a keyboard visitor can step over the
+            announcement bar, the lockup, the four actions and the ten-item nav
+            in one press. Styled in App.css — off-canvas until focused. */}
+        <a className="skip-link" href="#main-content">
+          Skip to content
+        </a>
         <Header />
-        <main className="main-content">
+        <main className="main-content" id="main-content" tabIndex={-1}>
           <AnimatePresence mode="wait" initial={false}>
             <motion.div key={location.pathname} {...pageMotion}>
               <Routes location={location}>

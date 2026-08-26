@@ -484,9 +484,11 @@ button.tab {
   font-variant-numeric: tabular-nums;
 }
 
+/* A separator glyph is TYPE, not a hairline: --sf-color-border-strong read at
+   1.5:1 on ivory and 2:1 in the dark room. */
 .metaSep {
   padding: 0 var(--sf-space-2);
-  color: var(--sf-color-border-strong);
+  color: var(--sf-color-text-muted);
 }
 
 /* ── Status chips — one shape, four tones, always with the word ──────────── */

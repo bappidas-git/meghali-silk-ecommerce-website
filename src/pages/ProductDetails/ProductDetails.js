@@ -666,7 +666,9 @@ const ProductDetails = () => {
     // No page-level fade here: the route transition is applied once, to the
     // keyed wrapper around <Routes> in App.js, so every storefront route —
     // and every one of this page's own branches — arrives the same way.
-    <div className={`${styles.page} ${isDarkMode ? styles.dark : ""}`}>
+    // This sheet has no `.dark` rule — the tokens flip on their own — so
+    // styles.dark is undefined and used to render class="page undefined".
+    <div className={`${styles.page} ${(isDarkMode && styles.dark) || ""}`}>
       <div className={styles.container}>
         {/* ── Breadcrumb (orientation) ──────────────────────────────────── */}
         <nav className={styles.breadcrumb} aria-label="Breadcrumb">

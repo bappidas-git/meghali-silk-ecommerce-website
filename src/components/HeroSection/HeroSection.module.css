@@ -275,6 +275,7 @@
 /* The visible mark is a 2px hairline; the transparent padding around it carries
    the 44px touch target without making the control look like a button. */
 .control {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -286,6 +287,21 @@
   background: transparent;
   cursor: pointer;
   pointer-events: auto;
+}
+
+/* The rule narrows on small screens (40px at ≤768, 32px at ≤480) so the strip
+   still fits beside the counter — which took the touch target under 44px in
+   exactly the widths that are all touch. This is the ProductCard wishlist
+   idiom: the mark keeps its drawn width, an invisible 44px square centred on it
+   takes the tap. */
+.control::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--sf-tap-target);
+  height: var(--sf-tap-target);
+  transform: translate(-50%, -50%);
 }
 
 .controlRule {

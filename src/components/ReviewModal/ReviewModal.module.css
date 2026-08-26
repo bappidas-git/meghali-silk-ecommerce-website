@@ -199,6 +199,10 @@
   gap: var(--sf-space-1);
 }
 
+/* The empty star is a control STATE (role="radio", aria-checked=false), so it
+   owes 3:1 under WCAG 1.4.11. --sf-color-border-strong gave it 1.5:1 on ivory
+   and, in the dark room where that token is gold at 30% alpha, about 1.9:1 —
+   an unrated picker that looked blank. The muted type token clears both. */
 .starBtn {
   display: inline-flex;
   align-items: center;
@@ -209,7 +213,7 @@
   border: none;
   border-radius: var(--sf-radius-sm);
   background: none;
-  color: var(--sf-color-border-strong);
+  color: var(--sf-color-text-muted);
   cursor: pointer;
   transition: color var(--sf-transition-fast),
     transform var(--sf-transition-fast), opacity var(--sf-transition-fast);

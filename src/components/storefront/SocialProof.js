@@ -59,9 +59,22 @@ const SocialProof = ({
         onReviewsClick ? styles.clickable : ""
       } ${className}`}
       onClick={onReviewsClick}
-      aria-label={`Rated ${value.toFixed(1)} out of 5 from ${countLabel}`}
+      /* WCAG 2.5.3 (Label in Name): as a button this is a labelled control, so
+         the accessible name has to CONTAIN the words on screen or a voice-
+         control user cannot say it. The count now leads, verbatim, and the
+         scale follows — "Rated … out of 5 from …" led before, and no spoken
+         phrase matched it. The badge below is hidden from the name rather than
+         quoted into it, because the two figures sit in adjacent spans with no
+         whitespace between them: the text reads "4.843 Ratings & Reviews" to a
+         machine, which is not a string anything should have to say out loud. */
+      aria-label={`${countLabel} — rated ${value.toFixed(1)} out of 5`}
     >
-      <span className={styles.badge}>{value.toFixed(1)}</span>
+      {/* A visual restatement of the stars beside it; the rating reaches
+          assistive tech through the label above and through StarRating's own
+          role="img", so announcing the figure a third time adds nothing. */}
+      <span className={styles.badge} aria-hidden="true">
+        {value.toFixed(1)}
+      </span>
       <StarRating rating={value} size={starSize} />
       <span className={styles.count}>{countLabel}</span>
     </Tag>
