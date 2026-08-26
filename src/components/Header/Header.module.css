@@ -546,12 +546,43 @@
   }
   .logoImg {
     height: 34px;
+    /* Last resort so the row can never push past the viewport: the wordmark
+       yields (object-fit keeps its ratio) before the actions overflow. */
+    max-width: 100%;
+  }
+  .logoLink {
+    min-width: 0;
   }
   .actions {
     gap: 0;
   }
   .actionIcon svg {
     font-size: 21px;
+  }
+  /* The wide masthead's search field-button is JS-gated (isMobile renders the
+     icon instead), but that gate is a matchMedia listener while this one is
+     plain CSS. A viewport that narrows before React re-renders would drop the
+     153px trigger into a 320px row and shove the actions ~138px past the edge,
+     so the mismatch is closed here rather than left to a race. */
+  .searchTrigger {
+    display: none;
+  }
+}
+
+/* Small phones — 320px and under (iPhone SE, fold cover screens).
+   The compact row needs 309px: 44px hamburger + 109px wordmark + three 44px
+   actions + padding. At 320px that clears by 11px and anything narrower
+   overflows. Search is the one masthead action with a second permanent home
+   on mobile — the BottomNav's Search tab, which is always on screen — so it
+   steps out here instead of any button shrinking below the 44px WCAG 2.5.5
+   target. The cut is at 340px, not 360px, because 360px (the common Android
+   width) has 51px to spare and no reason to lose the affordance. */
+@media (max-width: 340px) {
+  /* !important because MUI's emotion class for the IconButton is injected
+     after this sheet and carries the same specificity — the same reason the
+     .actionIcon and .userMenuPaper overrides above have to shout. */
+  .actionSearch {
+    display: none !important;
   }
 }
 
