@@ -36,7 +36,13 @@ import useAdminBodyClass from "../../hooks/useAdminBodyClass";
 import apiService from "../../services/api";
 import Swal from "sweetalert2";
 
-const LOGO = "https://res.cloudinary.com/dn9gyaiik/image/upload/v1782451315/Logo_gpxble.png";
+// Same byte-for-byte w_520 URLs the storefront serves (intrinsic art 1454×454),
+// so the drawer paints from cache. The logo slot sits on background.paper —
+// white in light mode, #111927 in dark — so the variant follows the mode.
+const LOGO_LIGHT =
+  "https://res.cloudinary.com/v8vrixwq/image/upload/f_auto,q_auto,w_520/v1787592407/meghali-silk-logo.png";
+const LOGO_WHITE =
+  "https://res.cloudinary.com/v8vrixwq/image/upload/f_auto,q_auto,w_520/v1787592405/meghali-silk-logo-white.png";
 
 const drawerWidth = 260;
 
@@ -334,8 +340,6 @@ const AdminLayout = () => {
       >
         <Box
           sx={{
-            backgroundColor: "#0B3B2E",
-            borderRadius: 2,
             px: 1.5,
             py: 1,
             display: "flex",
@@ -345,7 +349,7 @@ const AdminLayout = () => {
           }}
         >
           <img
-            src={LOGO}
+            src={mode === "dark" ? LOGO_WHITE : LOGO_LIGHT}
             alt={process.env.REACT_APP_NAME || "Meghali's Silk Admin"}
             style={{ height: 36, width: "auto", maxWidth: "100%", display: "block" }}
           />

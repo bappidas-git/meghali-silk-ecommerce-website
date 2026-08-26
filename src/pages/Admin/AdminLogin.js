@@ -18,7 +18,13 @@ import { useTheme } from "../../context/ThemeContext";
 import buildAdminTheme from "../../theme/adminTheme";
 import useAdminBodyClass from "../../hooks/useAdminBodyClass";
 
-const LOGO = "https://res.cloudinary.com/dn9gyaiik/image/upload/v1782451315/Logo_gpxble.png";
+// Same byte-for-byte w_520 URLs the storefront serves (intrinsic art 1454×454).
+// The card is background.paper — white in light mode, #111927 in dark — so the
+// variant follows isDarkMode.
+const LOGO_LIGHT =
+  "https://res.cloudinary.com/v8vrixwq/image/upload/f_auto,q_auto,w_520/v1787592407/meghali-silk-logo.png";
+const LOGO_WHITE =
+  "https://res.cloudinary.com/v8vrixwq/image/upload/f_auto,q_auto,w_520/v1787592405/meghali-silk-logo-white.png";
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const AdminLogin = () => {
@@ -135,8 +141,6 @@ const AdminLogin = () => {
             >
               <Box
                 sx={{
-                  backgroundColor: "#0B3B2E",
-                  borderRadius: 2,
                   px: 2,
                   py: 1.5,
                   display: "inline-flex",
@@ -146,7 +150,7 @@ const AdminLogin = () => {
                 }}
               >
                 <img
-                  src={LOGO}
+                  src={isDarkMode ? LOGO_WHITE : LOGO_LIGHT}
                   alt={process.env.REACT_APP_NAME || "Meghali's Silk Admin"}
                   style={{ height: 60, width: "auto", maxWidth: "100%", display: "block" }}
                 />
