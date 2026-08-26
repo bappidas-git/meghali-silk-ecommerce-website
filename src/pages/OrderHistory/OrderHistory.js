@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import Swal from "sweetalert2";
 import { useTheme } from "../../context/ThemeContext";
 import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../hooks/useAuth";
 import apiService from "../../services/api";
-import { formatCurrency, formatDate, normalizeOrderAddress } from "../../utils/helpers";
+import {
+  formatCurrency,
+  formatDate,
+  normalizeOrderAddress,
+  onImageError,
+  PLACEHOLDER_IMG,
+} from "../../utils/helpers";
 import ReviewModal from "../../components/ReviewModal/ReviewModal";
 import styles from "./OrderHistory.module.css";
 
@@ -18,6 +23,12 @@ const reviewDisplayName = (user) => {
   if (first && last) return `${first} ${last[0].toUpperCase()}.`;
   return first || user?.email?.split("@")[0] || "Customer";
 };
+
+// SweetAlert2 takes a colour VALUE, not a token — it renders outside the React
+// tree, and a per-call confirmButtonColor is set as an inline variable on the
+// button (see the Swal block in App.css). This mirrors --sf-color-danger from
+// storefront-tokens.css; keep the two in sync if that token is ever retuned.
+const DANGER_HEX = "#9E3B2E";
 
 const REVIEW_STATUS = {
   pending: { label: "Review pending approval", className: "reviewPending" },
@@ -40,6 +51,7 @@ const STATUS_CONFIG = {
 const FILTER_OPTIONS = ["All", "Processing", "Shipped", "Delivered", "Cancelled"];
 const ORDERS_PER_PAGE = 5;
 const RETURN_WINDOW_DAYS = 7; // per the 7-day return policy (see /refund-policy)
+const TIMELINE_STEPS = ["Placed", "Shipped", "Delivered"];
 
 // Orders carry paymentStatus / fulfillmentStatus / shippingStatus (the shape
 // checkout writes and Admin manages) — collapse those into the single display
@@ -63,6 +75,150 @@ const deriveOrderStatus = (order) => {
   }
   return order.status || "processing";
 };
+
+/* ------------------------------------------------------------------ */
+/*  Marks — hairline line art, never a filled icon                     */
+/* ------------------------------------------------------------------ */
+
+const Stroke = ({ size = 16, width = 1.5, children, ...rest }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth={width}
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    aria-hidden="true"
+    focusable="false"
+    {...rest}
+  >
+    {children}
+  </svg>
+);
+
+const IconRefresh = (props) => (
+  <Stroke {...props}>
+    <polyline points="23 4 23 10 17 10" />
+    <polyline points="1 20 1 14 7 14" />
+    <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
+  </Stroke>
+);
+
+const IconSearch = (props) => (
+  <Stroke {...props}>
+    <circle cx="11" cy="11" r="8" />
+    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+  </Stroke>
+);
+
+const IconClose = (props) => (
+  <Stroke {...props}>
+    <line x1="18" y1="6" x2="6" y2="18" />
+    <line x1="6" y1="6" x2="18" y2="18" />
+  </Stroke>
+);
+
+const IconCopy = (props) => (
+  <Stroke {...props}>
+    <rect x="9" y="9" width="12" height="12" rx="1.5" />
+    <path d="M5 15H4a1.5 1.5 0 01-1.5-1.5v-9A1.5 1.5 0 014 3h9A1.5 1.5 0 0114.5 4.5V5" />
+  </Stroke>
+);
+
+const IconCheck = (props) => (
+  <Stroke {...props}>
+    <polyline points="20 6 9 17 4 12" />
+  </Stroke>
+);
+
+const IconChevron = (props) => (
+  <Stroke {...props}>
+    <polyline points="6 9 12 15 18 9" />
+  </Stroke>
+);
+
+const IconExternal = (props) => (
+  <Stroke {...props}>
+    <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" />
+    <polyline points="15 3 21 3 21 9" />
+    <line x1="10" y1="14" x2="21" y2="3" />
+  </Stroke>
+);
+
+const IconStar = ({ size = 13 }) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    aria-hidden="true"
+    focusable="false"
+  >
+    <polygon points="12 2.6 14.9 9 21.6 9.6 16.5 14.1 18 20.8 12 17.3 6 20.8 7.5 14.1 2.4 9.6 9.1 9" />
+  </svg>
+);
+
+// The ledger mark — a bound page with three ruled lines and one gold rule.
+const LedgerMark = () => (
+  <svg width="72" height="72" viewBox="0 0 72 72" fill="none" aria-hidden="true" focusable="false">
+    <path
+      d="M18 10h30a4 4 0 014 4v48l-7-4-6 4-6-4-6 4-6-4-7 4V14a4 4 0 014-4z"
+      stroke="currentColor"
+      strokeWidth="1.2"
+      strokeLinejoin="round"
+    />
+    <line x1="26" y1="26" x2="46" y2="26" stroke="currentColor" strokeWidth="1.2" />
+    <line x1="26" y1="34" x2="46" y2="34" stroke="currentColor" strokeWidth="1.2" />
+    <line
+      x1="26"
+      y1="42"
+      x2="38"
+      y2="42"
+      stroke="var(--sf-color-gold)"
+      strokeWidth="1.2"
+    />
+  </svg>
+);
+
+// The signed-out mark — the same bound page, closed, with a gold keyhole.
+const SealedMark = () => (
+  <svg width="72" height="72" viewBox="0 0 72 72" fill="none" aria-hidden="true" focusable="false">
+    <rect
+      x="16"
+      y="10"
+      width="40"
+      height="52"
+      rx="4"
+      stroke="currentColor"
+      strokeWidth="1.2"
+    />
+    <path
+      d="M29 34v-5a7 7 0 0114 0v5"
+      stroke="var(--sf-color-gold)"
+      strokeWidth="1.2"
+      strokeLinecap="round"
+    />
+    <rect
+      x="26"
+      y="34"
+      width="20"
+      height="15"
+      rx="2"
+      stroke="currentColor"
+      strokeWidth="1.2"
+    />
+  </svg>
+);
+
+const AlertMark = () => (
+  <svg width="64" height="64" viewBox="0 0 64 64" fill="none" aria-hidden="true" focusable="false">
+    <circle cx="32" cy="32" r="23" stroke="currentColor" strokeWidth="1.2" />
+    <line x1="32" y1="21" x2="32" y2="35" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    <circle cx="32" cy="42" r="1.4" fill="currentColor" />
+  </svg>
+);
 
 const OrderHistory = () => {
   const navigate = useNavigate();
@@ -110,7 +266,7 @@ const OrderHistory = () => {
       setOrders(sorted);
       setMyReviews(Array.isArray(reviews) ? reviews : []);
     } catch (err) {
-      // Keep "No Orders Yet" honest: a failed fetch renders the error state,
+      // Keep "No orders yet" honest: a failed fetch renders the error state,
       // never the empty state.
       console.error("Failed to fetch orders:", err);
       setOrders([]);
@@ -120,10 +276,16 @@ const OrderHistory = () => {
     }
   };
 
-  const handleCopy = (text) => {
-    navigator.clipboard.writeText(text);
-    setCopiedId(text);
-    setTimeout(() => setCopiedId(null), 2000);
+  const handleCopy = async (text) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedId(text);
+      setTimeout(() => setCopiedId(null), 2000);
+    } catch (err) {
+      // Clipboard access can be refused (an unfocused document, a denied
+      // permission). Stay silent rather than claim a copy that never happened.
+      console.error("Couldn't copy to clipboard:", err);
+    }
   };
 
   const getStatusInfo = (status) => {
@@ -282,7 +444,7 @@ const OrderHistory = () => {
       html: `Order <strong>${order.orderNumber || `#${order.id}`}</strong> will be cancelled.${refundLine}`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#d32f2f",
+      confirmButtonColor: DANGER_HEX,
       confirmButtonText: "Cancel Order",
       cancelButtonText: "Keep Order",
     });
@@ -335,41 +497,67 @@ const OrderHistory = () => {
     if (totalPages > 0 && currentPage > totalPages) setCurrentPage(totalPages);
   }, [currentPage, totalPages]);
 
-  // Not authenticated - show login prompt (only once the session restore has
-  // settled, so a reload while logged in doesn't flash this screen)
+  // The page shell, so every state below is framed the same way.
+  const shell = (children) => (
+    <div className={`${styles.page} ${isDarkMode ? styles.dark : ""}`}>
+      <div className={styles.container}>{children}</div>
+    </div>
+  );
+
+  // A copy control: the word, then the check in gold once it has been copied.
+  const copyControl = (text, label) => (
+    <button
+      type="button"
+      className={`${styles.copyBtn} ${copiedId === text ? styles.copyBtnDone : ""}`}
+      onClick={() => handleCopy(text)}
+      aria-label={copiedId === text ? `Copied ${label}` : `Copy ${label}`}
+    >
+      {copiedId === text ? (
+        <>
+          <IconCheck size={13} width={2} />
+          Copied
+        </>
+      ) : (
+        <>
+          <IconCopy size={13} />
+          Copy
+        </>
+      )}
+    </button>
+  );
+
+  const statusChip = (statusInfo) => (
+    <span className={`${styles.chip} ${styles[statusInfo.className]}`}>
+      <span className={styles.chipDot} aria-hidden="true" />
+      {statusInfo.label}
+    </span>
+  );
+
+  // Not authenticated — show the sign-in invitation (only once the session
+  // restore has settled, so a reload while logged in doesn't flash this screen)
   if (!authLoading && !isAuthenticated) {
-    return (
-      <div className={`${styles.page} ${isDarkMode ? styles.dark : ""}`}>
-        <div className={styles.container}>
-          <motion.div
-            className={styles.loginPrompt}
-            initial={{ opacity: 0, y: 30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+    return shell(
+      <div className={styles.state}>
+        <div className={styles.stateMark}>
+          <SealedMark />
+        </div>
+        <p className={styles.stateEyebrow}>Your account</p>
+        <h1 className={styles.stateTitle}>Your orders live here</h1>
+        <p className={styles.stateText}>
+          Sign in and every piece you have ordered — placed, on its way or
+          delivered — is waiting on this page, with its tracking and its papers.
+        </p>
+        <div className={styles.stateActions}>
+          <button
+            type="button"
+            className={`sf-btn sf-btn--emerald ${styles.stateBtn}`}
+            onClick={() => openAuthModal("login")}
           >
-            <div className={styles.loginIcon}>
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M15 3h4a2 2 0 012 2v14a2 2 0 01-2 2h-4" />
-                <polyline points="10 17 15 12 10 7" />
-                <line x1="15" y1="12" x2="3" y2="12" />
-              </svg>
-            </div>
-            <h2 className={styles.loginTitle}>Sign In Required</h2>
-            <p className={styles.loginSubtext}>
-              Please sign in to view your order history. Your orders are linked to your account.
-            </p>
-            <div className={styles.loginActions}>
-              <button
-                className={styles.btnPrimary}
-                onClick={() => openAuthModal("login")}
-              >
-                Log In
-              </button>
-              <Link to="/" className={styles.linkSecondary}>
-                Back to Home
-              </Link>
-            </div>
-          </motion.div>
+            Sign In
+          </button>
+          <Link to="/" className={`sf-btn sf-btn--ghost ${styles.stateBtn}`}>
+            Back to Home
+          </Link>
         </div>
       </div>
     );
@@ -378,605 +566,602 @@ const OrderHistory = () => {
   return (
     <div className={`${styles.page} ${isDarkMode ? styles.dark : ""}`}>
       <div className={styles.container}>
-        {/* Page Header */}
-        <motion.div
-          className={styles.pageHeader}
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <div className={styles.headerLeft}>
-            <h1 className={styles.pageTitle}>My Orders</h1>
+        {/* ── The head ─────────────────────────────────────────────────── */}
+        <header className={styles.head}>
+          <div className={styles.headText}>
+            <p className={styles.eyebrow}>Your account</p>
+            <h1 className={styles.title}>Order History</h1>
             {!loading && !fetchError && (
-              <span className={styles.orderCount}>
+              <p className={styles.countLine}>
                 {filteredOrders.length} order{filteredOrders.length !== 1 ? "s" : ""}
-              </span>
+                {activeFilter !== "All" || searchQuery ? " matching" : " on record"}.
+              </p>
             )}
           </div>
-          <button className={styles.btnRefresh} onClick={fetchOrders} disabled={loading}>
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={loading ? styles.spinning : ""}>
-              <polyline points="23 4 23 10 17 10" />
-              <polyline points="1 20 1 14 7 14" />
-              <path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15" />
-            </svg>
+          <button
+            type="button"
+            className={styles.refreshBtn}
+            onClick={fetchOrders}
+            disabled={loading}
+            aria-label="Refresh orders"
+            title="Refresh orders"
+          >
+            <IconRefresh size={16} className={loading ? styles.spinning : undefined} />
           </button>
-        </motion.div>
+        </header>
 
-        {/* Search & Filter Bar */}
-        <motion.div
-          className={styles.filterBar}
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          <div className={styles.searchWrapper}>
-            <svg className={styles.searchIcon} width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
+        {/* ── Search & filters ─────────────────────────────────────────── */}
+        <div className={styles.controls}>
+          <div className={styles.search}>
+            <IconSearch size={16} className={styles.searchIcon} />
             <input
               type="text"
               className={styles.searchInput}
-              placeholder="Search by order number..."
+              placeholder="Search by order number"
+              aria-label="Search by order number"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             {searchQuery && (
-              <button className={styles.clearSearch} onClick={() => setSearchQuery("")}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <line x1="18" y1="6" x2="6" y2="18" />
-                  <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
+              <button
+                type="button"
+                className={styles.clearSearch}
+                onClick={() => setSearchQuery("")}
+                aria-label="Clear search"
+              >
+                <IconClose size={15} />
               </button>
             )}
           </div>
-          <div className={styles.filterTabs}>
+          <div className={styles.tabs} role="group" aria-label="Filter orders by status">
             {FILTER_OPTIONS.map((filter) => (
               <button
                 key={filter}
-                className={`${styles.filterTab} ${activeFilter === filter ? styles.filterTabActive : ""}`}
+                type="button"
+                className={`sf-chip ${styles.tab} ${activeFilter === filter ? "sf-chip--active" : ""}`}
                 onClick={() => setActiveFilter(filter)}
+                aria-pressed={activeFilter === filter}
               >
                 {filter}
               </button>
             ))}
           </div>
-        </motion.div>
+        </div>
 
-        {/* Loading State */}
+        {/* ── Loading — the list's own silhouette ──────────────────────── */}
         {loading && (
-          <div className={styles.loadingState}>
-            <div className={styles.spinner} />
-            <p>Loading your orders...</p>
+          <div className={styles.skeletonList} aria-busy="true" aria-live="polite">
+            <p className={styles.srOnly}>Loading your orders…</p>
+            {Array.from({ length: 3 }).map((_, i) => (
+              <div key={i} className={styles.skeletonCard}>
+                <div className={styles.skeletonRow}>
+                  <span
+                    className={`sf-skeleton ${styles.skeletonLine}`}
+                    style={{ width: "11rem" }}
+                  />
+                  <span
+                    className={`sf-skeleton ${styles.skeletonLine}`}
+                    style={{ width: "6rem", marginLeft: "auto" }}
+                  />
+                </div>
+                <div className={styles.skeletonRow}>
+                  <span className={`sf-skeleton ${styles.skeletonPlate}`} />
+                  <span className={`sf-skeleton ${styles.skeletonPlate}`} />
+                  <span
+                    className={`sf-skeleton ${styles.skeletonLine}`}
+                    style={{ width: "7rem", marginLeft: "auto" }}
+                  />
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
-        {/* Error State — fetch failed; never masquerade as "No Orders Yet" */}
+        {/* ── Error — a failed fetch never masquerades as an empty ledger ── */}
         {!loading && fetchError && (
-          <motion.div
-            className={styles.errorState}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-          >
-            <div className={styles.errorIcon}>
-              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10" />
-                <line x1="12" y1="8" x2="12" y2="12" />
-                <line x1="12" y1="16" x2="12.01" y2="16" />
-              </svg>
+          <div className={styles.state}>
+            <div className={styles.stateMark}>
+              <AlertMark />
             </div>
-            <h3 className={styles.emptyTitle}>Couldn't Load Your Orders</h3>
-            <p className={styles.emptySubtext}>
-              Something went wrong while fetching your orders. Please check your
-              connection and try again.
+            <h2 className={styles.stateTitle}>We couldn't reach your orders</h2>
+            <p className={styles.stateText}>
+              Something went wrong while fetching them. Check your connection and
+              try again — nothing has been lost.
             </p>
-            <button className={styles.btnPrimary} onClick={fetchOrders}>
-              Try Again
-            </button>
-          </motion.div>
+            <div className={styles.stateActions}>
+              <button
+                type="button"
+                className={`sf-btn sf-btn--emerald ${styles.stateBtn}`}
+                onClick={fetchOrders}
+              >
+                Try Again
+              </button>
+            </div>
+          </div>
         )}
 
-        {/* Empty State */}
+        {/* ── Empty ───────────────────────────────────────────────────── */}
         {!loading && !fetchError && filteredOrders.length === 0 && orders.length === 0 && (
-          <motion.div
-            className={styles.emptyState}
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-          >
-            <div className={styles.emptyIcon}>
-              <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
-                <line x1="3" y1="6" x2="21" y2="6" />
-                <path d="M16 10a4 4 0 01-8 0" />
-              </svg>
+          <div className={styles.state}>
+            <div className={styles.stateMark}>
+              <LedgerMark />
             </div>
-            <h3 className={styles.emptyTitle}>No Orders Yet</h3>
-            <p className={styles.emptySubtext}>
-              You haven't placed any orders yet. Explore our products and start shopping!
+            <h2 className={styles.stateTitle}>No orders yet</h2>
+            <p className={styles.stateText}>
+              Your ledger opens with the first piece you take home. Muga, Pat and
+              Eri — woven in Assam, and waiting.
             </p>
-            <button className={styles.btnPrimary} onClick={() => navigate("/")}>
-              Start Shopping
-            </button>
-          </motion.div>
+            <div className={styles.stateActions}>
+              <button
+                type="button"
+                className={`sf-btn sf-btn--emerald ${styles.stateBtn}`}
+                onClick={() => navigate("/")}
+              >
+                Start Shopping
+              </button>
+            </div>
+          </div>
         )}
 
-        {/* No filter results */}
-        {!loading && filteredOrders.length === 0 && orders.length > 0 && (
-          <motion.div
-            className={styles.emptyState}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-          >
-            <h3 className={styles.emptyTitle}>No matching orders</h3>
-            <p className={styles.emptySubtext}>
-              Try adjusting your search or filter criteria.
+        {/* ── No matches ──────────────────────────────────────────────── */}
+        {!loading && !fetchError && filteredOrders.length === 0 && orders.length > 0 && (
+          <div className={styles.state}>
+            <h2 className={styles.stateTitle}>No matching orders</h2>
+            <p className={styles.stateText}>
+              Nothing on record answers to that search or filter. Widen it and
+              your orders come back.
             </p>
-            <button
-              className={styles.btnSecondary}
-              onClick={() => {
-                setSearchQuery("");
-                setActiveFilter("All");
-              }}
-            >
-              Clear Filters
-            </button>
-          </motion.div>
+            <div className={styles.stateActions}>
+              <button
+                type="button"
+                className={`sf-btn sf-btn--outline-gold ${styles.stateBtn}`}
+                onClick={() => {
+                  setSearchQuery("");
+                  setActiveFilter("All");
+                }}
+              >
+                Clear Filters
+              </button>
+            </div>
+          </div>
         )}
 
-        {/* Orders List */}
+        {/* ── The records ─────────────────────────────────────────────── */}
         {!loading && paginatedOrders.length > 0 && (
-          <div className={styles.ordersList}>
-            <AnimatePresence>
-              {paginatedOrders.map((order, index) => {
-                const statusInfo = getStatusInfo(deriveOrderStatus(order));
-                const orderItems = order.items || [];
-                const visibleItems = orderItems.slice(0, 3);
-                const remainingCount = orderItems.length - 3;
-                const isExpanded = expandedOrder === (order.id || order.orderNumber);
-                const showTracking = trackingVisible === (order.id || order.orderNumber);
+          <div className={styles.list}>
+            {paginatedOrders.map((order, index) => {
+              const derived = deriveOrderStatus(order);
+              const statusInfo = getStatusInfo(derived);
+              const orderItems = order.items || [];
+              const orderKey = order.id || order.orderNumber;
+              const orderRef = order.orderNumber || `#${order.id}`;
+              const copyRef = order.orderNumber || order.id;
+              const visibleItems = orderItems.slice(0, 3);
+              const remainingCount = orderItems.length - 3;
+              const isExpanded = expandedOrder === orderKey;
+              const showTracking = trackingVisible === orderKey;
+              const showPassage = derived !== "cancelled" && derived !== "returned";
+              const stageIndex = derived === "delivered" ? 2 : derived === "shipped" ? 1 : 0;
+              const addr = normalizeOrderAddress(order.shippingAddress);
+              const canReorder = reorderableItems(order).length > 0;
 
-                return (
-                  <motion.div
-                    key={order.id || order.orderNumber}
-                    className={styles.orderCard}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ delay: index * 0.05 }}
-                  >
-                    {/* Order Card Header */}
-                    <div className={styles.cardHeader}>
-                      <div className={styles.cardHeaderLeft}>
-                        <div className={styles.orderNumberRow}>
-                          <span className={styles.orderNumber}>
-                            {order.orderNumber || `#${order.id}`}
-                          </span>
-                          <button
-                            className={styles.btnCopy}
-                            onClick={() => handleCopy(order.orderNumber || order.id)}
-                            title="Copy order number"
-                          >
-                            {copiedId === (order.orderNumber || order.id) ? (
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                <polyline points="20 6 9 17 4 12" />
-                              </svg>
-                            ) : (
-                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                                <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-                              </svg>
+              return (
+                <article
+                  key={orderKey}
+                  className={styles.record}
+                  style={{ animationDelay: `${Math.min(index, 4) * 60}ms` }}
+                  aria-label={`Order ${orderRef}`}
+                >
+                  {/* Identity */}
+                  <div className={styles.recordHead}>
+                    <div className={styles.identity}>
+                      <div className={styles.numberRow}>
+                        <span className={styles.number}>{orderRef}</span>
+                        {copyControl(copyRef, "order number")}
+                      </div>
+                      <p className={styles.meta}>
+                        {formatDate(order.createdAt)}
+                        <span className={styles.metaSep} aria-hidden="true">
+                          /
+                        </span>
+                        {orderItems.length} item{orderItems.length !== 1 ? "s" : ""}
+                      </p>
+                    </div>
+                    {statusChip(statusInfo)}
+                  </div>
+
+                  {/* The pieces, and the total */}
+                  <div className={styles.pieces}>
+                    <div className={styles.plates}>
+                      {visibleItems.map((item, i) => (
+                        <span key={i} className={styles.plate}>
+                          <img
+                            src={item.image || PLACEHOLDER_IMG}
+                            alt={item.name || "Product"}
+                            loading="lazy"
+                            onError={onImageError}
+                          />
+                        </span>
+                      ))}
+                      {remainingCount > 0 && (
+                        <span className={styles.plateMore}>+{remainingCount} more</span>
+                      )}
+                    </div>
+                    <p className={styles.total}>
+                      <span className={styles.totalLabel}>Total</span>
+                      <span className={styles.totalValue}>{formatCurrency(order.total)}</span>
+                    </p>
+                  </div>
+
+                  {/* The passage — hidden for a cancelled or returned order,
+                      where the chip has already said the outcome. */}
+                  {showPassage && (
+                    <div className={styles.passage}>
+                      <p className={styles.srOnly}>
+                        {`Progress: stage ${stageIndex + 1} of 3. ` +
+                          TIMELINE_STEPS.map(
+                            (label, i) => `${label}: ${i <= stageIndex ? "done" : "not yet"}`
+                          ).join(". ")}
+                      </p>
+                      <div className={styles.track} aria-hidden="true">
+                        {TIMELINE_STEPS.map((label, i) => (
+                          <React.Fragment key={label}>
+                            {i > 0 && (
+                              <span
+                                className={`${styles.rail} ${i <= stageIndex ? styles.railDone : ""}`}
+                              />
                             )}
-                          </button>
-                        </div>
-                        <span className={styles.orderDate}>
-                          {formatDate(order.createdAt)}
-                        </span>
-                      </div>
-                      <div className={styles.cardHeaderRight}>
-                        <span className={`${styles.statusBadge} ${styles[statusInfo.className]}`}>
-                          {statusInfo.label}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Product Thumbnails */}
-                    <div className={styles.cardBody}>
-                      <div className={styles.thumbnailRow}>
-                        {visibleItems.map((item, i) => (
-                          <div key={i} className={styles.thumbnail}>
-                            <img
-                              src={item.image || "https://placehold.co/64x64?text=Item"}
-                              alt={item.name || "Product"}
-                              loading="lazy"
-                            />
-                          </div>
+                            <span className={styles.stage}>
+                              <span
+                                className={`${styles.node} ${i <= stageIndex ? styles.nodeDone : ""}`}
+                              />
+                              <span
+                                className={`${styles.stageLabel} ${i <= stageIndex ? styles.stageLabelDone : ""}`}
+                              >
+                                {label}
+                              </span>
+                            </span>
+                          </React.Fragment>
                         ))}
-                        {remainingCount > 0 && (
-                          <div className={styles.thumbnailMore}>
-                            +{remainingCount} more
-                          </div>
-                        )}
-                        <div className={styles.orderTotal}>
-                          <span className={styles.totalLabel}>Total</span>
-                          <span className={styles.totalValue}>
-                            {formatCurrency(order.total)}
-                          </span>
-                        </div>
                       </div>
                     </div>
+                  )}
 
-                    {/* Status Timeline — derived only from deriveOrderStatus;
-                        hidden for cancelled/returned, where the badge says it. */}
-                    {(() => {
-                      const status = deriveOrderStatus(order);
-                      if (status === "cancelled" || status === "returned") return null;
-                      const idx =
-                        status === "delivered" ? 2 : status === "shipped" ? 1 : 0;
-                      const steps = ["Placed", "Shipped", "Delivered"];
-                      return (
-                        <div className={styles.statusTimeline}>
-                          {steps.map((label, i) => (
-                            <React.Fragment key={label}>
-                              {i > 0 && (
-                                <span
-                                  className={`${styles.timelineLine} ${i <= idx ? styles.timelineLineDone : ""}`}
-                                />
-                              )}
-                              <div className={styles.timelineStep}>
-                                <span
-                                  className={`${styles.timelineDot} ${i <= idx ? styles.timelineDotDone : ""}`}
-                                />
-                                <span
-                                  className={`${styles.timelineLabel} ${i <= idx ? styles.timelineLabelDone : ""}`}
-                                >
-                                  {label}
-                                </span>
-                              </div>
-                            </React.Fragment>
-                          ))}
-                        </div>
-                      );
-                    })()}
-
-                    {/* Action Buttons */}
-                    <div className={styles.cardActions}>
+                  {/* Actions */}
+                  <div className={styles.actions}>
+                    {isCancellable(order) && (
                       <button
-                        className={styles.btnOutline}
-                        onClick={() =>
-                          setTrackingVisible(
-                            showTracking ? null : order.id || order.orderNumber
-                          )
-                        }
+                        type="button"
+                        className={`${styles.action} ${styles.actionDanger}`}
+                        onClick={() => handleCancelOrder(order)}
+                        disabled={cancellingId !== null}
                       >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <rect x="1" y="3" width="15" height="13" rx="2" ry="2" />
-                          <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
-                          <circle cx="5.5" cy="18.5" r="2.5" />
-                          <circle cx="18.5" cy="18.5" r="2.5" />
-                        </svg>
-                        Track Order
-                      </button>
-                      <button
-                        className={styles.btnOutline}
-                        onClick={() =>
-                          setExpandedOrder(
-                            isExpanded ? null : order.id || order.orderNumber
-                          )
-                        }
-                      >
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                          <circle cx="12" cy="12" r="3" />
-                        </svg>
-                        {isExpanded ? "Hide Details" : "View Details"}
-                      </button>
-                      <button
-                        className={styles.btnReorder}
-                        onClick={() => handleReorder(order)}
-                        disabled={
-                          reorderingId !== null ||
-                          reorderableItems(order).length === 0
-                        }
-                        title={
-                          reorderableItems(order).length === 0
-                            ? "These items can't be re-added to the cart"
-                            : "Add these items to your cart again"
-                        }
-                      >
-                        {reorderingId === order.id ? (
+                        {cancellingId === order.id ? (
                           <>
-                            <span className={styles.btnSpinner} />
-                            Adding...
+                            <span className={styles.btnSpinner} aria-hidden="true" />
+                            Cancelling…
                           </>
                         ) : (
-                          <>
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <polyline points="23 4 23 10 17 10" />
-                              <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
-                            </svg>
-                            Reorder
-                          </>
+                          "Cancel Order"
                         )}
                       </button>
-                      {isReturnEligible(order) && (
-                        <button
-                          className={styles.btnOutlineWarning}
-                          onClick={() => navigate("/support")}
-                        >
-                          Return / Exchange
-                        </button>
+                    )}
+                    {isReturnEligible(order) && (
+                      <button
+                        type="button"
+                        className={`${styles.action} ${styles.actionAccent}`}
+                        onClick={() => navigate("/support")}
+                      >
+                        Return / Exchange
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className={styles.action}
+                      onClick={() => handleReorder(order)}
+                      disabled={reorderingId !== null || !canReorder}
+                      title={
+                        canReorder
+                          ? "Add these items to your cart again"
+                          : "These items can't be re-added to the cart"
+                      }
+                    >
+                      {reorderingId === order.id ? (
+                        <>
+                          <span className={styles.btnSpinner} aria-hidden="true" />
+                          Adding…
+                        </>
+                      ) : (
+                        "Reorder"
                       )}
-                      {isCancellable(order) && (
-                        <button
-                          className={styles.btnOutlineDanger}
-                          onClick={() => handleCancelOrder(order)}
-                          disabled={cancellingId !== null}
-                        >
-                          {cancellingId === order.id ? (
+                    </button>
+                    <button
+                      type="button"
+                      className={`${styles.action} ${showTracking ? styles.actionOpen : ""}`}
+                      onClick={() => setTrackingVisible(showTracking ? null : orderKey)}
+                      aria-expanded={showTracking}
+                      aria-controls={`tracking-${orderKey}`}
+                    >
+                      Tracking
+                      <IconChevron
+                        size={14}
+                        className={`${styles.chevron} ${showTracking ? styles.chevronUp : ""}`}
+                      />
+                    </button>
+                    <button
+                      type="button"
+                      className={`${styles.action} ${isExpanded ? styles.actionOpen : ""}`}
+                      onClick={() => setExpandedOrder(isExpanded ? null : orderKey)}
+                      aria-expanded={isExpanded}
+                      aria-controls={`details-${orderKey}`}
+                    >
+                      Details
+                      <IconChevron
+                        size={14}
+                        className={`${styles.chevron} ${isExpanded ? styles.chevronUp : ""}`}
+                      />
+                    </button>
+                  </div>
+
+                  {/* Drawer — tracking */}
+                  <div
+                    id={`tracking-${orderKey}`}
+                    className={`${styles.drawer} ${showTracking ? styles.drawerOpen : ""}`}
+                  >
+                    <div className={styles.drawerPane}>
+                      <div className={styles.drawerInner}>
+                        <div className={styles.trackRow}>
+                          <span className={styles.trackLabel}>Tracking number</span>
+                          {order.trackingNumber ? (
                             <>
-                              <span className={styles.btnSpinner} />
-                              Cancelling...
+                              <span className={`${styles.trackValue} ${styles.trackMono}`}>
+                                {order.trackingNumber}
+                              </span>
+                              {copyControl(order.trackingNumber, "tracking number")}
                             </>
                           ) : (
-                            "Cancel Order"
+                            <span className={`${styles.trackValue} ${styles.trackMuted}`}>
+                              Not yet available
+                            </span>
                           )}
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Tracking Info */}
-                    <AnimatePresence>
-                      {showTracking && (
-                        <motion.div
-                          className={styles.trackingSection}
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.25 }}
-                        >
-                          <div className={styles.trackingInner}>
-                            <div className={styles.trackingRow}>
-                              <span className={styles.trackingLabel}>Tracking Number</span>
-                              <span className={styles.trackingValue}>
-                                {order.trackingNumber || "Not yet available"}
-                              </span>
-                              {order.trackingNumber && (
-                                <button
-                                  className={styles.btnCopy}
-                                  onClick={() => handleCopy(order.trackingNumber)}
-                                >
-                                  {copiedId === order.trackingNumber ? (
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                      <polyline points="20 6 9 17 4 12" />
-                                    </svg>
-                                  ) : (
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                                      <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-                                    </svg>
-                                  )}
-                                </button>
-                              )}
-                            </div>
-                            {order.trackingUrl && (
-                              <div className={styles.trackingRow}>
-                                <span className={styles.trackingLabel}>Track Shipment</span>
-                                <a
-                                  href={order.trackingUrl}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className={styles.trackingLink}
-                                >
-                                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                    <rect x="1" y="3" width="15" height="13" rx="2" ry="2" />
-                                    <polygon points="16 8 20 8 23 11 23 16 16 16 16 8" />
-                                    <circle cx="5.5" cy="18.5" r="2.5" />
-                                    <circle cx="18.5" cy="18.5" r="2.5" />
-                                  </svg>
-                                  Open carrier tracking page
-                                </a>
-                              </div>
-                            )}
-                            <div className={styles.trackingRow}>
-                              <span className={styles.trackingLabel}>Status</span>
-                              <span className={`${styles.statusBadge} ${styles[statusInfo.className]}`}>
-                                {statusInfo.label}
-                              </span>
-                            </div>
-                            {order.refundStatus && (
-                              <div className={styles.trackingRow}>
-                                <span className={styles.trackingLabel}>Refund</span>
-                                <span className={styles.trackingValue} style={{ fontFamily: "inherit" }}>
-                                  {order.refundStatus === "completed"
-                                    ? `Refunded${order.refundedAmount ? ` ${formatCurrency(order.refundedAmount)}` : ""} to your ${(order.refundMethod || "original payment").replace(/_/g, " ")}`
-                                    : order.refundStatus === "processing"
-                                    ? "Refund in progress — typically 5–7 business days"
-                                    : order.refundStatus === "failed"
-                                    ? "Refund delayed — our team is on it"
-                                    : order.refundStatus}
-                                </span>
-                              </div>
-                            )}
+                        </div>
+                        {order.trackingUrl && (
+                          <div className={styles.trackRow}>
+                            <span className={styles.trackLabel}>Carrier</span>
+                            <a
+                              href={order.trackingUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={styles.trackLink}
+                            >
+                              <IconExternal size={14} />
+                              Open carrier tracking page
+                              <span className={styles.srOnly}>(opens in a new tab)</span>
+                            </a>
                           </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
+                        )}
+                        <div className={styles.trackRow}>
+                          <span className={styles.trackLabel}>Status</span>
+                          {statusChip(statusInfo)}
+                        </div>
+                        {order.refundStatus && (
+                          <div className={styles.trackRow}>
+                            <span className={styles.trackLabel}>Refund</span>
+                            <span
+                              className={`${styles.refundLine} ${
+                                order.refundStatus === "completed"
+                                  ? styles.refundOk
+                                  : order.refundStatus === "processing"
+                                  ? styles.refundPending
+                                  : order.refundStatus === "failed"
+                                  ? styles.refundFailed
+                                  : ""
+                              }`}
+                            >
+                              {order.refundStatus === "completed"
+                                ? `Refunded${order.refundedAmount ? ` ${formatCurrency(order.refundedAmount)}` : ""} to your ${(order.refundMethod || "original payment").replace(/_/g, " ")}`
+                                : order.refundStatus === "processing"
+                                ? "Refund in progress — typically 5–7 business days"
+                                : order.refundStatus === "failed"
+                                ? "Refund delayed — our team is on it"
+                                : order.refundStatus}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
 
-                    {/* Expanded Details */}
-                    <AnimatePresence>
-                      {isExpanded && (
-                        <motion.div
-                          className={styles.expandedSection}
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.25 }}
-                        >
-                          <div className={styles.expandedInner}>
-                            {/* Full Items List */}
-                            <div className={styles.detailBlock}>
-                              <h4 className={styles.detailBlockTitle}>Items Ordered</h4>
-                              <div className={styles.detailItemsList}>
-                                {orderItems.map((item, i) => (
-                                  <div key={i} className={styles.detailItem}>
-                                    <div className={styles.detailItemImg}>
+                  {/* Drawer — the full record */}
+                  <div
+                    id={`details-${orderKey}`}
+                    className={`${styles.drawer} ${isExpanded ? styles.drawerOpen : ""}`}
+                  >
+                    <div className={styles.drawerPane}>
+                      <div className={`${styles.drawerInner} ${styles.detailGrid}`}>
+                        <div className={styles.detailCol}>
+                          <section>
+                            <h3 className={styles.blockTitle}>Items ordered</h3>
+                            <ul className={styles.lines}>
+                              {orderItems.map((item, i) => {
+                                const existing =
+                                  item.productId != null ? reviewFor(item.productId) : null;
+                                const sc = existing ? REVIEW_STATUS[existing.status] : null;
+                                return (
+                                  <li key={i} className={styles.line}>
+                                    <span className={styles.lineThumb}>
                                       <img
-                                        src={item.image || "https://placehold.co/56x56?text=Item"}
+                                        src={item.image || PLACEHOLDER_IMG}
                                         alt={item.name || "Product"}
                                         loading="lazy"
+                                        onError={onImageError}
                                       />
-                                    </div>
-                                    <div className={styles.detailItemInfo}>
-                                      <span className={styles.detailItemName}>{item.name}</span>
+                                    </span>
+                                    <div className={styles.lineBody}>
+                                      <p className={styles.lineName}>{item.name}</p>
                                       {item.variantName && (
-                                        <span className={styles.detailItemVariant}>{item.variantName}</span>
+                                        <span className={styles.lineVariant}>
+                                          {item.variantName}
+                                        </span>
                                       )}
-                                      <span className={styles.detailItemQty}>Qty: {item.quantity}</span>
-                                      {isReviewable(order) && item.productId != null && (() => {
-                                        const existing = reviewFor(item.productId);
-                                        const sc = existing ? REVIEW_STATUS[existing.status] : null;
-                                        return (
-                                          <div className={styles.reviewControl}>
-                                            {existing && sc && (
-                                              <span className={`${styles.reviewStatusChip} ${styles[sc.className]}`}>
-                                                {sc.label}
-                                              </span>
-                                            )}
-                                            <button
-                                              type="button"
-                                              className={styles.btnReview}
-                                              onClick={() => openReviewModal(order, item)}
+                                      <span className={styles.lineQty}>
+                                        Qty {item.quantity}
+                                      </span>
+                                      {isReviewable(order) && item.productId != null && (
+                                        <div className={styles.reviewControl}>
+                                          <button
+                                            type="button"
+                                            className={styles.reviewBtn}
+                                            onClick={() => openReviewModal(order, item)}
+                                          >
+                                            <span className={styles.reviewStar}>
+                                              <IconStar />
+                                            </span>
+                                            {existing ? "Edit review" : "Rate & review"}
+                                          </button>
+                                          {existing && sc && (
+                                            <span
+                                              className={`${styles.chip} ${styles[sc.className]}`}
                                             >
-                                              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                                                <polygon points="12 2 15 9 22 9.5 17 14.5 18.5 22 12 18 5.5 22 7 14.5 2 9.5 9 9" />
-                                              </svg>
-                                              {existing ? "Edit Review" : "Rate & Review"}
-                                            </button>
-                                          </div>
-                                        );
-                                      })()}
+                                              <span
+                                                className={styles.chipDot}
+                                                aria-hidden="true"
+                                              />
+                                              {sc.label}
+                                            </span>
+                                          )}
+                                        </div>
+                                      )}
                                     </div>
-                                    <div className={styles.detailItemPrice}>
+                                    <span className={styles.linePrice}>
                                       {formatCurrency(item.price * item.quantity, item.currency)}
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
+                                    </span>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          </section>
+                        </div>
 
-                            {/* Shipping Address */}
-                            <div className={styles.detailBlock}>
-                              <h4 className={styles.detailBlockTitle}>Shipping Address</h4>
-                              <div className={styles.detailContent}>
-                                {(() => {
-                                  const addr = normalizeOrderAddress(order.shippingAddress);
-                                  if (!addr) {
-                                    return <p className={styles.textMuted}>Shipping address not available</p>;
-                                  }
-                                  return (
-                                    <>
-                                      {addr.name && <p>{addr.name}</p>}
-                                      {addr.line1 && <p>{addr.line1}</p>}
-                                      {addr.line2 && <p>{addr.line2}</p>}
-                                      {addr.cityLine && <p>{addr.cityLine}</p>}
-                                      {addr.country && <p>{addr.country}</p>}
-                                      {addr.phone && <p>Phone: {addr.phone}</p>}
-                                    </>
-                                  );
-                                })()}
-                              </div>
-                            </div>
-
-                            {/* Payment Method */}
-                            <div className={styles.detailBlock}>
-                              <h4 className={styles.detailBlockTitle}>Payment</h4>
-                              <div className={styles.detailContent}>
-                                <p>{order.paymentMethod ? order.paymentMethod.replace(/_/g, " ").toUpperCase() : "N/A"}</p>
-                                {order.paymentStatus && (
-                                  <p className={styles.textMuted}>
-                                    Status: {order.paymentStatus.replace(/_/g, " ")}
-                                  </p>
+                        <div className={styles.detailCol}>
+                          <section>
+                            <h3 className={styles.blockTitle}>Shipping address</h3>
+                            {addr ? (
+                              <>
+                                {addr.name && <p className={styles.addrName}>{addr.name}</p>}
+                                {addr.line1 && <p className={styles.addrLine}>{addr.line1}</p>}
+                                {addr.line2 && <p className={styles.addrLine}>{addr.line2}</p>}
+                                {addr.cityLine && (
+                                  <p className={styles.addrLine}>{addr.cityLine}</p>
                                 )}
-                              </div>
-                            </div>
+                                {addr.country && <p className={styles.addrLine}>{addr.country}</p>}
+                                {addr.phone && <p className={styles.addrPhone}>{addr.phone}</p>}
+                              </>
+                            ) : (
+                              <p className={styles.muted}>Shipping address not available</p>
+                            )}
+                          </section>
 
-                            {/* Order Summary */}
-                            <div className={styles.detailBlock}>
-                              <h4 className={styles.detailBlockTitle}>Order Summary</h4>
-                              <div className={styles.summaryTable}>
-                                <div className={styles.summaryRow}>
-                                  <span>Subtotal</span>
-                                  <span>{formatCurrency(order.subtotal)}</span>
-                                </div>
-                                {(order.discountAmount ?? 0) > 0 && (
-                                  <div className={styles.summaryRow}>
-                                    <span>Discount{order.couponCode ? ` (${order.couponCode})` : ""}</span>
-                                    <span>-{formatCurrency(order.discountAmount)}</span>
-                                  </div>
-                                )}
-                                <div className={styles.summaryRow}>
-                                  <span>Shipping</span>
-                                  <span>
-                                    {(order.shippingAmount ?? order.shipping ?? 0) > 0
-                                      ? formatCurrency(order.shippingAmount ?? order.shipping)
-                                      : "FREE"}
-                                  </span>
-                                </div>
-                                <div className={styles.summaryRow}>
-                                  <span>Tax</span>
-                                  <span>{formatCurrency(order.taxAmount ?? order.tax ?? 0)}</span>
-                                </div>
-                                <div className={`${styles.summaryRow} ${styles.summaryRowTotal}`}>
-                                  <span>Total</span>
-                                  <span>{formatCurrency(order.total)}</span>
-                                </div>
+                          <section>
+                            <h3 className={styles.blockTitle}>Payment</h3>
+                            <p className={styles.payMethod}>
+                              {order.paymentMethod
+                                ? order.paymentMethod.replace(/_/g, " ").toUpperCase()
+                                : "N/A"}
+                            </p>
+                            {order.paymentStatus && (
+                              <p className={styles.muted}>
+                                Status: {order.paymentStatus.replace(/_/g, " ")}
+                              </p>
+                            )}
+                          </section>
+
+                          <section>
+                            <h3 className={styles.blockTitle}>Order summary</h3>
+                            <dl className={styles.ledger}>
+                              <div className={styles.ledgerRow}>
+                                <dt>Subtotal</dt>
+                                <dd>{formatCurrency(order.subtotal)}</dd>
                               </div>
-                            </div>
-                          </div>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
+                              {(order.discountAmount ?? 0) > 0 && (
+                                <div className={`${styles.ledgerRow} ${styles.ledgerDiscount}`}>
+                                  <dt>
+                                    Discount{order.couponCode ? ` (${order.couponCode})` : ""}
+                                  </dt>
+                                  <dd>-{formatCurrency(order.discountAmount)}</dd>
+                                </div>
+                              )}
+                              <div className={styles.ledgerRow}>
+                                <dt>Shipping</dt>
+                                <dd>
+                                  {(order.shippingAmount ?? order.shipping ?? 0) > 0
+                                    ? formatCurrency(order.shippingAmount ?? order.shipping)
+                                    : "FREE"}
+                                </dd>
+                              </div>
+                              <div className={styles.ledgerRow}>
+                                <dt>Tax</dt>
+                                <dd>{formatCurrency(order.taxAmount ?? order.tax ?? 0)}</dd>
+                              </div>
+                              <div className={`${styles.ledgerRow} ${styles.ledgerTotal}`}>
+                                <dt>Total</dt>
+                                <dd>{formatCurrency(order.total)}</dd>
+                              </div>
+                            </dl>
+                          </section>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         )}
 
-        {/* Pagination */}
+        {/* ── The pager ───────────────────────────────────────────────── */}
         {!loading && totalPages > 1 && (
-          <div className={styles.pagination}>
-            <button
-              className={styles.pageBtn}
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage((p) => p - 1)}
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polyline points="15 18 9 12 15 6" />
-              </svg>
-              Previous
-            </button>
-            <div className={styles.pageNumbers}>
-              {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                <button
-                  key={page}
-                  className={`${styles.pageNumber} ${currentPage === page ? styles.pageNumberActive : ""}`}
-                  onClick={() => setCurrentPage(page)}
-                >
-                  {page}
-                </button>
-              ))}
+          <nav className={styles.pager} aria-label="Order history pages">
+            <div className={styles.pagerRow}>
+              <button
+                type="button"
+                className={styles.pagerStep}
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+                aria-label="Previous page"
+              >
+                <IconChevron size={14} style={{ transform: "rotate(90deg)" }} />
+                Prev
+              </button>
+              <div className={styles.pagerNums}>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                  <button
+                    key={page}
+                    type="button"
+                    className={`${styles.pagerNum} ${currentPage === page ? styles.pagerNumActive : ""}`}
+                    onClick={() => setCurrentPage(page)}
+                    aria-label={`Page ${page}`}
+                    aria-current={currentPage === page ? "page" : undefined}
+                  >
+                    {page}
+                  </button>
+                ))}
+              </div>
+              <button
+                type="button"
+                className={styles.pagerStep}
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((p) => p + 1)}
+                aria-label="Next page"
+              >
+                Next
+                <IconChevron size={14} style={{ transform: "rotate(-90deg)" }} />
+              </button>
             </div>
-            <button
-              className={styles.pageBtn}
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((p) => p + 1)}
-            >
-              Next
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polyline points="9 18 15 12 9 6" />
-              </svg>
-            </button>
-          </div>
+            <p className={styles.pagerInfo}>
+              Page {currentPage} of {totalPages}
+            </p>
+          </nav>
         )}
       </div>
 
@@ -986,7 +1171,6 @@ const OrderHistory = () => {
         product={reviewModal.product}
         existing={reviewModal.existing}
         onSubmit={handleSubmitReview}
-        isDarkMode={isDarkMode}
       />
     </div>
   );

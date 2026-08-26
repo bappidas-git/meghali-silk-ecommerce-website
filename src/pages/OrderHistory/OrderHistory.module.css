@@ -1,1000 +1,1443 @@
-/* =============================================================================
- * Order History — Meghali's Silk re-skin
- * All colours come from src/theme/storefront-tokens.css (--sf-*), which flip on
- * body.dark. No hardcoded hex. The .dark marker only hints the native
- * color-scheme so form controls / scrollbars render for the active theme.
- * ========================================================================== */
+/* ═══════════════════════════════════════════════════════════════════════════
+   ORDER HISTORY  —  the account ledger
+   ═══════════════════════════════════════════════════════════════════════════
+   Not a dashboard: a bound ledger of records you keep. The page is read top to
+   bottom in four moves, and nothing else:
 
-/* ===== Base Page ===== */
+     1. THE HEAD — tracked eyebrow, serif title, one muted count line, and the
+        refresh as a quiet mark on the right. The controls sit under it on a
+        single hairline: the search field IS a rule, and the five filters are
+        hairline chips on the ivory ground.
+     2. THE RECORD — one card per order. The number is set in tracked mono with
+        a text Copy beside it, the date and line count beneath, the derived
+        status as a quiet chip. Then the pieces themselves (three plates and a
+        "+N more"), with the total in the serif.
+     3. THE PASSAGE — Placed → Shipped → Delivered drawn as a hairline rail
+        with small nodes, gold behind the stages already reached. Hidden for a
+        cancelled or returned order, where the chip has already said it.
+     4. THE ACTIONS — a segmented footer of text buttons divided by hairlines,
+        and under it the two drawers: tracking and the full detail.
+
+   Every status word, refund line and money row is the order's own field. There
+   is no invented progress here — an order with no tracking number says so.
+
+   TOKENS ONLY
+   Colour, space, radius and type all resolve through `--sf-*`, which flips
+   under `body.dark`, so light and dark are one stylesheet and there is no hex
+   in this file. The single local variable is the monospace stack for order and
+   tracking numbers: the token layer has no `--sf-font-mono`, and a font stack
+   is not a colour.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 .page {
+  /* No `--sf-font-mono` exists; the record numbers are the only mono strings
+     here, so the stack is declared locally (as on the confirmation page). */
+  --oh-mono: ui-monospace, "SFMono-Regular", "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+  /* How long a drawer's contents stay reachable after it starts closing. Held
+     in one place so the visibility hand-off and the height share a duration. */
+  --oh-collapse: 0.35s;
+
   min-height: 100vh;
-  padding: var(--sf-space-8) 0 var(--sf-space-16);
+  padding-bottom: var(--sf-space-24);
   background: var(--sf-color-bg);
   color: var(--sf-color-text);
   font-family: var(--sf-font-family);
 }
 
-.dark { color-scheme: dark; }
+/* The only thing ThemeContext is consumed for: a native color-scheme hint so
+   scrollbars and native controls render for the active theme. */
+.dark {
+  color-scheme: dark;
+}
 
 .container {
-  max-width: 960px;
+  max-width: 1040px;
   margin: 0 auto;
   padding: 0 var(--sf-space-6);
 }
 
-/* ===== Page Header ===== */
-.pageHeader {
+/* Visually hidden, still announced — the timeline's text equivalent and the
+   "opens in a new tab" notes ride on this. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   1. THE HEAD
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--sf-space-6);
+  padding: var(--sf-space-16) 0 var(--sf-space-8);
+}
+
+.headText {
+  min-width: 0;
+}
+
+.eyebrow {
+  margin: 0 0 var(--sf-space-3);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wider);
+  line-height: 1;
+  color: var(--sf-color-gold-deep);
+}
+
+.title {
+  margin: 0;
+  font-family: var(--sf-font-display);
+  font-size: clamp(2.25rem, 4.6vw, 3.25rem);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-display);
+  letter-spacing: var(--sf-tracking-tight);
+  color: var(--sf-color-text);
+}
+
+.countLine {
+  margin: var(--sf-space-3) 0 0;
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Refresh is a mark, not a button: a hairline square that only warms on hover.
+   It sits on the baseline of the title block, out of the reading path. */
+.refreshBtn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sf-space-2);
+  min-width: var(--sf-tap-target);
+  min-height: var(--sf-tap-target);
+  padding: 0 var(--sf-space-3);
+  border: 1px solid var(--sf-color-border);
+  border-radius: var(--sf-radius-sm);
+  background: transparent;
+  color: var(--sf-color-text-secondary);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: 1;
+  cursor: pointer;
+  transition: color var(--sf-transition-fast),
+    border-color var(--sf-transition-fast);
+}
+
+.refreshBtn:hover:not(:disabled) {
+  color: var(--sf-color-text);
+  border-color: var(--sf-color-border-strong);
+}
+
+.refreshBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.refreshBtn:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--sf-shadow-focus);
+}
+
+/* The one spinning thing on the page, and only while a fetch is in flight. */
+.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   2. THE CONTROLS  —  a field that is a rule, and five hairline chips
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.controls {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--sf-space-6);
+  padding-bottom: var(--sf-space-6);
+  border-bottom: 1px solid var(--sf-color-border);
+}
+
+.search {
+  position: relative;
+  flex: 1 1 18rem;
+  min-width: 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  margin-bottom: var(--sf-space-6);
-}
-
-.headerLeft {
-  display: flex;
-  align-items: baseline;
   gap: var(--sf-space-3);
+  height: var(--sf-tap-target);
+  border-bottom: 1px solid var(--sf-color-border-strong);
+  transition: border-color var(--sf-transition-fast),
+    box-shadow var(--sf-transition-fast);
 }
 
-.pageTitle {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-3xl);
-  font-weight: var(--sf-font-bold);
-  letter-spacing: -0.01em;
+.search:focus-within {
+  border-bottom-color: var(--sf-color-focus-ring);
+  box-shadow: 0 1px 0 0 var(--sf-color-focus-ring);
+}
+
+.searchIcon {
+  flex: none;
+  color: var(--sf-color-text-muted);
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-base);
   color: var(--sf-color-text);
-  margin: 0;
+  caret-color: var(--sf-color-gold);
 }
 
-.orderCount {
-  font-size: var(--sf-text-sm);
-  color: var(--sf-color-text-secondary);
-  font-weight: var(--sf-font-medium);
-  background: var(--sf-color-badge-bg);
-  padding: var(--sf-space-1) var(--sf-space-3);
-  border-radius: var(--sf-radius-pill);
+.searchInput::placeholder {
+  color: var(--sf-color-text-muted);
+  opacity: 1;
 }
 
-.btnRefresh {
-  display: flex;
+.clearSearch {
+  flex: none;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   width: var(--sf-tap-target);
   height: var(--sf-tap-target);
-  border: 1px solid var(--sf-color-border-strong);
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-surface);
-  color: var(--sf-color-text-secondary);
-  cursor: pointer;
-  transition: all var(--sf-transition-fast);
-}
-
-.btnRefresh:hover {
-  border-color: var(--sf-color-gold);
-  color: var(--sf-color-price);
-  background: var(--sf-color-badge-bg);
-}
-
-.btnRefresh:focus-visible {
-  outline: 2px solid var(--sf-color-emerald);
-  outline-offset: 2px;
-}
-
-.btnRefresh:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.spinning { animation: spin 1s linear infinite; }
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-/* ===== Filter Bar ===== */
-.filterBar {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sf-space-4);
-  margin-bottom: var(--sf-space-6);
-  padding: var(--sf-space-5);
-  background: var(--sf-color-surface);
-  border-radius: var(--sf-radius-lg);
-  border: 1px solid var(--sf-color-border);
-  box-shadow: var(--sf-shadow-sm);
-}
-
-.searchWrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.searchIcon {
-  position: absolute;
-  left: var(--sf-space-3);
+  border: none;
+  background: transparent;
   color: var(--sf-color-text-muted);
-  pointer-events: none;
+  cursor: pointer;
+  transition: color var(--sf-transition-fast);
 }
 
-.searchInput {
-  width: 100%;
-  padding: var(--sf-space-3) var(--sf-space-8) var(--sf-space-3) 2.75rem;
-  border: 1px solid var(--sf-color-border);
-  border-radius: var(--sf-radius-md);
-  font-family: var(--sf-font-family);
-  font-size: var(--sf-text-sm);
-  background: var(--sf-color-surface-2);
+.clearSearch:hover {
   color: var(--sf-color-text);
-  outline: none;
-  transition: border-color var(--sf-transition-fast);
 }
 
-.searchInput::placeholder { color: var(--sf-color-text-muted); }
-
-.searchInput:focus {
-  border-color: var(--sf-color-emerald);
+.clearSearch:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  border-radius: var(--sf-radius-sm);
   box-shadow: var(--sf-shadow-focus);
 }
 
-.clearSearch {
-  position: absolute;
-  right: var(--sf-space-3);
+.tabs {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
-  border: none;
-  border-radius: var(--sf-radius-pill);
-  background: var(--sf-color-badge-bg);
-  color: var(--sf-color-text-secondary);
-  cursor: pointer;
-  padding: 0;
-}
-
-.clearSearch:hover { color: var(--sf-color-text); }
-
-.filterTabs {
-  display: flex;
-  gap: var(--sf-space-2);
   flex-wrap: wrap;
+  gap: var(--sf-space-2);
 }
 
-.filterTab {
-  padding: var(--sf-space-2) var(--sf-space-4);
-  border-radius: var(--sf-radius-pill);
-  border: 1px solid var(--sf-color-border-strong);
-  background: transparent;
-  color: var(--sf-color-text-secondary);
-  font-family: var(--sf-font-family);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-medium);
-  cursor: pointer;
-  transition: all var(--sf-transition-fast);
-  white-space: nowrap;
+/* Local trim on the shared chip: the ledger's filters are smaller than the
+   collection's, because they are a caption bar and not the page's subject. */
+.tab {
+  padding: var(--sf-space-2) var(--sf-space-3);
+  font-size: var(--sf-text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
 }
 
-.filterTab:hover {
-  border-color: var(--sf-color-gold);
-  color: var(--sf-color-price);
+button.tab {
+  min-height: 34px;
 }
 
-.filterTab:focus-visible {
-  outline: 2px solid var(--sf-color-emerald);
-  outline-offset: 2px;
+@media (pointer: coarse) {
+  button.tab {
+    min-height: var(--sf-tap-target);
+  }
 }
 
-.filterTabActive {
-  background: var(--sf-gradient-gold);
-  border-color: transparent;
-  color: var(--sf-color-brand-green);
-  font-weight: var(--sf-font-semibold);
-}
+/* ═══════════════════════════════════════════════════════════════════════════
+   3. STATES  —  signed out, loading, error, empty, no match
+   The same centred column in every case, so a dead end is still the page.
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-.filterTabActive:hover {
-  color: var(--sf-color-brand-green);
-  border-color: transparent;
-}
-
-/* ===== Loading ===== */
-.loadingState {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--sf-space-16) var(--sf-space-6);
-  gap: var(--sf-space-5);
-  color: var(--sf-color-text-secondary);
-}
-
-.spinner {
-  width: 44px;
-  height: 44px;
-  border: 3px solid var(--sf-color-border);
-  border-top-color: var(--sf-color-emerald);
-  border-radius: var(--sf-radius-pill);
-  animation: spin 0.8s linear infinite;
-}
-
-/* ===== Empty / Error State ===== */
-.emptyState {
+.state {
+  max-width: 46ch;
+  margin: 0 auto;
+  padding: var(--sf-space-20) 0;
   text-align: center;
-  padding: var(--sf-space-16) var(--sf-space-6);
-  background: var(--sf-color-surface);
-  border-radius: var(--sf-radius-lg);
-  border: 1px solid var(--sf-color-border);
-  box-shadow: var(--sf-shadow-sm);
 }
 
-.errorState { composes: emptyState; }
-
-.emptyIcon { color: var(--sf-color-text-muted); margin-bottom: var(--sf-space-4); }
-.errorIcon { color: var(--sf-color-danger); margin-bottom: var(--sf-space-4); }
-
-.emptyTitle {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-xl);
-  font-weight: var(--sf-font-semibold);
-  margin: 0 0 var(--sf-space-2);
-  color: var(--sf-color-text);
-}
-
-.emptySubtext {
-  color: var(--sf-color-text-secondary);
-  margin: 0 0 var(--sf-space-6);
-  font-size: var(--sf-text-base);
-}
-
-/* ===== Login Prompt ===== */
-.loginPrompt {
-  text-align: center;
-  padding: var(--sf-space-16) var(--sf-space-6);
-  max-width: 480px;
-  margin: var(--sf-space-16) auto;
-  background: var(--sf-color-surface);
-  border-radius: var(--sf-radius-xl);
-  border: 1px solid var(--sf-color-border);
-  box-shadow: var(--sf-shadow-md);
-}
-
-.loginIcon { color: var(--sf-color-gold-deep); margin-bottom: var(--sf-space-6); }
-
-.loginTitle {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-2xl);
-  font-weight: var(--sf-font-bold);
-  margin: 0 0 var(--sf-space-3);
-  color: var(--sf-color-text);
-}
-
-.loginSubtext {
-  color: var(--sf-color-text-secondary);
-  margin: 0 0 var(--sf-space-8);
-  font-size: var(--sf-text-base);
-  line-height: var(--sf-leading-normal);
-}
-
-.loginActions {
+.stateMark {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--sf-space-4);
-  margin-top: var(--sf-space-6);
+  justify-content: center;
+  margin-bottom: var(--sf-space-6);
+  color: var(--sf-color-border-strong);
 }
 
-.linkSecondary {
-  display: inline-block;
-  color: var(--sf-color-price);
-  font-size: var(--sf-text-sm);
-  text-decoration: none;
+.stateEyebrow {
+  margin: 0 0 var(--sf-space-4);
+  font-size: var(--sf-text-xs);
   font-weight: var(--sf-font-medium);
-}
-
-.linkSecondary:hover { text-decoration: underline; }
-
-/* ===== Buttons ===== */
-.btnPrimary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sf-space-2);
-  min-height: var(--sf-tap-target);
-  padding: var(--sf-space-3) var(--sf-space-8);
-  background: var(--sf-color-emerald);
-  color: var(--sf-color-emerald-contrast);
-  border: 1px solid var(--sf-color-emerald);
-  border-radius: var(--sf-radius-md);
-  font-family: var(--sf-font-family);
-  font-size: var(--sf-text-base);
-  font-weight: var(--sf-font-semibold);
-  cursor: pointer;
-  transition: all var(--sf-transition-fast);
-}
-
-.btnPrimary:hover {
-  background: var(--sf-color-emerald-hover);
-  border-color: var(--sf-color-emerald-hover);
-  transform: translateY(-1px);
-}
-
-.btnSecondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sf-space-2);
-  min-height: var(--sf-tap-target);
-  padding: var(--sf-space-3) var(--sf-space-6);
-  background: transparent;
-  color: var(--sf-color-text);
-  border: 1px solid var(--sf-color-border-strong);
-  border-radius: var(--sf-radius-md);
-  font-family: var(--sf-font-family);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-  cursor: pointer;
-  transition: all var(--sf-transition-fast);
-}
-
-.btnSecondary:hover {
-  border-color: var(--sf-color-gold);
-  color: var(--sf-color-price);
-  background: var(--sf-color-badge-bg);
-}
-
-.btnPrimary:focus-visible,
-.btnSecondary:focus-visible {
-  outline: 2px solid var(--sf-color-emerald);
-  outline-offset: 2px;
-}
-
-.btnOutline {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sf-space-1);
-  min-height: var(--sf-tap-target);
-  padding: var(--sf-space-2) var(--sf-space-4);
-  background: transparent;
-  color: var(--sf-color-text-secondary);
-  border: 1px solid var(--sf-color-border-strong);
-  border-radius: var(--sf-radius-sm);
-  font-family: var(--sf-font-family);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-medium);
-  cursor: pointer;
-  transition: all var(--sf-transition-fast);
-}
-
-.btnOutline:hover {
-  border-color: var(--sf-color-gold);
-  color: var(--sf-color-price);
-  background: var(--sf-color-badge-bg);
-}
-
-.btnOutline:focus-visible {
-  outline: 2px solid var(--sf-color-emerald);
-  outline-offset: 2px;
-}
-
-.btnOutline:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-/* Reorder — emerald-tinted to signal the primary "buy again" action */
-.btnReorder {
-  composes: btnOutline;
-  color: var(--sf-color-emerald);
-  border-color: var(--sf-color-emerald);
-}
-
-.btnReorder:hover {
-  color: var(--sf-color-emerald-contrast);
-  background: var(--sf-color-emerald);
-  border-color: var(--sf-color-emerald);
-}
-
-.btnSpinner {
-  width: 13px;
-  height: 13px;
-  border: 2px solid currentColor;
-  border-top-color: transparent;
-  border-radius: var(--sf-radius-pill);
-  animation: spin 0.7s linear infinite;
-  flex-shrink: 0;
-}
-
-.btnOutlineWarning {
-  composes: btnOutline;
-  color: var(--sf-color-warning);
-  border-color: var(--sf-color-warning);
-}
-
-.btnOutlineWarning:hover {
-  background: var(--sf-color-warning-bg);
-  color: var(--sf-color-warning);
-  border-color: var(--sf-color-warning);
-}
-
-.btnOutlineDanger {
-  composes: btnOutline;
-  color: var(--sf-color-danger);
-  border-color: var(--sf-color-danger);
-}
-
-.btnOutlineDanger:hover {
-  background: var(--sf-color-danger-bg);
-  color: var(--sf-color-danger);
-  border-color: var(--sf-color-danger);
-}
-
-.btnCopy {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  border: none;
-  border-radius: var(--sf-radius-sm);
-  background: var(--sf-color-badge-bg);
-  color: var(--sf-color-gold-deep);
-  cursor: pointer;
-  padding: 0;
-  transition: background var(--sf-transition-fast);
-}
-
-.btnCopy:hover { background: var(--sf-color-border); }
-.btnCopy:focus-visible { outline: 2px solid var(--sf-color-emerald); outline-offset: 2px; }
-
-/* ===== Order Cards ===== */
-.ordersList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sf-space-4);
-}
-
-.orderCard {
-  background: var(--sf-color-surface);
-  border-radius: var(--sf-radius-lg);
-  border: 1px solid var(--sf-color-border);
-  box-shadow: var(--sf-shadow-sm);
-  overflow: hidden;
-  transition: box-shadow var(--sf-transition-fast), border-color var(--sf-transition-fast);
-}
-
-.orderCard:hover {
-  box-shadow: var(--sf-shadow-md);
-  border-color: var(--sf-color-border-strong);
-}
-
-/* Card Header */
-.cardHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: var(--sf-space-5) var(--sf-space-5) 0;
-}
-
-.cardHeaderLeft {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sf-space-1);
-}
-
-.cardHeaderRight { flex-shrink: 0; }
-
-.orderNumberRow {
-  display: flex;
-  align-items: center;
-  gap: var(--sf-space-2);
-}
-
-.orderNumber {
-  font-weight: var(--sf-font-bold);
-  font-size: var(--sf-text-base);
-  color: var(--sf-color-text);
-}
-
-.orderDate {
-  font-size: var(--sf-text-sm);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wider);
+  line-height: 1;
   color: var(--sf-color-text-muted);
 }
 
-/* Status Badges — semantic status tokens, text + colour (never colour alone) */
-.statusBadge {
+.stateTitle {
+  margin: 0 0 var(--sf-space-3);
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-3xl);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-display);
+  letter-spacing: var(--sf-tracking-tight);
+  color: var(--sf-color-text);
+}
+
+.stateText {
+  margin: 0 0 var(--sf-space-8);
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-secondary);
+}
+
+.stateActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sf-space-4);
+  justify-content: center;
+}
+
+.stateBtn {
+  min-width: 13rem;
+}
+
+/* Loading is the list's own silhouette, not a spinner in a void. */
+.skeletonList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-6);
+  padding-top: var(--sf-space-10);
+}
+
+.skeletonCard {
+  padding: var(--sf-space-6);
+  border: 1px solid var(--sf-color-border);
+  border-radius: var(--sf-radius-md);
+  background: var(--sf-color-surface);
+}
+
+.skeletonRow {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-4);
+}
+
+.skeletonRow + .skeletonRow {
+  margin-top: var(--sf-space-6);
+}
+
+.skeletonLine {
+  height: 12px;
+  border-radius: var(--sf-radius-sm);
+}
+
+.skeletonPlate {
+  flex: none;
+  width: 52px;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--sf-radius-sm);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   4. THE RECORD
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-6);
+  padding-top: var(--sf-space-10);
+}
+
+.record {
+  border: 1px solid var(--sf-color-border);
+  border-radius: var(--sf-radius-md);
+  background: var(--sf-color-surface);
+  transition: border-color var(--sf-transition);
+  /* Transform only: if the timeline never advances, the record is still fully
+     drawn and legible — one line lower than it will settle. */
+  animation: recordIn 0.5s var(--sf-ease) both;
+}
+
+.record:hover {
+  border-color: var(--sf-color-border-strong);
+}
+
+@keyframes recordIn {
+  from {
+    transform: translateY(8px);
+  }
+  to {
+    transform: none;
+  }
+}
+
+.recordHead {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--sf-space-5);
+  padding: var(--sf-space-6) var(--sf-space-6) var(--sf-space-5);
+}
+
+.identity {
+  min-width: 0;
+}
+
+.numberRow {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--sf-space-2) var(--sf-space-4);
+}
+
+.number {
+  font-family: var(--oh-mono);
+  font-size: var(--sf-text-md);
+  font-weight: var(--sf-font-medium);
+  letter-spacing: 0.08em;
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text);
+  word-break: break-all;
+}
+
+/* Copy is a word over a hairline, not a button-shaped thing. */
+.copyBtn {
+  flex: none;
   display: inline-flex;
   align-items: center;
-  padding: var(--sf-space-1) var(--sf-space-3);
-  border-radius: var(--sf-radius-pill);
+  gap: var(--sf-space-2);
+  min-height: var(--sf-tap-target);
+  padding: 0 var(--sf-space-1);
+  border: none;
+  background: transparent;
+  color: var(--sf-color-text-secondary);
+  font-family: var(--sf-font-family);
   font-size: var(--sf-text-xs);
-  font-weight: var(--sf-font-semibold);
-  letter-spacing: 0.01em;
-  text-transform: capitalize;
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: 1;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
+  text-decoration-color: var(--sf-color-border-strong);
+  transition: color var(--sf-transition-fast),
+    text-decoration-color var(--sf-transition-fast);
+}
+
+.copyBtn:hover {
+  color: var(--sf-color-text);
+  text-decoration-color: currentColor;
+}
+
+.copyBtn:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  border-radius: var(--sf-radius-sm);
+  box-shadow: var(--sf-shadow-focus);
+}
+
+/* Copied is said in gold, with a check — colour is never the only signal. */
+.copyBtnDone,
+.copyBtnDone:hover {
+  color: var(--sf-color-gold-deep);
+  text-decoration-color: transparent;
+}
+
+.meta {
+  margin: var(--sf-space-2) 0 0;
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.metaSep {
+  padding: 0 var(--sf-space-2);
+  color: var(--sf-color-border-strong);
+}
+
+/* ── Status chips — one shape, four tones, always with the word ──────────── */
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sf-space-2);
+  flex: none;
+  margin: 0;
+  padding: var(--sf-space-2) var(--sf-space-3);
+  border: 1px solid color-mix(in srgb, currentColor 32%, transparent);
+  border-radius: var(--sf-radius-sm);
+  background: var(--sf-color-badge-bg);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: var(--sf-color-text-secondary);
+}
+
+.chipDot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--sf-radius-pill);
+  background: currentColor;
+}
+
+.statusProcessing {
+  color: var(--sf-color-info);
+  background: var(--sf-color-info-bg);
+}
+
+.statusShipped {
+  color: var(--sf-color-warning);
+  background: var(--sf-color-warning-bg);
 }
 
 .statusDelivered {
-  background: var(--sf-color-success-bg);
   color: var(--sf-color-success);
-}
-
-.statusShipped,
-.statusProcessing {
-  background: var(--sf-color-info-bg);
-  color: var(--sf-color-info);
+  background: var(--sf-color-success-bg);
 }
 
 .statusCancelled {
-  background: var(--sf-color-danger-bg);
   color: var(--sf-color-danger);
+  background: var(--sf-color-danger-bg);
 }
 
-/* Card Body */
-.cardBody { padding: var(--sf-space-4) var(--sf-space-5); }
+/* Inside a drawer the chip sits on the sunken panel, where a 10% tone tint
+   lands too close to the panel itself (the warning tone drops under 4.5:1).
+   There the chip is drawn on the card's own surface instead, and the tone
+   stays where it is legible: the word, the hairline and the dot. */
+.drawerInner .chip {
+  background: var(--sf-color-surface);
+}
 
-.thumbnailRow {
+/* ── The pieces, and the total ───────────────────────────────────────────── */
+
+.pieces {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-4);
+  padding: 0 var(--sf-space-6) var(--sf-space-6);
+}
+
+.plates {
   display: flex;
   align-items: center;
   gap: var(--sf-space-3);
+  min-width: 0;
 }
 
-.thumbnail {
-  width: 56px;
-  height: 56px;
-  border-radius: var(--sf-radius-md);
+.plate {
+  flex: none;
+  display: block;
+  width: 52px;
+  aspect-ratio: 3 / 4;
   overflow: hidden;
-  flex-shrink: 0;
-  border: 1px solid var(--sf-color-border);
+  border-radius: var(--sf-radius-sm);
   background: var(--sf-color-surface-2);
 }
 
-.thumbnail img {
+.plate img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
 }
 
-.thumbnailMore {
-  width: 56px;
-  height: 56px;
-  border-radius: var(--sf-radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--sf-color-surface-2);
-  color: var(--sf-color-text-secondary);
+.plateMore {
+  flex: none;
   font-size: var(--sf-text-xs);
-  font-weight: var(--sf-font-semibold);
-  flex-shrink: 0;
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-muted);
 }
 
-.orderTotal {
+.total {
   margin-left: auto;
   text-align: right;
 }
 
 .totalLabel {
   display: block;
-  font-size: var(--sf-text-xs);
-  color: var(--sf-color-text-muted);
   margin-bottom: var(--sf-space-1);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: 1;
+  color: var(--sf-color-text-muted);
 }
 
 .totalValue {
+  display: block;
   font-family: var(--sf-font-display);
-  font-size: var(--sf-text-xl);
-  font-weight: var(--sf-font-bold);
+  font-size: var(--sf-text-2xl);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
   color: var(--sf-color-price);
+  font-variant-numeric: tabular-nums;
 }
 
-/* ===== Status Timeline (derived from deriveOrderStatus only) ===== */
-.statusTimeline {
+/* ═══════════════════════════════════════════════════════════════════════════
+   5. THE PASSAGE  —  three nodes on a hairline rail
+   Decorative only: the same three stages are spoken in an `.srOnly` line above
+   it, so nothing here is the sole carrier of meaning.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.passage {
+  padding: 0 var(--sf-space-6) var(--sf-space-6);
+}
+
+.track {
   display: flex;
+  align-items: flex-start;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stage {
+  flex: none;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   gap: var(--sf-space-2);
-  padding: 0 var(--sf-space-5) var(--sf-space-4);
+  width: 7rem;
+  max-width: 34%;
 }
 
-.timelineStep {
-  display: flex;
-  align-items: center;
-  gap: var(--sf-space-2);
+.stage:first-child {
+  align-items: flex-start;
+  text-align: left;
 }
 
-.timelineDot {
-  width: 12px;
-  height: 12px;
+.stage:last-child {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.node {
+  width: 7px;
+  height: 7px;
+  margin-top: 1px;
+  border: 1px solid var(--sf-color-border-strong);
   border-radius: var(--sf-radius-pill);
-  background: var(--sf-color-surface-2);
-  border: 2px solid var(--sf-color-border-strong);
-  flex-shrink: 0;
-  transition: all var(--sf-transition-fast);
+  background: var(--sf-color-surface);
 }
 
-.timelineDotDone {
-  background: var(--sf-color-emerald);
-  border-color: var(--sf-color-emerald);
+.nodeDone {
+  border-color: var(--sf-color-gold-deep);
+  background: var(--sf-color-gold-deep);
 }
 
-.timelineDotCancelled {
-  background: var(--sf-color-danger);
-  border-color: var(--sf-color-danger);
-}
-
-.timelineLabel {
+.stageLabel {
   font-size: var(--sf-text-xs);
+  letter-spacing: 0.03em;
+  line-height: var(--sf-leading-normal);
   color: var(--sf-color-text-muted);
-  white-space: nowrap;
 }
 
-.timelineLabelDone { color: var(--sf-color-text); font-weight: var(--sf-font-medium); }
-
-.timelineLine {
-  width: 28px;
-  height: 2px;
-  background: var(--sf-color-border-strong);
-  flex-shrink: 0;
+.stageLabelDone {
+  color: var(--sf-color-text);
 }
 
-.timelineLineDone { background: var(--sf-color-emerald); }
+.rail {
+  flex: 1 1 auto;
+  height: 1px;
+  margin: 4px var(--sf-space-2) 0;
+  background: var(--sf-color-border);
+}
 
-/* Card Actions */
-.cardActions {
+.railDone {
+  background: var(--sf-color-gold-deep);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   6. THE ACTIONS  —  words on the footer rule, divided by hairline ticks
+   The row hugs the left and leaves the rest of the card empty, so the card
+   still ends in white space rather than in a segmented control.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.actions {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--sf-space-2);
-  padding: 0 var(--sf-space-5) var(--sf-space-5);
-}
-
-/* Tracking Section */
-.trackingSection {
-  overflow: hidden;
+  align-items: center;
+  gap: 0 var(--sf-space-6);
+  padding: 0 var(--sf-space-6);
   border-top: 1px solid var(--sf-color-border);
 }
 
-.trackingInner {
-  padding: var(--sf-space-4) var(--sf-space-5);
-  background: var(--sf-color-surface-2);
-}
-
-.trackingRow {
-  display: flex;
-  align-items: center;
-  gap: var(--sf-space-3);
-  padding: var(--sf-space-1) 0;
-}
-
-.trackingLabel {
-  font-size: var(--sf-text-sm);
-  color: var(--sf-color-text-muted);
-  min-width: 120px;
-}
-
-.trackingValue {
-  font-weight: var(--sf-font-semibold);
-  font-size: var(--sf-text-sm);
-  color: var(--sf-color-text);
-}
-
-/* Carrier tracking link — opens the courier's tracking page in a new tab */
-.trackingLink {
+.action {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: var(--sf-space-1);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-  color: var(--sf-color-emerald);
-  text-decoration: none;
-  padding: var(--sf-space-1) var(--sf-space-3);
-  border: 1px solid var(--sf-color-emerald);
-  border-radius: var(--sf-radius-sm);
-  transition: background var(--sf-transition-fast), color var(--sf-transition-fast);
-}
-
-.trackingLink:hover {
-  background: var(--sf-color-emerald);
-  color: var(--sf-color-emerald-contrast);
-}
-
-/* Expanded Details */
-.expandedSection {
-  overflow: hidden;
-  border-top: 1px solid var(--sf-color-border);
-}
-
-.expandedInner {
-  padding: var(--sf-space-5);
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--sf-space-5);
-}
-
-.detailBlock {
-  background: var(--sf-color-surface-2);
-  border-radius: var(--sf-radius-md);
-  padding: var(--sf-space-4);
-}
-
-.detailBlock:first-child { grid-column: 1 / -1; }
-
-.detailBlockTitle {
-  font-size: var(--sf-text-xs);
-  font-weight: var(--sf-font-bold);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--sf-color-gold-deep);
-  margin: 0 0 var(--sf-space-3);
-}
-
-.detailContent p {
-  margin: 0 0 var(--sf-space-1);
-  font-size: var(--sf-text-sm);
-  color: var(--sf-color-text-secondary);
-  line-height: var(--sf-leading-normal);
-}
-
-.textMuted { color: var(--sf-color-text-muted) !important; }
-
-/* Detail Items List */
-.detailItemsList {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sf-space-3);
-}
-
-.detailItem {
-  display: flex;
-  align-items: center;
-  gap: var(--sf-space-3);
-  padding: var(--sf-space-3);
-  background: var(--sf-color-surface);
-  border-radius: var(--sf-radius-sm);
-  border: 1px solid var(--sf-color-border);
-}
-
-.detailItemImg {
-  width: 48px;
-  height: 48px;
-  border-radius: var(--sf-radius-sm);
-  overflow: hidden;
-  flex-shrink: 0;
-  background: var(--sf-color-surface-2);
-}
-
-.detailItemImg img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.detailItemInfo {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--sf-space-1);
-}
-
-.detailItemName {
-  font-weight: var(--sf-font-semibold);
-  font-size: var(--sf-text-sm);
-  color: var(--sf-color-text);
-}
-
-.detailItemVariant {
-  font-size: var(--sf-text-xs);
-  color: var(--sf-color-text-secondary);
-}
-
-.detailItemQty {
-  font-size: var(--sf-text-xs);
-  color: var(--sf-color-text-muted);
-}
-
-.detailItemPrice {
-  font-weight: var(--sf-font-bold);
-  font-size: var(--sf-text-sm);
-  color: var(--sf-color-price);
-  flex-shrink: 0;
-}
-
-/* Summary Table */
-.summaryTable {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sf-space-1);
-}
-
-.summaryRow {
-  display: flex;
-  justify-content: space-between;
-  font-size: var(--sf-text-sm);
-  color: var(--sf-color-text-secondary);
-  padding: var(--sf-space-1) 0;
-}
-
-.summaryRowTotal {
-  border-top: 1px solid var(--sf-color-border);
-  margin-top: var(--sf-space-2);
-  padding-top: var(--sf-space-3);
-  font-weight: var(--sf-font-bold);
-  font-size: var(--sf-text-base);
-  color: var(--sf-color-price);
-}
-
-/* ===== Pagination ===== */
-.pagination {
-  display: flex;
-  align-items: center;
-  justify-content: center;
   gap: var(--sf-space-2);
-  margin-top: var(--sf-space-8);
-  padding: var(--sf-space-4) 0;
-}
-
-.pageBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sf-space-1);
   min-height: var(--sf-tap-target);
-  padding: var(--sf-space-2) var(--sf-space-4);
-  background: var(--sf-color-surface);
+  padding: var(--sf-space-3) 0;
+  border: none;
+  background: transparent;
   color: var(--sf-color-text-secondary);
-  border: 1px solid var(--sf-color-border-strong);
-  border-radius: var(--sf-radius-sm);
   font-family: var(--sf-font-family);
-  font-size: var(--sf-text-sm);
+  font-size: var(--sf-text-xs);
   font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: 1;
+  text-align: left;
   cursor: pointer;
-  transition: all var(--sf-transition-fast);
+  transition: color var(--sf-transition-fast);
 }
 
-.pageBtn:hover:not(:disabled) {
-  border-color: var(--sf-color-gold);
-  color: var(--sf-color-price);
+/* The divider is a tick in the gap, drawn by the action that follows it. */
+.action + .action::before {
+  content: "";
+  position: absolute;
+  left: calc(var(--sf-space-3) * -1);
+  top: 50%;
+  width: 1px;
+  height: 12px;
+  margin-top: -6px;
+  background: var(--sf-color-border-strong);
 }
 
-.pageBtn:disabled {
-  opacity: 0.4;
+.action:hover:not(:disabled) {
+  color: var(--sf-color-text);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
+}
+
+.action:disabled {
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
-.pageNumbers {
-  display: flex;
-  gap: var(--sf-space-1);
+.action:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  border-radius: var(--sf-radius-sm);
+  box-shadow: var(--sf-shadow-focus);
 }
 
-.pageNumber {
-  width: var(--sf-tap-target);
-  height: var(--sf-tap-target);
+/* An open drawer's own control keeps the ink, so you can see where you are. */
+.actionOpen {
+  color: var(--sf-color-text);
+}
+
+.actionDanger,
+.actionDanger:hover:not(:disabled) {
+  color: var(--sf-color-danger);
+}
+
+.actionAccent,
+.actionAccent:hover:not(:disabled) {
+  color: var(--sf-color-accent);
+}
+
+/* The in-flight mark on Cancel / Reorder — a hairline arc, sized to the text. */
+.btnSpinner {
+  flex: none;
+  width: 12px;
+  height: 12px;
+  border: 1px solid color-mix(in srgb, currentColor 35%, transparent);
+  border-top-color: currentColor;
+  border-radius: var(--sf-radius-pill);
+  animation: spin 0.9s linear infinite;
+}
+
+/* The chevron turns with its drawer. */
+.chevron {
+  transition: transform var(--sf-transition-fast);
+}
+
+.chevronUp {
+  transform: rotate(180deg);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   7. THE DRAWERS  —  tracking, and the full detail
+   Height animates through `grid-template-rows: 0fr → 1fr`, which needs no
+   measurement and no JS. The inner pane goes `visibility: hidden` once the
+   close has finished, which is what keeps a collapsed drawer out of the tab
+   order and out of the accessibility tree.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.drawer {
+  display: grid;
+  grid-template-rows: 0fr;
+  background: var(--sf-color-surface-2);
+  transition: grid-template-rows var(--oh-collapse) var(--sf-ease);
+}
+
+.drawerOpen {
+  grid-template-rows: 1fr;
+  border-top: 1px solid var(--sf-color-border);
+}
+
+.drawerPane {
+  overflow: hidden;
+  visibility: hidden;
+  transition: visibility 0s linear var(--oh-collapse);
+}
+
+.drawerOpen .drawerPane {
+  visibility: visible;
+  transition-delay: 0s;
+}
+
+.drawerInner {
+  padding: var(--sf-space-6);
+}
+
+/* ── Tracking ────────────────────────────────────────────────────────────── */
+
+.trackRow {
   display: flex;
   align-items: center;
-  justify-content: center;
-  border: 1px solid var(--sf-color-border-strong);
-  border-radius: var(--sf-radius-sm);
-  background: var(--sf-color-surface);
-  color: var(--sf-color-text-secondary);
-  font-family: var(--sf-font-family);
+  flex-wrap: wrap;
+  gap: var(--sf-space-2) var(--sf-space-4);
+  padding: var(--sf-space-3) 0;
+}
+
+.trackRow + .trackRow {
+  border-top: 1px solid var(--sf-color-border);
+}
+
+.trackLabel {
+  flex: none;
+  width: 10rem;
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-muted);
+}
+
+.trackValue {
+  min-width: 0;
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text);
+}
+
+.trackMono {
+  font-family: var(--oh-mono);
+  letter-spacing: 0.06em;
+  word-break: break-all;
+}
+
+.trackMuted {
+  color: var(--sf-color-text-muted);
+}
+
+/* The carrier link leaves the site, so it is marked as such — icon, and an
+   `.srOnly` note that it opens in a new tab. */
+.trackLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sf-space-2);
+  min-height: var(--sf-tap-target);
   font-size: var(--sf-text-sm);
   font-weight: var(--sf-font-medium);
-  cursor: pointer;
-  transition: all var(--sf-transition-fast);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  text-decoration-color: color-mix(in srgb, var(--sf-color-accent) 40%, transparent);
+  transition: text-decoration-color var(--sf-transition-fast);
 }
 
-.pageNumber:hover {
-  border-color: var(--sf-color-gold);
-  color: var(--sf-color-price);
+.trackLink:hover {
+  text-decoration-color: currentColor;
 }
 
-.pageNumberActive {
-  background: var(--sf-gradient-gold);
-  border-color: transparent;
-  color: var(--sf-color-brand-green);
-  font-weight: var(--sf-font-semibold);
+.trackLink:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  border-radius: var(--sf-radius-sm);
+  box-shadow: var(--sf-shadow-focus);
 }
 
-.pageNumberActive:hover {
-  color: var(--sf-color-brand-green);
-  border-color: transparent;
+/* Refund messaging carries its own tone — completed, in progress, or delayed.
+   The words say it; the colour only agrees with them. */
+.refundLine {
+  min-width: 0;
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text);
 }
 
-/* ===== Responsive ===== */
-@media (max-width: 768px) {
-  .page { padding: var(--sf-space-4) 0 var(--sf-space-16); }
-  .container { padding: 0 var(--sf-space-4); }
-  .pageTitle { font-size: var(--sf-text-2xl); }
-  .filterBar { padding: var(--sf-space-4); }
-
-  .filterTabs {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    flex-wrap: nowrap;
-  }
-
-  .filterTabs::-webkit-scrollbar { display: none; }
-
-  .statusTimeline {
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .statusTimeline::-webkit-scrollbar { display: none; }
-
-  .expandedInner { grid-template-columns: 1fr; padding: var(--sf-space-4); }
-
-  .cardActions { flex-direction: column; }
-
-  .btnOutline,
-  .btnReorder,
-  .btnOutlineWarning,
-  .btnOutlineDanger {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .thumbnailRow { flex-wrap: wrap; }
-
-  .orderTotal {
-    width: 100%;
-    text-align: left;
-    margin-left: 0;
-    margin-top: var(--sf-space-2);
-    padding-top: var(--sf-space-2);
-    border-top: 1px solid var(--sf-color-border);
-  }
-
-  .pagination { flex-wrap: wrap; }
-
-  .loginPrompt { margin: var(--sf-space-8) auto; padding: var(--sf-space-10) var(--sf-space-5); }
-
-  .filterTab { min-height: 40px; }
-
-  .btnCopy {
-    width: 40px;
-    height: 40px;
-    flex-shrink: 0;
-  }
+.refundOk {
+  color: var(--sf-color-success);
 }
 
-/* ── Per-item review controls (expanded details) ─────────────────────────── */
+.refundPending {
+  color: var(--sf-color-warning);
+}
+
+.refundFailed {
+  color: var(--sf-color-danger);
+}
+
+/* ── Detail ──────────────────────────────────────────────────────────────── */
+
+.detailGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 17rem;
+  gap: var(--sf-space-10);
+  align-items: start;
+}
+
+.detailCol {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-8);
+}
+
+.blockTitle {
+  margin: 0 0 var(--sf-space-4);
+  padding-bottom: var(--sf-space-3);
+  border-bottom: 1px solid var(--sf-color-border);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: 1;
+  color: var(--sf-color-text-muted);
+}
+
+.lines {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.line {
+  display: flex;
+  gap: var(--sf-space-4);
+  padding: var(--sf-space-4) 0;
+}
+
+.line + .line {
+  border-top: 1px solid var(--sf-color-border);
+}
+
+/* `align-self` is load-bearing: the row is a flex container, so without it the
+   plate takes the row's full height and the 3:4 crop quietly stops holding. */
+.lineThumb {
+  flex: none;
+  align-self: flex-start;
+  display: block;
+  width: 60px;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: var(--sf-radius-sm);
+  background: var(--sf-color-surface);
+}
+
+.lineThumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.lineBody {
+  flex: 1;
+  min-width: 0;
+}
+
+.lineName {
+  margin: 0;
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-lg);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  letter-spacing: var(--sf-tracking-tight);
+  color: var(--sf-color-text);
+}
+
+.lineVariant {
+  display: block;
+  margin-top: var(--sf-space-1);
+  font-size: var(--sf-text-xs);
+  letter-spacing: 0.02em;
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-muted);
+}
+
+.lineQty {
+  display: block;
+  margin-top: var(--sf-space-1);
+  font-size: var(--sf-text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.linePrice {
+  flex: none;
+  align-self: flex-start;
+  min-width: 6ch;
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  text-align: right;
+  color: var(--sf-color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── The per-item review control ─────────────────────────────────────────── */
+
 .reviewControl {
   display: flex;
   align-items: center;
-  gap: var(--sf-space-2);
-  margin-top: var(--sf-space-2);
   flex-wrap: wrap;
+  gap: var(--sf-space-3);
+  margin-top: var(--sf-space-3);
 }
 
-.btnReview {
+.reviewBtn {
   display: inline-flex;
   align-items: center;
-  gap: var(--sf-space-1);
+  gap: var(--sf-space-2);
   min-height: 32px;
   padding: var(--sf-space-1) var(--sf-space-3);
-  border: 1px solid var(--sf-color-gold);
+  border: 1px solid var(--sf-color-border-strong);
   border-radius: var(--sf-radius-sm);
-  background: var(--sf-color-badge-bg);
-  color: var(--sf-color-price);
+  background: transparent;
+  color: var(--sf-color-text);
   font-family: var(--sf-font-family);
   font-size: var(--sf-text-xs);
-  font-weight: var(--sf-font-semibold);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: 1;
   cursor: pointer;
-  transition: background var(--sf-transition-fast), border-color var(--sf-transition-fast);
+  transition: border-color var(--sf-transition-fast),
+    color var(--sf-transition-fast);
 }
 
-.btnReview:hover { background: var(--sf-color-surface-2); border-color: var(--sf-color-gold-deep); }
-.btnReview:focus-visible { outline: 2px solid var(--sf-color-emerald); outline-offset: 2px; }
-.btnReview svg { color: var(--sf-color-star); }
+.reviewBtn:hover {
+  color: var(--sf-color-accent);
+  border-color: var(--sf-color-accent);
+}
 
-.reviewStatusChip {
+.reviewBtn:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--sf-shadow-focus);
+}
+
+@media (pointer: coarse) {
+  .reviewBtn {
+    min-height: var(--sf-tap-target);
+  }
+}
+
+.reviewStar {
+  color: var(--sf-color-star);
+}
+
+.reviewPending {
+  color: var(--sf-color-warning);
+  background: var(--sf-color-warning-bg);
+}
+
+.reviewApproved {
+  color: var(--sf-color-success);
+  background: var(--sf-color-success-bg);
+}
+
+.reviewRejected {
+  color: var(--sf-color-danger);
+  background: var(--sf-color-danger-bg);
+}
+
+/* ── Address, payment, ledger ────────────────────────────────────────────── */
+
+.addrName {
+  margin: 0 0 var(--sf-space-2);
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-lg);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  letter-spacing: var(--sf-tracking-tight);
+  color: var(--sf-color-text);
+}
+
+.addrLine {
+  margin: 0;
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-secondary);
+}
+
+.addrPhone {
+  margin: var(--sf-space-2) 0 0;
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.muted {
+  margin: 0;
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-muted);
+}
+
+.payMethod {
+  margin: 0 0 var(--sf-space-3);
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text);
+}
+
+.ledger {
+  margin: 0;
+  padding: 0;
+}
+
+.ledgerRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sf-space-4);
+  padding: var(--sf-space-2) 0;
+}
+
+.ledgerRow dt {
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-secondary);
+}
+
+.ledgerRow dd {
+  flex: none;
+  margin: 0;
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-medium);
+  text-align: right;
+  color: var(--sf-color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.ledgerDiscount dd {
+  color: var(--sf-color-discount);
+}
+
+.ledgerTotal {
+  margin-top: var(--sf-space-2);
+  padding-top: var(--sf-space-3);
+  border-top: 1px solid var(--sf-color-border);
+}
+
+.ledgerTotal dt {
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-lg);
+  font-weight: var(--sf-font-medium);
+  color: var(--sf-color-text);
+}
+
+.ledgerTotal dd {
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-xl);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-price);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   8. THE PAGER  —  words and numbers on a hairline (as on the collection)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.pager {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sf-space-4);
+  margin-top: var(--sf-space-16);
+  padding-top: var(--sf-space-8);
+  border-top: 1px solid var(--sf-color-border);
+}
+
+.pagerRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--sf-space-4);
+}
+
+.pagerNums {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-1);
+}
+
+.pagerStep {
   display: inline-flex;
   align-items: center;
-  padding: 3px var(--sf-space-3);
-  border-radius: var(--sf-radius-pill);
+  gap: var(--sf-space-2);
+  min-height: var(--sf-tap-target);
+  padding: 0 var(--sf-space-2);
+  border: none;
+  background: transparent;
+  color: var(--sf-color-text-secondary);
+  font-family: var(--sf-font-family);
   font-size: var(--sf-text-xs);
-  font-weight: var(--sf-font-semibold);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  cursor: pointer;
+  transition: color var(--sf-transition-fast), opacity var(--sf-transition-fast);
 }
 
-.reviewPending { background: var(--sf-color-warning-bg); color: var(--sf-color-warning); }
-.reviewApproved { background: var(--sf-color-success-bg); color: var(--sf-color-success); }
-.reviewRejected { background: var(--sf-color-danger-bg); color: var(--sf-color-danger); }
+.pagerStep:hover:not(:disabled) {
+  color: var(--sf-color-text);
+}
+
+.pagerStep:disabled {
+  opacity: 0.32;
+  cursor: not-allowed;
+}
+
+.pagerStep:focus-visible {
+  outline: 2px solid transparent;
+  border-radius: var(--sf-radius-sm);
+  box-shadow: var(--sf-shadow-focus);
+}
+
+/* A number is a number: no button chrome until it is the page you are on, and
+   then it is underlined in gold rather than filled. */
+.pagerNum {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  min-width: var(--sf-tap-target);
+  min-height: var(--sf-tap-target);
+  padding: 0 var(--sf-space-2);
+  border: none;
+  background: transparent;
+  color: var(--sf-color-text-secondary);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-sm);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: color var(--sf-transition-fast);
+}
+
+.pagerNum::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  right: 50%;
+  bottom: 11px;
+  height: 1px;
+  background: var(--sf-color-gold-deep);
+  transition: left var(--sf-transition), right var(--sf-transition);
+}
+
+.pagerNum:hover {
+  color: var(--sf-color-text);
+}
+
+.pagerNum:hover::after,
+.pagerNumActive::after {
+  left: var(--sf-space-2);
+  right: var(--sf-space-2);
+}
+
+.pagerNum:focus-visible {
+  outline: 2px solid transparent;
+  border-radius: var(--sf-radius-sm);
+  box-shadow: var(--sf-shadow-focus);
+}
+
+.pagerNumActive {
+  color: var(--sf-color-text);
+  font-weight: var(--sf-font-medium);
+}
+
+.pagerInfo {
+  font-size: var(--sf-text-xs);
+  letter-spacing: 0.04em;
+  color: var(--sf-color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   9. RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 860px) {
+  .detailGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--sf-space-8);
+  }
+}
+
+@media (max-width: 700px) {
+  .head {
+    padding-top: var(--sf-space-12);
+  }
+
+  .controls {
+    align-items: stretch;
+  }
+
+  .search {
+    flex: 1 1 100%;
+  }
+
+  .recordHead {
+    flex-direction: column;
+    gap: var(--sf-space-3);
+  }
+
+  .trackLabel {
+    width: 100%;
+  }
+
+  .drawerInner {
+    padding: var(--sf-space-5) var(--sf-space-4);
+  }
+}
+
+@media (max-width: 560px) {
+  .container {
+    padding: 0 var(--sf-space-4);
+  }
+
+  .recordHead,
+  .pieces,
+  .passage {
+    padding-left: var(--sf-space-4);
+    padding-right: var(--sf-space-4);
+  }
+
+  .pieces {
+    flex-wrap: wrap;
+  }
+
+  .plate {
+    width: 44px;
+  }
+
+  .totalValue {
+    font-size: var(--sf-text-xl);
+  }
+
+  /* On a phone the words become touch targets: the same hairlines, drawn by a
+     1px grid gap over the border colour, so a wrapped row never strands a
+     divider tick in the padding. Two columns, and an odd last action stretches
+     across both — an empty cell would otherwise paint the gap colour as a
+     block. */
+  .actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    padding: 0;
+    background: var(--sf-color-border);
+  }
+
+  .action {
+    justify-content: center;
+    padding: var(--sf-space-3);
+    background: var(--sf-color-surface);
+    text-align: center;
+  }
+
+  .action:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  .action + .action::before {
+    display: none;
+  }
+
+  .actionOpen {
+    background: var(--sf-color-surface-2);
+  }
+
+  .stage {
+    width: 6rem;
+  }
+
+  .stateBtn {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   10. REDUCED MOTION
+   The token layer already zeroes the transitions; the keyframes and the
+   drawer's own duration are this page's own, so they are stopped here. Every
+   element's resting state is its finished state, so nothing disappears when
+   the animations do.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  .page {
+    --oh-collapse: 0s;
+  }
+
+  .record {
+    animation: none;
+  }
+
+  .spinning,
+  .btnSpinner {
+    animation-duration: 2.4s;
+  }
+}
