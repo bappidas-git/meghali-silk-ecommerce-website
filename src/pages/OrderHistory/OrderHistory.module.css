@@ -36,7 +36,7 @@
     "Liberation Mono", monospace;
   /* How long a drawer's contents stay reachable after it starts closing. Held
      in one place so the visibility hand-off and the height share a duration. */
-  --oh-collapse: 0.35s;
+  --oh-collapse: var(--sf-duration);
 
   min-height: 100vh;
   padding-bottom: var(--sf-space-24);
@@ -159,7 +159,7 @@
 
 /* The one spinning thing on the page, and only while a fetch is in flight. */
 .spinning {
-  animation: spin 1s linear infinite;
+  animation: spin 0.9s linear infinite;
 }
 
 @keyframes spin {
@@ -386,7 +386,7 @@ button.tab {
   transition: border-color var(--sf-transition);
   /* Transform only: if the timeline never advances, the record is still fully
      drawn and legible — one line lower than it will settle. */
-  animation: recordIn 0.5s var(--sf-ease) both;
+  animation: recordIn var(--sf-duration-slow) var(--sf-ease) both;
 }
 
 .record:hover {

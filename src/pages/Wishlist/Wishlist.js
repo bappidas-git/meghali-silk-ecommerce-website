@@ -11,6 +11,7 @@ import {
   getDefaultCartVariant,
   buildCartItem,
 } from "../../utils/helpers";
+import { DURATION, RISE, staggerDelay, t, tween } from "../../theme/motion";
 import styles from "./Wishlist.module.css";
 
 // =============================================================================
@@ -57,11 +58,10 @@ const SORT_OPTIONS = [
 // How many "You May Also Like" cards to show in the rail.
 const REC_LIMIT = 10;
 
-// The page's own easing, matching --sf-ease.
-const EASE = [0.22, 1, 0.36, 1];
-
 // How long a piece is left fading before its row is dropped. The timers below
-// and the exit animation are deliberately the same number.
+// and the exit animation are deliberately the same number. This is BEHAVIOUR
+// (it gates when the item actually leaves the list), not a motion value, so it
+// stays a literal rather than moving onto the shared duration tiers.
 const REMOVAL_MS = 300;
 
 // ---------------------------------------------------------------------------
@@ -431,22 +431,31 @@ const Wishlist = () => {
                   key={item.productId}
                   className={`${styles.cell} ${isRemoving ? styles.cardRemoving : ""}`}
                   layout
-                  initial={shouldReduceMotion ? false : { opacity: 0, y: 16 }}
+                  initial={
+                    shouldReduceMotion ? false : { opacity: 0, y: RISE.reveal }
+                  }
                   // The removal fade is the SAME animation as the entrance, run
                   // backwards: the piece dims in place for REMOVAL_MS while the
                   // timer above waits, then AnimatePresence closes the gap.
                   animate={{
                     opacity: isRemoving ? 0 : 1,
-                    y: isRemoving && !shouldReduceMotion ? 6 : 0,
+                    y: isRemoving && !shouldReduceMotion ? RISE.micro : 0,
                   }}
-                  exit={shouldReduceMotion ? { opacity: 0 } : { opacity: 0, y: 8 }}
+                  exit={
+                    shouldReduceMotion
+                      ? { opacity: 0 }
+                      : { opacity: 0, y: RISE.micro }
+                  }
                   transition={
                     isRemoving
-                      ? { duration: shouldReduceMotion ? 0 : REMOVAL_MS / 1000, ease: EASE }
+                      ? // REMOVAL_MS is behaviour, not a motion tier: the fade
+                        // has to end exactly when the timer drops the row.
+                        {
+                          ...tween(shouldReduceMotion ? 0 : REMOVAL_MS / 1000),
+                        }
                       : {
-                          duration: shouldReduceMotion ? 0 : 0.5,
-                          ease: EASE,
-                          delay: shouldReduceMotion ? 0 : Math.min(index * 0.04, 0.4),
+                          ...t(shouldReduceMotion, DURATION.slow),
+                          delay: shouldReduceMotion ? 0 : staggerDelay(index),
                         }
                   }
                 >

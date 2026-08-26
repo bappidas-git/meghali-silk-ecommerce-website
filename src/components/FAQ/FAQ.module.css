@@ -10,12 +10,12 @@
 
 /* Plus icon drawn with pseudo-elements so it can rotate into a cross. */
 .toggle { position: relative; flex: 0 0 auto; width: 18px; height: 18px; }
-.toggle::before, .toggle::after { content: ""; position: absolute; top: 50%; left: 50%; width: 14px; height: 2px; border-radius: 2px; background: var(--sf-color-accent); transform: translate(-50%, -50%); transition: transform 0.28s ease; }
+.toggle::before, .toggle::after { content: ""; position: absolute; top: 50%; left: 50%; width: 14px; height: 2px; border-radius: 2px; background: var(--sf-color-accent); transform: translate(-50%, -50%); transition: transform var(--sf-transition); }
 .toggle::after { transform: translate(-50%, -50%) rotate(90deg); }
 .item.open .toggle::after { transform: translate(-50%, -50%) rotate(180deg); }
 
 /* Smooth height animation via animatable grid-template-rows (0fr -> 1fr). */
-.answer { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.28s ease; }
+.answer { display: grid; grid-template-rows: 0fr; transition: grid-template-rows var(--sf-transition); }
 .item.open .answer { grid-template-rows: 1fr; }
 .answerInner { overflow: hidden; min-height: 0; }
 .answerInner p { padding: 0 20px 16px; margin: 0; color: var(--sf-color-text-secondary); line-height: 1.6; }

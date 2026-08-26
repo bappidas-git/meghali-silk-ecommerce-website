@@ -595,3 +595,17 @@
     padding: 0 var(--sf-space-6);
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   REDUCED MOTION
+   The token layer already zeroes every duration on this page. What is left is
+   the one hover transform — the topic arrow sliding a step to the right — and
+   it is cancelled outright here rather than merely hurried. The plus/minus
+   mark keeps its scaleY: that is state (open vs closed), not travel.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  .topic:hover .topicArrow {
+    transform: none;
+  }
+}

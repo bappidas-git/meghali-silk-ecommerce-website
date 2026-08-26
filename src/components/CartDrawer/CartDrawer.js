@@ -17,17 +17,13 @@ import {
   onImageError,
 } from "../../utils/helpers";
 import { FREE_SHIPPING_THRESHOLD } from "../../utils/constants";
+import { DURATION, INSTANT, overlay, panel, t, tween } from "../../theme/motion";
 import styles from "./CartDrawer.module.css";
 
 // Shipping shown while below the free threshold. Mirrors the Standard method's
 // flatRate in db.json; the free-shipping cutoff itself comes from the shared
 // FREE_SHIPPING_THRESHOLD constant (same source as Header + Checkout).
 const FLAT_SHIPPING = 99;
-
-// framer-motion needs JS values, so the Prompt 01 motion tokens are mirrored
-// here: EASE is --sf-ease and the durations sit on the --sf-transition tier.
-// Keep in sync with storefront-tokens.css if the curve is ever retuned.
-const EASE = [0.22, 1, 0.36, 1];
 
 // Tab-cycling needs the tray's own focusables. Links, buttons and the promo
 // input are the lot; the panel itself is tabIndex={-1} and is excluded by the
@@ -235,20 +231,16 @@ const CartDrawer = ({ open, onClose }) => {
   // MOTION — the tray slides in slowly on the editorial curve; reduced motion
   // trades the slide for a plain fade and drops every per-row offset.
   // ---------------------------------------------------------------------------
-  const panelVariants = reduceMotion
-    ? {
-        hidden: { opacity: 0 },
-        visible: { opacity: 1, transition: { duration: 0 } },
-        exit: { opacity: 0, transition: { duration: 0 } },
-      }
-    : {
-        hidden: { x: "100%" },
-        visible: {
-          x: 0,
-          transition: { type: "spring", damping: 36, stiffness: 220, mass: 1 },
-        },
-        exit: { x: "100%", transition: { duration: 0.35, ease: EASE } },
-      };
+  // The tray used to arrive on a spring (damping 36 / stiffness 220); it is
+  // the shared drawer tween now — in on the slow tier, out on the base one.
+  const tray = panel(reduceMotion, "right");
+  const panelVariants = {
+    hidden: tray.initial,
+    visible: tray.animate,
+    exit: tray.exit,
+  };
+
+  const scrim = overlay(reduceMotion);
 
   // Rows arrive and leave quietly. Height collapses on exit so the list closes
   // the gap instead of jumping, and `opacity: 0` takes the row's hairline with
@@ -256,19 +248,19 @@ const CartDrawer = ({ open, onClose }) => {
   const lineMotion = reduceMotion
     ? {
         initial: { opacity: 0 },
-        animate: { opacity: 1, transition: { duration: 0 } },
-        exit: { opacity: 0, height: 0, transition: { duration: 0 } },
+        animate: { opacity: 1, transition: INSTANT },
+        exit: { opacity: 0, height: 0, transition: INSTANT },
       }
     : {
         initial: { opacity: 0, x: 16 },
-        animate: { opacity: 1, x: 0, transition: { duration: 0.4, ease: EASE } },
+        animate: { opacity: 1, x: 0, transition: tween(DURATION.base) },
         exit: {
           opacity: 0,
           height: 0,
           paddingTop: 0,
           paddingBottom: 0,
           overflow: "hidden",
-          transition: { duration: 0.3, ease: EASE },
+          transition: tween(DURATION.fast),
         },
       };
 
@@ -277,19 +269,7 @@ const CartDrawer = ({ open, onClose }) => {
       {open && (
         <>
           {/* ===== Scrim — the token overlay, nothing more ===== */}
-          <motion.div
-            className={styles.scrim}
-            initial={{ opacity: 0 }}
-            animate={{
-              opacity: 1,
-              transition: { duration: reduceMotion ? 0 : 0.4, ease: EASE },
-            }}
-            exit={{
-              opacity: 0,
-              transition: { duration: reduceMotion ? 0 : 0.3, ease: EASE },
-            }}
-            onClick={onClose}
-          />
+          <motion.div className={styles.scrim} {...scrim} onClick={onClose} />
 
           {/* ===== The tray ===== */}
           <motion.aside
@@ -393,10 +373,7 @@ const CartDrawer = ({ open, onClose }) => {
                       className={styles.meterFill}
                       initial={{ width: 0 }}
                       animate={{ width: `${shippingProgress}%` }}
-                      transition={{
-                        duration: reduceMotion ? 0 : 0.6,
-                        ease: EASE,
-                      }}
+                      transition={t(reduceMotion, DURATION.slow)}
                     />
                   </div>
                 </div>

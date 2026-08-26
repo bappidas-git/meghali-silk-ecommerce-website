@@ -33,6 +33,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
+import { reveal as sharedReveal } from "../../theme/motion";
 import { useTheme } from "../../context/ThemeContext";
 import {
   APP_NAME,
@@ -46,18 +47,11 @@ const PrivacyPolicy = () => {
   const { isDarkMode } = useTheme();
   const prefersReducedMotion = useReducedMotion();
 
-  // A gentle fade and rise, staggered down the page and capped at six steps so
-  // the last clause never sits waiting behind a long queue. Disabled outright
-  // for anyone who asked for less motion — the clauses then paint at their
-  // final state on the first frame.
-  const reveal = (i) =>
-    prefersReducedMotion
-      ? {}
-      : {
-          initial: { opacity: 0, y: 12 },
-          animate: { opacity: 1, y: 0 },
-          transition: { duration: 0.55, delay: Math.min(i, 6) * 0.06 },
-        };
+  // The shared reveal from theme/motion.js: one gentle fade and rise, stepped
+  // down the page and capped so the last clause never waits behind a queue.
+  // It returns nothing at all under reduced motion, so the clauses paint at
+  // their final state on the first frame.
+  const reveal = (i) => sharedReveal(prefersReducedMotion, { index: i });
 
   // Eight clauses, in the order a reader needs them: what we take, why, who
   // else sees it, how it is kept, and how to get it back.

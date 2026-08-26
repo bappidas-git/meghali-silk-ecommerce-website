@@ -1,6 +1,5 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import { useCart } from "../../hooks/useCart";
 import { useWishlist } from "../../context/WishlistContext";
 import {
@@ -18,12 +17,10 @@ const ProductCard = ({ product, onAddToCart, onToggleWishlist, isWishlisted, onC
   const { sellingPrice, originalPrice, discount } = getProductMinPrice(product);
 
   return (
-    <motion.div
-      className={styles.card}
-      whileHover={{ y: -6 }}
-      transition={{ duration: 0.2 }}
-      onClick={onClick}
-    >
+    // No hover lift: the card holds its place and its photograph breathes
+    // instead (see .card:hover .imageWrapper img) — the storefront's one card
+    // hover treatment, shared with the ProductCard primitive.
+    <div className={styles.card} onClick={onClick}>
       <div className={styles.imageWrapper}>
         <img
           src={product.images?.[0] || PLACEHOLDER_IMG}
@@ -61,7 +58,7 @@ const ProductCard = ({ product, onAddToCart, onToggleWishlist, isWishlisted, onC
           Add to Cart
         </button>
       </div>
-    </motion.div>
+    </div>
   );
 };
 

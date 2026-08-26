@@ -3,6 +3,7 @@
 .content { max-width: 600px; margin: 0 auto; }
 .content h2 { font-family: var(--sf-font-display); font-size: 2rem; font-weight: 700; margin-bottom: 12px; }
 .content p { font-size: 1.1rem; opacity: 0.9; margin-bottom: 24px; }
-.ctaBtn { padding: 14px 36px; border-radius: var(--sf-radius-md); border: none; background: var(--sf-gradient-gold); color: var(--sf-color-brand-green-deep); font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: transform var(--sf-transition), box-shadow var(--sf-transition); min-height: var(--sf-tap-target); }
-.ctaBtn:hover { transform: translateY(-3px); box-shadow: var(--sf-shadow-lg); }
+.ctaBtn { padding: 14px 36px; border-radius: var(--sf-radius-md); border: none; background: var(--sf-gradient-gold); color: var(--sf-color-brand-green-deep); font-weight: 700; font-size: 1.1rem; cursor: pointer; transition: background-color var(--sf-transition), opacity var(--sf-transition-fast); min-height: var(--sf-tap-target); }
+.ctaBtn:hover { background-image: none; background-color: var(--sf-color-gold); }
+.ctaBtn:active { opacity: 0.9; }
 .ctaBtn:focus-visible { outline: none; box-shadow: var(--sf-shadow-focus); }

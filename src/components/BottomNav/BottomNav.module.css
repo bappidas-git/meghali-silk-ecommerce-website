@@ -53,6 +53,11 @@
   .bottomNav {
     transition: none;
   }
+
+  /* The press dims but no longer moves. */
+  .navItem:active .iconWrap {
+    transform: none;
+  }
 }
 
 /* ===== Nav items container ===== */
@@ -110,6 +115,14 @@
   }
 }
 
+/* The shared icon-button press — this bar is thumb-driven, so it is the one
+   place the press state does most of the talking. The scale sits on the icon
+   rather than the tab so the label does not jump. */
+.navItem:active .iconWrap {
+  transform: scale(0.98);
+  opacity: 0.85;
+}
+
 .navItem:focus {
   outline: none;
 }
@@ -129,6 +142,8 @@
   justify-content: center;
   width: 24px;
   height: 24px;
+  transition: transform var(--sf-transition-fast),
+    opacity var(--sf-transition-fast);
 }
 
 .icon {

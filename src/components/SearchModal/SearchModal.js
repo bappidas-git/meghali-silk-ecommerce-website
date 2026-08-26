@@ -4,6 +4,7 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import apiService from "../../services/api";
 import { formatCurrency, getProductMinPrice, productPath } from "../../utils/helpers";
 import StarRating from "../storefront/StarRating";
+import { DURATION, RISE, overlay, staggerDelay, t } from "../../theme/motion";
 import styles from "./SearchModal.module.css";
 
 // ---------------------------------------------------------------------------
@@ -41,13 +42,6 @@ const MAX_RECENT_SEARCHES = 8;
 const MAX_RESULTS = 12;
 const MAX_TRENDING = 5;
 const DEBOUNCE_MS = 300;
-
-// framer-motion needs JS values, so the Prompt 01 motion tokens are mirrored
-// here: EASE is --sf-ease and the durations sit on the --sf-transition tier.
-// Keep in sync with storefront-tokens.css if the curve is ever retuned.
-const EASE = [0.22, 1, 0.36, 1];
-const STAGGER_STEP = 0.03; // per the editorial motion brief — barely perceptible
-const STAGGER_MAX = 0.24; // cap so the twelfth result never trails off
 
 // Inline SVG fallback (no external host) shown if a product image fails to load.
 // A data URI cannot read var(), so these two literals mirror the light-mode
@@ -537,9 +531,11 @@ const SearchModal = ({ open, onClose }) => {
   // flight — on a slow connection the first keystroke must not read "nothing".
   const isBusy = showResultsView && (isSearching || !dataReady);
 
-  const overlayFade = { duration: reduceMotion ? 0 : 0.3, ease: EASE };
-  const sheetSlide = { duration: reduceMotion ? 0 : 0.45, ease: EASE };
-  const sheetExit = { duration: reduceMotion ? 0 : 0.3, ease: EASE };
+  // The shared overlay/panel treatment: the scrim on the base tier, the sheet
+  // dropping in on the slow one and leaving on the base one.
+  const scrim = overlay(reduceMotion);
+  const sheetSlide = t(reduceMotion, DURATION.slow);
+  const sheetExit = t(reduceMotion, DURATION.base);
 
   // Quiet ruled rows — used for Suggestions and for the curated Trending
   // fallback. Each row simply seeds the input with a real query.
@@ -577,10 +573,7 @@ const SearchModal = ({ open, onClose }) => {
       {open && (
         <motion.div
           className={styles.overlay}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={overlayFade}
+          {...scrim}
           onClick={onClose}
           role="dialog"
           aria-modal="true"
@@ -589,9 +582,13 @@ const SearchModal = ({ open, onClose }) => {
           <motion.div
             ref={modalRef}
             className={styles.sheet}
-            initial={{ opacity: 0, y: reduceMotion ? 0 : -28 }}
+            initial={{ opacity: 0, y: reduceMotion ? 0 : -RISE.reveal }}
             animate={{ opacity: 1, y: 0, transition: sheetSlide }}
-            exit={{ opacity: 0, y: reduceMotion ? 0 : -20, transition: sheetExit }}
+            exit={{
+              opacity: 0,
+              y: reduceMotion ? 0 : -RISE.micro,
+              transition: sheetExit,
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* ---- Masthead: label, close mark, the input line, the chips ---- */}
@@ -704,12 +701,14 @@ const SearchModal = ({ open, onClose }) => {
                             key={product.id}
                             type="button"
                             className={styles.card}
-                            initial={{ opacity: 0, y: reduceMotion ? 0 : 10 }}
+                            initial={{
+                              opacity: 0,
+                              y: reduceMotion ? 0 : RISE.micro,
+                            }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{
-                              duration: reduceMotion ? 0 : 0.35,
-                              ease: EASE,
-                              delay: reduceMotion ? 0 : Math.min(idx * STAGGER_STEP, STAGGER_MAX),
+                              ...t(reduceMotion, DURATION.base),
+                              delay: reduceMotion ? 0 : staggerDelay(idx),
                             }}
                             onClick={() => handleProductClick(product)}
                           >

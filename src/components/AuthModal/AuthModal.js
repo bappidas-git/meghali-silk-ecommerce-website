@@ -4,6 +4,16 @@ import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../context/ThemeContext";
 import { isEmailValid } from "../../utils/helpers";
+import {
+  DURATION,
+  INSTANT,
+  RISE,
+  overlay,
+  panel,
+  sheet,
+  t,
+  tween,
+} from "../../theme/motion";
 import styles from "./AuthModal.module.css";
 
 /* Both wordmarks are gold/white on a TRANSPARENT ground, so they sit straight
@@ -18,10 +28,10 @@ const LOGO_WHITE =
 const LOGO_W = 520;
 const LOGO_H = 162;
 
-/* framer-motion needs JS values, so the Prompt 01 motion tokens are mirrored
-   here: EASE is --sf-ease and the durations sit on the --sf-transition tier.
-   Keep in sync with storefront-tokens.css if the curve is ever retuned. */
-const EASE = [0.22, 1, 0.36, 1];
+/* How far the tab panes travel as they swap. Shorter than the old ±60px: the
+   pane is answering a click on a tab six pixels away, not arriving from
+   off-screen. */
+const PANE_TRAVEL = 32;
 
 /* Tab-cycling needs the dialog's own focusables. Queried broadly and then
    filtered by tabIndex, because the tablist uses a roving tabindex — a
@@ -429,54 +439,51 @@ const AuthModal = ({ open, onClose, defaultTab = "login" }) => {
   const isLogin = activeTab === "login";
 
   /* ---------------------------------------------------------------------
-   * MOTION — the scrim fades, the dialog rises on the editorial curve, and
-   * the panes slide the way you asked them to. Reduced motion keeps every
-   * state change but drops the travel: no rise, no slide, no spring.
+   * MOTION — all of it from theme/motion.js, so the dialog opens with the
+   * same weight as the cart tray and the menu. On mobile it is a bottom
+   * sheet (a tween now, where it used to be a spring); on desktop it rises
+   * and fades. Reduced motion keeps every state change but drops the travel.
    * ------------------------------------------------------------------- */
 
-  const dialogVariants = reduceMotion
-    ? {
-        hidden: { opacity: 0 },
-        visible: { opacity: 1, transition: { duration: 0 } },
-        exit: { opacity: 0, transition: { duration: 0 } },
-      }
-    : isMobile
-    ? {
-        // Gentled sheet spring — the same weight as the cart tray.
-        hidden: { y: "100%" },
-        visible: { y: 0, transition: { type: "spring", damping: 36, stiffness: 220, mass: 1 } },
-        exit: { y: "100%", transition: { duration: 0.35, ease: EASE } },
-      }
-    : {
-        hidden: { opacity: 0, y: 24 },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.45, ease: EASE } },
-        exit: { opacity: 0, y: 16, transition: { duration: 0.25, ease: EASE } },
-      };
+  const scrim = overlay(reduceMotion);
 
-  // Directional pane slide: the ±60px travel is kept, softened onto the
-  // editorial curve so it glides rather than snaps.
+  const dialogMotion = isMobile
+    ? panel(reduceMotion, "bottom")
+    : sheet(reduceMotion, RISE.reveal);
+  const dialogVariants = {
+    hidden: dialogMotion.initial,
+    visible: dialogMotion.animate,
+    exit: dialogMotion.exit,
+  };
+
+  // Directional pane slide — the pane follows the direction you moved along
+  // the tablist, arriving on the base tier and leaving on the fast one.
   const tabContentVariants = reduceMotion
     ? {
         enter: { opacity: 0 },
-        center: { opacity: 1, transition: { duration: 0 } },
-        exit: { opacity: 0, transition: { duration: 0 } },
+        center: { opacity: 1, transition: INSTANT },
+        exit: { opacity: 0, transition: INSTANT },
       }
     : {
-        enter: (dir) => ({ x: dir > 0 ? 60 : -60, opacity: 0 }),
-        center: { x: 0, opacity: 1, transition: { duration: 0.4, ease: EASE } },
-        exit: (dir) => ({ x: dir > 0 ? -60 : 60, opacity: 0, transition: { duration: 0.25, ease: EASE } }),
+        enter: (dir) => ({ x: dir > 0 ? PANE_TRAVEL : -PANE_TRAVEL, opacity: 0 }),
+        center: { x: 0, opacity: 1, transition: tween(DURATION.base) },
+        exit: (dir) => ({
+          x: dir > 0 ? -PANE_TRAVEL : PANE_TRAVEL,
+          opacity: 0,
+          transition: tween(DURATION.fast),
+        }),
       };
 
   const bannerMotion = reduceMotion
     ? {
         initial: { opacity: 0 },
-        animate: { opacity: 1, transition: { duration: 0 } },
-        exit: { opacity: 0, transition: { duration: 0 } },
+        animate: { opacity: 1, transition: INSTANT },
+        exit: { opacity: 0, transition: INSTANT },
       }
     : {
         initial: { opacity: 0, height: 0 },
-        animate: { opacity: 1, height: "auto", transition: { duration: 0.3, ease: EASE } },
-        exit: { opacity: 0, height: 0, transition: { duration: 0.2, ease: EASE } },
+        animate: { opacity: 1, height: "auto", transition: tween(DURATION.base) },
+        exit: { opacity: 0, height: 0, transition: tween(DURATION.fast) },
       };
 
   /* ---- Render ---- */
@@ -486,9 +493,7 @@ const AuthModal = ({ open, onClose, defaultTab = "login" }) => {
       {open && (
         <motion.div
           className={`${styles.overlay} ${themeClass}`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1, transition: { duration: reduceMotion ? 0 : 0.4, ease: EASE } }}
-          exit={{ opacity: 0, transition: { duration: reduceMotion ? 0 : 0.3, ease: EASE } }}
+          {...scrim}
           onClick={handleOverlayClick}
         >
           <motion.div
@@ -507,9 +512,19 @@ const AuthModal = ({ open, onClose, defaultTab = "login" }) => {
               {successMessage && (
                 <motion.div
                   className={styles.successToast}
-                  initial={{ opacity: 0, x: "-50%", y: reduceMotion ? 0 : -12 }}
-                  animate={{ opacity: 1, x: "-50%", y: 0, transition: { duration: reduceMotion ? 0 : 0.35, ease: EASE } }}
-                  exit={{ opacity: 0, x: "-50%", y: reduceMotion ? 0 : -12, transition: { duration: reduceMotion ? 0 : 0.2, ease: EASE } }}
+                  initial={{ opacity: 0, x: "-50%", y: reduceMotion ? 0 : -RISE.micro }}
+                  animate={{
+                    opacity: 1,
+                    x: "-50%",
+                    y: 0,
+                    transition: t(reduceMotion, DURATION.base),
+                  }}
+                  exit={{
+                    opacity: 0,
+                    x: "-50%",
+                    y: reduceMotion ? 0 : -RISE.micro,
+                    transition: t(reduceMotion, DURATION.fast),
+                  }}
                   role="status"
                 >
                   <span className={styles.successIcon}><CheckIcon /></span>
@@ -583,7 +598,7 @@ const AuthModal = ({ open, onClose, defaultTab = "login" }) => {
                 <motion.div
                   className={styles.tabIndicator}
                   animate={{ x: isLogin ? "0%" : "100%" }}
-                  transition={reduceMotion ? { duration: 0 } : { duration: 0.4, ease: EASE }}
+                  transition={t(reduceMotion, DURATION.base)}
                 />
               </div>
 

@@ -95,7 +95,7 @@
   border: 1px solid var(--sf-color-border);
   border-top-color: var(--sf-color-gold-deep);
   border-radius: var(--sf-radius-pill);
-  animation: spin 1.1s linear infinite;
+  animation: spin 0.9s linear infinite;
 }
 
 @keyframes spin {
@@ -168,7 +168,7 @@
   position: relative;
   display: inline-flex;
   margin-bottom: var(--sf-space-6);
-  animation: sealIn 0.7s var(--sf-ease) both;
+  animation: sealIn var(--sf-duration-slow) var(--sf-ease) both;
 }
 
 .sealSvg {

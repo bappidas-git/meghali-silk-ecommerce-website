@@ -77,12 +77,19 @@
   background: transparent;
   color: var(--sf-color-text);
   cursor: pointer;
-  transition: color var(--sf-transition-fast);
+  transition: color var(--sf-transition-fast),
+    transform var(--sf-transition-fast), opacity var(--sf-transition-fast);
   -webkit-tap-highlight-color: transparent;
 }
 
 .closeBtn:hover {
   color: var(--sf-color-accent);
+}
+
+/* The shared icon-button press. */
+.closeBtn:active {
+  transform: scale(0.98);
+  opacity: 0.85;
 }
 
 .closeIcon {
@@ -709,5 +716,10 @@
   .metaChevron,
   .toggleKnob {
     transition: none;
+  }
+
+  /* The press dims but no longer moves. */
+  .closeBtn:active {
+    transform: none;
   }
 }

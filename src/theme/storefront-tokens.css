@@ -226,11 +226,25 @@
   --sf-tracking-wider: 0.2em;
 
   /* ---- Motion ----------------------------------------------------------- */
-  /* Calm and confident: slower, with a decelerating editorial curve. */
+  /* Calm and confident: slower, with a decelerating editorial curve. ONE
+     curve and THREE durations — the whole storefront animates on this
+     language, CSS transitions and framer-motion alike. The JS half is
+     mirrored in `src/theme/motion.js`; retune the two together.
+     The durations are exposed on their own so a rule that needs a bare time —
+     a keyframe, a grid-template-rows collapse, a delayed visibility — can
+     still say it in the shared language instead of a magic number. */
   --sf-ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --sf-transition-fast: 0.2s var(--sf-ease);
-  --sf-transition: 0.35s var(--sf-ease);
-  --sf-transition-slow: 0.6s var(--sf-ease);
+  --sf-duration-fast: 0.2s;   /* leaving: exits, presses, hairline swaps */
+  --sf-duration: 0.35s;       /* the default: hovers, collapses, arrivals */
+  --sf-duration-slow: 0.6s;   /* panels, in-view reveals, the image breathing */
+  /* These three tiers govern TRANSITIONS AND ENTRANCES — anything that starts
+     because something changed and then stops. The looping "working" signals
+     keep their own steady rhythms instead, because they are read as tempo
+     rather than as travel: every storefront spinner turns at 0.9s, the shared
+     skeleton shimmer sweeps at 1.6s, the search field's gold rule at 1.2s. */
+  --sf-transition-fast: var(--sf-duration-fast) var(--sf-ease);
+  --sf-transition: var(--sf-duration) var(--sf-ease);
+  --sf-transition-slow: var(--sf-duration-slow) var(--sf-ease);
 
   /* ---- Layout & a11y ---------------------------------------------------- */
   --sf-container-max: 1280px;
@@ -325,9 +339,16 @@ body.dark {
   --sf-shadow-focus: 0 0 0 2px var(--sf-color-bg), 0 0 0 4px var(--sf-color-focus-ring);
 }
 
-/* Respect users who prefer reduced motion — shared, applies storefront-wide. */
+/* Respect users who prefer reduced motion — shared, applies storefront-wide.
+   Zeroing the durations zeroes the composite transitions with them, and with
+   those every local override built on the same names (the hero crossfade, the
+   order-history collapse), so one block covers the lot. The composites are
+   still written out because a few stylesheets read them directly. */
 @media (prefers-reduced-motion: reduce) {
   :root {
+    --sf-duration-fast: 0s;
+    --sf-duration: 0s;
+    --sf-duration-slow: 0s;
     --sf-transition-fast: 0s;
     --sf-transition: 0s;
     --sf-transition-slow: 0s;

@@ -128,29 +128,12 @@ body.admin-area.dark *::-webkit-scrollbar-thumb:hover {
 
 /* =============================================================================
  * ANIMATIONS
+ * One keyframe survives here, and it is the only one that carries state: the
+ * spinner. The decorative loops that used to sit alongside it — `float` (a
+ * 6s infinite bob) and `gradient-shift` (a 3s infinite background sweep) —
+ * are retired. Nothing on the storefront waves, floats or pulses; attention
+ * belongs to the garments, not to the chrome.
  * ========================================================================== */
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-20px);
-  }
-}
-
-@keyframes gradient-shift {
-  0% {
-    background-position: 0% 50%;
-  }
-  50% {
-    background-position: 100% 50%;
-  }
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
 @keyframes spin {
   to {
     transform: rotate(360deg);
@@ -160,7 +143,11 @@ body.admin-area.dark *::-webkit-scrollbar-thumb:hover {
 /* =============================================================================
  * SHARED UTILITIES
  * Generic, token-driven helpers. The legacy neon skin (.glass-effect,
- * .neon-glow, .pulse-glow) is gone — nothing under src/ referenced it.
+ * .neon-glow, .pulse-glow) is gone — nothing under src/ referenced it, and
+ * neither did the hover-lift helpers (.card-hover, .hover-scale) or the
+ * infinite-loop ones (.floating, .gradient-animation) that followed it out.
+ * The hover vocabulary now lives where it is used: cards breathe their image
+ * (see .sf-card / ProductCard), buttons shift colour, nothing lifts.
  * ========================================================================== */
 .container {
   max-width: var(--sf-container-max);
@@ -176,34 +163,6 @@ body.admin-area.dark *::-webkit-scrollbar-thumb:hover {
   background-clip: text;
 }
 
-/* Editorial lift: a few pixels, slow easing, soft warm shadow — never a glow. */
-.card-hover {
-  transition: transform var(--sf-transition), box-shadow var(--sf-transition),
-    border-color var(--sf-transition);
-}
-
-.card-hover:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--sf-shadow-md);
-}
-
-.hover-scale {
-  transition: transform var(--sf-transition);
-}
-
-.hover-scale:hover {
-  transform: scale(1.02);
-}
-
-.floating {
-  animation: float 6s ease-in-out infinite;
-}
-
-.gradient-animation {
-  background-size: 200% 200%;
-  animation: gradient-shift 3s ease infinite;
-}
-
 /* Hairline ring with a gold leading edge. */
 .loading-spinner {
   width: 40px;
@@ -211,42 +170,14 @@ body.admin-area.dark *::-webkit-scrollbar-thumb:hover {
   border: 2px solid var(--sf-color-border);
   border-top-color: var(--sf-color-gold-deep);
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: spin 0.9s linear infinite;
 }
 
-/* Page transitions */
-.page-transition-enter {
-  opacity: 0;
-  transform: translateY(12px);
-}
-
-.page-transition-enter-active {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity var(--sf-transition), transform var(--sf-transition);
-}
-
-.page-transition-exit {
-  opacity: 1;
-}
-
-.page-transition-exit-active {
-  opacity: 0;
-  transition: opacity var(--sf-transition-fast);
-}
-
-/* Decorative motion only — the spinner keeps turning, it carries state. */
-@media (prefers-reduced-motion: reduce) {
-  .floating,
-  .gradient-animation {
-    animation: none;
-  }
-
-  .card-hover:hover,
-  .hover-scale:hover {
-    transform: none;
-  }
-}
+/* The route transition is NOT here. It lives in one place — the keyed wrapper
+   around <Routes> in App.js, driven by `pageMotion` in src/theme/motion.js —
+   so every storefront route enters and leaves identically. The half-finished
+   `.page-transition-*` classes that used to sit here were a second, unused
+   implementation of the same idea and are gone. */
 
 /* =============================================================================
  * RESPONSIVE UTILITIES
