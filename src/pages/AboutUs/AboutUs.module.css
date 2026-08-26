@@ -1,532 +1,842 @@
-/* =============================================================================
- * Our Story / About — Meghali's Silk re-skin (tokens only; no hardcoded hex)
- * =============================================================================
- * Dark-first, gold-on-green heritage narrative. Every colour resolves from
- * src/theme/storefront-tokens.css and is theme-aware via body.dark; the `.dark`
- * class is kept for parity with the page's useTheme() pattern.
- * ========================================================================== */
+/* ═══════════════════════════════════════════════════════════════════════════
+   OUR STORY  —  the storefront's reference spread
+   ═══════════════════════════════════════════════════════════════════════════
+   The old page was a stack of widgets on a 1040px column: a boxed emblem hero,
+   pill chips, four cards with rainbow icon lozenges, a dotted timeline, and a
+   green stat box. This one is a magazine long-read on the ivory ground.
 
-.container {
-  max-width: 1040px;
-  margin: 0 auto;
-  padding: var(--sf-space-6) var(--sf-space-4) var(--sf-space-16);
-  min-height: calc(100vh - 200px);
+   THE FIVE DEVICES, USED THROUGHOUT
+     1. THE HANGING LABEL — every chapter puts its tracked eyebrow in a margin
+        column beside the text, the way a spread hangs a running head. Below
+        1024px the label falls above the chapter and the grid linearizes.
+     2. THE MEASURE — prose is capped at 68ch and never runs the container's
+        width, no matter how wide the viewport gets.
+     3. THE SERIF — Cormorant carries every headline, the lead paragraph, the
+        silk names, the years and the figures. Inter carries the body and the
+        tracked capitals. Nothing else changes size for emphasis.
+     4. THE HAIRLINE — lists are rules with content hanging under them. There
+        is not one card, one lozenge or one filled icon on the page.
+     5. THE BAND — three sections run full-bleed (the establishing image, the
+        loom, the pull-quote) so the page breathes between chapters. They work
+        because .main-content imposes no max-width; the contained sections
+        bring their own .container.
+
+   TOKENS ONLY
+   Every colour, space, radius, shadow and type value resolves through `--sf-*`,
+   which flips under `body.dark` — light and dark are one stylesheet and there
+   is no hex in this file. (The three image URLs in the component carry hex as
+   query parameters for the placeholder service; that is not CSS.)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.page {
+  min-height: 100vh;
+  padding-bottom: var(--sf-space-24);
   background: var(--sf-color-bg);
   color: var(--sf-color-text);
   font-family: var(--sf-font-family);
-  transition: background var(--sf-transition), color var(--sf-transition);
 }
 
-/* ===== Breadcrumb ===== */
+.container {
+  max-width: var(--sf-container-max);
+  margin: 0 auto;
+  padding: 0 var(--sf-space-6);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   BREADCRUMB  —  a whisper, in the listing page's language
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 .breadcrumb {
   display: flex;
-  gap: var(--sf-space-2);
   align-items: center;
-  margin-bottom: var(--sf-space-6);
-  font-size: var(--sf-text-sm);
+  flex-wrap: wrap;
+  gap: var(--sf-space-2);
+  padding: var(--sf-space-10) 0 0;
+  font-size: var(--sf-text-xs);
+  letter-spacing: 0.04em;
   color: var(--sf-color-text-muted);
 }
-.breadcrumb a {
-  color: var(--sf-color-gold-deep);
+
+.breadcrumbSep {
+  color: var(--sf-color-border-strong);
+}
+
+/* No chrome; a gold hairline grows in under the link on hover. */
+.breadcrumbLink {
+  position: relative;
+  color: var(--sf-color-text-secondary);
   text-decoration: none;
   transition: color var(--sf-transition-fast);
 }
-.breadcrumb a:hover {
-  color: var(--sf-color-gold);
+
+.breadcrumbLink::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 100%;
+  bottom: -3px;
+  height: 1px;
+  background: var(--sf-color-gold-deep);
+  transition: right var(--sf-transition);
 }
-@media (max-width: 768px) {
-  .breadcrumb a {
+
+.breadcrumbLink:hover {
+  color: var(--sf-color-text);
+}
+
+.breadcrumbLink:hover::after {
+  right: 0;
+}
+
+.breadcrumbLink:focus-visible {
+  outline: 2px solid transparent;
+  border-radius: var(--sf-radius-sm);
+  box-shadow: var(--sf-shadow-focus);
+}
+
+.breadcrumbCurrent {
+  color: var(--sf-color-text);
+}
+
+/* On touch the crumb still has to clear the 44px target (WCAG 2.5.5). The
+   padding grows the hit area, the negative margin hands the space back to the
+   layout, and the underline is pushed down by the same amount so it stays
+   glued to the text rather than to the bottom of the enlarged box. */
+@media (pointer: coarse) {
+  .breadcrumbLink {
     display: inline-block;
-    padding: 10px 2px;
-    margin: -10px 0;
+    padding: var(--sf-space-4) 0;
+    margin: calc(-1 * var(--sf-space-4)) 0;
+  }
+
+  .breadcrumbLink::after {
+    bottom: calc(var(--sf-space-4) - 3px);
   }
 }
 
-/* ===== Shared section heading ===== */
-.heading {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-2xl);
-  font-weight: var(--sf-font-bold);
-  color: var(--sf-color-text);
-  margin: 0 0 var(--sf-space-4);
-  position: relative;
-}
-.heading::after {
-  content: "";
-  display: block;
-  width: 56px;
-  height: 3px;
-  margin-top: var(--sf-space-3);
-  border-radius: var(--sf-radius-pill);
-  background: var(--sf-gradient-gold);
-}
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE SHARED EYEBROW  —  the storefront's opener (Prompt 12/14/23/24)
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-/* ===== 1. Hero / emblem ===== */
-.hero {
-  text-align: center;
-  padding: var(--sf-space-12) var(--sf-space-6) var(--sf-space-10);
-  margin-bottom: var(--sf-space-12);
-  border-radius: var(--sf-radius-xl);
-  background: var(--sf-color-surface);
-  border: 1px solid var(--sf-color-border);
-}
-.emblem {
-  display: inline-flex;
+.eyebrow {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  width: 84px;
-  height: 84px;
-  margin-bottom: var(--sf-space-5);
-  border-radius: var(--sf-radius-pill);
-  background: var(--sf-gradient-gold);
-  color: var(--sf-color-brand-green);
-  font-size: 2.4rem;
-  box-shadow: var(--sf-shadow-md);
-}
-.hero h1 {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-3xl);
-  font-weight: var(--sf-font-bold);
-  color: var(--sf-color-gold);
-  margin: 0 0 var(--sf-space-2);
-  letter-spacing: 0.01em;
-}
-.heroSubtitle {
-  font-size: var(--sf-text-sm);
-  letter-spacing: 0.12em;
+  gap: var(--sf-space-3);
+  margin: 0 0 var(--sf-space-4);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
   text-transform: uppercase;
-  color: var(--sf-color-text-muted);
-  margin: 0;
+  letter-spacing: var(--sf-tracking-wider);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-gold-deep);
 }
 
-/* ===== 2. Tag chips ===== */
-.tagRow {
-  list-style: none;
+.eyebrow::before {
+  content: "";
+  width: var(--sf-space-8);
+  height: 1px;
+  flex: none;
+  background: var(--sf-color-gold);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   1. THE OPENING
+   Tracked eyebrow, the largest serif line on the storefront, one standfirst at
+   reading measure, a ruled meta line — then the image, edge to edge.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.opening {
+  padding-top: var(--sf-space-16);
+}
+
+.title {
+  margin: 0;
+  max-width: 18ch;
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-5xl);
+  font-weight: var(--sf-font-light);
+  line-height: var(--sf-leading-display);
+  letter-spacing: var(--sf-tracking-tight);
+  color: var(--sf-color-text);
+}
+
+.standfirst {
+  margin: var(--sf-space-8) 0 0;
+  max-width: 60ch;
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-xl);
+  font-weight: var(--sf-font-light);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text-secondary);
+}
+
+/* Tracked capitals over a single rule — the page's only "facts" line above the
+   fold, and it carries no number that can go stale. */
+.meta {
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
-  gap: var(--sf-space-3);
-  margin: var(--sf-space-6) 0 0;
-  padding: 0;
+  gap: var(--sf-space-3) var(--sf-space-10);
+  margin: var(--sf-space-10) 0 0;
+  padding: var(--sf-space-5) 0 0;
+  border-top: 1px solid var(--sf-color-border);
+  list-style: none;
 }
-.tag {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sf-space-2);
-  min-height: var(--sf-tap-target);
-  padding: var(--sf-space-2) var(--sf-space-4);
-  border-radius: var(--sf-radius-pill);
-  border: 1px solid var(--sf-color-border-strong);
-  background: var(--sf-color-surface-2);
-  color: var(--sf-color-text-secondary);
-  font-size: var(--sf-text-sm);
+
+.metaItem {
+  font-size: var(--sf-text-xs);
   font-weight: var(--sf-font-medium);
-}
-.tag svg {
-  color: var(--sf-color-gold);
-  font-size: 1.1rem;
-}
-
-/* ===== 3. Our Heritage ===== */
-.heritage {
-  margin-bottom: var(--sf-space-12);
-}
-.heritage p {
-  color: var(--sf-color-text-secondary);
-  line-height: var(--sf-leading-normal);
-  margin: 0 0 var(--sf-space-4);
-  font-size: var(--sf-text-md);
-}
-.heritage strong {
-  color: var(--sf-color-text);
-  font-weight: var(--sf-font-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  color: var(--sf-color-text-muted);
 }
 
-/* ===== 4. Master Silk Collection feature row ===== */
-.feature {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--sf-space-8);
-  align-items: center;
-  margin-bottom: var(--sf-space-12);
-}
-.featureMedia {
-  border-radius: var(--sf-radius-lg);
-  overflow: hidden;
-  border: 1px solid var(--sf-color-border);
-  box-shadow: var(--sf-shadow-sm);
-}
-.featureMedia img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  aspect-ratio: 7 / 9;
-}
-.featureBody p {
-  color: var(--sf-color-text-secondary);
-  line-height: var(--sf-leading-normal);
-  margin: 0 0 var(--sf-space-5);
-  font-size: var(--sf-text-md);
-}
-.featureBody strong {
-  color: var(--sf-color-text);
-  font-weight: var(--sf-font-semibold);
-}
-.textLink {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sf-space-2);
-  min-height: var(--sf-tap-target);
-  color: var(--sf-color-gold-deep);
-  font-weight: var(--sf-font-semibold);
-  text-decoration: none;
-  transition: gap var(--sf-transition-fast), color var(--sf-transition-fast);
-}
-.textLink:hover {
-  color: var(--sf-color-gold);
-  gap: var(--sf-space-3);
-}
-.textLink svg {
-  font-size: 1.2rem;
+/* The establishing band. Full-bleed, cinematic crop, no frame and no radius —
+   it is the page's horizon line, not a picture on a wall. */
+.establishing {
+  margin-top: var(--sf-space-16);
+  background: var(--sf-color-surface-2);
 }
 
-/* ===== 5. Media / video block ===== */
-.media {
-  margin-bottom: var(--sf-space-12);
-  text-align: center;
-}
-.mediaPoster {
-  position: relative;
-  border-radius: var(--sf-radius-lg);
-  overflow: hidden;
-  border: 1px solid var(--sf-color-border);
-}
-.mediaPoster img {
+.establishing img {
   display: block;
   width: 100%;
   height: auto;
+  aspect-ratio: 12 / 5;
   object-fit: cover;
-  aspect-ratio: 2 / 1;
-}
-.mediaPoster::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: var(--sf-color-overlay);
-  pointer-events: none;
-}
-.playBtn {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 72px;
-  height: 72px;
-  border-radius: var(--sf-radius-pill);
-  border: 3px solid var(--sf-color-gold);
-  background: var(--sf-color-brand-green);
-  color: var(--sf-color-gold);
-  font-size: 2rem;
-  cursor: pointer;
-  transition: transform var(--sf-transition), background var(--sf-transition);
-}
-.playBtn:hover {
-  transform: translate(-50%, -50%) scale(1.06);
-  background: var(--sf-color-brand-green-deep);
-}
-.playBtn:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
-}
-.mediaCaption {
-  margin: var(--sf-space-4) 0 0;
-  color: var(--sf-color-text-muted);
-  font-size: var(--sf-text-sm);
 }
 
-/* ===== 6. Our Values ===== */
-.values {
-  margin-bottom: var(--sf-space-12);
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE CHAPTER  —  a hanging label beside a column of text
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.chapter {
+  padding: var(--sf-space-24) 0;
 }
-.valuesGrid {
+
+/* A hairline opens a chapter that follows another contained one, drawn inside
+   the container so it stops at the text measure rather than the viewport. */
+.chapterRuled > .container {
+  border-top: 1px solid var(--sf-color-border);
+  padding-top: var(--sf-space-24);
+  margin-top: calc(-1 * var(--sf-space-24));
+}
+
+.chapterGrid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--sf-space-4);
+  grid-template-columns: minmax(0, 13rem) minmax(0, 1fr);
+  gap: var(--sf-space-16);
+  align-items: start;
 }
-.valueCard {
-  padding: var(--sf-space-6);
-  border-radius: var(--sf-radius-lg);
-  background: var(--sf-color-surface);
-  border: 1px solid var(--sf-color-border);
-  transition: transform var(--sf-transition), box-shadow var(--sf-transition),
-    border-color var(--sf-transition);
+
+/* The label sits with the top of the chapter title, not the top of the box. */
+.chapterLabel {
+  padding-top: var(--sf-space-3);
 }
-.valueCard:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--sf-shadow-md);
-  border-color: var(--sf-color-border-strong);
-}
-.valueIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 52px;
-  height: 52px;
-  border-radius: var(--sf-radius-pill);
-  margin-bottom: var(--sf-space-4);
-  font-size: 1.6rem;
-  color: var(--sf-color-primary-contrast);
-}
-.accent-purple {
-  background: var(--sf-cat-purple);
-}
-.accent-teal {
-  background: var(--sf-cat-teal);
-}
-.accent-orange {
-  background: var(--sf-cat-orange);
-}
-.accent-pink {
-  background: var(--sf-cat-pink);
-}
-.valueCard h3 {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-lg);
-  font-weight: var(--sf-font-semibold);
-  color: var(--sf-color-text);
-  margin: 0 0 var(--sf-space-2);
-}
-.valueCard p {
-  font-size: var(--sf-text-sm);
-  color: var(--sf-color-text-secondary);
-  line-height: var(--sf-leading-normal);
+
+.chapterLabel .eyebrow {
   margin: 0;
 }
 
-/* ===== 7. Our Journey — vertical timeline ===== */
-.journey {
-  margin-bottom: var(--sf-space-12);
-}
-.timeline {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  position: relative;
-}
-.timeline::before {
-  content: "";
-  position: absolute;
-  top: var(--sf-space-2);
-  bottom: var(--sf-space-2);
-  left: 7px;
-  width: 2px;
-  background: var(--sf-gradient-gold);
-}
-.timelineItem {
-  position: relative;
-  padding: 0 0 var(--sf-space-8) var(--sf-space-8);
-}
-.timelineItem:last-child {
-  padding-bottom: 0;
-}
-.timelineDot {
-  position: absolute;
-  left: 0;
-  top: 4px;
-  width: 16px;
-  height: 16px;
-  border-radius: var(--sf-radius-pill);
-  background: var(--sf-color-gold);
-  border: 3px solid var(--sf-color-bg);
-  box-shadow: 0 0 0 1px var(--sf-color-gold-deep);
-}
-.timelineYear {
-  display: inline-block;
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-lg);
-  font-weight: var(--sf-font-bold);
-  color: var(--sf-color-gold-deep);
-  margin-bottom: var(--sf-space-1);
-}
-.timelineItem h3 {
-  font-size: var(--sf-text-md);
-  font-weight: var(--sf-font-semibold);
-  color: var(--sf-color-text);
-  margin: 0 0 var(--sf-space-1);
-}
-.timelineItem p {
-  font-size: var(--sf-text-sm);
-  color: var(--sf-color-text-secondary);
-  line-height: var(--sf-leading-normal);
-  margin: 0;
+.chapterBody {
+  min-width: 0;
 }
 
-/* ===== 8. Pull-quote ===== */
-.quoteBand {
-  margin-bottom: var(--sf-space-12);
-  padding: var(--sf-space-10) var(--sf-space-8);
-  border-radius: var(--sf-radius-xl);
-  background: var(--sf-gradient-heritage);
-  text-align: center;
+.chapterTitle {
+  margin: 0 0 var(--sf-space-8);
+  max-width: 22ch;
+  font-family: var(--sf-font-display);
+  font-size: clamp(2rem, 3.6vw, 3rem);
+  font-weight: var(--sf-font-light);
+  line-height: var(--sf-leading-display);
+  letter-spacing: var(--sf-tracking-tight);
+  color: var(--sf-color-text);
 }
-.quote {
+
+.subTitle {
+  margin: 0 0 var(--sf-space-4);
   font-family: var(--sf-font-display);
   font-size: var(--sf-text-2xl);
-  font-weight: var(--sf-font-medium);
-  font-style: italic;
+  font-weight: var(--sf-font-normal);
   line-height: var(--sf-leading-tight);
-  color: var(--sf-color-primary-contrast);
-  margin: 0;
-  max-width: 720px;
-  margin-inline: auto;
-}
-.quoteCite {
-  display: block;
-  margin-top: var(--sf-space-5);
-  font-family: var(--sf-font-family);
-  font-size: var(--sf-text-sm);
-  font-style: normal;
-  font-weight: var(--sf-font-semibold);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: var(--sf-color-gold-light);
+  color: var(--sf-color-text);
 }
 
-/* ===== 9. Our Impact — stat band ===== */
-.impact {
-  margin-bottom: var(--sf-space-12);
-  padding: var(--sf-space-10) var(--sf-space-8);
-  border-radius: var(--sf-radius-xl);
-  background: var(--sf-color-brand-green);
-  border: 1px solid var(--sf-color-gold-deep);
-  text-align: center;
+/* ── The measure ───────────────────────────────────────────────────────────
+   68ch and no wider, whatever the container does. */
+.prose {
+  max-width: 68ch;
 }
-.impactLabel {
-  display: block;
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--sf-color-gold-light);
-  margin-bottom: var(--sf-space-6);
+
+.prose p {
+  margin: 0 0 var(--sf-space-6);
+  font-size: var(--sf-text-md);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-secondary);
 }
-.impactGrid {
+
+.prose p:last-child {
+  margin-bottom: 0;
+}
+
+.prose strong {
+  font-weight: var(--sf-font-medium);
+  color: var(--sf-color-text);
+}
+
+/* The lead paragraph is the serif's second entrance after the headline.
+   Scoped as `.prose .proseLead` so it outranks the `.prose p` rule above
+   rather than reaching for !important. */
+.prose .proseLead {
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-2xl);
+  font-weight: var(--sf-font-light);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   3. THE FIBRE  —  three silks as hairline rows
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.silks {
+  max-width: 68ch;
+  margin: var(--sf-space-12) 0 0;
+}
+
+.silk {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--sf-space-6);
+  grid-template-columns: minmax(0, 10rem) minmax(0, 1fr);
+  gap: var(--sf-space-4) var(--sf-space-8);
+  padding: var(--sf-space-6) 0;
+  border-top: 1px solid var(--sf-color-border);
 }
-.impactStat {
+
+.silk:last-child {
+  border-bottom: 1px solid var(--sf-color-border);
+}
+
+.silkTerm {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: var(--sf-space-2);
-}
-.impactNumber {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-3xl);
-  font-weight: var(--sf-font-bold);
-  color: var(--sf-color-gold);
-  line-height: 1;
-}
-.impactStatLabel {
-  font-size: var(--sf-text-sm);
-  color: var(--sf-color-primary-contrast);
-  opacity: 0.85;
+  gap: var(--sf-space-1);
 }
 
-/* ===== 10. Experience Our Heritage — CTA ===== */
-.cta {
-  text-align: center;
-  padding: var(--sf-space-10) var(--sf-space-6);
-  border-radius: var(--sf-radius-xl);
-  background: var(--sf-color-surface);
-  border: 1px solid var(--sf-color-border);
+.silkName {
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-2xl);
+  font-weight: var(--sf-font-normal);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text);
 }
-.cta .heading {
-  display: inline-block;
+
+.silkNote {
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  color: var(--sf-color-gold-deep);
 }
-.cta .heading::after {
-  margin-inline: auto;
-}
-.ctaSubtitle {
+
+.silkText {
+  margin: 0;
+  font-size: var(--sf-text-base);
+  line-height: var(--sf-leading-relaxed);
   color: var(--sf-color-text-secondary);
-  font-size: var(--sf-text-md);
-  margin: 0 0 var(--sf-space-6);
 }
-.ctaActions {
+
+.drape {
+  margin-top: var(--sf-space-16);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   4. THE COLLECTION  —  one large plate against a short column
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.feature {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--sf-space-16);
+  align-items: center;
+}
+
+.featureMedia {
+  background: var(--sf-color-surface-2);
+}
+
+.featureMedia img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 4 / 5;
+  object-fit: cover;
+}
+
+.featureText {
+  min-width: 0;
+}
+
+/* The quiet link: no chrome, a gold hairline that grows in under it. */
+.textLink {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sf-space-2);
+  min-height: var(--sf-tap-target);
+  margin-top: var(--sf-space-6);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  text-decoration: none;
+  color: var(--sf-color-text);
+  transition: color var(--sf-transition-fast);
+}
+
+.textLink::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 100%;
+  bottom: 11px;
+  height: 1px;
+  background: var(--sf-color-gold-deep);
+  transition: right var(--sf-transition);
+}
+
+.textLink:hover {
+  color: var(--sf-color-gold-deep);
+}
+
+.textLink:hover::after {
+  right: 0;
+}
+
+.textLink:focus-visible {
+  outline: 2px solid transparent;
+  border-radius: var(--sf-radius-sm);
+  box-shadow: var(--sf-shadow-focus);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   5. THE LOOM  —  a photograph, and nothing pretending to be a player
+   The old block put a 72px play button over this poster with nothing behind
+   it. It is a picture; it is now framed and captioned as one.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.loom {
+  margin: 0;
+  background: var(--sf-color-surface-2);
+}
+
+.loom img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 2 / 1;
+  object-fit: cover;
+}
+
+.loomCaption {
+  display: block;
+  padding: var(--sf-space-5) 0 var(--sf-space-6);
+  background: var(--sf-color-bg);
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-muted);
+}
+
+/* The caption re-uses the page container so it lines up with the prose above
+   it; the max-width has to survive being a span. */
+.loomCaption .container {
+  display: block;
+  max-width: var(--sf-container-max);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   6. WHAT WE HOLD TO  —  a numbered hairline list (the rainbow tiles are gone)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.values {
+  margin: 0;
+  padding: 0;
+  max-width: 68ch;
+  list-style: none;
+}
+
+.value {
+  display: grid;
+  grid-template-columns: minmax(0, 4rem) minmax(0, 1fr);
+  gap: var(--sf-space-2) var(--sf-space-6);
+  padding: var(--sf-space-6) 0;
+  border-top: 1px solid var(--sf-color-border);
+}
+
+.value:last-child {
+  border-bottom: 1px solid var(--sf-color-border);
+}
+
+.valueIndex {
+  grid-row: span 2;
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-xl);
+  font-weight: var(--sf-font-light);
+  font-variant-numeric: lining-nums tabular-nums;
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-gold-deep);
+}
+
+.valueTitle {
+  margin: 0;
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-xl);
+  font-weight: var(--sf-font-normal);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text);
+}
+
+.valueText {
+  margin: 0;
+  font-size: var(--sf-text-base);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-secondary);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   7. THE JOURNEY  —  one vertical hairline, serif years
+   The rule belongs to the <li>, so both the year and its paragraph hang to the
+   right of it and the line stays continuous when the grid linearizes.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.timeline {
+  margin: 0;
+  padding: 0;
+  max-width: 68ch;
+  list-style: none;
+}
+
+.step {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 7rem) minmax(0, 1fr);
+  gap: var(--sf-space-2) var(--sf-space-8);
+  padding: 0 0 var(--sf-space-12) var(--sf-space-8);
+  border-left: 1px solid var(--sf-color-border);
+}
+
+/* The mark on the line, set on the year's own baseline. */
+.step::before {
+  content: "";
+  position: absolute;
+  left: -3px;
+  top: var(--sf-space-2);
+  width: 5px;
+  height: 5px;
+  border-radius: var(--sf-radius-pill);
+  background: var(--sf-color-gold);
+}
+
+.step:last-child {
+  padding-bottom: 0;
+}
+
+.stepYear {
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-2xl);
+  font-weight: var(--sf-font-light);
+  font-variant-numeric: lining-nums tabular-nums;
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-gold-deep);
+}
+
+.stepBody {
+  min-width: 0;
+}
+
+.stepTitle {
+  margin: 0 0 var(--sf-space-2);
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-xl);
+  font-weight: var(--sf-font-normal);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text);
+}
+
+.stepText {
+  margin: 0;
+  font-size: var(--sf-text-base);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-secondary);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   8. THE LINE  —  the pull-quote, full width on the heritage ground
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.quoteBand {
+  padding: var(--sf-space-32) 0;
+  background: var(--sf-gradient-heritage);
+  color: var(--sf-color-primary-contrast);
+}
+
+.quote {
+  margin: 0;
+  max-width: 24ch;
+}
+
+.quoteText {
+  margin: 0;
+  font-family: var(--sf-font-display);
+  font-size: clamp(2rem, 4.4vw, 3.5rem);
+  font-weight: var(--sf-font-light);
+  line-height: var(--sf-leading-display);
+  letter-spacing: var(--sf-tracking-tight);
+  color: var(--sf-color-primary-contrast);
+}
+
+.quoteCite {
+  display: block;
+  margin-top: var(--sf-space-8);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-style: normal;
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wider);
+  color: var(--sf-color-gold-light);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   9. IN NUMBERS  —  three quiet figures, no box
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.marksHeading {
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.marksHeading .eyebrow {
+  margin: 0;
+}
+
+.marks {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sf-space-8) var(--sf-space-12);
+  margin: var(--sf-space-10) 0 0;
+  padding: var(--sf-space-8) 0 0;
+  border-top: 1px solid var(--sf-color-border);
+  list-style: none;
+}
+
+.mark {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-3);
+}
+
+.markValue {
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-4xl);
+  font-weight: var(--sf-font-light);
+  font-variant-numeric: lining-nums tabular-nums;
+  line-height: 1;
+  color: var(--sf-color-text);
+}
+
+.markLabel {
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   10. THE CLOSE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.close {
+  padding: var(--sf-space-24) 0;
+  background: var(--sf-color-surface-2);
+  text-align: center;
+}
+
+.closeTitle {
+  margin: 0;
+  font-family: var(--sf-font-display);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: var(--sf-font-light);
+  line-height: var(--sf-leading-display);
+  letter-spacing: var(--sf-tracking-tight);
+  color: var(--sf-color-text);
+}
+
+.closeText {
+  margin: var(--sf-space-5) auto 0;
+  max-width: 52ch;
+  font-size: var(--sf-text-md);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-secondary);
+}
+
+.closeActions {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   gap: var(--sf-space-4);
-}
-.ctaPrimary,
-.ctaSecondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: var(--sf-tap-target);
-  padding: var(--sf-space-3) var(--sf-space-8);
-  border-radius: var(--sf-radius-pill);
-  font-weight: var(--sf-font-semibold);
-  font-size: var(--sf-text-base);
-  text-decoration: none;
-  transition: transform var(--sf-transition), box-shadow var(--sf-transition),
-    background var(--sf-transition), color var(--sf-transition);
-}
-.ctaPrimary {
-  background: var(--sf-gradient-gold);
-  color: var(--sf-color-brand-green);
-  border: 1px solid transparent;
-}
-.ctaPrimary:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--sf-shadow-md);
-}
-.ctaSecondary {
-  background: transparent;
-  color: var(--sf-color-text);
-  border: 1px solid var(--sf-color-border-strong);
-}
-.ctaSecondary:hover {
-  border-color: var(--sf-color-gold);
-  color: var(--sf-color-gold-deep);
-}
-.ctaPrimary:focus-visible,
-.ctaSecondary:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
+  margin-top: var(--sf-space-10);
 }
 
-/* ===== Responsive ===== */
-@media (max-width: 768px) {
-  .feature {
-    grid-template-columns: 1fr;
+.closeBtn {
+  min-width: 15rem;
+}
+
+/* The second action is a hairline, not a second fill — the band already has
+   its one ink moment. */
+.closeGhost {
+  min-width: 15rem;
+  color: var(--sf-color-text);
+  border-color: var(--sf-color-border-strong);
+}
+
+.closeGhost:hover {
+  border-color: var(--sf-color-gold-deep);
+  color: var(--sf-color-gold-deep);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   The hanging label folds above its chapter first; the two-column blocks stack
+   next; the type steps down last.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (max-width: 1024px) {
+  .chapterGrid {
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--sf-space-6);
   }
-  .valuesGrid {
-    grid-template-columns: repeat(2, 1fr);
+
+  .chapterLabel {
+    padding-top: 0;
+  }
+
+  .feature {
+    gap: var(--sf-space-12);
   }
 }
-@media (max-width: 560px) {
-  .hero {
-    padding: var(--sf-space-10) var(--sf-space-4) var(--sf-space-8);
+
+@media (max-width: 900px) {
+  .feature {
+    grid-template-columns: minmax(0, 1fr);
   }
-  .hero h1 {
-    font-size: var(--sf-text-2xl);
+
+  .featureMedia img {
+    aspect-ratio: 3 / 2;
   }
-  .valuesGrid {
-    grid-template-columns: 1fr;
+}
+
+@media (max-width: 768px) {
+  .chapter {
+    padding: var(--sf-space-16) 0;
   }
-  .impactGrid {
-    grid-template-columns: 1fr;
+
+  .chapterRuled > .container {
+    padding-top: var(--sf-space-16);
+    margin-top: calc(-1 * var(--sf-space-16));
+  }
+
+  .opening {
+    padding-top: var(--sf-space-10);
+  }
+
+  .title {
+    max-width: 100%;
+  }
+
+  .establishing {
+    margin-top: var(--sf-space-12);
+  }
+
+  .establishing img {
+    aspect-ratio: 3 / 2;
+  }
+
+  .loom img {
+    aspect-ratio: 3 / 2;
+  }
+
+  .quoteBand {
+    padding: var(--sf-space-20) 0;
+  }
+
+  .quote {
+    max-width: 100%;
+  }
+
+  .close {
+    padding: var(--sf-space-16) 0;
+  }
+
+  .marks {
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--sf-space-8);
   }
-  .quote {
+}
+
+@media (max-width: 560px) {
+  .container {
+    padding: 0 var(--sf-space-4);
+  }
+
+  .standfirst {
+    font-size: var(--sf-text-lg);
+  }
+
+  .prose .proseLead {
     font-size: var(--sf-text-xl);
   }
+
+  .meta {
+    gap: var(--sf-space-2) var(--sf-space-6);
+  }
+
+  /* The three list families all collapse to a single column, with the term
+     sitting above its text rather than beside it. */
+  .silk,
+  .value,
+  .step {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .silk {
+    gap: var(--sf-space-2);
+  }
+
+  .silkTerm {
+    flex-direction: row;
+    align-items: baseline;
+    gap: var(--sf-space-3);
+  }
+
+  .valueIndex {
+    grid-row: auto;
+    font-size: var(--sf-text-base);
+  }
+
+  .step {
+    gap: var(--sf-space-2);
+    padding-left: var(--sf-space-6);
+  }
+
+  .closeBtn,
+  .closeGhost {
+    min-width: 100%;
+  }
 }
+
+/* Reduced motion is handled in the component (the reveals are simply not
+   applied), and the token layer already zeroes every transition — so the
+   hairlines and links stop animating too. */
