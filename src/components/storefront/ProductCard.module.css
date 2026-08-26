@@ -49,8 +49,18 @@
  * 1. THE PHOTOGRAPH
  * ========================================================================== */
 
+/* The plate is also a QUERY CONTAINER. The marks pinned to its corners collide
+   or clear each other according to how wide THIS CARD is, and the same card is
+   166px in the two-up phone listing and 284px on the desktop wall — a viewport
+   media query would be guessing at that from the outside. See §2. */
 .mediaWrap {
+  /* One mark's height, derived rather than measured: both the badge and the
+     ribbon primitives set line-height 1 at --sf-text-xs and pad by --sf-space-1
+     above and below. §2 uses it to step one mark down a row under another. */
+  --mark-row: calc(var(--sf-space-1) * 2 + var(--sf-text-xs));
+
   grid-row: 1;
+  container-type: inline-size;
   position: relative;
   aspect-ratio: 3 / 4;
   background: var(--sf-color-surface-2);
@@ -122,6 +132,30 @@
 /* When both the heart and the ribbon sit top-right, drop the heart below it. */
 .premiumRibbon ~ .wishlist {
   top: calc(var(--sf-space-3) + 34px);
+}
+
+/* ---- Narrow plates: the marks stop competing for the top line -------------
+   "NN% OFF" and "PREMIUM" want about 170px of type between them, plus their
+   two insets — so under roughly 210px of plate they cannot both sit on the top
+   line, and the badge ends up printed underneath the ribbon.
+   The fix is a step, not a disappearance: the ribbon drops into the LEFT column
+   directly beneath the badge, which leaves the right corner free and lets the
+   heart come back up to it. Both marks stay, both stay legible, and neither
+   loses a letter.
+   Scoped by `.discountBadge ~` on purpose: a card carrying only the ribbon has
+   nothing to collide with and keeps its composed top-right position at every
+   width. Ordering is guaranteed by the markup — badge, then ribbon, then the
+   heart. */
+@container (max-width: 210px) {
+  .discountBadge ~ .premiumRibbon.premiumRibbon {
+    top: calc(var(--sf-space-3) + var(--mark-row) + var(--sf-space-2));
+    right: auto;
+    left: var(--sf-space-3);
+  }
+
+  .discountBadge ~ .premiumRibbon ~ .wishlist {
+    top: var(--sf-space-3);
+  }
 }
 
 /* Out of stock — a tracked label on a warm scrim, across the foot of the crop. */
