@@ -1,617 +1,1577 @@
-/* =============================================================================
- * Checkout — Meghali's Silk re-skin
- * All colours come from src/theme/storefront-tokens.css (--sf-*), which flip on
- * body.dark. No hardcoded hex. The .dark marker only hints the native
- * color-scheme so form controls / scrollbars render for the active theme.
- * ========================================================================== */
+/* ═══════════════════════════════════════════════════════════════════════════
+   CHECKOUT  —  the editorial counter
+   ═══════════════════════════════════════════════════════════════════════════
+   A focused, low-noise flow. Five moves and nothing else:
+
+     1. A HEAD given air — a tracked eyebrow carrying the step count, then the
+        page's one serif word.
+     2. THE STEP LINE — four tracked labels joined by hairlines. Gold and a
+        check behind you, ink where you stand, a hairline ahead. No bubbles.
+     3. THE CONTENT COLUMN — line rows, radio cards and underline fields, all
+        drawn in hairlines on the ivory ground.
+     4. THE RAIL — a quiet summary, sticky beside the content on desktop, a
+        collapsible band directly above the CTA on phones.
+     5. THE NAV ROW — Back as a text button, one ink CTA.
+
+   ─────────────────────────────────────────────────────────────────────────────
+   TWO PROMPTS, ONE STYLESHEET
+   Sections 1–8 are the SHELL plus step 0 (Cart) and step 1 (Shipping) — Prompt
+   18. Section 9 is step 2 (Payment) and step 3 (Review), which Prompt 19 owns:
+   it can be rewritten wholesale without touching a single shell class. The one
+   deliberate overlap is the shared field atoms (.sectionTitle, .formRow,
+   .formGroup, .inputError, .fieldError, .readOnly) defined in section 5 — the
+   payment forms consume them as-is.
+
+   TOKENS ONLY
+   Every colour, space, radius and type value resolves through `--sf-*`, which
+   flips under `body.dark` — so light and dark are one stylesheet and there is
+   no hex in this file. The only local variables are the two aliases colouring
+   the inline empty-state artwork and the measured header height, and all three
+   are aliases onto tokens or measurements, never colours.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.page {
+  /* Aliases, so a single inline SVG can be re-coloured from the token layer. */
+  --empty-line: var(--sf-color-border-strong);
+  --empty-gold: var(--sf-color-gold-deep);
+
+  /* Measured height of the sticky masthead + nav band at desktop widths; the
+     rail clears it by --sf-space-6. Matches the PDP's own measurement. */
+  --checkout-header-h: 118px;
+
+  min-height: 100vh;
+  padding-bottom: var(--sf-space-24);
+  background: var(--sf-color-bg);
+  color: var(--sf-color-text);
+  font-family: var(--sf-font-family);
+}
+
+/* Header.js drops the nav band at 1024px, leaving the masthead alone — so the
+   rail's clearance follows it. */
+@media (max-width: 1024px) {
+  .page {
+    --checkout-header-h: 69px;
+  }
+}
+
+/* The only thing ThemeContext is consumed for: a native color-scheme hint so
+   number spinners, selects and scrollbars render for the active theme. */
+.dark {
+  color-scheme: dark;
+}
 
 .container {
   max-width: var(--sf-container-max);
   margin: 0 auto;
-  padding: var(--sf-space-6) var(--sf-space-4) var(--sf-space-16);
-  min-height: calc(100vh - 200px);
-  font-family: var(--sf-font-family);
-  color: var(--sf-color-text);
-  background: var(--sf-color-bg);
-}
-.dark { color-scheme: dark; }
-
-.breadcrumb {
-  display: flex;
-  gap: var(--sf-space-2);
-  align-items: center;
-  margin-bottom: var(--sf-space-6);
-  font-size: var(--sf-text-sm);
-  color: var(--sf-color-text-muted);
-}
-.breadcrumb a {
-  color: var(--sf-color-text-secondary);
-  text-decoration: none;
-  transition: color var(--sf-transition-fast);
-}
-.breadcrumb a:hover { color: var(--sf-color-price); }
-/* Touch-target sizing: grow the breadcrumb hit area without moving the row */
-@media (max-width: 768px) {
-  .breadcrumb a { display: inline-block; padding: 10px 2px; margin: -10px 0; }
-}
-
-/* ── Step Indicator ──────────────────────────────────────────────────────── */
-.stepIndicator {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: var(--sf-space-8);
-  gap: 0;
-}
-.step { display: flex; align-items: center; gap: var(--sf-space-2); }
-.stepCircle {
-  width: 34px;
-  height: 34px;
-  border-radius: var(--sf-radius-pill);
-  border: 2px solid var(--sf-color-border-strong);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-bold);
-  color: var(--sf-color-text-muted);
-  background: var(--sf-color-surface);
-  transition: all var(--sf-transition);
-  flex-shrink: 0;
-}
-/* Active (current) step: gold ring */
-.activeStep .stepCircle {
-  border-color: var(--sf-color-gold);
-  color: var(--sf-color-text);
-  box-shadow: 0 0 0 3px var(--sf-color-badge-bg);
-}
-.activeStep .stepLabel { color: var(--sf-color-text); }
-/* Completed step: emerald fill + check */
-.completedStep .stepCircle {
-  border-color: var(--sf-color-emerald);
-  background: var(--sf-color-emerald);
-  color: var(--sf-color-emerald-contrast);
-  box-shadow: none;
-}
-.completedStep .stepLabel { color: var(--sf-color-emerald); }
-.stepLabel {
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-medium);
-  color: var(--sf-color-text-muted);
-  white-space: nowrap;
-}
-.stepLine {
-  width: 44px;
-  height: 2px;
-  background: var(--sf-color-border-strong);
-  margin: 0 var(--sf-space-2);
-}
-.completedStep .stepLine { background: var(--sf-color-emerald); }
-@media (max-width: 640px) { .stepLabel { display: none; } .stepLine { width: 24px; } }
-
-/* ── Layout ──────────────────────────────────────────────────────────────── */
-.checkoutLayout { display: grid; grid-template-columns: 1fr 360px; gap: var(--sf-space-8); }
-@media (max-width: 900px) { .checkoutLayout { grid-template-columns: 1fr; } }
-/* Grid items default to min-width:auto, which would let a long nowrap product
-   title force the column wider than the viewport on small screens. */
-.mainContent, .sidebar { min-width: 0; }
-
-.sectionTitle {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-2xl);
-  font-weight: var(--sf-font-bold);
-  letter-spacing: -0.01em;
-  margin-bottom: var(--sf-space-5);
-  color: var(--sf-color-text);
-}
-.subTitle {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-xl);
-  font-weight: var(--sf-font-semibold);
-  margin: var(--sf-space-6) 0 var(--sf-space-3);
-  color: var(--sf-color-text);
-}
-
-/* ── Cart Items ──────────────────────────────────────────────────────────── */
-.cartItems { display: flex; flex-direction: column; gap: var(--sf-space-3); margin-bottom: var(--sf-space-6); }
-.cartItem {
-  display: flex;
-  align-items: center;
-  gap: var(--sf-space-3);
-  padding: var(--sf-space-3);
-  border-radius: var(--sf-radius-lg);
-  background: var(--sf-color-surface);
-  border: 1px solid var(--sf-color-border);
-  transition: border-color var(--sf-transition-fast);
-}
-.cartItem:hover { border-color: var(--sf-color-border-strong); }
-.cartItemImage {
-  width: 72px;
-  height: 72px;
-  border-radius: var(--sf-radius-md);
-  object-fit: cover;
-  background: var(--sf-color-surface-2);
-  flex-shrink: 0;
-}
-.cartItemInfo { flex: 1; min-width: 0; }
-.cartItemInfo h4 {
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-  margin-bottom: 2px;
-  color: var(--sf-color-text);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.variant { font-size: var(--sf-text-xs); color: var(--sf-color-text-muted); }
-.itemPrice { font-size: var(--sf-text-sm); font-weight: var(--sf-font-semibold); color: var(--sf-color-price); }
-.quantityControls {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  border: 1px solid var(--sf-color-border);
-  border-radius: var(--sf-radius-md);
-  overflow: hidden;
-}
-.quantityControls button {
-  width: 32px;
-  height: 32px;
-  border: none;
-  background: var(--sf-color-surface-2);
-  color: var(--sf-color-text-secondary);
-  cursor: pointer;
-  font-size: var(--sf-text-base);
-  font-weight: var(--sf-font-semibold);
-  transition: background var(--sf-transition-fast), color var(--sf-transition-fast);
-}
-.quantityControls button:hover { background: var(--sf-color-primary-soft); color: var(--sf-color-emerald); }
-.quantityControls span {
-  width: 32px;
-  text-align: center;
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-  background: var(--sf-color-surface);
-  color: var(--sf-color-text);
-}
-.itemSubtotal {
-  font-weight: var(--sf-font-bold);
-  font-size: var(--sf-text-base);
-  color: var(--sf-color-text);
-  white-space: nowrap;
-  min-width: 80px;
-  text-align: right;
-}
-.removeBtn {
-  background: none;
-  border: none;
-  font-size: 1.3rem;
-  color: var(--sf-color-text-muted);
-  cursor: pointer;
-  padding: 0 var(--sf-space-1);
-  border-radius: var(--sf-radius-sm);
-  transition: color var(--sf-transition-fast), background var(--sf-transition-fast);
-}
-.removeBtn:hover { color: var(--sf-color-danger); background: var(--sf-color-danger-bg); }
-@media (max-width: 640px) { .itemSubtotal { display: none; } .cartItemImage { width: 56px; height: 56px; } }
-/* Comfortable touch targets for the line-item controls on phones. */
-@media (max-width: 768px) {
-  .quantityControls button { width: 40px; height: 40px; }
-  .quantityControls span { width: 32px; }
-  .removeBtn { min-width: 44px; min-height: 44px; padding: 0 var(--sf-space-2); }
-}
-
-/* ── Coupon ──────────────────────────────────────────────────────────────── */
-.couponSection {
-  padding: var(--sf-space-4);
-  border-radius: var(--sf-radius-lg);
-  background: var(--sf-color-surface-2);
-  border: 1px solid var(--sf-color-border);
-  margin-bottom: var(--sf-space-5);
-}
-.couponSection h3 {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-lg);
-  font-weight: var(--sf-font-semibold);
-  margin-bottom: var(--sf-space-3);
-  color: var(--sf-color-text);
-}
-.couponForm { display: flex; gap: var(--sf-space-2); }
-/* min-width:0 lets flex shrink the input below its ~20ch intrinsic width, else
-   the Apply button is pushed past the 320px viewport edge. */
-.couponForm input {
-  flex: 1;
-  min-width: 0;
-  min-height: var(--sf-tap-target);
-  padding: 0 var(--sf-space-4);
-  border-radius: var(--sf-radius-md);
-  border: 1px solid var(--sf-color-border-strong);
-  font-size: var(--sf-text-sm);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  background: var(--sf-color-surface);
-  color: var(--sf-color-text);
-  font-family: inherit;
-}
-.couponForm input::placeholder { color: var(--sf-color-text-muted); letter-spacing: normal; text-transform: none; }
-.couponForm input:focus { outline: none; border-color: var(--sf-color-emerald); box-shadow: var(--sf-shadow-focus); }
-.couponForm button {
-  flex-shrink: 0;
-  min-height: var(--sf-tap-target);
-  padding: 0 var(--sf-space-5);
-  border-radius: var(--sf-radius-md);
-  border: none;
-  background: var(--sf-color-emerald);
-  color: var(--sf-color-emerald-contrast);
-  font-weight: var(--sf-font-semibold);
-  cursor: pointer;
-  font-family: inherit;
-  transition: background var(--sf-transition-fast);
-}
-.couponForm button:hover { background: var(--sf-color-emerald-hover); }
-.couponForm button:focus-visible { outline: none; box-shadow: var(--sf-shadow-focus); }
-.couponApplied {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--sf-space-3);
-  padding: var(--sf-space-3) var(--sf-space-4);
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-discount-bg);
-  border: 1px solid var(--sf-color-border);
-  color: var(--sf-color-discount);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-}
-.couponApplied button {
-  flex-shrink: 0;
-  background: none;
-  border: none;
-  color: var(--sf-color-danger);
-  cursor: pointer;
-  font-weight: var(--sf-font-semibold);
-  font-family: inherit;
-  padding: var(--sf-space-1) var(--sf-space-2);
-  border-radius: var(--sf-radius-sm);
-}
-.couponApplied button:hover { background: var(--sf-color-danger-bg); }
-.couponError { color: var(--sf-color-danger); font-size: var(--sf-text-xs); margin-top: var(--sf-space-2); }
-.couponCapNote { font-style: normal; font-size: var(--sf-text-xs); opacity: 0.85; }
-
-.loginPrompt {
-  text-align: center;
-  padding: var(--sf-space-5);
-  border-radius: var(--sf-radius-lg);
-  background: var(--sf-color-warning-bg);
-  color: var(--sf-color-warning);
-  border: 1px solid var(--sf-color-border);
-}
-.loginPrompt p { margin: 0 0 var(--sf-space-3); }
-.loginPromptBtn {
-  min-height: var(--sf-tap-target);
   padding: 0 var(--sf-space-6);
-  border: none;
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-emerald);
-  color: var(--sf-color-emerald-contrast);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-  cursor: pointer;
-  font-family: inherit;
-  transition: background var(--sf-transition-fast);
-}
-.loginPromptBtn:hover { background: var(--sf-color-emerald-hover); }
-.loginPromptBtn:focus-visible { outline: none; box-shadow: var(--sf-shadow-focus); }
-
-/* ── Address ─────────────────────────────────────────────────────────────── */
-.savedAddresses { margin-bottom: var(--sf-space-5); }
-.savedAddresses h3 {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-lg);
-  font-weight: var(--sf-font-semibold);
-  margin-bottom: var(--sf-space-3);
-  color: var(--sf-color-text);
-}
-.addressCard {
-  display: flex;
-  gap: var(--sf-space-3);
-  padding: var(--sf-space-4);
-  border-radius: var(--sf-radius-lg);
-  border: 2px solid var(--sf-color-border);
-  background: var(--sf-color-surface);
-  cursor: pointer;
-  margin-bottom: var(--sf-space-2);
-  transition: border-color var(--sf-transition-fast), background var(--sf-transition-fast);
-}
-.selectedAddress { border-color: var(--sf-color-gold); background: var(--sf-color-badge-bg); }
-.addressCard input { flex-shrink: 0; margin-top: 4px; accent-color: var(--sf-color-emerald); }
-.addressCard strong { display: block; margin-bottom: 4px; font-size: var(--sf-text-sm); color: var(--sf-color-text); }
-.addressCard p { font-size: var(--sf-text-sm); color: var(--sf-color-text-secondary); margin: 0; }
-.newAddressBtn {
-  background: none;
-  border: 2px dashed var(--sf-color-border-strong);
-  border-radius: var(--sf-radius-lg);
-  padding: var(--sf-space-3);
-  width: 100%;
-  min-height: var(--sf-tap-target);
-  cursor: pointer;
-  color: var(--sf-color-emerald);
-  font-weight: var(--sf-font-semibold);
-  font-family: inherit;
-  font-size: var(--sf-text-sm);
-  transition: border-color var(--sf-transition-fast);
-}
-.newAddressBtn:hover { border-color: var(--sf-color-emerald); }
-
-.addressForm { margin-bottom: var(--sf-space-5); }
-.formRow { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sf-space-3); }
-@media (max-width: 480px) { .formRow { grid-template-columns: 1fr; } }
-.formGroup { display: flex; flex-direction: column; gap: var(--sf-space-1); margin-bottom: var(--sf-space-3); }
-.formGroup label { font-size: var(--sf-text-sm); font-weight: var(--sf-font-medium); color: var(--sf-color-text-secondary); }
-.formGroup input, .formGroup select {
-  min-height: var(--sf-tap-target);
-  padding: 0 var(--sf-space-3);
-  border-radius: var(--sf-radius-md);
-  border: 1px solid var(--sf-color-border-strong);
-  font-size: var(--sf-text-sm);
-  background: var(--sf-color-surface);
-  color: var(--sf-color-text);
-  font-family: inherit;
-}
-.formGroup input:focus, .formGroup select:focus {
-  outline: none;
-  border-color: var(--sf-color-emerald);
-  box-shadow: var(--sf-shadow-focus);
-}
-.inputError { border-color: var(--sf-color-danger) !important; }
-.fieldError { color: var(--sf-color-danger); font-size: var(--sf-text-xs); }
-.readOnly { background: var(--sf-color-surface-2) !important; color: var(--sf-color-text-muted) !important; cursor: not-allowed; }
-
-/* ── Shipping Methods ────────────────────────────────────────────────────── */
-.shippingMethods { display: flex; flex-direction: column; gap: var(--sf-space-2); }
-.shippingOption {
-  display: flex;
-  gap: var(--sf-space-3);
-  align-items: center;
-  padding: var(--sf-space-4);
-  border-radius: var(--sf-radius-lg);
-  border: 2px solid var(--sf-color-border);
-  background: var(--sf-color-surface);
-  cursor: pointer;
-  transition: border-color var(--sf-transition-fast), background var(--sf-transition-fast);
-}
-.selectedShipping { border-color: var(--sf-color-gold); background: var(--sf-color-badge-bg); }
-.shippingOption input { flex-shrink: 0; accent-color: var(--sf-color-emerald); }
-.shippingOption strong { display: block; font-size: var(--sf-text-sm); color: var(--sf-color-text); }
-.shippingOption p { font-size: var(--sf-text-xs); color: var(--sf-color-text-secondary); margin: 2px 0 0; }
-.shippingPrice { margin-left: auto; font-weight: var(--sf-font-bold); color: var(--sf-color-discount); white-space: nowrap; }
-.shippingEmpty {
-  font-size: var(--sf-text-sm);
-  color: var(--sf-color-text-secondary);
-  padding: var(--sf-space-3);
-  border: 1px dashed var(--sf-color-border-strong);
-  border-radius: var(--sf-radius-lg);
 }
 
-/* ── Payment ─────────────────────────────────────────────────────────────── */
-.paymentMethods { display: flex; flex-direction: column; gap: var(--sf-space-2); margin-bottom: var(--sf-space-5); }
-.paymentOption {
-  display: flex;
-  gap: var(--sf-space-3);
-  align-items: center;
-  padding: var(--sf-space-4);
-  border-radius: var(--sf-radius-lg);
-  border: 2px solid var(--sf-color-border);
-  background: var(--sf-color-surface);
-  cursor: pointer;
-  transition: border-color var(--sf-transition-fast), background var(--sf-transition-fast);
+@media (max-width: 480px) {
+  .container {
+    padding: 0 var(--sf-space-4);
+  }
 }
-.selectedPayment { border-color: var(--sf-color-gold); background: var(--sf-color-badge-bg); }
-.paymentOption input { flex-shrink: 0; accent-color: var(--sf-color-emerald); }
-.paymentIcon { font-size: 1.3rem; }
-.paymentOption strong { display: block; font-size: var(--sf-text-sm); color: var(--sf-color-text); }
-.paymentOption p { font-size: var(--sf-text-xs); color: var(--sf-color-text-secondary); margin: 2px 0 0; }
-.cardForm, .upiForm, .bankForm {
-  padding: var(--sf-space-4);
-  border-radius: var(--sf-radius-lg);
-  background: var(--sf-color-surface-2);
-  border: 1px solid var(--sf-color-border);
-}
-.disabledPayment { opacity: 0.55; cursor: not-allowed; }
-.disabledPayment input { cursor: not-allowed; }
-.codInfo {
-  padding: var(--sf-space-3);
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-warning-bg);
-  color: var(--sf-color-warning);
-  font-size: var(--sf-text-sm);
-}
-.codInfo p { margin: 0; }
 
-/* ── Review & Confirm ────────────────────────────────────────────────────── */
-.reviewItems { display: flex; flex-direction: column; gap: var(--sf-space-3); margin-bottom: var(--sf-space-5); }
-.reviewItem {
-  display: flex;
-  align-items: center;
-  gap: var(--sf-space-3);
-  padding: var(--sf-space-3);
-  border-radius: var(--sf-radius-lg);
-  background: var(--sf-color-surface);
-  border: 1px solid var(--sf-color-border);
-}
-.reviewItemImage {
-  width: 60px;
-  height: 60px;
-  border-radius: var(--sf-radius-md);
-  object-fit: cover;
-  background: var(--sf-color-surface-2);
-  flex-shrink: 0;
-}
-.reviewItemInfo { flex: 1; min-width: 0; }
-.reviewItemInfo h4 {
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-  color: var(--sf-color-text);
-  margin: 0 0 2px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.reviewItemQty { font-size: var(--sf-text-xs); color: var(--sf-color-text-secondary); margin: 2px 0 0; }
-.reviewGrid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--sf-space-3); }
-.reviewBlock {
-  padding: var(--sf-space-4);
-  border-radius: var(--sf-radius-lg);
-  background: var(--sf-color-surface-2);
-  border: 1px solid var(--sf-color-border);
-}
-.reviewBlock p { font-size: var(--sf-text-sm); color: var(--sf-color-text-secondary); margin: 0 0 var(--sf-space-1); }
-.reviewBlockHeader { display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--sf-space-3); }
-.reviewBlockHeader h3 {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-lg);
-  font-weight: var(--sf-font-semibold);
-  margin: 0;
-  color: var(--sf-color-text);
-}
-.reviewBlockHeader button {
-  background: none;
-  border: none;
-  color: var(--sf-color-emerald);
-  font-weight: var(--sf-font-semibold);
-  font-size: var(--sf-text-sm);
-  cursor: pointer;
-  font-family: inherit;
+/* Visually hidden, still announced. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
   padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
-.reviewBlockHeader button:hover { color: var(--sf-color-emerald-hover); }
-.reviewName { font-weight: var(--sf-font-semibold); color: var(--sf-color-text) !important; }
-.reviewShippingCost { font-weight: var(--sf-font-bold); color: var(--sf-color-discount) !important; }
 
-/* ── Nav Buttons ─────────────────────────────────────────────────────────── */
-.navButtons { display: flex; justify-content: space-between; gap: var(--sf-space-3); margin-top: var(--sf-space-6); }
-.backBtn {
-  min-height: var(--sf-tap-target);
-  padding: 0 var(--sf-space-6);
-  border-radius: var(--sf-radius-md);
-  border: 1px solid var(--sf-color-border-strong);
-  background: transparent;
-  font-weight: var(--sf-font-semibold);
-  cursor: pointer;
-  font-size: var(--sf-text-sm);
-  color: var(--sf-color-text);
-  font-family: inherit;
-  transition: background var(--sf-transition-fast), border-color var(--sf-transition-fast);
+/* ═══════════════════════════════════════════════════════════════════════════
+   1. HEAD  —  the prompt-12/14/17 convention: eyebrow, then the serif title
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.head {
+  max-width: 60ch;
+  padding: var(--sf-space-10) 0 var(--sf-space-6);
 }
-.backBtn:hover:not(:disabled) { background: var(--sf-color-surface-hover); border-color: var(--sf-color-border-strong); }
-.backBtn:focus-visible { outline: none; box-shadow: var(--sf-shadow-focus); }
-.backBtn:disabled { opacity: 0.5; cursor: not-allowed; }
-.primaryBtn {
-  flex: 1;
-  min-height: var(--sf-tap-target);
-  padding: var(--sf-space-3) var(--sf-space-6);
-  border-radius: var(--sf-radius-md);
-  border: none;
-  background: var(--sf-color-emerald);
-  color: var(--sf-color-emerald-contrast);
-  font-weight: var(--sf-font-bold);
-  font-size: var(--sf-text-base);
-  cursor: pointer;
-  transition: background var(--sf-transition-fast), transform var(--sf-transition-fast);
-  font-family: inherit;
-  text-decoration: none;
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-3);
+  margin: 0 0 var(--sf-space-4);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wider);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-gold-deep);
+  font-variant-numeric: tabular-nums;
+}
+
+.eyebrow::before {
+  content: "";
+  flex: none;
+  width: var(--sf-space-8);
+  height: 1px;
+  background: currentColor;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--sf-font-display);
+  font-size: clamp(2.25rem, 4.4vw, 3.25rem);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-display);
+  letter-spacing: var(--sf-tracking-tight);
+  color: var(--sf-color-text);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   2. THE STEP LINE
+   Four tracked labels threaded on one hairline. The mark is a 16px near-square:
+   gold with a check once passed, ink where you stand, an empty hairline ahead.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.stepline {
+  padding: var(--sf-space-2) 0 var(--sf-space-8);
+  border-bottom: 1px solid var(--sf-color-border);
+  margin-bottom: var(--sf-space-8);
+}
+
+.steplineList {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sf-space-1) 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.stepItem {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-2);
+  min-height: var(--sf-space-8);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: 1;
+  color: var(--sf-color-text-muted);
+}
+
+/* The thread between two labels. It is a pseudo-element of the FOLLOWING step,
+   so its colour states with the step it leads into. */
+.stepItem + .stepItem::before {
+  content: "";
+  flex: none;
+  width: clamp(16px, 4vw, 56px);
+  height: 1px;
+  margin: 0 var(--sf-space-3);
+  background: var(--sf-color-border-strong);
+  transition: background-color var(--sf-transition);
+}
+
+/* Both selectors are written at the same specificity as the base rule above
+   (0,2,1) and sit after it, so the gold actually lands. */
+.stepItem + .stepDone::before,
+.stepDone + .stepItem::before {
+  background: var(--sf-color-gold);
+}
+
+.stepMark {
+  flex: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
+  width: 16px;
+  height: 16px;
+  border: 1px solid var(--sf-color-border-strong);
+  border-radius: var(--sf-radius-sm);
+  background: transparent;
+  color: transparent;
+  transition: background-color var(--sf-transition),
+    border-color var(--sf-transition), color var(--sf-transition);
 }
-.primaryBtn:hover:not(:disabled) { background: var(--sf-color-emerald-hover); transform: translateY(-1px); }
-.primaryBtn:active:not(:disabled) { transform: translateY(0); }
-.primaryBtn:focus-visible { outline: none; box-shadow: var(--sf-shadow-focus); }
-.primaryBtn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
 
-/* ── Sidebar ─────────────────────────────────────────────────────────────── */
-/* Sticky offset must clear the fixed header: 140px tall on desktop, 104px on
-   tablet (901–1024px; below 900px the layout is single-column and not sticky). */
-.sidebar { position: sticky; top: 152px; align-self: start; }
-@media (max-width: 1024px) { .sidebar { top: 116px; } }
-.summaryCard {
-  padding: var(--sf-space-6);
-  border-radius: var(--sf-radius-lg);
-  background: var(--sf-color-surface);
-  border: 1px solid var(--sf-color-border);
-  box-shadow: var(--sf-shadow-sm);
+/* Passed — gold fill, ink check. */
+.stepDone .stepMark {
+  background: var(--sf-color-gold);
+  border-color: var(--sf-color-gold);
+  color: var(--sf-color-primary-dark);
 }
-.summaryCard h3 {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-xl);
-  font-weight: var(--sf-font-bold);
-  margin-bottom: var(--sf-space-4);
+
+.stepDone {
+  color: var(--sf-color-gold-deep);
+}
+
+/* Here — the ink mark (ivory under body.dark; both tokens invert together). */
+.stepCurrent .stepMark {
+  background: var(--sf-color-emerald);
+  border-color: var(--sf-color-emerald);
+}
+
+.stepCurrent {
   color: var(--sf-color-text);
 }
-.summaryItems { margin-bottom: var(--sf-space-3); }
-.summaryItem {
-  display: flex;
-  justify-content: space-between;
+
+/* Narrow plates carry only the current label; the rest stay in the a11y tree
+   rather than being dropped by `display: none`. */
+@media (max-width: 620px) {
+  .stepItem:not(.stepCurrent) .stepName {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .stepItem + .stepItem::before {
+    margin: 0 var(--sf-space-2);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   3. LAYOUT
+   Content column + summary rail on desktop; on phones the rail slides between
+   the step content and the CTA, which is why the nav row is its own grid item
+   rather than a child of the column.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 380px;
+  grid-template-areas:
+    "steps rail"
+    "nav   rail";
+  column-gap: var(--sf-space-12);
+  align-items: start;
+}
+
+.steps {
+  grid-area: steps;
+  min-width: 0;
+}
+
+.rail {
+  grid-area: rail;
+  min-width: 0;
+  position: sticky;
+  top: calc(var(--checkout-header-h) + var(--sf-space-6));
+  align-self: start;
+}
+
+.nav {
+  grid-area: nav;
+  min-width: 0;
+}
+
+@media (max-width: 1024px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr) 320px;
+    column-gap: var(--sf-space-8);
+  }
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "steps"
+      "rail"
+      "nav";
+  }
+
+  .rail {
+    position: static;
+    margin-top: var(--sf-space-8);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   4. SECTION TYPE  —  shared by every step, including Prompt 19's
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.sectionTitle {
+  margin: 0;
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-2xl);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  letter-spacing: var(--sf-tracking-tight);
+  color: var(--sf-color-text);
+}
+
+.sectionNote {
+  margin: var(--sf-space-2) 0 var(--sf-space-6);
   font-size: var(--sf-text-sm);
-  padding: var(--sf-space-1) 0;
+  line-height: var(--sf-leading-relaxed);
   color: var(--sf-color-text-secondary);
+  font-variant-numeric: tabular-nums;
 }
-.summaryItem span:first-child { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-right: var(--sf-space-3); }
-.moreItems { font-size: var(--sf-text-xs); color: var(--sf-color-text-muted); margin-top: var(--sf-space-1); }
-.summaryDivider { height: 1px; background: var(--sf-color-border); margin: var(--sf-space-3) 0; }
-.summaryRow {
-  display: flex;
-  justify-content: space-between;
-  padding: var(--sf-space-1) 0;
-  font-size: var(--sf-text-sm);
-  color: var(--sf-color-text);
-}
-.discount { color: var(--sf-color-discount); }
-.totalRow {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-xl);
-  font-weight: var(--sf-font-bold);
-  padding-top: var(--sf-space-2);
-  color: var(--sf-color-text);
-}
-.totalRow span:last-child { color: var(--sf-color-price); }
-.trustBadges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sf-space-3);
-  justify-content: center;
-  margin-top: var(--sf-space-4);
+
+/* The tracked caption that opens a block inside a step. */
+.blockTitle {
+  margin: 0 0 var(--sf-space-4);
+  font-family: var(--sf-font-family);
   font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: 1;
   color: var(--sf-color-text-muted);
 }
 
-/* ── Empty State ─────────────────────────────────────────────────────────── */
-.emptyState { text-align: center; padding: var(--sf-space-16) var(--sf-space-5); }
-.emptyIcon { font-size: 4rem; margin-bottom: var(--sf-space-4); }
-.emptyState h2 {
+/* ═══════════════════════════════════════════════════════════════════════════
+   5. STEP 0  —  CART REVIEW
+   The prompt-10 drawer language at page scale: a 3:4 crop, a serif name, the
+   hairline stepper and a quiet Remove. No frames — hairlines between rows.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.lines {
+  margin: 0 0 var(--sf-space-10);
+  padding: 0;
+  list-style: none;
+  border-bottom: 1px solid var(--sf-color-border);
+}
+
+.line {
+  display: flex;
+  gap: var(--sf-space-5);
+  padding: var(--sf-space-5) 0;
+  border-top: 1px solid var(--sf-color-border);
+}
+
+/* `align-self` is load-bearing: the row is a flex container, so without it the
+   default `stretch` gives the thumbnail the row's full height and the crop
+   silently stops being 3:4. */
+.thumb {
+  flex: none;
+  align-self: flex-start;
+  display: block;
+  width: 84px;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: var(--sf-radius-sm);
+  background: var(--sf-color-surface-2);
+}
+
+.thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.lineBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sf-space-1);
+}
+
+.lineName {
+  margin: 0;
   font-family: var(--sf-font-display);
-  font-size: var(--sf-text-2xl);
-  font-weight: var(--sf-font-bold);
-  margin-bottom: var(--sf-space-2);
+  font-size: var(--sf-text-lg);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  letter-spacing: var(--sf-tracking-tight);
+  color: var(--sf-color-text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.lineVariant {
+  font-size: var(--sf-text-xs);
+  color: var(--sf-color-text-muted);
+  letter-spacing: 0.02em;
+  line-height: var(--sf-leading-normal);
+}
+
+.linePrice {
+  margin: var(--sf-space-1) 0 var(--sf-space-3);
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-medium);
+  color: var(--sf-color-price);
+  font-variant-numeric: tabular-nums;
+}
+
+.lineFoot {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-5);
+  width: 100%;
+  margin-top: auto;
+}
+
+/* The QuantityStepper look (prompt 09), inlined: a near-square hairline frame
+   with two internal rules, not a pill of buttons. Kept visually identical to
+   the shared control so the PDP, the tray and this page never disagree. */
+.stepper {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--sf-color-border-strong);
+  border-radius: var(--sf-radius-sm);
+  background: var(--sf-color-surface);
+  transition: border-color var(--sf-transition-fast);
+}
+
+.stepper:focus-within {
+  border-color: var(--sf-color-text-secondary);
+}
+
+.stepperBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  min-height: 36px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--sf-color-text-secondary);
+  cursor: pointer;
+  transition: background-color var(--sf-transition-fast),
+    color var(--sf-transition-fast);
+}
+
+.stepperBtn:hover:not(:disabled) {
+  background: var(--sf-color-primary-soft);
   color: var(--sf-color-text);
 }
-.emptyState p { color: var(--sf-color-text-secondary); margin-bottom: var(--sf-space-6); }
 
-/* ── Store Credit (Payment step) ─────────────────────────────────────────── */
-.storeCreditSection {
-  padding: var(--sf-space-4);
-  border-radius: var(--sf-radius-lg);
-  background: var(--sf-color-primary-soft);
-  border: 1px solid var(--sf-color-border-strong);
-  margin-bottom: var(--sf-space-5);
+.stepperBtn:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: -2px;
+  box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
+  color: var(--sf-color-text);
 }
-.storeCreditHeader { display: flex; justify-content: space-between; align-items: center; gap: var(--sf-space-3); flex-wrap: wrap; }
+
+/* On touch the stepper's edges have to clear the 44px target (WCAG 2.5.5) —
+   the same bump the shared `sf-btn--sm` primitive makes. */
+@media (pointer: coarse) {
+  .stepperBtn {
+    min-width: var(--sf-tap-target);
+    min-height: var(--sf-tap-target);
+  }
+}
+
+.stepperValue {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 40px;
+  padding: 0 var(--sf-space-2);
+  border-left: 1px solid var(--sf-color-border);
+  border-right: 1px solid var(--sf-color-border);
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-medium);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+  color: var(--sf-color-text);
+  user-select: none;
+}
+
+/* Quiet remove — a tracked label that only reddens when you reach for it. */
+.removeBtn {
+  flex: none;
+  min-height: var(--sf-tap-target);
+  padding: var(--sf-space-2) 0;
+  border: none;
+  background: transparent;
+  color: var(--sf-color-text-muted);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: 1;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: 4px;
+  transition: color var(--sf-transition-fast),
+    text-decoration-color var(--sf-transition-fast);
+}
+
+.removeBtn:hover {
+  color: var(--sf-color-danger);
+  text-decoration-color: currentColor;
+}
+
+.removeBtn:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
+}
+
+/* The line's own money, held on the right margin. */
+.lineTotal {
+  flex: none;
+  align-self: flex-start;
+  margin: 0;
+  min-width: 7ch;
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-xl);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  text-align: right;
+  color: var(--sf-color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 560px) {
+  .line {
+    gap: var(--sf-space-4);
+    flex-wrap: wrap;
+  }
+
+  .thumb {
+    width: 64px;
+  }
+
+  /* The money drops under the row rather than squeezing the name column. */
+  .lineTotal {
+    order: 3;
+    width: 100%;
+    min-width: 0;
+    text-align: left;
+    padding-left: calc(64px + var(--sf-space-4));
+    font-size: var(--sf-text-lg);
+  }
+
+  .lineFoot {
+    gap: var(--sf-space-4);
+  }
+}
+
+/* ── Promo code — the drawer's underline field ───────────────────────────── */
+
+.promo {
+  padding-bottom: var(--sf-space-8);
+  border-bottom: 1px solid var(--sf-color-border);
+  margin-bottom: var(--sf-space-8);
+}
+
+.promoField {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-3);
+  max-width: 34rem;
+  border-bottom: 1px solid var(--sf-color-border-strong);
+  transition: border-color var(--sf-transition-fast);
+}
+
+.promoField:focus-within {
+  border-bottom-color: var(--sf-color-focus-ring);
+  box-shadow: 0 1px 0 0 var(--sf-color-focus-ring);
+}
+
+.promoInput {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--sf-tap-target);
+  padding: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--sf-color-text);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-medium);
+  letter-spacing: var(--sf-tracking-wide);
+  text-transform: uppercase;
+  caret-color: var(--sf-color-gold);
+}
+
+.promoInput::placeholder {
+  color: var(--sf-color-text-muted);
+  font-weight: var(--sf-font-normal);
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.promoApply {
+  flex: none;
+  min-height: var(--sf-tap-target);
+  padding: 0 var(--sf-space-1);
+  border: none;
+  background: transparent;
+  color: var(--sf-color-text);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  cursor: pointer;
+  transition: color var(--sf-transition-fast);
+}
+
+.promoApply:hover {
+  color: var(--sf-color-accent);
+}
+
+.promoApply:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
+}
+
+/* Applied: a small ink chip. */
+.couponChip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sf-space-3);
+  max-width: 100%;
+  padding: var(--sf-space-2) var(--sf-space-3) var(--sf-space-2) var(--sf-space-4);
+  border-radius: var(--sf-radius-sm);
+  background: var(--sf-color-emerald);
+  color: var(--sf-color-emerald-contrast);
+}
+
+.couponCode {
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.couponValue {
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.85;
+}
+
+.couponRemove {
+  flex: none;
+  min-height: var(--sf-tap-target);
+  padding: 0 var(--sf-space-1);
+  border: none;
+  background: transparent;
+  color: inherit;
+  opacity: 0.75;
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  cursor: pointer;
+  transition: opacity var(--sf-transition-fast);
+}
+
+.couponRemove:hover {
+  opacity: 1;
+}
+
+.couponRemove:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
+  opacity: 1;
+}
+
+/* Calm inline text, no icons and no boxes. Only a true error takes colour. */
+.promoMsg {
+  margin: var(--sf-space-3) 0 0;
+  font-size: var(--sf-text-xs);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-muted);
+}
+
+.promoError {
+  color: var(--sf-color-danger);
+}
+
+/* ── The auth gate, said kindly ──────────────────────────────────────────── */
+
+.gate {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-6);
+  padding: var(--sf-space-5) 0;
+  border-top: 1px solid var(--sf-color-border);
+  border-bottom: 1px solid var(--sf-color-border);
+}
+
+.gateText {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
+.gateLead {
+  display: block;
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-xl);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  letter-spacing: var(--sf-tracking-tight);
+  color: var(--sf-color-text);
+}
+
+.gateNote {
+  display: block;
+  margin-top: var(--sf-space-1);
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-secondary);
+}
+
+.gateBtn {
+  flex: none;
+  min-height: var(--sf-tap-target);
+  padding: 0 var(--sf-space-2);
+  border: none;
+  background: transparent;
+  color: var(--sf-color-text);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 6px;
+  text-decoration-color: var(--sf-color-border-strong);
+  transition: color var(--sf-transition-fast),
+    text-decoration-color var(--sf-transition-fast);
+}
+
+.gateBtn:hover {
+  color: var(--sf-color-accent);
+  text-decoration-color: currentColor;
+}
+
+.gateBtn:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
+}
+
+@media (max-width: 560px) {
+  .gate {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sf-space-3);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   6. STEP 1  —  SHIPPING
+   Hairline radio cards for the saved addresses, underline fields for the new
+   one, hairline rows for the methods. The radio mark is the house control
+   (prompt 14): the native input is hidden but focusable, the drawn box beside
+   it carries every visual state.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.addrBlock {
+  margin-bottom: var(--sf-space-8);
+}
+
+.addrList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-3);
+  margin-bottom: var(--sf-space-4);
+}
+
+.addrCard {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sf-space-4);
+  padding: var(--sf-space-4) var(--sf-space-5);
+  border: 1px solid var(--sf-color-border);
+  border-radius: var(--sf-radius-md);
+  background: var(--sf-color-surface);
+  cursor: pointer;
+  transition: border-color var(--sf-transition-fast),
+    background-color var(--sf-transition-fast);
+}
+
+.addrCard:hover {
+  border-color: var(--sf-color-border-strong);
+}
+
+/* Selected — a hairline that has firmed up, not a coloured wash. */
+.addrCardSelected {
+  border-color: var(--sf-color-text);
+  background: var(--sf-color-surface);
+}
+
+/* The native control: present, focusable, invisible. */
+.control {
+  position: absolute;
+  left: var(--sf-space-5);
+  top: var(--sf-space-5);
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.box {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+  border: 1px solid var(--sf-color-border-strong);
+  border-radius: var(--sf-radius-sm);
+  background: var(--sf-color-surface);
+  color: transparent;
+  transition: background-color var(--sf-transition-fast),
+    border-color var(--sf-transition-fast), color var(--sf-transition-fast);
+}
+
+.boxRound {
+  border-radius: var(--sf-radius-pill);
+}
+
+.addrCard:hover .box,
+.method:hover .box {
+  border-color: var(--sf-color-text-secondary);
+}
+
+.control:checked + .box {
+  background: var(--sf-color-emerald);
+  border-color: var(--sf-color-emerald);
+  color: var(--sf-color-emerald-contrast);
+}
+
+/* The radio's dot, drawn on the mark rather than shipped as an icon. */
+.control:checked + .boxRound::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: var(--sf-radius-pill);
+  background: currentColor;
+}
+
+.control:focus-visible + .box {
+  outline: 2px solid transparent;
+  box-shadow: var(--sf-shadow-focus);
+}
+
+.addrCopy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-1);
+}
+
+.addrHead {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-2);
+  margin-bottom: var(--sf-space-1);
+}
+
+.addrLabel {
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: 1;
+  color: var(--sf-color-text-muted);
+}
+
+/* The default mark — a hairline chip in gold, the house "note" treatment. */
+.addrDefault {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--sf-space-1) var(--sf-space-2);
+  border: 1px solid color-mix(in srgb, var(--sf-color-gold) 45%, transparent);
+  border-radius: var(--sf-radius-sm);
+  color: var(--sf-color-gold-deep);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: 1;
+}
+
+.addrName {
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-lg);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  letter-spacing: var(--sf-tracking-tight);
+  color: var(--sf-color-text);
+}
+
+.addrLines,
+.addrPhone {
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-secondary);
+}
+
+.addrPhone {
+  color: var(--sf-color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.newAddressBtn {
+  min-height: var(--sf-tap-target);
+  padding: 0 var(--sf-space-1);
+  border: none;
+  background: transparent;
+  color: var(--sf-color-text);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 6px;
+  text-decoration-color: var(--sf-color-border-strong);
+  transition: color var(--sf-transition-fast),
+    text-decoration-color var(--sf-transition-fast);
+}
+
+.newAddressBtn:hover {
+  color: var(--sf-color-accent);
+  text-decoration-color: currentColor;
+}
+
+.newAddressBtn:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
+}
+
+/* ── The form ────────────────────────────────────────────────────────────── */
+/* SHARED WITH PROMPT 19: the payment step's card / UPI / bank forms use these
+   same three classes, so they pick up the underline language for free. */
+
+.addressForm {
+  margin-bottom: var(--sf-space-8);
+  max-width: 40rem;
+}
+
+.formRow {
+  display: grid;
+  /* minmax(0,…) lets the columns shrink below the inputs' intrinsic width —
+     plain 1fr floors at min-content and overflows the column. */
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--sf-space-5);
+}
+
+@media (max-width: 480px) {
+  .formRow {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: var(--sf-space-5);
+  min-width: 0;
+}
+
+/* Small, tracked, quiet — a caption above the rule. */
+.formGroup label {
+  margin-bottom: var(--sf-space-1);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  color: var(--sf-color-text-muted);
+}
+
+/* The field IS the hairline. Focus deepens it to the gold ring rather than
+   drawing a box; the box-shadow doubles the rule to 2px without shifting
+   anything below it. */
+.formGroup input,
+.formGroup select {
+  min-width: 0;
+  height: var(--sf-tap-target);
+  padding: 0;
+  border: none;
+  border-bottom: 1px solid var(--sf-color-border-strong);
+  border-radius: 0;
+  outline: none;
+  background: transparent;
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-base);
+  color: var(--sf-color-text);
+  caret-color: var(--sf-color-gold);
+  transition: border-color var(--sf-transition-fast),
+    box-shadow var(--sf-transition-fast);
+}
+
+.formGroup input::placeholder {
+  color: var(--sf-color-text-muted);
+  opacity: 1;
+}
+
+.formGroup input:focus,
+.formGroup select:focus {
+  border-bottom-color: var(--sf-color-focus-ring);
+  box-shadow: 0 1px 0 0 var(--sf-color-focus-ring);
+}
+
+/* Chrome paints autofilled inputs a hard blue; hold the ivory ground and the
+   ink type with a long inset shadow (the only way to override it). */
+.formGroup input:-webkit-autofill,
+.formGroup input:-webkit-autofill:hover,
+.formGroup input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--sf-color-text);
+  -webkit-box-shadow: 0 0 0 1000px var(--sf-color-bg) inset;
+  caret-color: var(--sf-color-text);
+}
+
+.inputError {
+  border-bottom-color: var(--sf-color-danger) !important;
+  box-shadow: 0 1px 0 0 var(--sf-color-danger);
+}
+
+.fieldError {
+  display: block;
+  margin-top: var(--sf-space-2);
+  font-size: var(--sf-text-xs);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-danger);
+}
+
+.readOnly {
+  color: var(--sf-color-text-muted) !important;
+  cursor: default;
+}
+
+/* ── Shipping methods ────────────────────────────────────────────────────── */
+
+.methodsBlock {
+  margin-bottom: var(--sf-space-4);
+}
+
+.methods {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-3);
+}
+
+.method {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sf-space-4);
+  padding: var(--sf-space-4) var(--sf-space-5);
+  border: 1px solid var(--sf-color-border);
+  border-radius: var(--sf-radius-md);
+  background: var(--sf-color-surface);
+  cursor: pointer;
+  transition: border-color var(--sf-transition-fast);
+}
+
+.method:hover {
+  border-color: var(--sf-color-border-strong);
+}
+
+.methodSelected {
+  border-color: var(--sf-color-text);
+}
+
+.methodCopy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-1);
+}
+
+.methodName {
+  font-size: var(--sf-text-base);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text);
+}
+
+.methodDesc {
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-secondary);
+}
+
+.methodMeta {
+  font-size: var(--sf-text-xs);
+  letter-spacing: 0.02em;
+  color: var(--sf-color-text-muted);
+}
+
+.methodCost {
+  flex: none;
+  margin-top: 2px;
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-medium);
+  white-space: nowrap;
+  color: var(--sf-color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.methodFree {
+  color: var(--sf-color-discount);
+  text-transform: uppercase;
+  font-size: var(--sf-text-xs);
+  letter-spacing: var(--sf-tracking-wide);
+}
+
+.methodsEmpty {
+  margin: 0;
+  padding: var(--sf-space-5) 0;
+  border-top: 1px solid var(--sf-color-border);
+  border-bottom: 1px solid var(--sf-color-border);
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-secondary);
+}
+
+/* Calm inline text — the same voice as a field error, no box, no icon. */
+.shippingError {
+  margin: var(--sf-space-3) 0 0;
+  font-size: var(--sf-text-xs);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-danger);
+}
+
+@media (max-width: 480px) {
+  .method {
+    flex-wrap: wrap;
+  }
+
+  .methodCost {
+    width: 100%;
+    padding-left: calc(16px + var(--sf-space-4));
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   7. THE NAV ROW
+   Back is a quiet text button; the CTA is the one ink fill on the page.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sf-space-5);
+  margin-top: var(--sf-space-10);
+  padding-top: var(--sf-space-6);
+  border-top: 1px solid var(--sf-color-border);
+}
+
+.backBtn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sf-space-2);
+  min-height: var(--sf-tap-target);
+  padding: 0 var(--sf-space-1);
+  border: none;
+  background: transparent;
+  color: var(--sf-color-text-secondary);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  cursor: pointer;
+  transition: color var(--sf-transition-fast);
+}
+
+.backBtn:hover:not(:disabled) {
+  color: var(--sf-color-text);
+}
+
+.backBtn:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
+}
+
+.backBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* The one ink button. Warms to deep gold on hover, exactly as sf-btn--emerald
+   does — this page's CTA is wider than the primitive's padding allows, so the
+   look is reproduced rather than composed. */
+.primaryBtn {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 52px;
+  min-width: 15rem;
+  padding: var(--sf-space-4) var(--sf-space-10);
+  border: 1px solid var(--sf-color-emerald);
+  border-radius: var(--sf-radius-sm);
+  background: var(--sf-color-emerald);
+  color: var(--sf-color-emerald-contrast);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color var(--sf-transition),
+    border-color var(--sf-transition), color var(--sf-transition),
+    opacity var(--sf-transition);
+}
+
+.primaryBtn:hover:not(:disabled) {
+  background: var(--sf-color-gold-deep);
+  border-color: var(--sf-color-gold-deep);
+}
+
+.primaryBtn:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--sf-shadow-focus);
+}
+
+.primaryBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@media (max-width: 560px) {
+  .nav {
+    flex-direction: column-reverse;
+    align-items: stretch;
+    gap: var(--sf-space-3);
+  }
+
+  .primaryBtn {
+    margin-left: 0;
+    width: 100%;
+    min-width: 0;
+    padding: var(--sf-space-4) var(--sf-space-5);
+  }
+
+  .backBtn {
+    justify-content: center;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   8. THE SUMMARY RAIL
+   Desktop: a hairline panel that pins beside the content. Phones: a collapsed
+   band whose header already carries the number that matters, opening onto the
+   full breakdown directly above the CTA.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.railCard {
+  padding: var(--sf-space-6);
+  border: 1px solid var(--sf-color-border);
+  border-radius: var(--sf-radius-md);
+  background: var(--sf-color-surface);
+}
+
+/* The mobile header. Hidden on desktop, where the rail is simply open. */
+.railToggle {
+  display: none;
+  align-items: center;
+  gap: var(--sf-space-3);
+  width: 100%;
+  min-height: var(--sf-tap-target);
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--sf-color-text);
+  font-family: var(--sf-font-family);
+  cursor: pointer;
+  text-align: left;
+}
+
+.railToggle:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
+}
+
+.railToggleLabel {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  color: var(--sf-color-text-muted);
+}
+
+.railToggleValue {
+  flex: none;
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-xl);
+  font-weight: var(--sf-font-medium);
+  color: var(--sf-color-price);
+  font-variant-numeric: tabular-nums;
+}
+
+.railChevron {
+  flex: none;
+  display: inline-flex;
+  color: var(--sf-color-text-muted);
+  transition: transform var(--sf-transition);
+}
+
+.railChevronOpen {
+  transform: rotate(180deg);
+}
+
+.railTitle {
+  margin: 0 0 var(--sf-space-5);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: 1;
+  color: var(--sf-color-text-muted);
+}
+
+.railItems {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.railItem {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sf-space-4);
+  padding: var(--sf-space-1) 0;
+}
+
+.railItemName {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-secondary);
+}
+
+.railItemQty {
+  color: var(--sf-color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.railItemValue {
+  flex: none;
+  font-size: var(--sf-text-sm);
+  color: var(--sf-color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.railMore {
+  margin: var(--sf-space-2) 0 0;
+  font-size: var(--sf-text-xs);
+  color: var(--sf-color-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.railRule {
+  height: 1px;
+  margin: var(--sf-space-4) 0;
+  background: var(--sf-color-border);
+}
+
+/* Rows are spaced by their own padding rather than a bottom margin, so the
+   hairlines above and below a run of rows sit an equal distance from it
+   whichever rows the order happens to have. */
+.railRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sf-space-4);
+  padding: var(--sf-space-1) 0;
+}
+
+.railLabel {
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-secondary);
+}
+
+.railValue {
+  flex: none;
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-medium);
+  text-align: right;
+  color: var(--sf-color-text);
+  font-variant-numeric: tabular-nums;
+}
+
+.railDiscount {
+  color: var(--sf-color-discount);
+}
+
+/* The single strong serif moment in the rail. */
+.railTotalRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sf-space-4);
+}
+
+.railTotalLabel {
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-lg);
+  font-weight: var(--sf-font-medium);
+  color: var(--sf-color-text);
+}
+
+.railTotalValue {
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-2xl);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  text-align: right;
+  color: var(--sf-color-price);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The assurance line. Store-attested facts only — see the JS, which assembles
+   it from the returns window, the live COD setting and the store's own care
+   address, and renders nothing it cannot source. */
+.assurance {
+  margin: var(--sf-space-5) 0 0;
+  padding-top: var(--sf-space-4);
+  border-top: 1px solid var(--sf-color-border);
+  font-size: var(--sf-text-xs);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-muted);
+}
+
+.assuranceSep {
+  color: var(--sf-color-border-strong);
+}
+
+/* Below the two-column breakpoint the rail becomes a band with a header. */
+@media (max-width: 900px) {
+  .railToggle {
+    display: flex;
+  }
+
+  .railTitle {
+    display: none;
+  }
+
+  .railBody {
+    padding-top: var(--sf-space-5);
+    margin-top: var(--sf-space-4);
+    border-top: 1px solid var(--sf-color-border);
+  }
+
+  .railBodyCollapsed {
+    display: none;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   9. EMPTY STATE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--sf-space-8) var(--sf-space-4) var(--sf-space-20);
+}
+
+.stateArt {
+  display: block;
+  margin-bottom: var(--sf-space-6);
+}
+
+.stateText {
+  max-width: 46ch;
+  margin: 0 0 var(--sf-space-8);
+  font-size: var(--sf-text-md);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-secondary);
+}
+
+.stateBtn {
+  min-width: 16rem;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   10. STEPS 2 & 3  —  PAYMENT AND REVIEW  ·  PROMPT 19 OWNS THIS SECTION
+   ═══════════════════════════════════════════════════════════════════════════
+   Carried over so those two steps stay fully functional until their own prompt
+   lands. Everything here is token-driven, so both themes hold; nothing here is
+   referenced by the shell above, so this whole section can be replaced without
+   touching a single class in sections 1–9. The shared field atoms these steps
+   also consume (.sectionTitle, .formRow, .formGroup, .inputError) live in
+   sections 4 and 6 — restyle them there, not here.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Store credit ────────────────────────────────────────────────────────── */
+.storeCreditSection {
+  padding: var(--sf-space-5);
+  border: 1px solid var(--sf-color-border);
+  border-radius: var(--sf-radius-md);
+  background: var(--sf-color-surface);
+  margin-bottom: var(--sf-space-6);
+}
+.storeCreditHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--sf-space-3);
+  flex-wrap: wrap;
+}
 .storeCreditInfo { display: flex; align-items: center; gap: var(--sf-space-3); }
 .storeCreditWalletIcon { font-size: 1.5rem; }
 .storeCreditSection h3 {
   font-family: var(--sf-font-display);
   font-size: var(--sf-text-lg);
-  font-weight: var(--sf-font-semibold);
+  font-weight: var(--sf-font-medium);
   margin: 0;
   color: var(--sf-color-text);
 }
@@ -621,59 +1581,245 @@
   display: inline-flex;
   align-items: center;
   gap: var(--sf-space-2);
+  min-height: var(--sf-tap-target);
   font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-  color: var(--sf-color-emerald);
+  font-weight: var(--sf-font-medium);
+  color: var(--sf-color-text);
   cursor: pointer;
 }
 .storeCreditToggle input { width: 16px; height: 16px; accent-color: var(--sf-color-emerald); cursor: pointer; }
-.storeCreditApply { margin-top: var(--sf-space-4); padding-top: var(--sf-space-4); border-top: 1px dashed var(--sf-color-border-strong); }
-.storeCreditAmountRow { display: flex; align-items: center; justify-content: space-between; gap: var(--sf-space-3); margin-bottom: var(--sf-space-3); flex-wrap: wrap; }
-.storeCreditAmountRow label { font-size: var(--sf-text-sm); font-weight: var(--sf-font-medium); color: var(--sf-color-text-secondary); }
+.storeCreditApply {
+  margin-top: var(--sf-space-4);
+  padding-top: var(--sf-space-4);
+  border-top: 1px solid var(--sf-color-border);
+}
+.storeCreditAmountRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sf-space-3);
+  margin-bottom: var(--sf-space-3);
+  flex-wrap: wrap;
+}
+.storeCreditAmountRow label {
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  color: var(--sf-color-text-muted);
+}
 .storeCreditInputWrap {
   display: flex;
   align-items: center;
   gap: var(--sf-space-2);
-  background: var(--sf-color-surface);
-  border: 1px solid var(--sf-color-border-strong);
-  border-radius: var(--sf-radius-md);
-  padding: 4px 4px 4px var(--sf-space-3);
+  border-bottom: 1px solid var(--sf-color-border-strong);
 }
-.storeCreditCurrency { color: var(--sf-color-text-muted); font-weight: var(--sf-font-semibold); }
+.storeCreditCurrency { color: var(--sf-color-text-muted); }
 .storeCreditInputWrap input {
   width: 110px;
+  height: var(--sf-tap-target);
   border: none;
   outline: none;
-  font-size: var(--sf-text-sm);
+  font-size: var(--sf-text-base);
   background: transparent;
   font-family: inherit;
   color: var(--sf-color-text);
+  font-variant-numeric: tabular-nums;
 }
 .storeCreditInputWrap button {
-  padding: var(--sf-space-2) var(--sf-space-3);
+  min-height: var(--sf-tap-target);
+  padding: 0 var(--sf-space-2);
   border: none;
-  border-radius: var(--sf-radius-sm);
-  background: var(--sf-color-emerald);
-  color: var(--sf-color-emerald-contrast);
+  background: transparent;
+  color: var(--sf-color-text);
   font-size: var(--sf-text-xs);
-  font-weight: var(--sf-font-semibold);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
   cursor: pointer;
   font-family: inherit;
-  transition: background var(--sf-transition-fast);
+  transition: color var(--sf-transition-fast);
 }
-.storeCreditInputWrap button:hover { background: var(--sf-color-emerald-hover); }
-.storeCreditSummaryRow { display: flex; justify-content: space-between; font-size: var(--sf-text-sm); padding: var(--sf-space-1) 0; color: var(--sf-color-text); }
-.storeCreditApplied { font-weight: var(--sf-font-semibold); color: var(--sf-color-discount); }
-.storeCreditPayable { font-weight: var(--sf-font-bold); color: var(--sf-color-text); }
-.fullyCoveredNote {
-  padding: var(--sf-space-4);
-  border-radius: var(--sf-radius-lg);
-  background: var(--sf-color-success-bg);
-  color: var(--sf-color-success);
+.storeCreditInputWrap button:hover { color: var(--sf-color-accent); }
+.storeCreditSummaryRow {
+  display: flex;
+  justify-content: space-between;
   font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-  margin-bottom: var(--sf-space-5);
+  padding: var(--sf-space-1) 0;
+  color: var(--sf-color-text);
+  font-variant-numeric: tabular-nums;
+}
+.storeCreditApplied { font-weight: var(--sf-font-medium); color: var(--sf-color-discount); }
+.storeCreditPayable { font-weight: var(--sf-font-medium); color: var(--sf-color-text); }
+.fullyCoveredNote {
+  padding: var(--sf-space-4) var(--sf-space-5);
+  border-left: 2px solid var(--sf-color-success);
+  background: var(--sf-color-success-bg);
+  color: var(--sf-color-text);
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-normal);
+  margin-bottom: var(--sf-space-6);
+}
+
+/* ── Payment methods ─────────────────────────────────────────────────────── */
+.paymentMethods {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-3);
+  margin-bottom: var(--sf-space-6);
+}
+.paymentOption {
+  display: flex;
+  gap: var(--sf-space-4);
+  align-items: center;
+  padding: var(--sf-space-4) var(--sf-space-5);
+  border: 1px solid var(--sf-color-border);
+  border-radius: var(--sf-radius-md);
+  background: var(--sf-color-surface);
+  cursor: pointer;
+  transition: border-color var(--sf-transition-fast);
+}
+.paymentOption:hover { border-color: var(--sf-color-border-strong); }
+.selectedPayment { border-color: var(--sf-color-text); }
+.paymentOption input { flex-shrink: 0; accent-color: var(--sf-color-emerald); }
+.paymentIcon { font-size: 1.3rem; }
+.paymentOption strong {
+  display: block;
+  font-size: var(--sf-text-base);
+  font-weight: var(--sf-font-medium);
+  color: var(--sf-color-text);
+}
+.paymentOption p { font-size: var(--sf-text-sm); color: var(--sf-color-text-secondary); margin: 2px 0 0; }
+.disabledPayment { opacity: 0.5; cursor: not-allowed; }
+.disabledPayment input { cursor: not-allowed; }
+.cardForm,
+.upiForm,
+.bankForm {
+  padding-top: var(--sf-space-5);
+  border-top: 1px solid var(--sf-color-border);
+  max-width: 40rem;
+}
+.codInfo {
+  padding: var(--sf-space-4) var(--sf-space-5);
+  border-left: 2px solid var(--sf-color-gold-deep);
+  background: var(--sf-color-warning-bg);
+  color: var(--sf-color-text);
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-normal);
+}
+.codInfo p { margin: 0; }
+
+/* ── Review & confirm ────────────────────────────────────────────────────── */
+.reviewItems {
+  margin-bottom: var(--sf-space-8);
+  border-bottom: 1px solid var(--sf-color-border);
+}
+.reviewItem {
   display: flex;
   align-items: center;
-  gap: var(--sf-space-2);
+  gap: var(--sf-space-4);
+  padding: var(--sf-space-4) 0;
+  border-top: 1px solid var(--sf-color-border);
+}
+.reviewItemImage {
+  width: 60px;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--sf-radius-sm);
+  object-fit: cover;
+  background: var(--sf-color-surface-2);
+  flex-shrink: 0;
+}
+.reviewItemInfo { flex: 1; min-width: 0; }
+.reviewItemInfo h4 {
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-lg);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text);
+  margin: 0 0 2px;
+}
+.variant { font-size: var(--sf-text-xs); color: var(--sf-color-text-muted); margin: 0; }
+.reviewItemQty {
+  font-size: var(--sf-text-sm);
+  color: var(--sf-color-text-secondary);
+  margin: 2px 0 0;
+  font-variant-numeric: tabular-nums;
+}
+.itemSubtotal {
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-xl);
+  font-weight: var(--sf-font-medium);
+  color: var(--sf-color-text);
+  white-space: nowrap;
+  min-width: 80px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.reviewGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--sf-space-5);
+}
+.reviewBlock {
+  padding: var(--sf-space-5);
+  border: 1px solid var(--sf-color-border);
+  border-radius: var(--sf-radius-md);
+  background: var(--sf-color-surface);
+}
+.reviewBlock p {
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-secondary);
+  margin: 0 0 var(--sf-space-1);
+}
+.reviewBlockHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--sf-space-3);
+  margin-bottom: var(--sf-space-3);
+}
+.reviewBlockHeader h3 {
+  margin: 0;
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  color: var(--sf-color-text-muted);
+}
+.reviewBlockHeader button {
+  background: none;
+  border: none;
+  color: var(--sf-color-text);
+  font-family: inherit;
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  min-height: var(--sf-tap-target);
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--sf-color-border-strong);
+  transition: color var(--sf-transition-fast),
+    text-decoration-color var(--sf-transition-fast);
+}
+.reviewBlockHeader button:hover {
+  color: var(--sf-color-accent);
+  text-decoration-color: currentColor;
+}
+.reviewBlockHeader button:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
+}
+.reviewName {
+  font-weight: var(--sf-font-medium);
+  color: var(--sf-color-text) !important;
+}
+.reviewShippingCost {
+  font-weight: var(--sf-font-medium);
+  color: var(--sf-color-discount) !important;
 }
