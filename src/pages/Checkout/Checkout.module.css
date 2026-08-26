@@ -1541,263 +1541,181 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
-   10. STEPS 2 & 3  —  PAYMENT AND REVIEW  ·  PROMPT 19 OWNS THIS SECTION
+   10. STEPS 2 & 3  —  PAYMENT AND REVIEW
    ═══════════════════════════════════════════════════════════════════════════
-   Carried over so those two steps stay fully functional until their own prompt
-   lands. Everything here is token-driven, so both themes hold; nothing here is
-   referenced by the shell above, so this whole section can be replaced without
-   touching a single class in sections 1–9. The shared field atoms these steps
-   also consume (.sectionTitle, .formRow, .formGroup, .inputError) live in
-   sections 4 and 6 — restyle them there, not here.
+   The same five moves as the shell, applied to the two steps where a customer
+   is most likely to hesitate:
+
+     • STORE CREDIT is a block, not a card — two hairlines, a serif balance and
+       one checkbox drawn with the shell's own .control/.box pair. When it
+       covers the order outright, the method list is replaced by a sentence.
+     • THE METHOD LIST is a stack of hairline rows. Selecting one opens its
+       form directly beneath, indented to the row's copy so the eye stays on
+       one column. The marks are line art at the shell's stroke weight; there
+       is no emoji and no brand logo anywhere on the step.
+     • THE REVIEW is three hairline-topped blocks, each with the Edit that
+       jumps to the step that owns it, then the pieces themselves. It has no
+       button of its own — the shell's nav CTA is the page's one Place Order.
+
+   Every colour resolves through `--sf-*`, so both themes come from this one
+   pass. The single local variable, --pay-indent, is a measurement (the width
+   of the radio + mark gutter), never a colour.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* ── Store credit ────────────────────────────────────────────────────────── */
-.storeCreditSection {
-  padding: var(--sf-space-5);
-  border: 1px solid var(--sf-color-border);
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-surface);
-  margin-bottom: var(--sf-space-6);
-}
-.storeCreditHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--sf-space-3);
-  flex-wrap: wrap;
-}
-.storeCreditInfo { display: flex; align-items: center; gap: var(--sf-space-3); }
-.storeCreditWalletIcon { font-size: 1.5rem; }
-.storeCreditSection h3 {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-lg);
-  font-weight: var(--sf-font-medium);
-  margin: 0;
-  color: var(--sf-color-text);
-}
-.storeCreditBalance { font-size: var(--sf-text-sm); color: var(--sf-color-text-secondary); margin: 2px 0 0; }
-.storeCreditBalance strong { color: var(--sf-color-price); }
-.storeCreditToggle {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sf-space-2);
-  min-height: var(--sf-tap-target);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-medium);
-  color: var(--sf-color-text);
-  cursor: pointer;
-}
-.storeCreditToggle input { width: 16px; height: 16px; accent-color: var(--sf-color-emerald); cursor: pointer; }
-.storeCreditApply {
-  margin-top: var(--sf-space-4);
-  padding-top: var(--sf-space-4);
+
+.credit {
+  padding: var(--sf-space-5) 0 var(--sf-space-6);
   border-top: 1px solid var(--sf-color-border);
+  border-bottom: 1px solid var(--sf-color-border);
+  margin-bottom: var(--sf-space-8);
 }
-.storeCreditAmountRow {
+
+.creditHead {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--sf-space-3);
-  margin-bottom: var(--sf-space-3);
-  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--sf-space-4);
 }
-.storeCreditAmountRow label {
+
+.creditMark {
+  flex: none;
+  display: inline-flex;
+  margin-top: 2px;
+  color: var(--sf-color-gold-deep);
+}
+
+.creditIntro {
+  min-width: 0;
+}
+
+.creditTitle {
+  margin: 0;
+  font-family: var(--sf-font-family);
   font-size: var(--sf-text-xs);
   font-weight: var(--sf-font-medium);
   text-transform: uppercase;
   letter-spacing: var(--sf-tracking-wide);
+  line-height: 1;
   color: var(--sf-color-text-muted);
 }
-.storeCreditInputWrap {
-  display: flex;
-  align-items: center;
-  gap: var(--sf-space-2);
-  border-bottom: 1px solid var(--sf-color-border-strong);
-}
-.storeCreditCurrency { color: var(--sf-color-text-muted); }
-.storeCreditInputWrap input {
-  width: 110px;
-  height: var(--sf-tap-target);
-  border: none;
-  outline: none;
-  font-size: var(--sf-text-base);
-  background: transparent;
-  font-family: inherit;
-  color: var(--sf-color-text);
-  font-variant-numeric: tabular-nums;
-}
-.storeCreditInputWrap button {
-  min-height: var(--sf-tap-target);
-  padding: 0 var(--sf-space-2);
-  border: none;
-  background: transparent;
-  color: var(--sf-color-text);
-  font-size: var(--sf-text-xs);
-  font-weight: var(--sf-font-medium);
-  text-transform: uppercase;
-  letter-spacing: var(--sf-tracking-wide);
-  cursor: pointer;
-  font-family: inherit;
-  transition: color var(--sf-transition-fast);
-}
-.storeCreditInputWrap button:hover { color: var(--sf-color-accent); }
-.storeCreditSummaryRow {
-  display: flex;
-  justify-content: space-between;
-  font-size: var(--sf-text-sm);
-  padding: var(--sf-space-1) 0;
-  color: var(--sf-color-text);
-  font-variant-numeric: tabular-nums;
-}
-.storeCreditApplied { font-weight: var(--sf-font-medium); color: var(--sf-color-discount); }
-.storeCreditPayable { font-weight: var(--sf-font-medium); color: var(--sf-color-text); }
-.fullyCoveredNote {
-  padding: var(--sf-space-4) var(--sf-space-5);
-  border-left: 2px solid var(--sf-color-success);
-  background: var(--sf-color-success-bg);
-  color: var(--sf-color-text);
-  font-size: var(--sf-text-sm);
-  line-height: var(--sf-leading-normal);
-  margin-bottom: var(--sf-space-6);
-}
 
-/* ── Payment methods ─────────────────────────────────────────────────────── */
-.paymentMethods {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sf-space-3);
-  margin-bottom: var(--sf-space-6);
-}
-.paymentOption {
-  display: flex;
-  gap: var(--sf-space-4);
-  align-items: center;
-  padding: var(--sf-space-4) var(--sf-space-5);
-  border: 1px solid var(--sf-color-border);
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-surface);
-  cursor: pointer;
-  transition: border-color var(--sf-transition-fast);
-}
-.paymentOption:hover { border-color: var(--sf-color-border-strong); }
-.selectedPayment { border-color: var(--sf-color-text); }
-.paymentOption input { flex-shrink: 0; accent-color: var(--sf-color-emerald); }
-.paymentIcon { font-size: 1.3rem; }
-.paymentOption strong {
-  display: block;
-  font-size: var(--sf-text-base);
-  font-weight: var(--sf-font-medium);
-  color: var(--sf-color-text);
-}
-.paymentOption p { font-size: var(--sf-text-sm); color: var(--sf-color-text-secondary); margin: 2px 0 0; }
-.disabledPayment { opacity: 0.5; cursor: not-allowed; }
-.disabledPayment input { cursor: not-allowed; }
-.cardForm,
-.upiForm,
-.bankForm {
-  padding-top: var(--sf-space-5);
-  border-top: 1px solid var(--sf-color-border);
-  max-width: 40rem;
-}
-.codInfo {
-  padding: var(--sf-space-4) var(--sf-space-5);
-  border-left: 2px solid var(--sf-color-gold-deep);
-  background: var(--sf-color-warning-bg);
-  color: var(--sf-color-text);
-  font-size: var(--sf-text-sm);
-  line-height: var(--sf-leading-normal);
-}
-.codInfo p { margin: 0; }
-
-/* ── Review & confirm ────────────────────────────────────────────────────── */
-.reviewItems {
-  margin-bottom: var(--sf-space-8);
-  border-bottom: 1px solid var(--sf-color-border);
-}
-.reviewItem {
-  display: flex;
-  align-items: center;
-  gap: var(--sf-space-4);
-  padding: var(--sf-space-4) 0;
-  border-top: 1px solid var(--sf-color-border);
-}
-.reviewItemImage {
-  width: 60px;
-  aspect-ratio: 3 / 4;
-  border-radius: var(--sf-radius-sm);
-  object-fit: cover;
-  background: var(--sf-color-surface-2);
-  flex-shrink: 0;
-}
-.reviewItemInfo { flex: 1; min-width: 0; }
-.reviewItemInfo h4 {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-lg);
-  font-weight: var(--sf-font-medium);
-  line-height: var(--sf-leading-tight);
-  color: var(--sf-color-text);
-  margin: 0 0 2px;
-}
-.variant { font-size: var(--sf-text-xs); color: var(--sf-color-text-muted); margin: 0; }
-.reviewItemQty {
-  font-size: var(--sf-text-sm);
-  color: var(--sf-color-text-secondary);
-  margin: 2px 0 0;
-  font-variant-numeric: tabular-nums;
-}
-.itemSubtotal {
+/* The balance said in the page's serif — the one number on this step that is
+   the customer's rather than the order's. */
+.creditBalance {
+  margin: var(--sf-space-2) 0 0;
   font-family: var(--sf-font-display);
   font-size: var(--sf-text-xl);
   font-weight: var(--sf-font-medium);
-  color: var(--sf-color-text);
-  white-space: nowrap;
-  min-width: 80px;
-  text-align: right;
+  line-height: var(--sf-leading-tight);
+  letter-spacing: var(--sf-tracking-tight);
+  color: var(--sf-color-price);
   font-variant-numeric: tabular-nums;
 }
-.reviewGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: var(--sf-space-5);
-}
-.reviewBlock {
-  padding: var(--sf-space-5);
-  border: 1px solid var(--sf-color-border);
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-surface);
-}
-.reviewBlock p {
-  font-size: var(--sf-text-sm);
-  line-height: var(--sf-leading-normal);
-  color: var(--sf-color-text-secondary);
-  margin: 0 0 var(--sf-space-1);
-}
-.reviewBlockHeader {
-  display: flex;
-  justify-content: space-between;
+
+.creditToggle {
+  position: relative;
+  display: inline-flex;
   align-items: center;
   gap: var(--sf-space-3);
-  margin-bottom: var(--sf-space-3);
+  min-height: var(--sf-tap-target);
+  margin-top: var(--sf-space-1);
+  font-size: var(--sf-text-sm);
+  color: var(--sf-color-text);
+  cursor: pointer;
 }
-.reviewBlockHeader h3 {
-  margin: 0;
+
+/* The shell's hidden control is anchored to a card's top-left; here the row is
+   a single line, so it rides the centre instead. */
+.creditToggle .control {
+  left: 0;
+  top: 50%;
+}
+
+.creditToggle .box {
+  margin-top: 0;
+}
+
+.creditToggle:hover .box {
+  border-color: var(--sf-color-text-secondary);
+}
+
+.creditToggleLabel {
+  font-weight: var(--sf-font-medium);
+}
+
+.creditApply {
+  max-width: 34rem;
+  margin-top: var(--sf-space-4);
+  padding-top: var(--sf-space-5);
+  border-top: 1px solid var(--sf-color-border);
+}
+
+.creditField {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.creditFieldLabel {
+  margin-bottom: var(--sf-space-1);
   font-size: var(--sf-text-xs);
   font-weight: var(--sf-font-medium);
   text-transform: uppercase;
   letter-spacing: var(--sf-tracking-wide);
   color: var(--sf-color-text-muted);
 }
-.reviewBlockHeader button {
-  background: none;
+
+/* The same underline field as the shell's inputs, sharing its rule with the
+   currency mark and the Use Max button so the three read as one control. */
+.creditInputRow {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-2);
+  max-width: 22rem;
+  border-bottom: 1px solid var(--sf-color-border-strong);
+  transition: border-color var(--sf-transition-fast),
+    box-shadow var(--sf-transition-fast);
+}
+
+.creditInputRow:focus-within {
+  border-bottom-color: var(--sf-color-focus-ring);
+  box-shadow: 0 1px 0 0 var(--sf-color-focus-ring);
+}
+
+.creditCurrency {
+  flex: none;
+  font-size: var(--sf-text-base);
+  color: var(--sf-color-text-muted);
+}
+
+.creditInput {
+  flex: 1;
+  min-width: 0;
+  height: var(--sf-tap-target);
+  padding: 0;
   border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-base);
   color: var(--sf-color-text);
-  font-family: inherit;
+  caret-color: var(--sf-color-gold);
+  font-variant-numeric: tabular-nums;
+}
+
+.creditMax {
+  flex: none;
+  min-height: var(--sf-tap-target);
+  padding: 0 var(--sf-space-1);
+  border: none;
+  background: transparent;
+  color: var(--sf-color-text);
+  font-family: var(--sf-font-family);
   font-size: var(--sf-text-xs);
   font-weight: var(--sf-font-medium);
   text-transform: uppercase;
   letter-spacing: var(--sf-tracking-wide);
-  min-height: var(--sf-tap-target);
-  padding: 0;
+  white-space: nowrap;
   cursor: pointer;
   text-decoration: underline;
   text-underline-offset: 4px;
@@ -1805,21 +1723,388 @@
   transition: color var(--sf-transition-fast),
     text-decoration-color var(--sf-transition-fast);
 }
-.reviewBlockHeader button:hover {
+
+.creditMax:hover {
   color: var(--sf-color-accent);
   text-decoration-color: currentColor;
 }
-.reviewBlockHeader button:focus-visible {
+
+.creditMax:focus-visible {
   outline: 2px solid transparent;
   outline-offset: 2px;
   box-shadow: var(--sf-shadow-focus);
   border-radius: var(--sf-radius-sm);
 }
-.reviewName {
-  font-weight: var(--sf-font-medium);
-  color: var(--sf-color-text) !important;
+
+.creditHint {
+  margin-top: var(--sf-space-2);
+  font-size: var(--sf-text-xs);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-muted);
+  font-variant-numeric: tabular-nums;
 }
-.reviewShippingCost {
+
+.creditRows {
+  margin: var(--sf-space-5) 0 0;
+  padding: 0;
+}
+
+.creditRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sf-space-4);
+  padding: var(--sf-space-2) 0;
+  font-size: var(--sf-text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.creditRow dt {
+  color: var(--sf-color-text-secondary);
+}
+
+.creditRow dd {
+  margin: 0;
   font-weight: var(--sf-font-medium);
-  color: var(--sf-color-discount) !important;
+  white-space: nowrap;
+}
+
+.creditRowCredit {
+  color: var(--sf-color-discount);
+}
+
+.creditRowPayable {
+  color: var(--sf-color-text);
+}
+
+/* Fully covered — a sentence where the method list would have been. */
+.covered {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-2);
+  max-width: 52ch;
+  margin: 0 0 var(--sf-space-6);
+  padding-bottom: var(--sf-space-6);
+  border-bottom: 1px solid var(--sf-color-border);
+}
+
+.coveredLead {
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-xl);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  letter-spacing: var(--sf-tracking-tight);
+  color: var(--sf-color-text);
+}
+
+.coveredNote {
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-secondary);
+}
+
+/* ── Payment methods ─────────────────────────────────────────────────────── */
+
+.payGroup {
+  /* The gutter the radio and the mark occupy, so an opened form can align its
+     first field with the method's name rather than with the page edge. */
+  --pay-indent: calc(16px + var(--sf-space-4) + 24px + var(--sf-space-4));
+
+  margin-bottom: var(--sf-space-6);
+  border-top: 1px solid var(--sf-color-border);
+}
+
+.payRow {
+  border-bottom: 1px solid var(--sf-color-border);
+  transition: background-color var(--sf-transition-fast);
+}
+
+.payHead {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sf-space-4);
+  padding: var(--sf-space-4) 0;
+  cursor: pointer;
+}
+
+.payHead .control {
+  left: 0;
+  top: var(--sf-space-4);
+}
+
+.payHead:hover .box {
+  border-color: var(--sf-color-text-secondary);
+}
+
+.payMark {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  margin-top: -1px;
+  color: var(--sf-color-text-muted);
+  transition: color var(--sf-transition-fast);
+}
+
+.payRowSelected .payMark {
+  color: var(--sf-color-text);
+}
+
+.payCopy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-1);
+}
+
+.payName {
+  font-size: var(--sf-text-base);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text);
+}
+
+.payDesc {
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-secondary);
+}
+
+/* Out of range: dimmed marks, muted type — but the hint stays at full contrast
+   because it is the one thing on the row worth reading. */
+.payRowDisabled .payHead {
+  cursor: not-allowed;
+}
+
+.payRowDisabled .payMark,
+.payRowDisabled .box {
+  opacity: 0.45;
+}
+
+.payRowDisabled .payName,
+.payRowDisabled .payDesc {
+  color: var(--sf-color-text-muted);
+}
+
+.payRowDisabled:hover .box {
+  border-color: var(--sf-color-border-strong);
+}
+
+/* The opened form, hanging under its own row. */
+.payForm {
+  max-width: 40rem;
+  padding: var(--sf-space-1) 0 var(--sf-space-6) var(--pay-indent);
+}
+
+.payForm > .formGroup:last-child,
+.payForm > .formRow:last-child .formGroup {
+  margin-bottom: 0;
+}
+
+.payNote {
+  margin: 0;
+  max-width: 52ch;
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The one assurance. Store policy, nothing implied about demand or timing. */
+.secure {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-2);
+  margin: 0;
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  color: var(--sf-color-text-muted);
+}
+
+.secureMark {
+  display: inline-flex;
+}
+
+@media (max-width: 480px) {
+  .payGroup {
+    --pay-indent: 0px;
+  }
+}
+
+/* ── Review & confirm ────────────────────────────────────────────────────── */
+
+.recap {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--sf-space-6) var(--sf-space-8);
+  margin-bottom: var(--sf-space-10);
+}
+
+.recapBlock {
+  min-width: 0;
+  padding-top: var(--sf-space-3);
+  border-top: 1px solid var(--sf-color-border-strong);
+}
+
+.recapHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sf-space-3);
+  margin-bottom: var(--sf-space-2);
+}
+
+.recapTitle {
+  margin: 0;
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: 1;
+  color: var(--sf-color-text-muted);
+}
+
+.recapEdit {
+  flex: none;
+  min-height: var(--sf-tap-target);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--sf-color-text);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--sf-color-border-strong);
+  transition: color var(--sf-transition-fast),
+    text-decoration-color var(--sf-transition-fast);
+}
+
+.recapEdit:hover {
+  color: var(--sf-color-accent);
+  text-decoration-color: currentColor;
+}
+
+.recapEdit:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
+}
+
+.recapLead {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-2);
+  margin: 0 0 var(--sf-space-2);
+  font-size: var(--sf-text-md);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text);
+}
+
+.recapMark {
+  flex: none;
+  display: inline-flex;
+  color: var(--sf-color-text-secondary);
+}
+
+.recapLine {
+  margin: 0 0 2px;
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.recapFree {
+  color: var(--sf-color-discount);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+}
+
+/* The pieces, read-only — the step-0 row without its controls. */
+.recapItems {
+  margin-bottom: var(--sf-space-4);
+}
+
+.recapList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--sf-color-border);
+}
+
+.recapItem {
+  display: flex;
+  align-items: center;
+  gap: var(--sf-space-4);
+  padding: var(--sf-space-4) 0;
+  border-bottom: 1px solid var(--sf-color-border);
+}
+
+.recapThumb {
+  flex: none;
+  width: 56px;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  border-radius: var(--sf-radius-sm);
+  background: var(--sf-color-surface-2);
+}
+
+.recapThumb img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.recapItemBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.recapItemName {
+  margin: 0;
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-md);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text);
+}
+
+.recapItemVariant {
+  font-size: var(--sf-text-xs);
+  color: var(--sf-color-text-muted);
+}
+
+.recapItemQty {
+  font-size: var(--sf-text-sm);
+  color: var(--sf-color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+
+.recapItemTotal {
+  flex: none;
+  margin: 0;
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-medium);
+  white-space: nowrap;
+  color: var(--sf-color-text);
+  font-variant-numeric: tabular-nums;
 }

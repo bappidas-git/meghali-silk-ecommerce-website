@@ -37,12 +37,22 @@ import styles from "./Checkout.module.css";
 //     inline form, an object selects a saved address.
 //
 // TWO PROMPTS, ONE FILE
-//   Prompt 18 owns the SHELL (head, step line, layout, nav row, summary rail,
-//   empty state) plus step 0 (Cart) and step 1 (Shipping). Prompt 19 owns the
-//   internals of step 2 (Payment) and step 3 (Review) — those render blocks and
-//   their stylesheet section are marked below and were deliberately left alone
-//   beyond the shared shell atoms (.sectionTitle, .formRow, .formGroup) that
-//   reach them for free.
+//   Prompt 18 built the SHELL (head, step line, layout, nav row, summary rail,
+//   empty state) plus step 0 (Cart) and step 1 (Shipping). Prompt 19 rebuilt
+//   the internals of step 2 (Payment) and step 3 (Review) on top of it, reusing
+//   the shell atoms rather than forking them: .sectionTitle / .sectionNote /
+//   .blockTitle for type, .control + .box / .boxRound for every radio and
+//   checkbox, .formRow / .formGroup for every field. The step-3 CTA is the
+//   shell's one ink button in the nav row — the page has a single Place Order
+//   control, not one per region.
+//
+// WHAT PROMPT 19 DID NOT TOUCH
+//   The money. couponDiscountFor, the tax/total formulas, maxApplicableCredit,
+//   the storeCreditApplied clamp and its shrink-effect, amountPayable, the COD
+//   availability rule and its force-reset, and the whole placeOrder payload are
+//   read by the new markup and never recomputed inside it. The COD *hint* is
+//   copy and was reworded (it used to print "₹0" when the store set no upper
+//   bound); the rule that decides availability is untouched.
 //
 // THEMING
 //   Tokens only — every colour resolves through `--sf-*`, which flips under
@@ -52,14 +62,6 @@ import styles from "./Checkout.module.css";
 // =============================================================================
 
 const STEPS = ["Cart", "Shipping", "Payment", "Review"];
-
-const PAYMENT_OPTIONS = [
-  { id: "card", label: "Credit / Debit Card", icon: "💳", desc: "Visa, Mastercard, RuPay" },
-  { id: "upi", label: "UPI", icon: "📱", desc: "Google Pay, PhonePe, Paytm" },
-  { id: "net_banking", label: "Net Banking", icon: "🏦", desc: "All major banks supported" },
-  { id: "wallet", label: "Wallet", icon: "👛", desc: "Paytm, PhonePe, Amazon Pay" },
-  { id: "cod", label: "Cash on Delivery", icon: "💵", desc: "Pay when you receive" },
-];
 
 // framer-motion needs JS values, so the Prompt 01 motion token is mirrored
 // here: EASE is --sf-ease. Keep in sync with storefront-tokens.css.
@@ -124,6 +126,88 @@ const ChevronMark = () => (
     <polyline points="6 9.5 12 15.5 18 9.5" />
   </svg>
 );
+
+// ---------------------------------------------------------------------------
+// Payment marks — the same hairline drawing, one per method
+// ---------------------------------------------------------------------------
+// Line art at 22px on a 24-unit grid, stroked in currentColor so a single
+// definition serves the muted row, the ink selected row and the Review recap.
+// Nothing here is a brand logo and nothing is an emoji: a card, a phone with a
+// transfer arrow, a bank facade, a wallet and a banknote, all drawn in the same
+// weight as the shell's marks above.
+const markProps = {
+  width: 22,
+  height: 22,
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: 1.25,
+  strokeLinecap: "round",
+  strokeLinejoin: "round",
+  "aria-hidden": true,
+};
+
+const CardMark = () => (
+  <svg {...markProps}>
+    <rect x="2.5" y="5.5" width="19" height="13" rx="1.75" />
+    <line x1="2.5" y1="9.75" x2="21.5" y2="9.75" />
+    <line x1="6" y1="14.75" x2="10.5" y2="14.75" />
+  </svg>
+);
+
+const UpiMark = () => (
+  <svg {...markProps}>
+    <rect x="6.5" y="2.5" width="11" height="19" rx="2" />
+    <line x1="10.5" y1="18.5" x2="13.5" y2="18.5" />
+    <polyline points="9.5 10.25 12 7.5 14.5 10.25" />
+    <line x1="12" y1="7.5" x2="12" y2="14.5" />
+  </svg>
+);
+
+const BankMark = () => (
+  <svg {...markProps}>
+    <path d="M3.5 9.5 L12 4.25 L20.5 9.5" />
+    <line x1="3.5" y1="19.75" x2="20.5" y2="19.75" />
+    <line x1="6.75" y1="12.25" x2="6.75" y2="17.25" />
+    <line x1="12" y1="12.25" x2="12" y2="17.25" />
+    <line x1="17.25" y1="12.25" x2="17.25" y2="17.25" />
+  </svg>
+);
+
+const WalletMark = () => (
+  <svg {...markProps}>
+    <rect x="2.5" y="5.5" width="19" height="13" rx="2" />
+    <path d="M21.5 9.75 H16.75 A2.25 2.25 0 0 0 16.75 14.25 H21.5" />
+    <circle cx="17" cy="12" r="0.85" />
+  </svg>
+);
+
+const CashMark = () => (
+  <svg {...markProps}>
+    <rect x="2.5" y="6.5" width="19" height="11" rx="1.5" />
+    <circle cx="12" cy="12" r="2.75" />
+    <line x1="5.5" y1="12" x2="6.5" y2="12" />
+    <line x1="17.5" y1="12" x2="18.5" y2="12" />
+  </svg>
+);
+
+// The one assurance the store attests to (TRUST_BADGE_CATALOG.securePayment).
+const LockMark = () => (
+  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <rect x="4" y="10.5" width="16" height="10.5" rx="2" />
+    <path d="M7.75 10.5 V7 a4.25 4.25 0 0 1 8.5 0 v3.5" />
+  </svg>
+);
+
+// The method list. `Mark` is the component, not a glyph — declared here (after
+// the marks) so the module evaluates without a temporal-dead-zone reference.
+const PAYMENT_OPTIONS = [
+  { id: "card", label: "Credit / Debit Card", Mark: CardMark, desc: "Visa, Mastercard, RuPay" },
+  { id: "upi", label: "UPI", Mark: UpiMark, desc: "Google Pay, PhonePe, Paytm" },
+  { id: "net_banking", label: "Net Banking", Mark: BankMark, desc: "All major banks supported" },
+  { id: "wallet", label: "Wallet", Mark: WalletMark, desc: "Paytm, PhonePe, Amazon Pay" },
+  { id: "cod", label: "Cash on Delivery", Mark: CashMark, desc: "Pay when you receive" },
+];
 
 // Empty state — the counter with nothing on it: a hairline tray, the loom's
 // gold weft laid across it and the shuttle resting. The same drawing language
@@ -433,7 +517,104 @@ const Checkout = () => {
 
   const reviewAddress = useExistingAddress || shippingAddress;
   const selectedPaymentOption = PAYMENT_OPTIONS.find((pm) => pm.id === paymentMethod);
+  const SelectedPaymentMark = selectedPaymentOption?.Mark;
+  const reviewEta = etaFor(selectedShipping);
   const itemCount = getCartItemCount();
+
+  // The inline form a method opens beneath itself. Mock fields only — there is
+  // no gateway on this branch, so nothing here is read, validated or submitted;
+  // they exist so the step reads like the real counter. Returns null for a
+  // method that asks nothing, which keeps the expanded area from opening empty.
+  const payFormFor = (id) => {
+    if (id === "card") {
+      return (
+        <>
+          <div className={styles.formGroup}>
+            <label htmlFor="pay-card-number">Card number</label>
+            <input
+              id="pay-card-number"
+              type="text"
+              inputMode="numeric"
+              autoComplete="cc-number"
+              placeholder="1234 5678 9012 3456"
+              maxLength={19}
+            />
+          </div>
+          <div className={styles.formRow}>
+            <div className={styles.formGroup}>
+              <label htmlFor="pay-card-expiry">Expiry</label>
+              <input
+                id="pay-card-expiry"
+                type="text"
+                inputMode="numeric"
+                autoComplete="cc-exp"
+                placeholder="MM/YY"
+                maxLength={5}
+              />
+            </div>
+            <div className={styles.formGroup}>
+              <label htmlFor="pay-card-cvv">CVV</label>
+              <input
+                id="pay-card-cvv"
+                type="password"
+                inputMode="numeric"
+                autoComplete="cc-csc"
+                placeholder="&bull;&bull;&bull;"
+                maxLength={4}
+              />
+            </div>
+          </div>
+          <div className={styles.formGroup}>
+            <label htmlFor="pay-card-name">Name on card</label>
+            <input
+              id="pay-card-name"
+              type="text"
+              autoComplete="cc-name"
+              placeholder="Full name"
+            />
+          </div>
+        </>
+      );
+    }
+    if (id === "upi") {
+      return (
+        <div className={styles.formGroup}>
+          <label htmlFor="pay-upi-id">UPI ID</label>
+          <input
+            id="pay-upi-id"
+            type="text"
+            inputMode="email"
+            autoComplete="off"
+            placeholder="name@upi"
+          />
+        </div>
+      );
+    }
+    if (id === "net_banking") {
+      return (
+        <div className={styles.formGroup}>
+          <label htmlFor="pay-bank">Bank</label>
+          <select id="pay-bank" defaultValue="State Bank of India">
+            <option>State Bank of India</option>
+            <option>HDFC Bank</option>
+            <option>ICICI Bank</option>
+            <option>Axis Bank</option>
+            <option>Kotak Mahindra Bank</option>
+            <option>Punjab National Bank</option>
+          </select>
+        </div>
+      );
+    }
+    if (id === "cod") {
+      return (
+        <p className={styles.payNote}>
+          Pay in cash when the parcel is handed to you —{" "}
+          {formatCurrency(amountPayable)} collected at the door.
+        </p>
+      );
+    }
+    return null;
+  };
 
   // Soft fade + slide between steps; reduced motion swaps instantly.
   const stepMotion = shouldReduceMotion
@@ -614,17 +795,26 @@ const Checkout = () => {
                         </button>
                       </div>
                     )}
-                    {couponApplied && couponCapped && (
-                      <p className={styles.promoMsg}>
-                        Capped at this coupon&rsquo;s maximum discount of{" "}
-                        {formatCurrency(couponApplied.maxDiscount)}.
-                      </p>
-                    )}
-                    {couponError && (
-                      <p id="checkout-coupon-msg" className={`${styles.promoMsg} ${styles.promoError}`}>
-                        {couponError}
-                      </p>
-                    )}
+                    {/* Both notes arrive without the customer asking — a cap
+                        applied silently, or a coupon dropped because the cart
+                        fell under its minimum — so the region announces them
+                        politely rather than leaving them for the eye alone. */}
+                    <div aria-live="polite">
+                      {couponApplied && couponCapped && (
+                        <p className={styles.promoMsg}>
+                          Capped at this coupon&rsquo;s maximum discount of{" "}
+                          {formatCurrency(couponApplied.maxDiscount)}.
+                        </p>
+                      )}
+                      {couponError && (
+                        <p
+                          id="checkout-coupon-msg"
+                          className={`${styles.promoMsg} ${styles.promoError}`}
+                        >
+                          {couponError}
+                        </p>
+                      )}
+                    </div>
                   </div>
 
                   {/* The gate, said kindly. Continue opens the same AuthModal;
@@ -929,219 +1119,359 @@ const Checkout = () => {
               )}
 
               {/* ═════════════════════════════════════════════════════════════
-                  STEP 2 — PAYMENT  ·  PROMPT 19 OWNS THIS BLOCK
-                  Left functional and structurally untouched; it inherits only
-                  the shared shell atoms (.sectionTitle, .formRow, .formGroup).
+                  STEP 2 — PAYMENT
+                  Store credit first (it can settle the whole order and remove
+                  the question), then the method list: hairline rows that open
+                  their own form beneath the selection. Every rule above this
+                  line — the clamps, the COD bounds, `fullyCovered` — is read
+                  here, never re-derived.
                   ═════════════════════════════════════════════════════════ */}
               {step === 2 && (
                 <motion.div key="payment" {...stepMotion}>
-                  <h2 className={styles.sectionTitle}>Payment Method</h2>
+                  <h2 className={styles.sectionTitle}>How you&rsquo;d like to pay</h2>
+                  <p className={styles.sectionNote}>
+                    {fullyCovered
+                      ? "Nothing further is due on this order."
+                      : `${formatCurrency(amountPayable)} due on this order.`}
+                  </p>
 
-                  {/* Store credit */}
+                  {/* ── Store credit ─────────────────────────────────────────
+                      Shown only when there is a balance to spend. The checkbox
+                      pre-fills the maximum; the field lets it be trimmed, and
+                      the two rows below read straight off the live figures. */}
                   {walletBalance > 0 && (
-                    <div className={styles.storeCreditSection}>
-                      <div className={styles.storeCreditHeader}>
-                        <div className={styles.storeCreditInfo}>
-                          <span className={styles.storeCreditWalletIcon} aria-hidden>👛</span>
-                          <div>
-                            <h3>Store Credit</h3>
-                            <p className={styles.storeCreditBalance}>
-                              Available balance: <strong>{formatCurrency(walletBalance)}</strong>
-                            </p>
-                          </div>
+                    <section className={styles.credit} aria-labelledby="checkout-credit-title">
+                      <div className={styles.creditHead}>
+                        <span className={styles.creditMark} aria-hidden="true">
+                          <WalletMark />
+                        </span>
+                        <div className={styles.creditIntro}>
+                          <h3 id="checkout-credit-title" className={styles.creditTitle}>
+                            Store credit
+                          </h3>
+                          <p className={styles.creditBalance}>
+                            {formatCurrency(walletBalance)} available
+                          </p>
                         </div>
-                        <label className={styles.storeCreditToggle}>
-                          <input
-                            type="checkbox"
-                            checked={applyStoreCredit}
-                            onChange={(e) => {
-                              const on = e.target.checked;
-                              setApplyStoreCredit(on);
-                              setCreditAmount(on ? maxApplicableCredit : 0);
-                            }}
-                          />
-                          <span>Apply to this order</span>
-                        </label>
                       </div>
 
+                      <label className={styles.creditToggle}>
+                        <input
+                          type="checkbox"
+                          className={styles.control}
+                          checked={applyStoreCredit}
+                          onChange={(e) => {
+                            const on = e.target.checked;
+                            setApplyStoreCredit(on);
+                            setCreditAmount(on ? maxApplicableCredit : 0);
+                          }}
+                        />
+                        <span className={styles.box} aria-hidden="true">
+                          <CheckMark />
+                        </span>
+                        <span className={styles.creditToggleLabel}>Apply to this order</span>
+                      </label>
+
                       {applyStoreCredit && (
-                        <div className={styles.storeCreditApply}>
-                          <div className={styles.storeCreditAmountRow}>
-                            <label>Amount to apply</label>
-                            <div className={styles.storeCreditInputWrap}>
-                              <span className={styles.storeCreditCurrency}>₹</span>
+                        <div className={styles.creditApply}>
+                          <div className={styles.creditField}>
+                            <label
+                              htmlFor="checkout-credit-amount"
+                              className={styles.creditFieldLabel}
+                            >
+                              Amount to apply
+                            </label>
+                            <div className={styles.creditInputRow}>
+                              <span className={styles.creditCurrency} aria-hidden="true">
+                                &#8377;
+                              </span>
                               <input
+                                id="checkout-credit-amount"
                                 type="number"
+                                inputMode="numeric"
+                                autoComplete="off"
                                 min="0"
                                 max={maxApplicableCredit}
+                                step="1"
+                                className={styles.creditInput}
                                 value={creditAmount}
                                 onChange={(e) => {
                                   const n = Number(e.target.value);
                                   setCreditAmount(Number.isFinite(n) ? Math.max(0, n) : 0);
                                 }}
+                                aria-describedby="checkout-credit-max"
                               />
-                              <button type="button" onClick={() => setCreditAmount(maxApplicableCredit)}>
+                              <button
+                                type="button"
+                                className={styles.creditMax}
+                                onClick={() => setCreditAmount(maxApplicableCredit)}
+                              >
                                 Use Max
                               </button>
                             </div>
+                            <span id="checkout-credit-max" className={styles.creditHint}>
+                              Up to {formatCurrency(maxApplicableCredit)} on this order.
+                            </span>
                           </div>
-                          <div className={styles.storeCreditSummaryRow}>
-                            <span>Store credit applied</span>
-                            <span className={styles.storeCreditApplied}>-{formatCurrency(storeCreditApplied)}</span>
-                          </div>
-                          <div className={styles.storeCreditSummaryRow}>
-                            <span>Remaining to pay</span>
-                            <span className={styles.storeCreditPayable}>{formatCurrency(amountPayable)}</span>
-                          </div>
+
+                          <dl className={styles.creditRows}>
+                            <div className={styles.creditRow}>
+                              <dt>Store credit applied</dt>
+                              <dd className={styles.creditRowCredit}>
+                                &minus;{formatCurrency(storeCreditApplied)}
+                              </dd>
+                            </div>
+                            <div className={styles.creditRow}>
+                              <dt>Remaining to pay</dt>
+                              <dd className={styles.creditRowPayable}>
+                                {formatCurrency(amountPayable)}
+                              </dd>
+                            </div>
+                          </dl>
                         </div>
                       )}
-                    </div>
+                    </section>
                   )}
 
+                  {/* The credit settles the whole order: the method list has
+                      nothing left to ask, so it does not appear at all. */}
                   {fullyCovered && (
-                    <div className={styles.fullyCoveredNote}>
-                      <span aria-hidden>✓</span> Your store credit covers this order in full — no further payment needed.
-                    </div>
+                    <p className={styles.covered}>
+                      <span className={styles.coveredLead}>
+                        Fully covered by your store credit.
+                      </span>
+                      <span className={styles.coveredNote}>
+                        {formatCurrency(storeCreditApplied)} will be drawn from your
+                        balance when the order is placed. Nothing further is due, so no
+                        payment method is needed.
+                      </span>
+                    </p>
                   )}
 
-                  {!fullyCovered && (<>
-                  <div className={styles.paymentMethods}>
-                    {PAYMENT_OPTIONS.map((pm) => {
-                      const isCod = pm.id === "cod";
-                      const isDisabled = isCod && !codAvailable;
-                      const codHint = !codEnabled
-                        ? "Currently unavailable"
-                        : `Available for orders ${codMinOrder > 0 ? `from ${formatCurrency(codMinOrder)} ` : ""}up to ${formatCurrency(codMaxOrder ?? 0)}`;
-                      return (
-                        <label key={pm.id} className={`${styles.paymentOption} ${paymentMethod === pm.id ? styles.selectedPayment : ""} ${isDisabled ? styles.disabledPayment : ""}`}>
-                          <input type="radio" name="payment" value={pm.id} checked={paymentMethod === pm.id} disabled={isDisabled} onChange={() => setPaymentMethod(pm.id)} />
-                          <span className={styles.paymentIcon}>{pm.icon}</span>
-                          <div>
-                            <strong>{pm.label}</strong>
-                            <p>{isDisabled ? codHint : pm.desc}</p>
-                          </div>
-                        </label>
-                      );
-                    })}
-                  </div>
+                  {!fullyCovered && (
+                    <>
+                      <h3 className={styles.blockTitle}>Payment method</h3>
+                      <div className={styles.payGroup}>
+                        {PAYMENT_OPTIONS.map((pm) => {
+                          const isCod = pm.id === "cod";
+                          const isDisabled = isCod && !codAvailable;
+                          // Copy only — the bounds themselves are decided by
+                          // `codAvailable` above and are never restated as logic.
+                          const codHint = !codEnabled
+                            ? "Currently unavailable"
+                            : codMaxOrder == null
+                            ? `Available for orders from ${formatCurrency(codMinOrder)}`
+                            : codMinOrder > 0
+                            ? `Available for orders between ${formatCurrency(codMinOrder)} and ${formatCurrency(codMaxOrder)}`
+                            : `Available for orders up to ${formatCurrency(codMaxOrder)}`;
+                          const selected = paymentMethod === pm.id;
+                          const Mark = pm.Mark;
+                          const formId = `pay-form-${pm.id}`;
+                          const form = payFormFor(pm.id);
+                          return (
+                            <div
+                              key={pm.id}
+                              className={`${styles.payRow} ${selected ? styles.payRowSelected : ""} ${isDisabled ? styles.payRowDisabled : ""}`}
+                            >
+                              <label className={styles.payHead}>
+                                <input
+                                  type="radio"
+                                  name="payment"
+                                  className={styles.control}
+                                  value={pm.id}
+                                  checked={selected}
+                                  disabled={isDisabled}
+                                  onChange={() => setPaymentMethod(pm.id)}
+                                  aria-describedby={describedBy(selected && form && formId)}
+                                />
+                                <span
+                                  className={`${styles.box} ${styles.boxRound}`}
+                                  aria-hidden="true"
+                                />
+                                <span className={styles.payMark} aria-hidden="true">
+                                  <Mark />
+                                </span>
+                                <span className={styles.payCopy}>
+                                  <span className={styles.payName}>{pm.label}</span>
+                                  <span className={styles.payDesc}>
+                                    {isDisabled ? codHint : pm.desc}
+                                  </span>
+                                </span>
+                              </label>
 
-                  {paymentMethod === "card" && (
-                    <div className={styles.cardForm}>
-                      <div className={styles.formGroup}>
-                        <label>Card Number</label>
-                        <input type="text" placeholder="1234 5678 9012 3456" maxLength={19} />
+                              {selected && !isDisabled && form && (
+                                <div id={formId} className={styles.payForm}>
+                                  {form}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
                       </div>
-                      <div className={styles.formRow}>
-                        <div className={styles.formGroup}><label>Expiry</label><input type="text" placeholder="MM/YY" maxLength={5} /></div>
-                        <div className={styles.formGroup}><label>CVV</label><input type="password" placeholder="***" maxLength={4} /></div>
-                      </div>
-                      <div className={styles.formGroup}><label>Name on Card</label><input type="text" placeholder="Full name" /></div>
-                    </div>
-                  )}
 
-                  {paymentMethod === "upi" && (
-                    <div className={styles.upiForm}>
-                      <div className={styles.formGroup}><label>UPI ID</label><input type="text" placeholder="name@upi" /></div>
-                    </div>
-                  )}
-
-                  {paymentMethod === "net_banking" && (
-                    <div className={styles.bankForm}>
-                      <div className={styles.formGroup}>
-                        <label>Select Bank</label>
-                        <select>
-                          <option>State Bank of India</option>
-                          <option>HDFC Bank</option>
-                          <option>ICICI Bank</option>
-                          <option>Axis Bank</option>
-                          <option>Kotak Mahindra Bank</option>
-                          <option>Punjab National Bank</option>
-                        </select>
-                      </div>
-                    </div>
-                  )}
-
-                  {paymentMethod === "cod" && (
-                    <div className={styles.codInfo}>
-                      <p>
-                        &#9432; Pay with cash when your order is delivered. Available for orders
-                        {codMinOrder > 0 ? ` from ${formatCurrency(codMinOrder)}` : ""}
-                        {codMaxOrder != null ? ` up to ${formatCurrency(codMaxOrder)}` : ""}.
+                      {/* The one assurance this store attests to (the catalogue
+                          calls it securePayment). Nothing about demand, timing
+                          or stock is claimed anywhere on this step. */}
+                      <p className={styles.secure}>
+                        <span className={styles.secureMark} aria-hidden="true">
+                          <LockMark />
+                        </span>
+                        Secure checkout
                       </p>
-                    </div>
+                    </>
                   )}
-                  </>)}
                 </motion.div>
               )}
 
               {/* ═════════════════════════════════════════════════════════════
-                  STEP 3 — REVIEW & CONFIRM  ·  PROMPT 19 OWNS THIS BLOCK
+                  STEP 3 — REVIEW & CONFIRM
+                  Three hairline blocks, each with the Edit that jumps back to
+                  the step that owns it, then the pieces themselves. The order
+                  is placed by the shell single ink CTA in the nav row below —
+                  one Place Order button on the page, not two.
                   ═════════════════════════════════════════════════════════ */}
               {step === 3 && (
                 <motion.div key="review" {...stepMotion}>
-                  <h2 className={styles.sectionTitle}>Review &amp; Confirm</h2>
+                  <h2 className={styles.sectionTitle}>Before it leaves the counter</h2>
+                  <p className={styles.sectionNote}>
+                    {itemCount} {itemCount === 1 ? "piece" : "pieces"}
+                    <span aria-hidden="true"> &middot; </span>
+                    {fullyCovered
+                      ? "settled with store credit."
+                      : `${formatCurrency(amountPayable)} to pay.`}
+                  </p>
 
-                  <div className={styles.reviewItems}>
-                    {cartItems.map((item) => (
-                      <div key={item.id} className={styles.reviewItem}>
-                        <img src={item.image || PLACEHOLDER_IMG} alt={item.name} onError={onImageError} className={styles.reviewItemImage} />
-                        <div className={styles.reviewItemInfo}>
-                          <h4>{item.name}</h4>
-                          {item.variantName && <p className={styles.variant}>{item.variantName}</p>}
-                          <p className={styles.reviewItemQty}>Qty: {item.quantity} &times; {formatCurrency(item.price)}</p>
-                        </div>
-                        <div className={styles.itemSubtotal}>{formatCurrency(item.price * item.quantity)}</div>
+                  <div className={styles.recap}>
+                    <section className={styles.recapBlock}>
+                      <div className={styles.recapHead}>
+                        <h3 className={styles.recapTitle}>Ship to</h3>
+                        <button
+                          type="button"
+                          className={styles.recapEdit}
+                          onClick={() => setStep(1)}
+                        >
+                          Edit
+                          <span className={styles.srOnly}> shipping address</span>
+                        </button>
                       </div>
-                    ))}
-                  </div>
+                      <p className={styles.recapLead}>
+                        {reviewAddress.firstName} {reviewAddress.lastName}
+                      </p>
+                      <p className={styles.recapLine}>
+                        {reviewAddress.addressLine1}
+                        {reviewAddress.addressLine2 ? `, ${reviewAddress.addressLine2}` : ""}
+                      </p>
+                      <p className={styles.recapLine}>
+                        {reviewAddress.city}, {reviewAddress.state} &ndash;{" "}
+                        {reviewAddress.postalCode}
+                      </p>
+                      <p className={styles.recapLine}>{reviewAddress.country}</p>
+                      <p className={styles.recapLine}>{reviewAddress.phone}</p>
+                    </section>
 
-                  <div className={styles.reviewGrid}>
-                    <div className={styles.reviewBlock}>
-                      <div className={styles.reviewBlockHeader}>
-                        <h3>Deliver To</h3>
-                        <button type="button" onClick={() => setStep(1)}>Edit</button>
+                    <section className={styles.recapBlock}>
+                      <div className={styles.recapHead}>
+                        <h3 className={styles.recapTitle}>Delivery method</h3>
+                        <button
+                          type="button"
+                          className={styles.recapEdit}
+                          onClick={() => setStep(1)}
+                        >
+                          Edit
+                          <span className={styles.srOnly}> delivery method</span>
+                        </button>
                       </div>
-                      <p className={styles.reviewName}>{reviewAddress.firstName} {reviewAddress.lastName}</p>
-                      <p>{reviewAddress.addressLine1}{reviewAddress.addressLine2 ? `, ${reviewAddress.addressLine2}` : ""}</p>
-                      <p>{reviewAddress.city}, {reviewAddress.state} - {reviewAddress.postalCode}</p>
-                      <p>{reviewAddress.country}</p>
-                      <p>{reviewAddress.phone}</p>
-                    </div>
+                      <p className={styles.recapLead}>{selectedShipping?.name}</p>
+                      {selectedShipping?.description && (
+                        <p className={styles.recapLine}>{selectedShipping.description}</p>
+                      )}
+                      {reviewEta && <p className={styles.recapLine}>{reviewEta}</p>}
+                      <p
+                        className={`${styles.recapLine} ${shippingCost === 0 ? styles.recapFree : ""}`}
+                      >
+                        {shippingCost === 0 ? "Complimentary" : formatCurrency(shippingCost)}
+                      </p>
+                    </section>
 
-                    <div className={styles.reviewBlock}>
-                      <div className={styles.reviewBlockHeader}>
-                        <h3>Shipping Method</h3>
-                        <button type="button" onClick={() => setStep(1)}>Edit</button>
-                      </div>
-                      <p className={styles.reviewName}>{selectedShipping?.name}</p>
-                      <p>{selectedShipping?.description}</p>
-                      <p className={styles.reviewShippingCost}>{shippingCost === 0 ? "FREE" : formatCurrency(shippingCost)}</p>
-                    </div>
-
-                    <div className={styles.reviewBlock}>
-                      <div className={styles.reviewBlockHeader}>
-                        <h3>Payment</h3>
-                        <button type="button" onClick={() => setStep(2)}>Edit</button>
+                    <section className={styles.recapBlock}>
+                      <div className={styles.recapHead}>
+                        <h3 className={styles.recapTitle}>Payment</h3>
+                        <button
+                          type="button"
+                          className={styles.recapEdit}
+                          onClick={() => setStep(2)}
+                        >
+                          Edit
+                          <span className={styles.srOnly}> payment method</span>
+                        </button>
                       </div>
                       {fullyCovered ? (
                         <>
-                          <p className={styles.reviewName}>👛 Store Credit</p>
-                          <p>Paid in full with store credit ({formatCurrency(storeCreditApplied)}).</p>
+                          <p className={styles.recapLead}>
+                            <span className={styles.recapMark} aria-hidden="true">
+                              <WalletMark />
+                            </span>
+                            Store credit
+                          </p>
+                          <p className={styles.recapLine}>
+                            Paid in full with store credit ({formatCurrency(storeCreditApplied)}).
+                          </p>
                         </>
                       ) : (
                         <>
-                          <p className={styles.reviewName}>{selectedPaymentOption?.icon} {selectedPaymentOption?.label}</p>
+                          <p className={styles.recapLead}>
+                            {SelectedPaymentMark && (
+                              <span className={styles.recapMark} aria-hidden="true">
+                                <SelectedPaymentMark />
+                              </span>
+                            )}
+                            {selectedPaymentOption?.label}
+                          </p>
                           {storeCreditApplied > 0 && (
-                            <p>Store credit applied: -{formatCurrency(storeCreditApplied)}</p>
+                            <p className={styles.recapLine}>
+                              Store credit &minus;{formatCurrency(storeCreditApplied)}
+                            </p>
                           )}
-                          {paymentMethod === "cod" ? (
-                            <p>Pay {formatCurrency(amountPayable)} in cash on delivery.</p>
-                          ) : (
-                            <p>You will be charged {formatCurrency(amountPayable)}.</p>
-                          )}
+                          <p className={styles.recapLine}>
+                            {paymentMethod === "cod"
+                              ? `${formatCurrency(amountPayable)} collected on delivery.`
+                              : `${formatCurrency(amountPayable)} charged when you place the order.`}
+                          </p>
                         </>
                       )}
-                    </div>
+                    </section>
+                  </div>
+
+                  <div className={styles.recapItems}>
+                    <h3 className={styles.blockTitle}>
+                      {itemCount} {itemCount === 1 ? "piece" : "pieces"}
+                    </h3>
+                    <ul className={styles.recapList}>
+                      {cartItems.map((item) => (
+                        <li key={item.id} className={styles.recapItem}>
+                          <div className={styles.recapThumb}>
+                            <img
+                              src={item.image || PLACEHOLDER_IMG}
+                              alt=""
+                              loading="lazy"
+                              onError={onImageError}
+                            />
+                          </div>
+                          <div className={styles.recapItemBody}>
+                            <h4 className={styles.recapItemName}>{item.name}</h4>
+                            {item.variantName && (
+                              <span className={styles.recapItemVariant}>{item.variantName}</span>
+                            )}
+                            <span className={styles.recapItemQty}>
+                              {item.quantity} &times; {formatCurrency(item.price)}
+                            </span>
+                          </div>
+                          <p className={styles.recapItemTotal}>
+                            {formatCurrency(item.price * item.quantity)}
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
                   </div>
                 </motion.div>
               )}
@@ -1274,20 +1604,27 @@ const Checkout = () => {
               </button>
             )}
             <button
+              type="button"
               className={styles.primaryBtn}
               onClick={handleNext}
               disabled={isProcessing || cartItems.length === 0}
+              aria-busy={isProcessing || undefined}
             >
               {isProcessing
-                ? "Processing..."
+                ? "Placing your order…"
                 : step === 3
                 ? fullyCovered
                   ? "Place Order"
-                  : `Place Order - ${formatCurrency(amountPayable)}`
+                  : `Place Order — ${formatCurrency(amountPayable)}`
                 : step === 0 && !isAuthenticated
                 ? "Login to Continue"
                 : "Continue"}
             </button>
+            {/* The button goes disabled while the order is created, which takes
+                it out of the focus order — so the state is also spoken here. */}
+            <span role="status" className={styles.srOnly}>
+              {isProcessing ? "Placing your order, please wait." : ""}
+            </span>
           </div>
         </div>
       </div>
