@@ -1,1160 +1,1325 @@
-/* =============================================================================
- * Special Offers & Deals — Meghali's Silk re-skin (tokens only; no hardcoded hex)
- * =============================================================================
- * Dark-first, gold-on-green deals experience: a deep-green hero band with gold
- * countdown tiles, gold coupon stubs, and brand product cards. Every colour
- * resolves from src/theme/storefront-tokens.css and is theme-aware via body.dark.
- * Class names are unchanged — the page's data logic in SpecialOffers.js is
- * untouched; this is a pure re-skin.
- * ========================================================================== */
+/* ═══════════════════════════════════════════════════════════════════════════
+   SPECIAL OFFERS  —  the season's offers, set editorially
+   ═══════════════════════════════════════════════════════════════════════════
+   The old page was a marketplace: a gradient banner, digit tiles, ticket-shaped
+   coupon stubs and a wall of framed tiles with a "Quick View" veil. This one is
+   a card posted by the door of the shop. Four movements on the ivory ground and
+   nothing between them but air and hairlines.
 
-/* ── Page Shell ─────────────────────────────────────────────────────────── */
+     1. THE OPENING BAND — the admin's eyebrow, headline and line, closed by a
+        single tracked countdown line over a hairline. No tiles, no pulsing.
+     2. THE VOUCHERS — hairline cards. The figure in the display serif, the
+        small print as a short ruled list, the code on a DASHED chip with Copy.
+     3. THE CHOSEN — the admin's Deal of the Day picks as large 4:5 features.
+     4. THE MARKDOWNS — a hairline strip of category words over a wall of cards
+        drawn in the Prompt 09 language.
+
+   THE LOCAL CARD IS A COPY OF THE SHARED CARD'S LANGUAGE, NOT AN IMPORT
+   §7 deliberately re-draws the Prompt 09 card here: 3:4 plate on the sunken
+   sand panel, tracked eyebrow, serif name, the gold star line, the quiet price
+   row, and an add affordance that lives over the foot of the photograph on a
+   fine pointer and in a row of its own on touch. Keep the two in step by eye —
+   this page has always owned its own card, and importing the shared one would
+   change what the Deals grid can do later.
+
+   TOKENS ONLY
+   Every colour, space, radius and type value resolves through `--sf-*`, which
+   flips under `body.dark` — light and dark are one stylesheet and there is no
+   hex in this file. The only local variables are the two aliases that colour
+   the inline tag artwork, and both are aliases onto tokens, never values.
+   ═══════════════════════════════════════════════════════════════════════════ */
 
 .page {
+  /* Aliases, so the one inline SVG can be re-coloured from the token layer. */
+  --offer-line: var(--sf-color-border-strong);
+  --offer-gold: var(--sf-color-gold-deep);
+
   min-height: 100vh;
+  padding-bottom: var(--sf-space-24);
   background: var(--sf-color-bg);
   color: var(--sf-color-text);
   font-family: var(--sf-font-family);
-  padding-bottom: var(--sf-space-16);
-  transition: background var(--sf-transition), color var(--sf-transition);
+}
+
+/* The only thing ThemeContext is consumed for here: a native color-scheme hint
+   so scrollbars and native controls render for the active theme. */
+.dark {
+  color-scheme: dark;
 }
 
 .container {
   max-width: var(--sf-container-max);
   margin: 0 auto;
-  padding: 0 var(--sf-space-5);
+  padding: 0 var(--sf-space-6);
 }
 
-/* ── Hero Banner ────────────────────────────────────────────────────────── */
-
-.heroBanner {
-  background: linear-gradient(135deg, var(--sf-color-brand-green) 0%, var(--sf-color-brand-green-deep) 100%);
-  padding: var(--sf-space-16) var(--sf-space-5);
-  text-align: center;
-  position: relative;
-  overflow: hidden;
-}
-
-.heroBanner::before {
-  content: "";
+/* Announced, never seen — the copy confirmations and the countdown's spoken
+   form both ride on this. */
+.srOnly {
   position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 18% 30%, rgba(203, 163, 90, 0.18) 0%, transparent 45%),
-    radial-gradient(circle at 82% 70%, rgba(203, 163, 90, 0.12) 0%, transparent 45%);
-  pointer-events: none;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
-.heroContent {
-  position: relative;
-  z-index: 1;
-  max-width: 720px;
-  margin: 0 auto;
-}
+/* ═══════════════════════════════════════════════════════════════════════════
+   1. THE SHARED FURNITURE  —  eyebrow, titles, ledes, sections
+   The Prompt 12/14 convention, so this page reads as part of the same magazine:
+   a tracked gold eyebrow opened by a short rule, a serif title, one quiet line.
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-.heroInner {
+.eyebrow {
   display: flex;
-  flex-direction: column;
   align-items: center;
   gap: var(--sf-space-3);
-}
-
-.heroTag {
-  display: inline-block;
-  background: var(--sf-color-badge-bg);
-  border: 1px solid var(--sf-color-gold);
-  color: var(--sf-color-gold);
-  padding: var(--sf-space-2) var(--sf-space-5);
-  border-radius: var(--sf-radius-pill);
+  margin: 0 0 var(--sf-space-4);
   font-size: var(--sf-text-xs);
-  font-weight: var(--sf-font-semibold);
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-}
-
-.heroTitle {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-3xl);
-  font-weight: var(--sf-font-bold);
-  color: var(--sf-color-gold-light);
-  margin: var(--sf-space-2) 0 0;
-  line-height: var(--sf-leading-tight);
-}
-
-.heroSubtitle {
-  color: var(--sf-color-primary-contrast);
-  opacity: 0.88;
-  font-size: var(--sf-text-md);
-  line-height: var(--sf-leading-normal);
-  max-width: 540px;
-  margin: 0;
-}
-
-/* Countdown in banner — gold-bordered tiles on dark */
-.heroCountdown {
-  margin-top: var(--sf-space-5);
-  display: flex;
-  align-items: center;
-  gap: var(--sf-space-4);
-  background: rgba(0, 0, 0, 0.22);
-  padding: var(--sf-space-3) var(--sf-space-6);
-  border-radius: var(--sf-radius-lg);
-  border: 1px solid var(--sf-color-border-strong);
-}
-
-.countdownLabel {
-  color: var(--sf-color-gold-light);
-  font-size: var(--sf-text-sm);
   font-weight: var(--sf-font-medium);
-}
-
-.countdownBoxes {
-  display: flex;
-  align-items: center;
-  gap: var(--sf-space-2);
-}
-
-.countdownUnit {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  min-width: 46px;
-}
-
-.countdownNumber {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-xl);
-  font-weight: var(--sf-font-bold);
-  color: var(--sf-color-gold);
-  background: var(--sf-color-brand-green-deep);
-  border: 1px solid var(--sf-color-gold-deep);
-  border-radius: var(--sf-radius-sm);
-  padding: var(--sf-space-1) var(--sf-space-3);
-  font-variant-numeric: tabular-nums;
-}
-
-.countdownText {
-  font-size: 0.65rem;
-  color: var(--sf-color-gold-light);
-  opacity: 0.8;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-top: var(--sf-space-1);
-}
-
-.countdownSep {
-  font-size: var(--sf-text-lg);
-  font-weight: var(--sf-font-bold);
+  letter-spacing: var(--sf-tracking-wider);
+  line-height: var(--sf-leading-tight);
   color: var(--sf-color-gold-deep);
-  margin-bottom: var(--sf-space-4);
 }
 
-/* ── Sections ───────────────────────────────────────────────────────────── */
+.eyebrow::before {
+  content: "";
+  flex: none;
+  width: var(--sf-space-8);
+  height: 1px;
+  background: currentColor;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--sf-font-display);
+  font-size: clamp(2.25rem, 4.6vw, 3.5rem);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-display);
+  letter-spacing: var(--sf-tracking-tight);
+  color: var(--sf-color-text);
+}
+
+.lede {
+  max-width: 56ch;
+  margin: var(--sf-space-5) 0 0;
+  font-size: var(--sf-text-md);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-secondary);
+}
 
 .section {
-  margin-top: var(--sf-space-10);
+  padding-top: var(--sf-space-20);
 }
 
-.sectionHeader {
-  margin-bottom: var(--sf-space-6);
+.sectionHead {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--sf-space-8);
+  flex-wrap: wrap;
+  margin-bottom: var(--sf-space-10);
 }
 
-.sectionTitleRow {
+.sectionHeadText {
+  min-width: 0;
+  max-width: 52ch;
+}
+
+.sectionHeadAside {
   display: flex;
   align-items: center;
   gap: var(--sf-space-4);
-  flex-wrap: wrap;
+  padding-bottom: var(--sf-space-1);
 }
 
 .sectionTitle {
+  margin: 0;
   font-family: var(--sf-font-display);
-  font-size: var(--sf-text-2xl);
-  font-weight: var(--sf-font-semibold);
+  font-size: clamp(1.75rem, 3.2vw, 2.5rem);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-display);
+  letter-spacing: var(--sf-tracking-tight);
   color: var(--sf-color-text);
-  margin: 0;
 }
 
-.sectionSubtitle {
+.sectionLede {
+  margin: var(--sf-space-4) 0 0;
   font-size: var(--sf-text-sm);
-  color: var(--sf-color-text-muted);
-  margin: var(--sf-space-1) 0 0;
-}
-
-/* ── Coupons Grid ───────────────────────────────────────────────────────── */
-
-.couponGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--sf-space-4);
-}
-
-.couponCard {
-  display: flex;
-  border-radius: var(--sf-radius-lg);
-  overflow: hidden;
-  background: var(--sf-color-surface);
-  border: 1px solid var(--sf-color-border);
-  box-shadow: var(--sf-shadow-xs);
-  transition: box-shadow var(--sf-transition), border-color var(--sf-transition);
-}
-
-.couponCard:hover {
-  box-shadow: var(--sf-shadow-md);
-  border-color: var(--sf-color-border-strong);
-}
-
-/* Stub: deep-green panel with a gold left rail + perforated seam. */
-.couponLeft {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--sf-space-5) var(--sf-space-6);
-  background: var(--sf-color-brand-green);
-  border-left: 4px solid var(--sf-color-gold);
-  border-right: 2px dashed var(--sf-color-border-strong);
-  min-width: 112px;
-}
-
-/* Ticket notches punched out of the perforated seam. */
-.couponLeft::before,
-.couponLeft::after {
-  content: "";
-  position: absolute;
-  right: -9px;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--sf-color-bg);
-}
-.couponLeft::before {
-  top: -9px;
-}
-.couponLeft::after {
-  bottom: -9px;
-}
-
-.couponDiscount {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-2xl);
-  font-weight: var(--sf-font-bold);
-  line-height: 1.1;
-  color: var(--sf-color-gold);
-}
-
-.couponLabel {
-  font-size: 0.7rem;
-  font-weight: var(--sf-font-semibold);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  color: var(--sf-color-gold-light);
-  opacity: 0.85;
-}
-
-.couponRight {
-  flex: 1;
-  padding: var(--sf-space-4) var(--sf-space-5);
-  display: flex;
-  flex-direction: column;
-  gap: var(--sf-space-2);
-}
-
-.couponDesc {
-  font-size: var(--sf-text-base);
-  font-weight: var(--sf-font-semibold);
-  color: var(--sf-color-text);
-  margin: 0;
-}
-
-.couponMeta {
-  font-size: var(--sf-text-xs);
-  color: var(--sf-color-text-muted);
-  margin: 0;
-}
-
-.couponCodeRow {
-  display: flex;
-  align-items: center;
-  gap: var(--sf-space-3);
-  margin-top: var(--sf-space-1);
-}
-
-.couponCode {
-  background: var(--sf-color-surface-2);
-  padding: var(--sf-space-1) var(--sf-space-3);
-  border-radius: var(--sf-radius-sm);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-bold);
-  color: var(--sf-color-gold-deep);
-  letter-spacing: 1px;
-  border: 1px dashed var(--sf-color-border-strong);
-}
-
-.copyBtn {
-  padding: var(--sf-space-2) var(--sf-space-4);
-  border: none;
-  border-radius: var(--sf-radius-sm);
-  background: var(--sf-color-emerald);
-  color: var(--sf-color-emerald-contrast);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-  font-family: var(--sf-font-family);
-  cursor: pointer;
-  transition: background var(--sf-transition-fast);
-  white-space: nowrap;
-}
-
-.copyBtn:hover {
-  background: var(--sf-color-emerald-hover);
-}
-
-.copyBtn:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
-}
-
-.copyBtn.copied {
-  background: var(--sf-color-success);
-  color: var(--sf-color-primary-contrast);
-}
-
-/* Empty / skeleton states for the coupons grid */
-.couponEmpty {
-  text-align: center;
-  padding: var(--sf-space-8) var(--sf-space-5);
-  color: var(--sf-color-text-muted);
-  font-size: var(--sf-text-base);
-  background: var(--sf-color-surface);
-  border: 1px dashed var(--sf-color-border-strong);
-  border-radius: var(--sf-radius-lg);
-}
-
-.couponSkeletonLeft {
-  min-width: 112px;
-  background: linear-gradient(90deg, var(--sf-color-surface-2) 25%, var(--sf-color-surface-hover) 50%, var(--sf-color-surface-2) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.4s infinite;
-}
-
-/* ── Deal of the Day ────────────────────────────────────────────────────── */
-
-.dotdTimer {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sf-space-2);
-  background: var(--sf-color-badge-bg);
-  border: 1px solid var(--sf-color-border-strong);
-  color: var(--sf-color-gold);
-  padding: var(--sf-space-1) var(--sf-space-4);
-  border-radius: var(--sf-radius-sm);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-bold);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-secondary);
   font-variant-numeric: tabular-nums;
 }
 
-.timerIcon {
-  font-size: 1rem;
-}
-
-.dotdGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--sf-space-5);
-}
-
-.dotdCard {
-  background: var(--sf-color-surface);
-  border-radius: var(--sf-radius-lg);
-  overflow: hidden;
-  cursor: pointer;
-  box-shadow: var(--sf-shadow-sm);
-  transition: transform var(--sf-transition), box-shadow var(--sf-transition), border-color var(--sf-transition);
-  border: 1px solid var(--sf-color-border);
-}
-
-.dotdCard:hover {
-  transform: translateY(-6px);
-  box-shadow: var(--sf-shadow-lg);
-  border-color: var(--sf-color-gold);
-}
-
-.dotdImageWrap {
-  position: relative;
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
-  background: var(--sf-color-surface-2);
-}
-
-.dotdImage {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform var(--sf-transition);
-}
-
-.dotdCard:hover .dotdImage {
-  transform: scale(1.05);
-}
-
-.dotdBadge {
-  position: absolute;
-  top: var(--sf-space-3);
-  left: var(--sf-space-3);
-  background: var(--sf-gradient-gold);
-  color: var(--sf-color-brand-green-deep);
-  padding: var(--sf-space-1) var(--sf-space-3);
-  border-radius: var(--sf-radius-sm);
+/* Used where a section has nothing to show but the absence is worth a sentence
+   (no live codes) — a note on the ground, not an empty box. */
+.quietNote {
+  margin: 0;
+  padding: var(--sf-space-6) 0;
+  border-top: 1px solid var(--sf-color-border);
   font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-bold);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-muted);
 }
 
-.dotdInfo {
-  padding: var(--sf-space-5);
+/* ═══════════════════════════════════════════════════════════════════════════
+   2. THE OPENING BAND
+   Full-bleed air closed by one hairline. Everything in it is the admin's own
+   copy; the page contributes only the setting.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.band {
+  padding: var(--sf-space-16) 0 var(--sf-space-12);
+  border-bottom: 1px solid var(--sf-color-border);
 }
 
-.dotdName {
-  font-size: var(--sf-text-base);
-  font-weight: var(--sf-font-semibold);
+.bandInner {
+  max-width: 64ch;
+}
+
+/* ---- The countdown -------------------------------------------------------
+   One tracked line — "ENDS IN  04 : 12 : 33" — rather than three boxed tiles.
+   Each pair is a fixed 2ch box in tabular figures, so a second rolling from 09
+   to 10 cannot nudge the colons sideways once a second for the life of the
+   page. The visual digits are aria-hidden; the sr-only sibling carries the
+   coarse spoken form (see countdownSpeech).
+   ------------------------------------------------------------------------- */
+
+.countdown {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sf-space-4);
+  margin: var(--sf-space-10) 0 0;
+  padding-top: var(--sf-space-5);
+  border-top: 1px solid var(--sf-color-border);
+}
+
+.countdownLabel {
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wider);
+  color: var(--sf-color-text-muted);
+}
+
+.countdownDigits {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sf-space-2);
+  font-size: var(--sf-text-xl);
+  font-weight: var(--sf-font-medium);
+  line-height: 1;
   color: var(--sf-color-text);
-  margin: 0 0 var(--sf-space-3);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
+  font-variant-numeric: tabular-nums;
 }
 
-.dotdPriceRow {
+.countdownPair {
+  min-width: 2ch;
+  text-align: center;
+}
+
+.countdownSep {
+  color: var(--sf-color-text-muted);
+  font-weight: var(--sf-font-light);
+}
+
+/* The same line, shrunk into a hairline chip for the Deal of the Day head. */
+.countdown.countdownChip {
+  gap: var(--sf-space-3);
+  margin: 0;
+  padding: var(--sf-space-2) var(--sf-space-4);
+  border: 1px solid var(--sf-color-border);
+  border-radius: var(--sf-radius-sm);
+}
+
+.countdownChip .countdownDigits {
+  font-size: var(--sf-text-sm);
+}
+
+/* The honest close: the window passed and we say so, in the display serif. */
+.ended {
+  max-width: 52ch;
+  margin: var(--sf-space-10) 0 0;
+  padding-top: var(--sf-space-5);
+  border-top: 1px solid var(--sf-color-border);
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-xl);
+  font-weight: var(--sf-font-normal);
+  line-height: var(--sf-leading-tight);
+  color: var(--sf-color-text-secondary);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   3. THE VOUCHERS
+   A hairline card, not a perforated ticket. The figure carries the card, the
+   small print is a short ruled list of conditions checkout will really apply,
+   and the code sits on a DASHED chip — the one place the old ticket idea is
+   allowed to survive, at the size of a stamp.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.voucherGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--sf-space-6);
+}
+
+.voucher {
+  display: flex;
+  flex-direction: column;
+  padding: var(--sf-space-6);
+  border: 1px solid var(--sf-color-border);
+  border-radius: var(--sf-radius-sm);
+  background: transparent;
+  transition: border-color var(--sf-transition);
+}
+
+.voucher:hover {
+  border-color: var(--sf-color-border-strong);
+}
+
+.voucherFigure {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sf-space-2);
+  margin: 0;
+}
+
+.voucherValue {
+  font-family: var(--sf-font-display);
+  font-size: clamp(2rem, 3.4vw, 2.75rem);
+  font-weight: var(--sf-font-medium);
+  line-height: 1;
+  letter-spacing: var(--sf-tracking-tight);
+  color: var(--sf-color-gold-deep);
+}
+
+.voucherOff {
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  color: var(--sf-color-text-muted);
+}
+
+.voucherDesc {
+  margin: var(--sf-space-4) 0 0;
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text);
+}
+
+/* The small print. Each row is opened by a short rule instead of a bullet —
+   the same device as the eyebrow, at the smallest size on the page. */
+.voucherTerms {
+  margin: var(--sf-space-5) 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-2);
+}
+
+.voucherTerms li {
   display: flex;
   align-items: baseline;
   gap: var(--sf-space-3);
-  margin-bottom: var(--sf-space-3);
+  font-size: var(--sf-text-xs);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-color-text-muted);
 }
 
-.dotdSalePrice {
-  font-size: var(--sf-text-lg);
-  font-weight: var(--sf-font-bold);
-  color: var(--sf-color-price);
+.voucherTerms li::before {
+  content: "";
+  flex: none;
+  width: var(--sf-space-3);
+  height: 1px;
+  background: var(--sf-color-border-strong);
+  transform: translateY(-0.28em);
 }
 
-.dotdOriginalPrice {
-  font-size: var(--sf-text-sm);
-  color: var(--sf-color-compare);
-  text-decoration: line-through;
+.voucherFoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sf-space-4);
+  /* margin-top:auto pins the code to the foot so a short description and a long
+     one still line their chips up across the row. */
+  margin-top: auto;
+  padding-top: var(--sf-space-5);
 }
 
-.dotdSavings {
-  font-size: var(--sf-text-sm);
-  color: var(--sf-color-discount);
-  font-weight: var(--sf-font-semibold);
-  margin: 0 0 var(--sf-space-1);
-}
-
-.dotdSavingsAmount {
-  font-weight: var(--sf-font-bold);
-}
-
-.dotdBtn {
-  margin-top: var(--sf-space-3);
-  width: 100%;
-  min-height: var(--sf-tap-target);
-  padding: var(--sf-space-3);
-  border: none;
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-gradient-gold);
-  color: var(--sf-color-brand-green-deep);
-  font-size: var(--sf-text-base);
-  font-weight: var(--sf-font-semibold);
+.voucherCode {
+  padding: var(--sf-space-2) var(--sf-space-4);
+  border: 1px dashed var(--sf-color-border-strong);
+  border-radius: var(--sf-radius-sm);
   font-family: var(--sf-font-family);
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-semibold);
+  letter-spacing: var(--sf-tracking-wide);
+  color: var(--sf-color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Copy is a word with a hairline under it, not a button-shaped button. */
+.copyBtn {
+  position: relative;
+  flex: none;
+  min-height: var(--sf-tap-target);
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--sf-color-text);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
   cursor: pointer;
-  transition: filter var(--sf-transition-fast);
+  transition: color var(--sf-transition-fast);
 }
 
-.dotdBtn:hover {
-  filter: brightness(1.05);
+.copyBtn::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(50% - 0.85em);
+  height: 1px;
+  background: currentColor;
+  transform: scaleX(0.4);
+  transform-origin: left;
+  transition: transform var(--sf-transition);
 }
 
-.dotdBtn:focus-visible {
-  outline: none;
+.copyBtn:hover {
+  color: var(--sf-color-gold-deep);
+}
+
+.copyBtn:hover::after {
+  transform: scaleX(1);
+}
+
+.copyBtn:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
   box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
 }
 
-/* ── Category Tabs (fully responsive, never clipped) ────────────────────── */
+/* Confirmed — gold, with the rule drawn all the way through. */
+.copyBtnDone,
+.copyBtnDone:hover {
+  color: var(--sf-color-gold-deep);
+}
 
-.tabBarWrap {
+.copyBtnDone::after {
+  transform: scaleX(1);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   4. THE PRICE CLUSTER  (shared by the feature and the card)
+   The same typography as the shared PriceBlock at `sm`: the figure in antique
+   gold, the compare struck in muted ink, the "% off" the quietest thing in the
+   row. Savings are printed only where the arithmetic supports them.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.priceRow {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--sf-space-2);
+}
+
+.price {
+  color: var(--sf-color-price);
+  font-size: var(--sf-text-md);
+  font-weight: var(--sf-font-semibold);
+  line-height: var(--sf-leading-tight);
+  letter-spacing: var(--sf-tracking-tight);
+  font-variant-numeric: tabular-nums;
+}
+
+.compare {
+  color: var(--sf-color-compare);
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-normal);
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.percentOff {
+  color: var(--sf-color-text-muted);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+/* Gold, so it reads as part of the price cluster rather than as a sticker
+   parked beside it. Rendered only when comparePrice genuinely exceeds price. */
+.savings {
+  margin: var(--sf-space-2) 0 0;
+  color: var(--sf-color-gold-deep);
+  font-size: var(--sf-text-sm);
+  font-weight: var(--sf-font-medium);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The tracked brand/category line — smallest, quietest thing on either card. */
+.cardEyebrow {
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  color: var(--sf-color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   5. MARKS ON A PHOTOGRAPH  (shared by the feature and the card)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.plate {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.plate img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform var(--sf-transition-slow);
+}
+
+.card:hover .plate img,
+.feature:hover .plate img {
+  transform: scale(1.03);
+}
+
+/* The ring has to sit INSIDE the crop, since the wrapper clips its overflow. */
+.plate:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: -4px;
+  box-shadow: inset 0 0 0 2px var(--sf-color-surface-2),
+    inset 0 0 0 4px var(--sf-color-focus-ring);
+}
+
+/* Top-left. The doubled selector wins the opaque veil against the primitive's
+   own tint, whatever the stylesheet order turns out to be. */
+.badge.badge {
+  position: absolute;
+  top: var(--sf-space-3);
+  left: var(--sf-space-3);
+  z-index: 2;
+  background: var(--sf-color-surface);
+  letter-spacing: 0.1em;
+}
+
+/* The only urgency this page knows how to express. */
+.stockTag {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  padding: var(--sf-space-3);
+  background: var(--sf-color-overlay);
+  color: var(--sf-color-primary-contrast);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  letter-spacing: var(--sf-tracking-wide);
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.isOut .plate img {
+  opacity: 0.55;
+  filter: grayscale(0.5);
+}
+
+.isOut:hover .plate img {
+  transform: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   6. THE CHOSEN  —  Deal of the Day as large features
+   The page's one large gesture: a 4:5 plate over a serif name. Three across,
+   and whatever the admin has selected beyond three simply wraps.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.featureGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  column-gap: var(--sf-space-8);
+  row-gap: var(--sf-space-12);
+}
+
+.feature {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: transparent;
+}
+
+.featureMedia {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  background: var(--sf-color-surface-2);
+  border-radius: var(--sf-radius-sm);
+  overflow: hidden;
+}
+
+.featureBody {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sf-space-3);
+  padding: var(--sf-space-5) 0 0;
+}
+
+.featureName {
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-xl);
+  font-weight: var(--sf-font-medium);
+  color: var(--sf-color-text);
+  line-height: var(--sf-leading-tight);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 5px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: text-decoration-color var(--sf-transition);
+}
+
+.feature:hover .featureName {
+  text-decoration-color: var(--sf-color-border-strong);
+}
+
+.featureName:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 3px;
+  box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
+}
+
+.feature .price {
+  font-size: var(--sf-text-lg);
+}
+
+.feature .compare {
+  font-size: var(--sf-text-md);
+}
+
+/* Always visible — this is a feature, not a tile, and hiding its action behind
+   a hover would be coy. It sits outside `.featureBody`, which takes the free
+   space, so the three buttons line up however tall the names above them run. */
+.featureBtn {
+  align-self: stretch;
+  margin-top: var(--sf-space-5);
+  min-height: var(--sf-tap-target);
+  padding: var(--sf-space-3) var(--sf-space-5);
+  border: 1px solid var(--sf-color-border-strong);
+  border-radius: var(--sf-radius-sm);
+  background: var(--sf-color-surface);
+  color: var(--sf-color-text);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  cursor: pointer;
+  transition: background-color var(--sf-transition),
+    border-color var(--sf-transition), color var(--sf-transition);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   7. THE MARKDOWNS  —  the strip and the wall
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ---- The category strip -------------------------------------------------
+   Words over one hairline, the active one underscored in gold. It never hides
+   a tab: the fades and the scroll marks appear only when there is more strip
+   off-screen, and the marks are withdrawn on touch, where you simply swipe.
+   ------------------------------------------------------------------------- */
+
+.tabsWrap {
   position: relative;
   display: flex;
   align-items: center;
-  margin-bottom: var(--sf-space-6);
+  margin-bottom: var(--sf-space-12);
+  border-bottom: 1px solid var(--sf-color-border);
 }
 
-.tabBar {
+.tabStrip {
   display: flex;
-  gap: var(--sf-space-2);
+  flex: 1 1 auto;
+  gap: var(--sf-space-8);
   overflow-x: auto;
-  padding: var(--sf-space-1) 2px;
-  flex: 1;
-  scroll-behavior: smooth;
-  scroll-snap-type: x proximity;
-  -ms-overflow-style: none;
   scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 
-.tabBar::-webkit-scrollbar {
+.tabStrip::-webkit-scrollbar {
   display: none;
 }
 
-/* Edge fades hint that more tabs sit off-screen (hidden at each end). */
+.tab {
+  position: relative;
+  flex: none;
+  min-height: var(--sf-tap-target);
+  padding: 0 0 var(--sf-space-4);
+  border: none;
+  background: transparent;
+  color: var(--sf-color-text-secondary);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--sf-transition-fast);
+}
+
+/* The underscore sits ON the strip's own hairline, so the active word looks
+   drawn into the rule rather than parked above it. */
+.tab::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 1px;
+  background: var(--sf-color-gold-deep);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--sf-transition);
+}
+
+.tab:hover {
+  color: var(--sf-color-text);
+}
+
+.tab:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: -2px;
+  box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
+}
+
+.tabActive {
+  color: var(--sf-color-text);
+}
+
+.tabActive::after {
+  transform: scaleX(1);
+}
+
 .tabFade {
   position: absolute;
   top: 0;
-  bottom: 0;
-  width: 44px;
-  pointer-events: none;
+  bottom: 1px;
   z-index: 2;
+  width: var(--sf-space-16);
+  pointer-events: none;
   transition: opacity var(--sf-transition-fast);
+}
+
+.tabFadeLeft {
+  left: 0;
+  background: linear-gradient(to right, var(--sf-color-bg) 30%, transparent);
+}
+
+.tabFadeRight {
+  right: 0;
+  background: linear-gradient(to left, var(--sf-color-bg) 30%, transparent);
 }
 
 .tabFadeHidden {
   opacity: 0;
 }
 
-.tabFadeLeft {
-  left: 0;
-  background: linear-gradient(to right, var(--sf-color-bg), transparent);
-}
-
-.tabFadeRight {
-  right: 0;
-  background: linear-gradient(to left, var(--sf-color-bg), transparent);
-}
-
-/* Scroll buttons (desktop/tablet); hidden on touch where the strip swipes. */
-.tabScrollBtn {
-  flex-shrink: 0;
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  border: 1px solid var(--sf-color-border);
-  background: var(--sf-color-surface);
-  color: var(--sf-color-text-secondary);
-  font-size: 1.3rem;
-  line-height: 1;
-  cursor: pointer;
-  display: flex;
+.tabScroll {
+  position: absolute;
+  top: 50%;
+  z-index: 3;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  z-index: 3;
-  box-shadow: var(--sf-shadow-sm);
-  transition: opacity var(--sf-transition-fast), transform var(--sf-transition-fast),
-    background var(--sf-transition-fast), visibility var(--sf-transition-fast);
-}
-
-.tabScrollBtn:hover {
-  background: var(--sf-color-surface-hover);
-  border-color: var(--sf-color-gold);
-  color: var(--sf-color-gold);
-  transform: scale(1.06);
-}
-
-.tabScrollBtn:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
-}
-
-.tabScrollLeft {
-  margin-right: var(--sf-space-2);
-}
-
-.tabScrollRight {
-  margin-left: var(--sf-space-2);
-}
-
-.tabScrollHidden {
-  opacity: 0;
-  pointer-events: none;
-  visibility: hidden;
-}
-
-.tab {
-  padding: var(--sf-space-2) var(--sf-space-5);
+  width: 32px;
+  height: 32px;
+  margin-top: calc(var(--sf-space-2) * -1);
+  padding: 0;
+  transform: translateY(-50%);
   border: 1px solid var(--sf-color-border);
   border-radius: var(--sf-radius-pill);
   background: var(--sf-color-surface);
   color: var(--sf-color-text-secondary);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-medium);
-  font-family: var(--sf-font-family);
   cursor: pointer;
-  white-space: nowrap;
-  scroll-snap-align: start;
-  transition: color var(--sf-transition-fast), border-color var(--sf-transition-fast),
-    background var(--sf-transition-fast);
+  transition: color var(--sf-transition-fast),
+    border-color var(--sf-transition-fast), opacity var(--sf-transition-fast),
+    visibility 0s;
 }
 
-.tab:hover {
-  border-color: var(--sf-color-gold);
-  color: var(--sf-color-gold);
-}
-
-.tab:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
-}
-
-.tab.tabActive {
-  background: var(--sf-gradient-gold);
-  color: var(--sf-color-brand-green-deep);
-  border-color: transparent;
-  font-weight: var(--sf-font-semibold);
-}
-
-/* ── Products Grid ──────────────────────────────────────────────────────── */
-
-.productsGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: var(--sf-space-5);
-}
-
-/* ── Product Card ───────────────────────────────────────────────────────── */
-
-.productCard {
-  background: var(--sf-color-surface);
-  border-radius: var(--sf-radius-lg);
-  overflow: hidden;
-  cursor: pointer;
-  box-shadow: var(--sf-shadow-xs);
-  border: 1px solid var(--sf-color-border);
-  transition: transform var(--sf-transition), box-shadow var(--sf-transition), border-color var(--sf-transition);
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.productCard:hover {
-  transform: translateY(-6px);
-  box-shadow: var(--sf-shadow-md);
+.tabScroll:hover {
+  color: var(--sf-color-text);
   border-color: var(--sf-color-border-strong);
 }
 
-.productImageWrap {
-  position: relative;
-  aspect-ratio: 4 / 3;
-  overflow: hidden;
-  background: var(--sf-color-surface-2);
+.tabScroll:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--sf-shadow-focus);
 }
 
-.productImage {
-  width: 100%;
+.tabScrollLeft {
+  left: 0;
+}
+
+.tabScrollRight {
+  right: 0;
+}
+
+/* `visibility` (not just opacity) so a withdrawn mark leaves the accessibility
+   tree and cannot be focused at all. */
+.tabScrollHidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: color var(--sf-transition-fast),
+    border-color var(--sf-transition-fast), opacity var(--sf-transition-fast),
+    visibility 0s var(--sf-transition-fast);
+}
+
+/* On touch the strip is swiped; the marks would only be in the way. */
+@media (pointer: coarse) {
+  .tabScroll {
+    display: none;
+  }
+}
+
+/* ---- The wall -----------------------------------------------------------
+   Wide gutters, generous rows. The cards bring no frame, so the only thing
+   separating two garments is whitespace — hence the row gap being twice the
+   column gap, exactly as on the Products wall.
+   ------------------------------------------------------------------------- */
+
+.cardGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  column-gap: var(--sf-space-8);
+  row-gap: var(--sf-space-16);
+}
+
+/* ---- The card — the Prompt 09 language, drawn locally -------------------
+   Three rows: media / body / action. The action is LAST in the DOM (so it is
+   the last tab stop and keyboard order reads plate, heart, name, add), but on
+   a fine pointer the stylesheet moves it back into row 1, where it overlaps
+   the foot of the photograph and is revealed on hover or focus. The reveal
+   changes opacity, never layout — the card is the same height at rest and on
+   hover, which is what keeps the grid rows from shuffling under the pointer.
+   ------------------------------------------------------------------------- */
+
+.card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto 1fr auto;
   height: 100%;
-  object-fit: cover;
-  transition: transform var(--sf-transition-slow);
+  background: transparent;
 }
 
-.productCard:hover .productImage {
-  transform: scale(1.06);
+/* Every child pinned to the single column. Without this, a child carrying an
+   explicit `grid-row` that is already occupied does not overlap — auto-placement
+   walks it sideways into a brand-new implicit column and the card silently
+   becomes two columns wide with a half-width photograph. */
+.card > * {
+  grid-column: 1;
 }
 
-.discountBadge {
-  position: absolute;
-  top: var(--sf-space-3);
-  left: var(--sf-space-3);
-  background: var(--sf-gradient-gold);
-  color: var(--sf-color-brand-green-deep);
-  padding: 3px var(--sf-space-3);
+.cardMedia {
+  grid-row: 1;
+  position: relative;
+  aspect-ratio: 3 / 4;
+  background: var(--sf-color-surface-2);
   border-radius: var(--sf-radius-sm);
-  font-size: var(--sf-text-xs);
-  font-weight: var(--sf-font-bold);
-  z-index: 2;
+  overflow: hidden;
 }
 
-.wishlistBtn {
-  position: absolute;
-  top: var(--sf-space-3);
-  right: var(--sf-space-3);
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  background: var(--sf-color-surface);
-  border: 1px solid var(--sf-color-border);
-  font-size: 1.15rem;
-  cursor: pointer;
+.cardBody {
+  grid-row: 2;
   display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--sf-space-2);
+  padding: var(--sf-space-4) 0 0;
+}
+
+.cardName {
+  font-family: var(--sf-font-display);
+  font-size: var(--sf-text-lg);
+  font-weight: var(--sf-font-medium);
+  color: var(--sf-color-text);
+  line-height: var(--sf-leading-tight);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: text-decoration-color var(--sf-transition);
+}
+
+.card:hover .cardName {
+  text-decoration-color: var(--sf-color-border-strong);
+}
+
+.cardName:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 3px;
+  box-shadow: var(--sf-shadow-focus);
+  border-radius: var(--sf-radius-sm);
+}
+
+.rating {
+  display: inline-flex;
   align-items: center;
-  justify-content: center;
-  z-index: 2;
-  transition: transform var(--sf-transition-fast), background var(--sf-transition-fast);
+  gap: var(--sf-space-2);
+  min-height: 14px;
+}
+
+.ratingCount {
+  font-size: var(--sf-text-xs);
   color: var(--sf-color-text-muted);
+  font-variant-numeric: tabular-nums;
   line-height: 1;
 }
 
-.wishlistBtn:hover {
-  transform: scale(1.15);
-  color: var(--sf-color-discount);
+.noRating {
+  font-size: var(--sf-text-xs);
+  color: var(--sf-color-text-muted);
+  letter-spacing: 0.02em;
+  min-height: 14px;
+  line-height: 1.2;
 }
 
-.wishlistBtn:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
-}
+/* ---- The heart ---------------------------------------------------------- */
 
-.wishlistBtn.wishlisted {
-  color: var(--sf-color-discount);
-  background: var(--sf-color-surface);
-}
-
-.productOverlay {
+.wishlist {
   position: absolute;
-  inset: 0;
-  background: var(--sf-color-overlay);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity var(--sf-transition);
-}
-
-.productCard:hover .productOverlay {
-  opacity: 1;
-}
-
-.quickViewBtn {
-  padding: var(--sf-space-2) var(--sf-space-6);
-  background: var(--sf-color-surface);
-  color: var(--sf-color-gold-deep);
-  border: none;
-  border-radius: var(--sf-radius-md);
-  font-weight: var(--sf-font-semibold);
-  font-size: var(--sf-text-sm);
-  font-family: var(--sf-font-family);
-  cursor: pointer;
-  transition: background var(--sf-transition-fast);
-}
-
-.quickViewBtn:hover {
-  background: var(--sf-color-surface-hover);
-}
-
-.quickViewBtn:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
-}
-
-/* Product Info */
-.productInfo {
-  padding: var(--sf-space-4);
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-
-.productCategory {
-  font-size: 0.7rem;
-  font-weight: var(--sf-font-semibold);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--sf-color-gold-deep);
-  margin-bottom: var(--sf-space-1);
-}
-
-.productName {
-  font-size: var(--sf-text-base);
-  font-weight: var(--sf-font-semibold);
-  color: var(--sf-color-text);
-  margin: 0 0 var(--sf-space-2);
-  line-height: var(--sf-leading-tight);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* Star Rating */
-.starRating {
-  display: flex;
-  align-items: center;
-  gap: 1px;
-  margin-bottom: var(--sf-space-2);
-}
-
-.starFull {
-  color: var(--sf-color-star);
-  font-size: var(--sf-text-sm);
-}
-
-.starHalf {
-  color: var(--sf-color-star);
-  font-size: var(--sf-text-sm);
-  opacity: 0.6;
-}
-
-.starEmpty {
-  color: var(--sf-color-border-strong);
-  font-size: var(--sf-text-sm);
-}
-
-.reviewCount {
-  font-size: var(--sf-text-xs);
-  color: var(--sf-color-text-muted);
-  margin-left: var(--sf-space-1);
-}
-
-/* Price */
-.priceRow {
-  display: flex;
-  align-items: baseline;
-  gap: var(--sf-space-2);
-  margin-bottom: var(--sf-space-3);
-  margin-top: auto;
-  flex-wrap: wrap;
-}
-
-.salePrice {
-  font-size: var(--sf-text-md);
-  font-weight: var(--sf-font-bold);
-  color: var(--sf-color-price);
-}
-
-.originalPrice {
-  font-size: var(--sf-text-sm);
-  color: var(--sf-color-compare);
-  text-decoration: line-through;
-}
-
-.discountPercent {
-  font-size: var(--sf-text-xs);
-  font-weight: var(--sf-font-semibold);
-  color: var(--sf-color-discount);
-}
-
-.addToCartBtn {
-  width: 100%;
-  min-height: var(--sf-tap-target);
-  padding: var(--sf-space-3);
-  border: none;
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-emerald);
-  color: var(--sf-color-emerald-contrast);
-  font-size: var(--sf-text-sm);
-  font-weight: var(--sf-font-semibold);
-  font-family: var(--sf-font-family);
-  cursor: pointer;
-  transition: background var(--sf-transition-fast);
-}
-
-.addToCartBtn:hover {
-  background: var(--sf-color-emerald-hover);
-}
-
-.addToCartBtn:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
-}
-
-/* ── Skeleton ───────────────────────────────────────────────────────────── */
-
-.skeletonImage {
-  background: linear-gradient(90deg, var(--sf-color-surface-2) 25%, var(--sf-color-surface-hover) 50%, var(--sf-color-surface-2) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.4s infinite;
-}
-
-.skeletonLine {
-  height: 12px;
-  border-radius: var(--sf-radius-sm);
-  background: linear-gradient(90deg, var(--sf-color-surface-2) 25%, var(--sf-color-surface-hover) 50%, var(--sf-color-surface-2) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.4s infinite;
-  margin-bottom: var(--sf-space-3);
-}
-
-.skeletonShort {
-  width: 40%;
-}
-
-.skeletonMedium {
-  width: 75%;
-}
-
-.skeletonFull {
-  width: 100%;
-  height: 36px;
-  border-radius: var(--sf-radius-md);
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
-}
-
-/* ── Empty State ────────────────────────────────────────────────────────── */
-
-.emptyState {
-  text-align: center;
-  padding: var(--sf-space-16) var(--sf-space-5);
-}
-
-.emptyIcon {
-  font-size: 4rem;
-  margin-bottom: var(--sf-space-4);
-}
-
-.emptyTitle {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-2xl);
-  font-weight: var(--sf-font-bold);
-  color: var(--sf-color-text);
-  margin: 0 0 var(--sf-space-2);
-}
-
-.emptyText {
-  color: var(--sf-color-text-muted);
-  max-width: 400px;
-  margin: 0 auto var(--sf-space-6);
-  line-height: var(--sf-leading-normal);
-}
-
-.emptyBtn {
-  min-height: var(--sf-tap-target);
-  padding: var(--sf-space-3) var(--sf-space-8);
-  border: none;
-  border-radius: var(--sf-radius-md);
-  background: var(--sf-color-emerald);
-  color: var(--sf-color-emerald-contrast);
-  font-size: var(--sf-text-base);
-  font-weight: var(--sf-font-semibold);
-  font-family: var(--sf-font-family);
-  cursor: pointer;
-  transition: background var(--sf-transition-fast);
-}
-
-.emptyBtn:hover {
-  background: var(--sf-color-emerald-hover);
-}
-
-.emptyBtn:focus-visible {
-  outline: none;
-  box-shadow: var(--sf-shadow-focus);
-}
-
-/* ── Responsive ─────────────────────────────────────────────────────────── */
-
-@media (max-width: 1024px) {
-  .productsGrid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .dotdGrid {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
-  .heroBanner {
-    padding: var(--sf-space-10) var(--sf-space-4);
-  }
-
-  .heroTitle {
-    font-size: var(--sf-text-2xl);
-  }
-
-  .heroSubtitle {
-    font-size: var(--sf-text-base);
-  }
-
-  .heroCountdown {
-    flex-direction: column;
-    gap: var(--sf-space-2);
-    padding: var(--sf-space-3) var(--sf-space-5);
-  }
-
-  /* On touch, the tab strip swipes — drop the scroll buttons, slim the fades. */
-  .tabScrollBtn {
-    display: none;
-  }
-
-  .tabFade {
-    width: 28px;
-  }
-
-  .couponGrid {
-    grid-template-columns: 1fr;
-  }
-
-  .couponLeft {
-    min-width: 88px;
-    padding: var(--sf-space-4);
-  }
-
-  .couponDiscount {
-    font-size: var(--sf-text-xl);
-  }
-
-  .productsGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--sf-space-4);
-  }
-
-  .dotdGrid {
-    grid-template-columns: 1fr;
-    gap: var(--sf-space-4);
-  }
-
-  .dotdCard {
-    display: flex;
-    flex-direction: row;
-  }
-
-  .dotdImageWrap {
-    width: 140px;
-    min-height: 140px;
-    aspect-ratio: unset;
-  }
-
-  .dotdInfo {
-    flex: 1;
-    padding: var(--sf-space-4);
-  }
-
-  .sectionTitle {
-    font-size: var(--sf-text-xl);
-  }
-
-  /* Touch-target sizing */
-  .tab {
-    min-height: 40px;
-  }
-}
-
-@media (max-width: 480px) {
-  .heroBanner {
-    padding: var(--sf-space-8) var(--sf-space-3);
-  }
-
-  .heroTitle {
-    font-size: var(--sf-text-xl);
-  }
-
-  .countdownNumber {
-    font-size: var(--sf-text-lg);
-    padding: 3px var(--sf-space-2);
-  }
-
-  .productsGrid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--sf-space-3);
-  }
-
-  .productInfo {
-    padding: var(--sf-space-3);
-  }
-
-  .productName {
-    font-size: var(--sf-text-sm);
-  }
-
-  .salePrice {
-    font-size: var(--sf-text-base);
-  }
-
-  .dotdCard {
-    flex-direction: column;
-  }
-
-  .dotdImageWrap {
-    width: 100%;
-    aspect-ratio: 4 / 3;
-  }
-
-  .tab {
-    padding: var(--sf-space-2) var(--sf-space-4);
-  }
-
-  .couponRight {
-    padding: var(--sf-space-3) var(--sf-space-4);
-  }
-
-  .couponCodeRow {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--sf-space-2);
-  }
-}
-
-/* ── Hero "ended" note (timer expired with onExpiry: hide) ──────────────── */
-
-.heroEnded {
-  margin-top: var(--sf-space-5);
-  background: rgba(0, 0, 0, 0.22);
-  border: 1px solid var(--sf-color-border-strong);
-  color: var(--sf-color-gold-light);
-  padding: var(--sf-space-3) var(--sf-space-6);
-  border-radius: var(--sf-radius-md);
-  font-size: var(--sf-text-base);
-  font-weight: var(--sf-font-semibold);
-}
-
-/* ── Config gate loader ─────────────────────────────────────────────────── */
-
-.pageLoader {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 60vh;
-}
-
-.spinner {
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 4px solid var(--sf-color-border-strong);
-  border-top-color: var(--sf-color-gold);
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* ── Unavailable state (admin master toggle off) ────────────────────────── */
-
-.unavailableState {
-  text-align: center;
-  max-width: 540px;
-  margin: 0 auto;
-  padding: var(--sf-space-16) var(--sf-space-5);
-}
-
-.unavailableIcon {
+  top: var(--sf-space-3);
+  right: var(--sf-space-3);
+  z-index: 3;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 88px;
-  height: 88px;
-  border-radius: 50%;
-  margin-bottom: var(--sf-space-4);
-  font-size: 2.6rem;
-  color: var(--sf-color-gold);
-  background: var(--sf-color-brand-green);
-  border: 1px solid var(--sf-color-border-strong);
-}
-
-.unavailableTitle {
-  font-family: var(--sf-font-display);
-  font-size: var(--sf-text-3xl);
-  font-weight: var(--sf-font-bold);
-  color: var(--sf-color-text);
-  margin: 0 0 var(--sf-space-3);
-}
-
-.unavailableText {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 1px solid var(--sf-color-border);
+  border-radius: var(--sf-radius-pill);
+  background: var(--sf-color-surface);
   color: var(--sf-color-text-secondary);
-  line-height: var(--sf-leading-normal);
-  margin: 0 auto var(--sf-space-6);
+  cursor: pointer;
+  transition: color var(--sf-transition-fast),
+    border-color var(--sf-transition-fast);
+}
+
+/* The visible button is 34px for the sake of the composition; the tap target
+   underneath it is the full 44px (WCAG 2.5.5) via a transparent pseudo. */
+.wishlist::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: var(--sf-tap-target);
+  height: var(--sf-tap-target);
+  transform: translate(-50%, -50%);
+}
+
+.wishlist:hover {
+  color: var(--sf-cat-pink);
+  border-color: var(--sf-color-border-strong);
+}
+
+.wishlist:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--sf-shadow-focus);
+}
+
+.wishlisted {
+  color: var(--sf-cat-pink);
+  border-color: color-mix(in srgb, var(--sf-cat-pink) 40%, transparent);
+}
+
+/* ---- The add affordance -------------------------------------------------
+   Touch / no-hover default: its own row under the price, always visible.
+   ------------------------------------------------------------------------- */
+
+.addBtn {
+  grid-row: 3;
+  align-self: stretch;
+  margin-top: var(--sf-space-4);
+  min-height: var(--sf-tap-target);
+  padding: var(--sf-space-2) var(--sf-space-4);
+  border: 1px solid var(--sf-color-border-strong);
+  border-radius: var(--sf-radius-sm);
+  background: var(--sf-color-surface);
+  color: var(--sf-color-text);
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  cursor: pointer;
+  transition: background-color var(--sf-transition),
+    border-color var(--sf-transition), color var(--sf-transition),
+    opacity var(--sf-transition), transform var(--sf-transition);
+}
+
+.addBtn:hover:not(:disabled),
+.featureBtn:hover:not(:disabled) {
+  background: var(--sf-color-emerald);
+  border-color: var(--sf-color-emerald);
+  color: var(--sf-color-emerald-contrast);
+}
+
+.addBtn:focus-visible,
+.featureBtn:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--sf-shadow-focus);
+}
+
+/* Confirmation — a gold hairline, then it quietly returns to itself. */
+.btnAdded,
+.btnAdded:hover {
+  background: var(--sf-color-surface);
+  border-color: var(--sf-color-gold-deep);
+  color: var(--sf-color-gold-deep);
+}
+
+.addBtn:disabled,
+.featureBtn:disabled {
+  cursor: not-allowed;
+  background: transparent;
+  border-color: var(--sf-color-border);
+  color: var(--sf-color-text-muted);
+}
+
+/* ---- Fine pointer: the card's button returns to the foot of the plate ---- */
+@media (hover: hover) and (pointer: fine) {
+  .addBtn {
+    grid-row: 1;
+    align-self: end;
+    justify-self: stretch;
+    z-index: 3;
+    margin: var(--sf-space-3);
+    min-height: 40px;
+    opacity: 0;
+    transform: translateY(var(--sf-space-2));
+    pointer-events: none;
+  }
+
+  /* Revealed by the pointer OR by the keyboard — the button stays in the tab
+     order while hidden, and focusing it is what brings it into view. */
+  .card:hover .addBtn,
+  .card:focus-within .addBtn {
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+
+  /* Nothing to add: leave the photograph and its stock label alone. */
+  .isOut:hover .addBtn,
+  .isOut:focus-within .addBtn {
+    opacity: 0;
+    pointer-events: none;
+  }
+}
+
+/* ---- …unless the device can also be touched -----------------------------
+   A touchscreen laptop answers (hover: hover) and (pointer: fine) because that
+   describes its PRIMARY input — but a finger on that same screen would have to
+   tap once to raise the hover state and again to actually add. `any-pointer`
+   asks whether ANY input is coarse, so hybrids opt back into the always-visible
+   button. Declared after the block above so it wins at equal specificity.
+   ------------------------------------------------------------------------- */
+@media (any-pointer: coarse) {
+  .addBtn,
+  .card:hover .addBtn,
+  .card:focus-within .addBtn,
+  .isOut:hover .addBtn,
+  .isOut:focus-within .addBtn {
+    grid-row: 3;
+    align-self: stretch;
+    margin: var(--sf-space-4) 0 0;
+    min-height: var(--sf-tap-target);
+    opacity: 1;
+    transform: none;
+    pointer-events: auto;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   8. SKELETONS  —  the silhouette of what is coming
+   Drawn on the shared `sf-skeleton` primitive (the warm sand sweep), so the
+   wait looks like the page rather than like a grey placeholder.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.skelHead {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-4);
+  padding: var(--sf-space-16) 0;
+  max-width: 56ch;
+}
+
+.skelHeadEyebrow { width: 24%; height: 10px; }
+.skelHeadTitle   { width: 82%; height: 44px; }
+.skelHeadLine    { width: 62%; height: 12px; }
+
+.skelCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-4);
+  min-width: 0;
+}
+
+.skelPlate {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  border-radius: var(--sf-radius-sm);
+}
+
+.skelBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-2);
+}
+
+.skelEyebrow { width: 32%; height: 8px; }
+.skelName    { width: 78%; height: 13px; }
+.skelStars   { width: 46%; height: 9px; }
+.skelPrice   { width: 38%; height: 13px; margin-top: var(--sf-space-1); }
+
+.skelVoucher {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sf-space-3);
+  padding: var(--sf-space-6);
+  border: 1px solid var(--sf-color-border);
+  border-radius: var(--sf-radius-sm);
+}
+
+.skelFigure    { width: 38%; height: 34px; margin-bottom: var(--sf-space-2); }
+.skelLineWide  { width: 92%; height: 11px; }
+.skelLineMid   { width: 64%; height: 11px; }
+.skelLineShort { width: 46%; height: 9px; }
+
+.skelRule {
+  height: 1px;
+  margin: var(--sf-space-3) 0;
+  background: var(--sf-color-border);
+}
+
+.skelChip {
+  width: 52%;
+  height: 34px;
+  margin-top: var(--sf-space-4);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   9. STATES  —  offers off, and nothing reduced
+   Both are editorial moments centred on the measure, not error boxes. The
+   artwork is the page's hanging price tag; the copy says exactly what is true.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: var(--sf-space-20) var(--sf-space-5) var(--sf-space-24);
+}
+
+.stateArt {
+  display: block;
+  margin-bottom: var(--sf-space-8);
+}
+
+/* The eyebrow's opening rule is a left-hand device; centred, it needs to sit
+   on both sides or not at all — so in a state it is simply withdrawn. */
+.state .eyebrow::before {
+  display: none;
+}
+
+.stateTitle {
+  margin: 0 0 var(--sf-space-3);
+  font-family: var(--sf-font-display);
+  font-size: clamp(1.75rem, 3.2vw, 2.5rem);
+  font-weight: var(--sf-font-medium);
+  line-height: var(--sf-leading-tight);
+  letter-spacing: var(--sf-tracking-tight);
+  color: var(--sf-color-text);
+}
+
+.stateText {
+  max-width: 48ch;
+  margin: 0 0 var(--sf-space-8);
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-relaxed);
+  color: var(--sf-color-text-secondary);
+}
+
+.stateBtn {
+  min-width: 220px;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   10. RESPONSIVE  —  1440 → 375
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Tablet — three across on the wall, two features, and the head steps down. */
+@media (max-width: 1024px) {
+  .cardGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    row-gap: var(--sf-space-12);
+  }
+
+  .featureGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .band {
+    padding: var(--sf-space-12) 0 var(--sf-space-10);
+  }
+
+  .section {
+    padding-top: var(--sf-space-16);
+  }
+}
+
+/* Mobile — two across on the wall, one feature at a time, and the section head
+   stops trying to hold its aside on the same line. */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 var(--sf-space-4);
+  }
+
+  .band {
+    padding: var(--sf-space-10) 0 var(--sf-space-8);
+  }
+
+  .sectionHead {
+    align-items: flex-start;
+    gap: var(--sf-space-5);
+    margin-bottom: var(--sf-space-8);
+  }
+
+  .sectionHeadAside {
+    padding-bottom: 0;
+  }
+
+  .cardGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--sf-space-4);
+    row-gap: var(--sf-space-10);
+  }
+
+  .featureGrid {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: var(--sf-space-10);
+  }
+
+  .voucherGrid {
+    gap: var(--sf-space-4);
+  }
+
+  .tabsWrap {
+    margin-bottom: var(--sf-space-8);
+  }
+
+  .tabStrip {
+    gap: var(--sf-space-6);
+  }
+
+  .countdown {
+    margin-top: var(--sf-space-8);
+  }
+
+  .state {
+    padding: var(--sf-space-16) var(--sf-space-4) var(--sf-space-20);
+  }
+}
+
+/* Small phones — the vouchers go single file and the code row is allowed to
+   wrap rather than squeeze a long code into an ellipsis. */
+@media (max-width: 480px) {
+  .voucherGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .voucherFoot {
+    flex-wrap: wrap;
+    gap: var(--sf-space-2) var(--sf-space-4);
+  }
+
+  .cardGrid {
+    column-gap: var(--sf-space-3);
+    row-gap: var(--sf-space-8);
+  }
+
+  .countdownDigits {
+    font-size: var(--sf-text-lg);
+  }
+
+  .stateBtn {
+    min-width: 0;
+    width: 100%;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   11. REDUCED MOTION
+   The token layer already zeroes the shared durations; these are the local
+   transforms, which move a thing rather than change a colour.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (prefers-reduced-motion: reduce) {
+  .card:hover .plate img,
+  .feature:hover .plate img {
+    transform: none;
+  }
+
+  .addBtn {
+    transform: none;
+  }
+
+  .tab::after,
+  .copyBtn::after {
+    transition: none;
+  }
 }
