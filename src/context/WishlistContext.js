@@ -10,6 +10,12 @@ import { useAuth } from "./AuthContext";
 import apiService from "../services/api";
 import Swal from "sweetalert2";
 
+// SweetAlert2 takes a colour VALUE, not a token — it renders outside the React
+// tree, and a per-call confirmButtonColor is set as an inline variable on the
+// button (see the Swal block in App.css). This mirrors --sf-color-danger from
+// storefront-tokens.css; keep the two in sync if that token is ever retuned.
+const DANGER_HEX = "#9E3B2E";
+
 const WishlistContext = createContext();
 
 export const useWishlist = () => {
@@ -332,7 +338,7 @@ export const WishlistProvider = ({ children }) => {
       text: `All ${items.length} saved item${items.length === 1 ? "" : "s"} will be removed.`,
       icon: "warning",
       showCancelButton: true,
-      confirmButtonColor: "#d32f2f",
+      confirmButtonColor: DANGER_HEX,
       confirmButtonText: "Clear All",
       cancelButtonText: "Keep Items",
     });
