@@ -6,7 +6,20 @@
       "subtitle": "Heirloom Mekhela Chador woven to order in undyed Sualkuchi Muga",
       "cta": "Shop Bridal",
       "link": "/products?category=bridal-occasion",
-      "gradient": "linear-gradient(135deg,#1D1A16 0%,#3A2E1B 60%,#8A6118 100%)"
+      "gradient": "linear-gradient(135deg,#1D1A16 0%,#3A2E1B 60%,#8A6118 100%)",
+      "eyebrow": "",
+      "secondaryCtaLabel": "",
+      "secondaryCtaLink": "",
+      "backgroundType": "gradient",
+      "image": "",
+      "imagePosition": "right center",
+      "videoUrl": "",
+      "videoPoster": "",
+      "overlayOpacity": null,
+      "textAlign": "left",
+      "durationMs": 0,
+      "isActive": true,
+      "sortOrder": 0
     },
     {
       "id": 2,
@@ -14,7 +27,20 @@
       "subtitle": "Muga, Pat, Eri and Nuni — the Assamese drape, woven on village looms",
       "cta": "Explore Mekhela Chador",
       "link": "/products?category=mekhela-chador",
-      "gradient": "linear-gradient(135deg,#322C25 0%,#6B5030 55%,#C8912A 100%)"
+      "gradient": "linear-gradient(135deg,#322C25 0%,#6B5030 55%,#C8912A 100%)",
+      "eyebrow": "",
+      "secondaryCtaLabel": "",
+      "secondaryCtaLink": "",
+      "backgroundType": "gradient",
+      "image": "",
+      "imagePosition": "right center",
+      "videoUrl": "",
+      "videoPoster": "",
+      "overlayOpacity": null,
+      "textAlign": "left",
+      "durationMs": 0,
+      "isActive": true,
+      "sortOrder": 1
     },
     {
       "id": 3,
@@ -22,7 +48,20 @@
       "subtitle": "A short list of genuinely reduced weaves — everything else stays at its honest price",
       "cta": "View Offers",
       "link": "/special-offers",
-      "gradient": "linear-gradient(135deg,#0F0D0A 0%,#5C554A 50%,#8A6118 100%)"
+      "gradient": "linear-gradient(135deg,#0F0D0A 0%,#5C554A 50%,#8A6118 100%)",
+      "eyebrow": "",
+      "secondaryCtaLabel": "",
+      "secondaryCtaLink": "",
+      "backgroundType": "gradient",
+      "image": "",
+      "imagePosition": "right center",
+      "videoUrl": "",
+      "videoPoster": "",
+      "overlayOpacity": null,
+      "textAlign": "left",
+      "durationMs": 0,
+      "isActive": true,
+      "sortOrder": 2
     },
     {
       "id": 4,
@@ -30,9 +69,62 @@
       "subtitle": "Handspun Eri — matte, warm and softer with every wash",
       "cta": "Shop Stoles",
       "link": "/products?category=stoles-wraps",
-      "gradient": "linear-gradient(135deg,#1D1A16 0%,#4A3F31 55%,#AF7E26 100%)"
+      "gradient": "linear-gradient(135deg,#1D1A16 0%,#4A3F31 55%,#AF7E26 100%)",
+      "eyebrow": "",
+      "secondaryCtaLabel": "",
+      "secondaryCtaLink": "",
+      "backgroundType": "gradient",
+      "image": "",
+      "imagePosition": "right center",
+      "videoUrl": "",
+      "videoPoster": "",
+      "overlayOpacity": null,
+      "textAlign": "left",
+      "durationMs": 0,
+      "isActive": true,
+      "sortOrder": 3
     }
   ],
+  "heroConfig": {
+    "enabled": true,
+    "autoplay": true,
+    "intervalMs": 5000,
+    "transition": "fade",
+    "pauseOnHover": true,
+    "showControls": true,
+    "showCounter": true,
+    "showProgress": true,
+    "showArrows": false,
+    "overlayOpacity": 100,
+    "heights": {
+      "desktop": {
+        "min": 520,
+        "vh": 78,
+        "max": 780
+      },
+      "tablet": {
+        "min": 480,
+        "vh": 70,
+        "max": 640
+      },
+      "mobile": {
+        "min": 460,
+        "vh": 66,
+        "max": 600
+      }
+    },
+    "secondaryCta": {
+      "enabled": true,
+      "label": "Our Story",
+      "link": "/about"
+    },
+    "openers": {
+      "enabled": true,
+      "label": "Collections",
+      "limit": 8
+    },
+    "updatedAt": "2026-09-01T00:00:00.000Z"
+  },
   "users": [
     {
       "id": 1,

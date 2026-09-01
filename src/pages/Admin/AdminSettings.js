@@ -25,6 +25,7 @@ import {
 import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
 import apiService from "../../services/api";
+import { normalizeHeroConfig, normalizeHeroSlides } from "../../utils/heroConfig";
 
 // Tab Panel component
 function TabPanel(props) {
@@ -61,6 +62,9 @@ const AdminSettings = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [categoryCount, setCategoryCount] = useState(null);
+  // Surfaced on the Hero Section tab so the pointer card can say what is
+  // currently live without an admin having to open the manager to find out.
+  const [heroSummary, setHeroSummary] = useState(null);
 
   // General settings forms (backed by db.json `settings.store` + `settings.payment`)
   const [storeForm, setStoreForm] = useState({
@@ -94,9 +98,11 @@ const AdminSettings = () => {
   const loadSettings = async () => {
     try {
       setLoading(true);
-      const [settings, cats] = await Promise.all([
+      const [settings, cats, heroConfig, heroSlides] = await Promise.all([
         apiService.admin.getSettings(),
         apiService.admin.getCategories().catch(() => []),
+        apiService.admin.getHeroConfig().catch(() => null),
+        apiService.admin.getBanners().catch(() => []),
       ]);
       const store = settings?.store || {};
       const payment = settings?.payment || {};
@@ -118,6 +124,12 @@ const AdminSettings = () => {
         codMaxOrder: payment.codMaxOrder ?? 0,
       });
       setCategoryCount(Array.isArray(cats) ? cats.length : 0);
+      const slides = normalizeHeroSlides(heroSlides);
+      setHeroSummary({
+        enabled: normalizeHeroConfig(heroConfig).enabled,
+        total: slides.length,
+        live: slides.filter((s) => s.isActive).length,
+      });
     } catch (error) {
       console.error("Error loading settings:", error);
       setSnackbar({ open: true, message: "Failed to load settings", severity: "error" });
@@ -241,6 +253,7 @@ const AdminSettings = () => {
         >
           <Tab icon={<Icon icon="mdi:cog" style={{ fontSize: 20 }} />} iconPosition="start" label="General" />
           <Tab icon={<Icon icon="mdi:folder-multiple" style={{ fontSize: 20 }} />} iconPosition="start" label="Categories" />
+          <Tab icon={<Icon icon="mdi:view-carousel-outline" style={{ fontSize: 20 }} />} iconPosition="start" label="Hero Section" />
         </Tabs>
       </Paper>
 
@@ -448,6 +461,64 @@ const AdminSettings = () => {
                 onClick={() => navigate("/admin/categories")}
               >
                 Open Category Manager
+              </Button>
+            </Box>
+          </Box>
+        </Paper>
+      </TabPanel>
+
+      {/* Hero Section Tab — same reconciliation as Categories: one canonical
+          manager lives at /admin/hero-section, and Settings points at it. */}
+      <TabPanel value={activeTab} index={2}>
+        <Paper sx={{ p: { xs: 3, sm: 5 }, border: "1px solid", borderColor: "divider" }} elevation={0}>
+          <Box sx={{ maxWidth: 560, mx: "auto", textAlign: "center" }}>
+            <Box
+              sx={{
+                width: 64,
+                height: 64,
+                mx: "auto",
+                mb: 2,
+                borderRadius: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                bgcolor: "primary.main",
+              }}
+            >
+              <Icon icon="mdi:view-carousel-outline" style={{ fontSize: 32, color: "#fff" }} />
+            </Box>
+            <Typography variant="h6" gutterBottom>
+              Manage the home page hero
+            </Typography>
+            <Typography color="text.secondary" sx={{ mb: 2 }}>
+              Every slide and every behaviour of the opening band lives in the dedicated{" "}
+              <strong>Hero Section</strong> manager — slide copy and buttons, background gradient,
+              image or video, per-slide timers, transition, overlay, the visible controls and the
+              stage height for desktop, tablet and mobile.
+            </Typography>
+            {heroSummary && (
+              <Box sx={{ display: "flex", gap: 1, justifyContent: "center", flexWrap: "wrap", mb: 3 }}>
+                <Chip
+                  icon={<Icon icon={heroSummary.enabled ? "mdi:eye-outline" : "mdi:eye-off-outline"} />}
+                  color={heroSummary.enabled ? "success" : "warning"}
+                  label={heroSummary.enabled ? "Hero is showing" : "Hero is switched off"}
+                />
+                <Chip
+                  icon={<Icon icon="mdi:image-multiple-outline" />}
+                  label={`${heroSummary.live} live of ${heroSummary.total} ${
+                    heroSummary.total === 1 ? "slide" : "slides"
+                  }`}
+                />
+              </Box>
+            )}
+            <Box>
+              <Button
+                variant="contained"
+                size="large"
+                startIcon={<Icon icon="mdi:image-edit-outline" />}
+                onClick={() => navigate("/admin/hero-section")}
+              >
+                Open Hero Section Manager
               </Button>
             </Box>
           </Box>
