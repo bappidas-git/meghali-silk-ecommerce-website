@@ -367,6 +367,10 @@
   background: var(--sf-color-surface-2);
 }
 
+/* 4:5 is the collection photograph's own ratio (1122 x 1402), so the frame
+   crops nothing at any width. It is deliberately not narrowed further down the
+   file: the picture is a full-length drape, and a landscape crop takes the top
+   of the piece and the border at the hem with it. */
 .featureMedia img {
   display: block;
   width: 100%;
@@ -734,10 +738,6 @@
 @media (max-width: 900px) {
   .feature {
     grid-template-columns: minmax(0, 1fr);
-  }
-
-  .featureMedia img {
-    aspect-ratio: 3 / 2;
   }
 }
 
