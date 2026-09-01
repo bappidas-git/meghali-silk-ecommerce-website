@@ -18,6 +18,7 @@ import { OrderProvider } from "./context/OrderContext";
 import { AdminProvider } from "./context/AdminContext";
 import { WishlistProvider } from "./context/WishlistContext";
 import { DealsConfigProvider } from "./context/DealsConfigContext";
+import { FaqProvider } from "./context/FaqContext";
 import { StoreSettingsProvider, useStoreSettings } from "./context/StoreSettingsContext";
 
 // Layout Components
@@ -58,6 +59,7 @@ import AdminShipping from "./pages/Admin/AdminShipping";
 import AdminCoupons from "./pages/Admin/AdminCoupons";
 import AdminSpecialOffers from "./pages/Admin/AdminSpecialOffers";
 import AdminHeroSection from "./pages/Admin/AdminHeroSection";
+import AdminFaqs from "./pages/Admin/AdminFaqs";
 import AdminReviews from "./pages/Admin/AdminReviews";
 import AdminLeads from "./pages/Admin/AdminLeads";
 import AdminSettings from "./pages/Admin/AdminSettings";
@@ -91,6 +93,9 @@ function StorefrontShell() {
 
   return (
     <DealsConfigProvider>
+      {/* The admin's FAQ set, read once for the whole storefront: the PDP's
+          FAQs tab, the Help Centre and the shared FAQ block all draw on it. */}
+      <FaqProvider>
       <div className="App">
         {/* First stop on every route, so a keyboard visitor can step over the
             announcement bar, the lockup, the four actions and the ten-item nav
@@ -130,6 +135,7 @@ function StorefrontShell() {
         <Footer />
         <BottomNav />
       </div>
+      </FaqProvider>
     </DealsConfigProvider>
   );
 }
@@ -165,6 +171,7 @@ function App() {
                         <Route path="coupons" element={<AdminCoupons />} />
                         <Route path="special-offers" element={<AdminSpecialOffers />} />
                         <Route path="hero-section" element={<AdminHeroSection />} />
+                        <Route path="faqs" element={<AdminFaqs />} />
                         <Route path="reviews" element={<AdminReviews />} />
                         <Route path="leads" element={<AdminLeads />} />
                         <Route path="settings" element={<AdminSettings />} />

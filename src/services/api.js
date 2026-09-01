@@ -1613,6 +1613,27 @@ const apiService = {
   },
 
   // ===========================================================================
+  // FAQs (Storefront)
+  // ===========================================================================
+  // Public read of the admin-managed answer set. One collection feeds the PDP's
+  // FAQs tab, the Help Centre and the shared FAQ block; each row says which of
+  // them it belongs on, and which products (if any) it is written for.
+  //
+  // Never throws: an unreachable API returns [] and the caller falls back to the
+  // built-in FAQ_ITEMS, so a shopper still reads yesterday's answers.
+  faqs: {
+    getAll: async () => {
+      try {
+        const response = await api.get("/faqs");
+        return IS_MOCK_API ? response.data || [] : extractData(response);
+      } catch (error) {
+        console.error("Get FAQs error:", error);
+        return [];
+      }
+    },
+  },
+
+  // ===========================================================================
   // Deals / Special Offers (Storefront)
   // ===========================================================================
   // Public read of the admin-managed config that drives the Special Offers page
@@ -2701,6 +2722,73 @@ const apiService = {
         const response = await api.put("/admin/banners/reorder", { order: orderedIds });
         return extractData(response);
       } catch (error) { console.error("Admin reorder banners error:", error); throw error; }
+    },
+
+    // --- FAQs ---
+    // One collection behind the PDP's FAQs tab, the Help Centre and the shared
+    // FAQ block. The admin screen needs every row, hidden ones included; the
+    // storefront reads faqs.getAll() and filters to the live ones itself.
+    getFaqs: async () => {
+      try {
+        const response = await api.get(IS_MOCK_API ? "/faqs" : "/admin/faqs");
+        return IS_MOCK_API ? response.data : extractData(response);
+      } catch (error) { console.error("Admin get FAQs error:", error); throw error; }
+    },
+
+    createFaq: async (data) => {
+      try {
+        const response = await api.post(IS_MOCK_API ? "/faqs" : "/admin/faqs", {
+          ...data,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+        return IS_MOCK_API ? response.data : extractData(response);
+      } catch (error) { console.error("Admin create FAQ error:", error); throw error; }
+    },
+
+    updateFaq: async (id, data) => {
+      try {
+        const response = await api.put(
+          IS_MOCK_API ? `/faqs/${id}` : `/admin/faqs/${id}`,
+          { ...data, updatedAt: new Date().toISOString() }
+        );
+        return IS_MOCK_API ? response.data : extractData(response);
+      } catch (error) { console.error("Admin update FAQ error:", error); throw error; }
+    },
+
+    deleteFaq: async (id) => {
+      try {
+        const response = await api.delete(
+          IS_MOCK_API ? `/faqs/${id}` : `/admin/faqs/${id}`
+        );
+        return IS_MOCK_API ? response.data : extractData(response);
+      } catch (error) { console.error("Admin delete FAQ error:", error); throw error; }
+    },
+
+    // Persist a new answer order — same contract as reorderBanners: `orderedIds`
+    // is the full id list, top first, and each row's sortOrder becomes its
+    // index. json-server has no bulk endpoint, so mock mode PATCHes only the
+    // rows whose position actually moved.
+    reorderFaqs: async (orderedIds, current = []) => {
+      try {
+        if (IS_MOCK_API) {
+          const byId = new Map(current.map((f) => [String(f.id), f]));
+          const changed = orderedIds
+            .map((id, index) => ({ row: byId.get(String(id)), index }))
+            .filter(({ row, index }) => row && (row.sortOrder ?? -1) !== index);
+          await Promise.all(
+            changed.map(({ row, index }) =>
+              api.patch(`/faqs/${row.id}`, {
+                sortOrder: index,
+                updatedAt: new Date().toISOString(),
+              })
+            )
+          );
+          return true;
+        }
+        const response = await api.put("/admin/faqs/reorder", { order: orderedIds });
+        return extractData(response);
+      } catch (error) { console.error("Admin reorder FAQs error:", error); throw error; }
     },
   },
 };

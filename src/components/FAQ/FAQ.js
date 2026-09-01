@@ -1,19 +1,26 @@
 import React, { useState } from "react";
-import { FAQ_ITEMS } from "../../utils/constants";
+import { useFaqs } from "../../context/FaqContext";
 import { useStoreSettings } from "../../context/StoreSettingsContext";
 import styles from "./FAQ.module.css";
 
+// The shared "Frequently Asked Questions" block. The answers are the admin's
+// (Admin > Storefront > FAQs) — only the ones switched on for this block, in
+// the order set there. Renders nothing when there are none to show.
 const FAQ = () => {
   const [openId, setOpenId] = useState(null);
   // The shipping, COD and tax figures in the answers are the store's own.
   const { fillCopy } = useStoreSettings();
+  const { forPlacement } = useFaqs();
+  const items = forPlacement("home");
+
+  if (items.length === 0) return null;
 
   return (
     <section className={styles.faq}>
       <div className={styles.container}>
         <h2>Frequently Asked Questions</h2>
         <div className={styles.list}>
-          {FAQ_ITEMS.map((faq) => {
+          {items.map((faq) => {
             const isOpen = openId === faq.id;
             return (
               <div key={faq.id} className={`${styles.item} ${isOpen ? styles.open : ""}`}>
