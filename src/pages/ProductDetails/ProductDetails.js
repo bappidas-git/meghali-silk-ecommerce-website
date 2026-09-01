@@ -4,6 +4,7 @@ import { motion, useReducedMotion } from "framer-motion";
 import { useTheme } from "../../context/ThemeContext";
 import { useCart } from "../../hooks/useCart";
 import { useWishlist } from "../../context/WishlistContext";
+import { useStoreSettings } from "../../context/StoreSettingsContext";
 import apiService from "../../services/api";
 import { categoryParam } from "../../utils/categories";
 import { STOREFRONT_CONFIG } from "../../theme/tokens";
@@ -300,6 +301,18 @@ const ProductDetails = () => {
   const { isDarkMode } = useTheme();
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
+  // Currency and the tax note come from the admin's Settings > General; the
+  // whole record is handed on to the trust badges and delivery panel, which
+  // read the COD rules out of it.
+  const {
+    store: settingsStore,
+    payment: settingsPayment,
+    currency: storeCurrency,
+    taxIncluded,
+    formatPrice,
+    fillCopy,
+  } = useStoreSettings();
+  const settings = { store: settingsStore, payment: settingsPayment };
   const prefersReducedMotion = useReducedMotion();
   const tabsRef = useRef(null);
   const tabRefs = useRef([]); // roving focus across the tablist
@@ -320,7 +333,6 @@ const ProductDetails = () => {
   const [relatedProducts, setRelatedProducts] = useState([]);
   const [bundle, setBundle] = useState([]);
   const [category, setCategory] = useState(null);
-  const [settings, setSettings] = useState(null);
   const [shipping, setShipping] = useState([]);
 
   // ── Fetch product ──────────────────────────────────────────────────────
@@ -432,8 +444,8 @@ const ProductDetails = () => {
   }, [product]);
 
   // ── Public store data for trust signals + transparent delivery info ─────
+  // (store settings come from StoreSettingsContext, one shared read.)
   useEffect(() => {
-    apiService.settings.get().then(setSettings).catch(() => {});
     apiService.shipping.getMethods().then((m) => setShipping(Array.isArray(m) ? m : [])).catch(() => {});
   }, []);
 
@@ -511,14 +523,14 @@ const ProductDetails = () => {
         image: product.images?.[0] || product.image || "",
         price: effectivePrice,
         comparePrice: product.comparePrice || 0,
-        currency: "INR",
+        currency: storeCurrency,
         ...(effectiveStock != null && effectiveStock !== ""
           ? { stock: Number(effectiveStock) }
           : {}),
       };
       return addToCart(cartItem, quantity, options);
     },
-    [product, selectedVariant, quantity, addToCart]
+    [product, selectedVariant, quantity, addToCart, storeCurrency]
   );
 
   // Primary CTA with a brief, satisfying "Added ✓" confirmation (the cart toast
@@ -628,7 +640,7 @@ const ProductDetails = () => {
       key: "shipping",
       title: "Free shipping",
       text: minFreeShip
-        ? `Free above ₹${minFreeShip.toLocaleString("en-IN")}`
+        ? `Free above ${formatPrice(minFreeShip, { decimals: 0 })}`
         : "Free shipping across India",
       icon: (
         <>
@@ -730,12 +742,11 @@ const ProductDetails = () => {
               <PriceBlock
                 price={currentPrice}
                 comparePrice={comparePrice}
-                currency="INR"
                 size="lg"
                 taxNote={
-                  settings?.store?.taxIncluded === false
-                    ? "Exclusive of taxes — calculated at checkout"
-                    : "Inclusive of all taxes"
+                  taxIncluded
+                    ? "Inclusive of all taxes"
+                    : "Exclusive of taxes — calculated at checkout"
                 }
               />
               {currentSku && (
@@ -773,8 +784,7 @@ const ProductDetails = () => {
                   value={selectedVariant}
                   onChange={setSelectedVariant}
                   productStock={product.stock}
-                  currency="INR"
-                />
+                  />
               </div>
             )}
 
@@ -841,7 +851,7 @@ const ProductDetails = () => {
                 as ONE ruled block, every number resolved from live data. ──── */}
             <div className={styles.assurance}>
               <TrustBadges settings={settings} shipping={shipping} variant="grid" />
-              <DeliveryReturnsInfo shipping={shipping} settings={settings} currency="INR" />
+              <DeliveryReturnsInfo shipping={shipping} settings={settings} />
             </div>
           </div>
         </div>
@@ -1038,7 +1048,7 @@ const ProductDetails = () => {
                             role="region"
                             aria-labelledby={`pdp-faq-question-${i}`}
                           >
-                            {faq.answer}
+                            {fillCopy(faq.answer)}
                           </div>
                         )}
                       </div>
@@ -1058,7 +1068,6 @@ const ProductDetails = () => {
           anchor={product}
           companions={bundle}
           onAddToCart={addToCart}
-          currency="INR"
         />
 
         <RelatedProducts
@@ -1075,7 +1084,6 @@ const ProductDetails = () => {
         anchorRef={buyBoxRef}
         price={currentPrice}
         comparePrice={comparePrice}
-        currency="INR"
         image={product.images?.[0] || product.image}
         name={selectedVariant?.name || product.name}
         disabled={isOutOfStock}

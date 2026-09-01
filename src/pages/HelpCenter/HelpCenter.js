@@ -27,10 +27,9 @@
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
+import { useStoreSettings } from "../../context/StoreSettingsContext";
 import {
   FAQ_ITEMS,
-  SUPPORT_EMAIL,
-  SUPPORT_PHONE,
   SUPPORT_HOURS,
 } from "../../utils/constants";
 import styles from "./HelpCenter.module.css";
@@ -160,23 +159,31 @@ const TOPICS = [
   },
 ];
 
-const PHONE_TEL = `tel:${SUPPORT_PHONE.replace(/[^\d+]/g, "")}`;
-
 const HelpCenter = () => {
   const { isDarkMode } = useTheme();
+  // The care desk's own address and number, as set in Settings > General.
+  const {
+    email: supportEmail,
+    phone: supportPhone,
+    emailHref,
+    phoneHref,
+    fillCopy,
+  } = useStoreSettings();
   const [openFaq, setOpenFaq] = useState(null);
   const [query, setQuery] = useState("");
 
   // Unchanged behaviour: a match on the question OR anywhere in the answer.
+  // Searched against the FILLED answer, so a shopper who types the store's own
+  // COD ceiling or shipping figure finds the line that prints it.
   const filteredFaqs = useMemo(() => {
     const term = query.trim().toLowerCase();
     if (!term) return FAQ_ITEMS;
     return FAQ_ITEMS.filter(
       (faq) =>
         faq.question.toLowerCase().includes(term) ||
-        faq.answer.toLowerCase().includes(term)
+        fillCopy(faq.answer).toLowerCase().includes(term)
     );
-  }, [query]);
+  }, [query, fillCopy]);
 
   const isSearching = query.trim().length > 0;
 
@@ -292,7 +299,7 @@ const HelpCenter = () => {
                         role="region"
                         aria-labelledby={`help-faq-question-${faq.id}`}
                       >
-                        {faq.answer}
+                        {fillCopy(faq.answer)}
                       </div>
                     )}
                   </div>
@@ -316,13 +323,13 @@ const HelpCenter = () => {
                 photograph of the piece you are asking about.
               </p>
               <p className={styles.bandMeta}>
-                <a href={`mailto:${SUPPORT_EMAIL}`}>
+                <a href={emailHref}>
                   <Glyph name="mail" size={16} />
-                  {SUPPORT_EMAIL}
+                  {supportEmail}
                 </a>
-                <a href={PHONE_TEL}>
+                <a href={phoneHref}>
                   <Glyph name="phone" size={16} />
-                  {SUPPORT_PHONE}
+                  {supportPhone}
                 </a>
               </p>
             </div>
@@ -330,7 +337,7 @@ const HelpCenter = () => {
               <Link to="/support" className={styles.primaryBtn}>
                 Contact support
               </Link>
-              <a href={`mailto:${SUPPORT_EMAIL}`} className={styles.ghostBtn}>
+              <a href={emailHref} className={styles.ghostBtn}>
                 Email us
               </a>
             </div>

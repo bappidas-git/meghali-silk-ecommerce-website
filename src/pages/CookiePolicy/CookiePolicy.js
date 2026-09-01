@@ -37,10 +37,9 @@ import { motion, useReducedMotion } from "framer-motion";
 import { reveal as sharedReveal } from "../../theme/motion";
 import { useTheme } from "../../context/ThemeContext";
 import {
-  APP_NAME,
-  SUPPORT_EMAIL,
   POLICY_LAST_UPDATED,
 } from "../../utils/constants";
+import { useStoreSettings } from "../../context/StoreSettingsContext";
 import styles from "./CookiePolicy.module.css";
 
 // The four families of cookie the site sets, in descending order of necessity.
@@ -76,6 +75,9 @@ const COOKIE_TYPES = [
 ];
 
 const CookiePolicy = () => {
+  // Store name and contact details are whatever the admin last saved in
+  // Settings > General, so the policy never names a store that no longer exists.
+  const { storeName, email: supportEmail, emailHref } = useStoreSettings();
   const { isDarkMode } = useTheme();
   const prefersReducedMotion = useReducedMotion();
 
@@ -109,7 +111,7 @@ const CookiePolicy = () => {
               Last updated: {POLICY_LAST_UPDATED}
             </p>
             <p className={styles.standfirst}>
-              {APP_NAME} uses cookies to keep your cart, remember how you like
+              {storeName} uses cookies to keep your cart, remember how you like
               the site set, and understand which weaves are being looked at.
               This is the full list, and how to turn off the ones you would
               rather not have.
@@ -230,8 +232,8 @@ const CookiePolicy = () => {
             <p className={styles.colophonLabel}>Questions about cookies</p>
             <p className={styles.colophonText}>
               Write to{" "}
-              <a href={`mailto:${SUPPORT_EMAIL}`} className={styles.link}>
-                {SUPPORT_EMAIL}
+              <a href={emailHref} className={styles.link}>
+                {supportEmail}
               </a>{" "}
               and we will tell you exactly what a given cookie holds.
             </p>

@@ -9,6 +9,7 @@ import {
 import { Icon } from "@iconify/react";
 import Swal from "sweetalert2";
 import apiService from "../../services/api";
+import { useStoreSettings } from "../../context/StoreSettingsContext";
 
 const PAYMENT_STATUS_CONFIG = {
   captured: { label: "Captured", color: "success" },
@@ -48,6 +49,9 @@ const METHOD_ICONS = {
 };
 
 const AdminPayments = () => {
+  // Currency comes from the admin's own Settings > General, so every figure
+  // on this screen speaks the same money as the storefront.
+  const { currencySymbol, formatPrice } = useStoreSettings();
   const [payments, setPayments] = useState([]);
   const [refunds, setRefunds] = useState([]);
   const [view, setView] = useState("transactions"); // "transactions" | "refunds"
@@ -112,7 +116,7 @@ const AdminPayments = () => {
   };
 
   const formatDate = (d) => d ? new Date(d).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—";
-  const formatCurrency = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
+  const formatCurrency = (n) => formatPrice(n, { decimals: 0 });
 
   // Captured = money currently held: the captured amount NET of any refunds
   // issued so far (a partially-refunded row keeps contributing its remainder;
@@ -383,7 +387,7 @@ const AdminPayments = () => {
                     </Typography>
                   </Typography>
                   <Box sx={{ display: "flex", gap: 2, mt: 1 }}>
-                    <TextField label="Refund Amount (₹)" value={refundAmount} onChange={(e) => setRefundAmount(e.target.value)} type="number" size="small" sx={{ flex: 1 }} />
+                    <TextField label={`Refund Amount (${currencySymbol})`} value={refundAmount} onChange={(e) => setRefundAmount(e.target.value)} type="number" size="small" sx={{ flex: 1 }} />
                     <TextField label="Reason" value={refundReason} onChange={(e) => setRefundReason(e.target.value)} size="small" sx={{ flex: 1 }} />
                   </Box>
                 </>

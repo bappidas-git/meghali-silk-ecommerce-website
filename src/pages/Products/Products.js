@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useCart } from "../../hooks/useCart";
 import { useWishlist } from "../../context/WishlistContext";
+import { useStoreSettings } from "../../context/StoreSettingsContext";
 import apiService from "../../services/api";
 import ProductCard from "../../components/storefront/ProductCard";
 import {
@@ -78,11 +79,13 @@ const normalizeSort = (raw) => {
   return SORT_ALIASES[v] || "relevance";
 };
 
+// Bounds only — the labels are built at render in the store's own currency
+// (Settings > General), so switching currency re-letters the chips.
 const PRICE_RANGES = [
-  { label: "Under ₹500", min: 0, max: 500 },
-  { label: "₹500 – ₹1,000", min: 500, max: 1000 },
-  { label: "₹1,000 – ₹5,000", min: 1000, max: 5000 },
-  { label: "Above ₹5,000", min: 5000, max: Infinity },
+  { min: 0, max: 500 },
+  { min: 500, max: 1000 },
+  { min: 1000, max: 5000 },
+  { min: 5000, max: Infinity },
 ];
 
 const RATING_OPTIONS = [4, 3, 2, 1];
@@ -303,6 +306,21 @@ const Products = () => {
   const { addToCart } = useCart();
   const { toggleWishlist, isInWishlist } = useWishlist();
   const shouldReduceMotion = useReducedMotion();
+  const { formatPrice } = useStoreSettings();
+
+  // Whole rupees/dollars — a filter chip has no room for decimals.
+  const priceRanges = useMemo(() => {
+    const money = (n) => formatPrice(n, { decimals: 0 });
+    return PRICE_RANGES.map((range) => ({
+      ...range,
+      label:
+        range.max === Infinity
+          ? `Above ${money(range.min)}`
+          : range.min === 0
+          ? `Under ${money(range.max)}`
+          : `${money(range.min)} – ${money(range.max)}`,
+    }));
+  }, [formatPrice]);
 
   // ---- Data state ---
   const [allProducts, setAllProducts] = useState([]);
@@ -1013,7 +1031,7 @@ const Products = () => {
       <section className={styles.facet}>
         <h3 className={styles.facetTitle}>Price</h3>
         <div className={styles.rangeChips}>
-          {PRICE_RANGES.map((range) => {
+          {priceRanges.map((range) => {
             const active = isPriceRangeActive(range);
             return (
               <button
@@ -1279,7 +1297,7 @@ const Products = () => {
             )}
 
             <div className={styles.chipGroup} role="group" aria-label="Price range">
-              {PRICE_RANGES.map((range) =>
+              {priceRanges.map((range) =>
                 renderChip(range.label, range.label, isPriceRangeActive(range), () =>
                   handlePriceRangeToggle(range)
                 )

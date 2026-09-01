@@ -1,3 +1,5 @@
+import { formatCurrency } from "../utils/helpers";
+
 // =============================================================================
 // STOREFRONT TOKENS & CONFIG (JS layer)
 // =============================================================================
@@ -88,7 +90,9 @@ export const resolveTrustBadgeDetail = (badgeId, { settings, shipping } = {}) =>
       .filter((n) => Number.isFinite(n) && n > 0);
     const threshold = fromMethods.length ? Math.min(...fromMethods) : null;
     if (threshold == null) return null;
-    return `Above ₹${threshold.toLocaleString("en-IN")}`;
+    // Printed in the store's configured currency (Settings > General), not a
+    // baked-in rupee sign.
+    return `Above ${formatCurrency(threshold, null, { decimals: 0 })}`;
   }
   if (badgeId === "easyReturns") {
     const days = STOREFRONT_CONFIG.returnsWindowDays;

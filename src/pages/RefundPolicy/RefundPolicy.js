@@ -42,9 +42,9 @@ import { reveal as sharedReveal } from "../../theme/motion";
 import { useTheme } from "../../context/ThemeContext";
 import { STOREFRONT_CONFIG } from "../../theme/tokens";
 import {
-  SUPPORT_EMAIL,
   POLICY_LAST_UPDATED,
 } from "../../utils/constants";
+import { useStoreSettings } from "../../context/StoreSettingsContext";
 import styles from "./RefundPolicy.module.css";
 
 // The one number this page turns on. Shared with the buy box, the checkout and
@@ -97,6 +97,9 @@ const TIMELINE = [
 ];
 
 const RefundPolicy = () => {
+  // Store name and contact details are whatever the admin last saved in
+  // Settings > General, so the policy never names a store that no longer exists.
+  const { email: supportEmail, emailHref } = useStoreSettings();
   const { isDarkMode } = useTheme();
   const prefersReducedMotion = useReducedMotion();
 
@@ -291,8 +294,8 @@ const RefundPolicy = () => {
                 Write to the care desk
               </Link>{" "}
               or email{" "}
-              <a href={`mailto:${SUPPORT_EMAIL}`} className={styles.link}>
-                {SUPPORT_EMAIL}
+              <a href={emailHref} className={styles.link}>
+                {supportEmail}
               </a>{" "}
               with your order number. A person answers, and they can start the
               return for you.

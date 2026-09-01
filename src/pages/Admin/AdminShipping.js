@@ -9,8 +9,12 @@ import {
 import { Icon } from "@iconify/react";
 import Swal from "sweetalert2";
 import apiService from "../../services/api";
+import { useStoreSettings } from "../../context/StoreSettingsContext";
 
 const AdminShipping = () => {
+  // Currency comes from the admin's own Settings > General, so every figure
+  // on this screen speaks the same money as the storefront.
+  const { currencySymbol, formatPrice } = useStoreSettings();
   const [methods, setMethods] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -113,7 +117,7 @@ const AdminShipping = () => {
     }
   };
 
-  const formatCurrency = (n) => n === null ? "—" : `₹${Number(n).toLocaleString("en-IN")}`;
+  const formatCurrency = (n) => (n === null ? "—" : formatPrice(n, { decimals: 0 }));
 
   return (
     <Box>
@@ -253,9 +257,9 @@ const AdminShipping = () => {
               </Select>
             </FormControl>
             {form.rateType === "flat" && (
-              <TextField label="Flat Rate (₹)" type="number" value={form.flatRate} onChange={(e) => setForm((f) => ({ ...f, flatRate: parseFloat(e.target.value) || 0 }))} fullWidth size="small" />
+              <TextField label={`Flat Rate (${currencySymbol})`} type="number" value={form.flatRate} onChange={(e) => setForm((f) => ({ ...f, flatRate: parseFloat(e.target.value) || 0 }))} fullWidth size="small" />
             )}
-            <TextField label="Free Shipping Above (₹)" type="number" value={form.freeAbove || ""} onChange={(e) => setForm((f) => ({ ...f, freeAbove: e.target.value ? parseFloat(e.target.value) : null }))} fullWidth size="small" helperText="Leave empty to disable free shipping threshold" />
+            <TextField label={`Free Shipping Above (${currencySymbol})`} type="number" value={form.freeAbove || ""} onChange={(e) => setForm((f) => ({ ...f, freeAbove: e.target.value ? parseFloat(e.target.value) : null }))} fullWidth size="small" helperText="Leave empty to disable free shipping threshold" />
             <TextField label="Estimated Days" value={form.estimatedDays} onChange={(e) => setForm((f) => ({ ...f, estimatedDays: e.target.value }))} fullWidth size="small" placeholder="e.g., 5-7" />
             <FormControlLabel control={<Switch checked={form.isActive} onChange={(e) => setForm((f) => ({ ...f, isActive: e.target.checked }))} />} label="Active" />
           </Box>

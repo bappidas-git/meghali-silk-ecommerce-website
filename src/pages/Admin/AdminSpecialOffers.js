@@ -310,7 +310,7 @@ const AdminSpecialOffers = () => {
   const getProductOption = useCallback((p) => {
     const mp = getProductMinPrice(p);
     const d = getProductMaxDiscount(p);
-    const bits = [formatCurrency(mp.sellingPrice, "INR")];
+    const bits = [formatCurrency(mp.sellingPrice)];
     if (d > 0) bits.push(`${d}% off`);
     if (p.sku) bits.push(p.sku);
     return {
@@ -326,7 +326,11 @@ const AdminSpecialOffers = () => {
     id: c.id,
     icon: "mdi:ticket-percent",
     primary: c.code,
-    secondary: `${c.type === "percentage" ? `${c.value}%` : `₹${c.value}`} off${c.description ? ` · ${c.description}` : ""}`,
+    secondary: `${
+      c.type === "percentage"
+        ? `${c.value}%`
+        : formatCurrency(c.value, null, { decimals: 0 })
+    } off${c.description ? ` · ${c.description}` : ""}`,
   }), []);
 
   const handleSave = async () => {

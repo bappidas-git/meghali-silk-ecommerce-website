@@ -10,6 +10,8 @@ import { Icon } from "@iconify/react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import apiService from "../../services/api";
+import { useStoreSettings } from "../../context/StoreSettingsContext";
+import { formatCurrency as money0 } from "../../utils/helpers";
 
 // Status enums shared, label-for-label, with AdminDashboard and reconciled with
 // the storefront: a customer cancellation stamps fulfillmentStatus "cancelled"
@@ -66,7 +68,7 @@ const refundImplication = (o) => {
   const online = isOnlinePayment(o);
   const captured = ["paid", "partially_refunded"].includes(o.paymentStatus);
   const method = (o.paymentMethod || "").toUpperCase();
-  const amount = `₹${Number(o.total || 0).toLocaleString("en-IN")}`;
+  const amount = money0(o.total, null, { decimals: 0 });
   if (captured && online) {
     return { kind: "refund", text: `Customer paid ${amount} online via ${method}. A refund will be initiated to the original payment method.` };
   }
@@ -108,6 +110,9 @@ const EMPTY_ADDR = {
 };
 
 const AdminOrders = () => {
+  // Currency comes from the admin's own Settings > General, so every figure
+  // on this screen speaks the same money as the storefront.
+  const { currencySymbol, formatPrice } = useStoreSettings();
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -265,7 +270,7 @@ const AdminOrders = () => {
     const pending = selectedOrder.pendingRefund || {};
     const result = await Swal.fire({
       title: "Mark refund as completed?",
-      text: `Confirm ₹${Number(pending.amount || 0).toLocaleString("en-IN")} has settled to the customer.`,
+      text: `Confirm ${formatPrice(pending.amount, { decimals: 0 })} has settled to the customer.`,
       icon: "question",
       showCancelButton: true,
       confirmButtonText: "Yes, completed",
@@ -372,10 +377,11 @@ const AdminOrders = () => {
       storeAddress = settings?.store?.address || "";
     } catch { /* fall back to defaults */ }
     const addr = o.shippingAddress || {};
+    // Whole units — an invoice line has no room for the minor unit.
+    const money = (n) => formatPrice(n, { decimals: 0 });
     const rows = (o.items || [])
-      .map((it) => `<tr><td>${it.name}</td><td>${it.sku || "—"}</td><td style="text-align:center">${it.quantity}</td><td style="text-align:right">₹${Number(it.price || 0).toLocaleString("en-IN")}</td><td style="text-align:right">₹${Number(it.subtotal || 0).toLocaleString("en-IN")}</td></tr>`)
+      .map((it) => `<tr><td>${it.name}</td><td>${it.sku || "—"}</td><td style="text-align:center">${it.quantity}</td><td style="text-align:right">${money(it.price)}</td><td style="text-align:right">${money(it.subtotal)}</td></tr>`)
       .join("");
-    const money = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
     const html = `<!DOCTYPE html><html><head><title>Invoice ${o.orderNumber}</title><style>
       body{font-family:Arial,Helvetica,sans-serif;color:#1a1a1a;margin:32px}
       h1{font-size:20px;margin:0} h2{font-size:14px;margin:24px 0 8px}
@@ -409,7 +415,7 @@ const AdminOrders = () => {
     win.print();
   };
 
-  const fc = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
+  const fc = (n) => formatPrice(n, { decimals: 0 });
   const formatDate = (d) => d ? new Date(d).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—";
 
   const isFiltering = search.trim() !== "" || fulfillmentFilter !== "all" || paymentFilter !== "all" || dateFrom !== "" || dateTo !== "";
@@ -900,7 +906,7 @@ const AdminOrders = () => {
                 <Typography variant="body2" fontWeight={600}>{fc(refundRemaining)}</Typography>
               </Box>
               <TextField
-                label="Refund amount (₹)" type="number" value={refundAmount}
+                label={`Refund amount (${currencySymbol})`} type="number" value={refundAmount}
                 onChange={(e) => setRefundAmount(e.target.value)} fullWidth size="small"
                 sx={{ mb: 2 }} inputProps={{ min: 0, max: refundRemaining }}
               />

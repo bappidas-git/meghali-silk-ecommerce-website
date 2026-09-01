@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { useAuth } from "../../hooks/useAuth";
 import { useTheme } from "../../context/ThemeContext";
+import { useStoreSettings } from "../../context/StoreSettingsContext";
 import { isEmailValid } from "../../utils/helpers";
 import {
   DURATION,
@@ -133,6 +134,7 @@ const describedBy = (...ids) => ids.filter(Boolean).join(" ") || undefined;
 const AuthModal = ({ open, onClose, defaultTab = "login" }) => {
   const { login, register, isLoading: authLoading } = useAuth();
   const { isDarkMode } = useTheme();
+  const { storeName } = useStoreSettings();
   const reduceMotion = useReducedMotion();
 
   const [activeTab, setActiveTab] = useState(defaultTab);
@@ -549,14 +551,14 @@ const AuthModal = ({ open, onClose, defaultTab = "login" }) => {
                 <img
                   className={styles.logo}
                   src={isDarkMode ? LOGO_WHITE : LOGO_LIGHT}
-                  alt="Meghali's Silk"
+                  alt={storeName}
                   width={LOGO_W}
                   height={LOGO_H}
                   loading="lazy"
                   decoding="async"
                 />
                 <h2 id="auth-modal-title" className={styles.title}>
-                  {isLogin ? "Welcome back" : "Join Meghali's Silk"}
+                  {isLogin ? "Welcome back" : `Join ${storeName}`}
                 </h2>
                 <p className={styles.subtitle}>
                   {isLogin
@@ -768,7 +770,7 @@ const AuthModal = ({ open, onClose, defaultTab = "login" }) => {
 
                       {/* Switch link */}
                       <p className={styles.switchText}>
-                        New to Meghali&rsquo;s Silk?{" "}
+                        New to {storeName}?{" "}
                         <button type="button" className={styles.switchBtn} onClick={() => switchTab("signup")}>
                           Create an account
                         </button>

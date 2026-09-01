@@ -68,15 +68,16 @@ import styles from "./SpecialOffers.module.css";
 // Coupons shown here come from the same store the Admin manages and Checkout
 // validates against (apiService.coupons), so every advertised code redeems.
 
-// Compact rupee figure for promo copy — round values read cleaner without paise.
-const rupees = (n) => `₹${Math.round(Number(n) || 0).toLocaleString("en-IN")}`;
+// Compact figure for promo copy, in the store's own currency — round values
+// read cleaner without the minor unit.
+const money = (n) => formatCurrency(Math.round(Number(n) || 0), null, { decimals: 0 });
 
 // Expiry shown on a coupon card — the same instant the checkout enforces.
 const formatExpiry = (iso) =>
   new Date(iso).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
 
 // Headline figure on a coupon's stub: "20%" for percentage, "₹500" for fixed.
-const couponHeadline = (c) => (c.type === "percentage" ? `${c.value}%` : rupees(c.value));
+const couponHeadline = (c) => (c.type === "percentage" ? `${c.value}%` : money(c.value));
 
 // Only advertise coupons a shopper can actually redeem right now: active, not
 // past expiry, not usage-exhausted — the same gates checkout enforces.
@@ -93,10 +94,10 @@ const isCouponValid = (c, now = new Date()) =>
 const couponTerms = (c) => {
   const rows = [];
   rows.push(
-    c.minOrderAmount > 0 ? `Minimum order ${rupees(c.minOrderAmount)}` : "No minimum order"
+    c.minOrderAmount > 0 ? `Minimum order ${money(c.minOrderAmount)}` : "No minimum order"
   );
   if (c.type === "percentage" && c.maxDiscount) {
-    rows.push(`Capped at ${rupees(c.maxDiscount)}`);
+    rows.push(`Capped at ${money(c.maxDiscount)}`);
   }
   rows.push(c.expiresAt ? `Valid through ${formatExpiry(c.expiresAt)}` : "No expiry date");
   return rows;

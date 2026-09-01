@@ -18,6 +18,7 @@ import { OrderProvider } from "./context/OrderContext";
 import { AdminProvider } from "./context/AdminContext";
 import { WishlistProvider } from "./context/WishlistContext";
 import { DealsConfigProvider } from "./context/DealsConfigContext";
+import { StoreSettingsProvider, useStoreSettings } from "./context/StoreSettingsContext";
 
 // Layout Components
 import Header from "./components/Header/Header";
@@ -82,6 +83,11 @@ function StorefrontShell() {
   const location = useLocation();
   const reduceMotion = useReducedMotion();
   const pageMotion = getPageMotion(reduceMotion);
+  // Subscribing to the currency here, at the root of the storefront tree, is
+  // what makes a currency change in the admin repaint every price under it:
+  // the pages below call the plain formatCurrency() helper, which reads the
+  // store's currency but cannot itself ask React for a re-render.
+  useStoreSettings();
 
   return (
     <DealsConfigProvider>
@@ -132,6 +138,9 @@ function App() {
   return (
     <ErrorBoundary>
     <ThemeContextProvider>
+      {/* Above both route trees: the admin's Settings > General values dress the
+          storefront AND the admin shell, so neither side can be the owner. */}
+      <StoreSettingsProvider>
       <AuthProvider>
         <AdminProvider>
           <WishlistProvider>
@@ -171,6 +180,7 @@ function App() {
           </WishlistProvider>
         </AdminProvider>
       </AuthProvider>
+      </StoreSettingsProvider>
     </ThemeContextProvider>
     </ErrorBoundary>
   );

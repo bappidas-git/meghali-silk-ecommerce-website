@@ -10,6 +10,7 @@ import { Icon } from "@iconify/react";
 import { useLocation } from "react-router-dom";
 import Swal from "sweetalert2";
 import apiService from "../../services/api";
+import { useStoreSettings } from "../../context/StoreSettingsContext";
 
 const STATUS_CONFIG = {
   requested: { label: "Requested", color: "warning" },
@@ -56,6 +57,9 @@ const netRefundForItems = (order, picks, items) => {
 };
 
 const AdminReturns = () => {
+  // Currency comes from the admin's own Settings > General, so every figure
+  // on this screen speaks the same money as the storefront.
+  const { currencySymbol, formatPrice } = useStoreSettings();
   const location = useLocation();
   const [returns, setReturns] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -214,7 +218,10 @@ const AdminReturns = () => {
   const handleProcessRefund = async () => {
     const ded = Number(deduction) || 0;
     if (ded < 0 || ded > (Number(selectedReturn.refundAmount) || 0)) {
-      toast("Deduction must be between ₹0 and the requested amount", "warning");
+      toast(
+        `Deduction must be between ${formatPrice(0, { decimals: 0 })} and the requested amount`,
+        "warning"
+      );
       return;
     }
     const payable = payableOf(selectedReturn, ded);
@@ -230,8 +237,8 @@ const AdminReturns = () => {
         },
         {
           event: {
-            action: `Refund processed (₹${payable.toLocaleString("en-IN")})`,
-            note: ded > 0 ? `₹${ded.toLocaleString("en-IN")} deducted` : "",
+            action: `Refund processed (${formatPrice(payable, { decimals: 0 })})`,
+            note: ded > 0 ? `${formatPrice(ded, { decimals: 0 })} deducted` : "",
           },
           restock,
         }
@@ -317,7 +324,7 @@ const AdminReturns = () => {
   };
 
   const formatDate = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—";
-  const formatCurrency = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
+  const formatCurrency = (n) => formatPrice(n, { decimals: 0 });
 
   const filtered = returns.filter((r) => {
     const q = search.toLowerCase();
@@ -479,7 +486,7 @@ const AdminReturns = () => {
                   <Typography variant="subtitle2" fontWeight="bold" gutterBottom>Process Refund</Typography>
                   <Box sx={{ display: "flex", gap: 2, mb: 1.5, flexWrap: "wrap" }}>
                     <TextField
-                      label="Deduction (₹)" type="number" size="small" sx={{ width: 150 }}
+                      label={`Deduction (${currencySymbol})`} type="number" size="small" sx={{ width: 150 }}
                       value={deduction} onChange={(e) => setDeduction(e.target.value)}
                       helperText="Restocking / shipping fee"
                     />

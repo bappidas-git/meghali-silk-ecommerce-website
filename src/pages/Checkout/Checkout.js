@@ -5,6 +5,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { useCart } from "../../hooks/useCart";
 import { useAuth } from "../../hooks/useAuth";
 import { useOrder } from "../../context/OrderContext";
+import { useStoreSettings } from "../../context/StoreSettingsContext";
 import apiService from "../../services/api";
 import {
   formatCurrency,
@@ -242,6 +243,14 @@ const Checkout = () => {
   const { cartItems, getCartTotal, getCartItemCount, updateQuantity, removeFromCart, clearCart } = useCart();
   const { user, isAuthenticated, openAuthModal } = useAuth();
   const { createOrder } = useOrder();
+  // Tax rate, tax treatment, COD rules and the care address the rail quotes all
+  // come from the admin's Settings > General — one shared read, live.
+  const {
+    payment: paymentCfg,
+    taxRate: taxRatePct,
+    taxIncluded,
+    email: storeEmail,
+  } = useStoreSettings();
 
   const [step, setStep] = useState(0);
   const [couponCode, setCouponCode] = useState("");
@@ -250,7 +259,6 @@ const Checkout = () => {
   const [shippingMethods, setShippingMethods] = useState([]);
   const [selectedShipping, setSelectedShipping] = useState(null);
   const [shippingError, setShippingError] = useState("");
-  const [storeSettings, setStoreSettings] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [isProcessing, setIsProcessing] = useState(false);
   const [orderPlaced, setOrderPlaced] = useState(null);
@@ -283,14 +291,7 @@ const Checkout = () => {
         if (active.length > 0) setSelectedShipping(active[0]);
       } catch (e) { console.error("Load shipping methods error:", e); }
     };
-    const loadSettings = async () => {
-      try {
-        const settings = await apiService.settings.get();
-        setStoreSettings(settings);
-      } catch (e) { console.error("Load store settings error:", e); }
-    };
     loadShipping();
-    loadSettings();
   }, []);
 
   // Load the signed-in customer's store-credit balance so it can be applied here.
@@ -326,17 +327,27 @@ const Checkout = () => {
   }, [step]);
 
   // ── Order math ────────────────────────────────────────────────────────────
-  // total = subtotal − discount + shipping + tax, with tax on the discounted
-  // subtotal. The same rounded figures are stored on the order so Confirmation,
-  // Order History and Admin all display exactly what was charged.
+  // total = subtotal − discount + shipping + tax (added only when the store
+  // prices tax-exclusively), with tax figured on the discounted subtotal. The
+  // same rounded figures are stored on the order so Confirmation, Order History
+  // and Admin all display exactly what was charged.
   const subtotal = getCartTotal();
   const { discount: couponDiscount, capped: couponCapped } = couponDiscountFor(couponApplied, subtotal);
   const shippingCost = selectedShipping
     ? selectedShipping.rateType === "free" || (selectedShipping.freeAbove && subtotal >= selectedShipping.freeAbove) ? 0 : selectedShipping.flatRate
     : 0;
-  const taxRatePct = storeSettings?.store?.taxRate ?? 5;
-  const taxAmount = Math.round(Math.max(0, subtotal - couponDiscount) * (taxRatePct / 100));
-  const total = subtotal - couponDiscount + shippingCost + taxAmount;
+  // Tax rate and whether listed prices already carry it both come from
+  // Settings > General.
+  //   exclusive (default) — tax is computed on the discounted subtotal and
+  //                         ADDED to the total.
+  //   inclusive           — the same tax is already inside the prices, so it is
+  //                         extracted for the receipt line and NOT added again.
+  const taxableBase = Math.max(0, subtotal - couponDiscount);
+  const taxAmount = taxIncluded
+    ? Math.round(taxableBase - taxableBase / (1 + taxRatePct / 100))
+    : Math.round(taxableBase * (taxRatePct / 100));
+  const total =
+    subtotal - couponDiscount + shippingCost + (taxIncluded ? 0 : taxAmount);
 
   // Store credit is applied LAST, against the grand total (it behaves like a
   // prepaid gift card — after discounts, shipping and tax). The customer can
@@ -351,12 +362,16 @@ const Checkout = () => {
 
   // COD availability comes from store settings, bounded by the amount actually
   // collected on delivery (the payable remainder after store credit).
-  const paymentCfg = storeSettings?.payment;
-  const codEnabled = paymentCfg?.codEnabled !== false;
-  const codMinOrder = paymentCfg?.codMinOrder ?? 0;
-  const codMaxOrder = paymentCfg?.codMaxOrder ?? null;
+  const codEnabled = paymentCfg.codEnabled !== false;
+  const codMinOrder = paymentCfg.codMinOrder ?? 0;
+  const codMaxOrder = paymentCfg.codMaxOrder ?? null;
   const codAvailable = codEnabled && amountPayable > 0 &&
     amountPayable >= codMinOrder && (codMaxOrder == null || amountPayable <= codMaxOrder);
+
+  // The handling fee the store charges for paying at the door. Added only when
+  // COD is the method actually chosen, so switching methods re-prices honestly.
+  const codFee = paymentMethod === "cod" && codAvailable ? paymentCfg.codFee || 0 : 0;
+  const amountDue = amountPayable + codFee;
 
   // If totals shift (qty/coupon/shipping) and COD falls out of range, move the
   // selection back to card rather than letting an invalid method be submitted.
@@ -451,10 +466,11 @@ const Checkout = () => {
         couponCode: couponApplied?.code || null,
         shippingAmount: shippingCost,
         taxAmount,
-        total,
+        codFee,
+        total: total + codFee,
         // Store credit applied at checkout, and what's left for the gateway.
         storeCreditUsed: storeCreditApplied,
-        amountPayable,
+        amountPayable: amountDue,
         // A fully store-credit order needs no further payment, so it is "paid"
         // via store credit; otherwise the chosen method settles the remainder.
         paymentMethod: fullyCovered ? "store_credit" : paymentMethod,
@@ -606,7 +622,7 @@ const Checkout = () => {
       return (
         <p className={styles.payNote}>
           Pay in cash when the parcel is handed to you —{" "}
-          {formatCurrency(amountPayable)} collected at the door.
+          {formatCurrency(amountDue)} collected at the door.
         </p>
       );
     }
@@ -628,7 +644,7 @@ const Checkout = () => {
       ? `${STOREFRONT_CONFIG.returnsWindowDays}-day returns`
       : null,
     codEnabled ? "Cash on delivery available" : null,
-    storeSettings?.store?.email ? `Questions? ${storeSettings.store.email}` : null,
+    storeEmail ? `Questions? ${storeEmail}` : null,
   ].filter(Boolean);
 
   return (
@@ -1120,7 +1136,7 @@ const Checkout = () => {
                   <p className={styles.sectionNote}>
                     {fullyCovered
                       ? "Nothing further is due on this order."
-                      : `${formatCurrency(amountPayable)} due on this order.`}
+                      : `${formatCurrency(amountDue)} due on this order.`}
                   </p>
 
                   {/* ── Store credit ─────────────────────────────────────────
@@ -1282,7 +1298,13 @@ const Checkout = () => {
                                 <span className={styles.payCopy}>
                                   <span className={styles.payName}>{pm.label}</span>
                                   <span className={styles.payDesc}>
-                                    {isDisabled ? codHint : pm.desc}
+                                    {isDisabled
+                                      ? codHint
+                                      : isCod && paymentCfg.codFee > 0
+                                      ? `${pm.desc} — ${formatCurrency(
+                                          paymentCfg.codFee
+                                        )} handling fee`
+                                      : pm.desc}
                                   </span>
                                 </span>
                               </label>
@@ -1326,7 +1348,7 @@ const Checkout = () => {
                     <span aria-hidden="true"> &middot; </span>
                     {fullyCovered
                       ? "settled with store credit."
-                      : `${formatCurrency(amountPayable)} to pay.`}
+                      : `${formatCurrency(amountDue)} to pay.`}
                   </p>
 
                   <div className={styles.recap}>
@@ -1422,8 +1444,8 @@ const Checkout = () => {
                           )}
                           <p className={styles.recapLine}>
                             {paymentMethod === "cod"
-                              ? `${formatCurrency(amountPayable)} collected on delivery.`
-                              : `${formatCurrency(amountPayable)} charged when you place the order.`}
+                              ? `${formatCurrency(amountDue)} collected on delivery.`
+                              : `${formatCurrency(amountDue)} charged when you place the order.`}
                           </p>
                         </>
                       )}
@@ -1480,7 +1502,7 @@ const Checkout = () => {
               >
                 <span className={styles.railToggleLabel}>Order summary</span>
                 <span className={styles.railToggleValue}>
-                  {formatCurrency(storeCreditApplied > 0 ? amountPayable : total)}
+                  {formatCurrency(storeCreditApplied > 0 || codFee > 0 ? amountDue : total)}
                 </span>
                 <span
                   className={`${styles.railChevron} ${summaryOpen ? styles.railChevronOpen : ""}`}
@@ -1537,15 +1559,26 @@ const Checkout = () => {
                   </span>
                 </div>
                 <div className={styles.railRow}>
-                  <span className={styles.railLabel}>Tax ({taxRatePct}% GST)</span>
+                  <span className={styles.railLabel}>
+                    Tax ({taxRatePct}%{taxIncluded ? ", included" : ""})
+                  </span>
                   <span className={styles.railValue}>{formatCurrency(taxAmount)}</span>
                 </div>
+
+                {codFee > 0 && (
+                  <div className={styles.railRow}>
+                    <span className={styles.railLabel}>Cash on delivery fee</span>
+                    <span className={styles.railValue}>{formatCurrency(codFee)}</span>
+                  </div>
+                )}
 
                 <div className={styles.railRule} />
 
                 <div className={styles.railTotalRow}>
                   <span className={styles.railTotalLabel}>Total</span>
-                  <span className={styles.railTotalValue}>{formatCurrency(total)}</span>
+                  <span className={styles.railTotalValue}>
+                    {formatCurrency(total + codFee)}
+                  </span>
                 </div>
 
                 {storeCreditApplied > 0 && (
@@ -1559,7 +1592,7 @@ const Checkout = () => {
                     <div className={styles.railRule} />
                     <div className={styles.railTotalRow}>
                       <span className={styles.railTotalLabel}>Amount payable</span>
-                      <span className={styles.railTotalValue}>{formatCurrency(amountPayable)}</span>
+                      <span className={styles.railTotalValue}>{formatCurrency(amountDue)}</span>
                     </div>
                   </>
                 )}
@@ -1603,7 +1636,7 @@ const Checkout = () => {
                 : step === 3
                 ? fullyCovered
                   ? "Place Order"
-                  : `Place Order — ${formatCurrency(amountPayable)}`
+                  : `Place Order — ${formatCurrency(amountDue)}`
                 : step === 0 && !isAuthenticated
                 ? "Login to Continue"
                 : "Continue"}

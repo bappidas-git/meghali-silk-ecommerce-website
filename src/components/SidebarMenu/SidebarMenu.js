@@ -19,7 +19,7 @@ import { useAuth } from "../../hooks/useAuth";
 import { useDealsConfig } from "../../context/DealsConfigContext";
 import apiService from "../../services/api";
 import { categoryParam } from "../../utils/categories";
-import { APP_NAME } from "../../utils/constants";
+import { useStoreSettings } from "../../context/StoreSettingsContext";
 import TrustStrip from "../TrustStrip";
 import {
   DURATION,
@@ -73,6 +73,7 @@ const SidebarMenu = ({ open, onClose, onOpenAuth }) => {
   const { user, logout } = useAuth();
   // The deals entry disappears when the admin turns the Special Offers page off.
   const { enabled: dealsEnabled } = useDealsConfig();
+  const { storeName } = useStoreSettings();
   const reduceMotion = useReducedMotion();
   const panelRef = useRef(null);
 
@@ -351,7 +352,7 @@ const SidebarMenu = ({ open, onClose, onOpenAuth }) => {
             exit="exit"
             role="dialog"
             aria-modal="true"
-            aria-label={`${APP_NAME} menu`}
+            aria-label={`${storeName} menu`}
             tabIndex={-1}
           >
             {/* ---- Masthead: wordmark straight on the ivory + the close mark ---- */}
@@ -359,7 +360,7 @@ const SidebarMenu = ({ open, onClose, onOpenAuth }) => {
               <img
                 className={styles.logo}
                 src={isDarkMode ? LOGO_WHITE : LOGO_LIGHT}
-                alt={APP_NAME}
+                alt={storeName}
                 width={LOGO_W}
                 height={LOGO_H}
                 loading="lazy"
@@ -667,7 +668,7 @@ const SidebarMenu = ({ open, onClose, onOpenAuth }) => {
                   </button>
                 </div>
                 <p className={styles.copyright}>
-                  © {new Date().getFullYear()} {APP_NAME}
+                  © {new Date().getFullYear()} {storeName}
                 </p>
               </div>
             </div>

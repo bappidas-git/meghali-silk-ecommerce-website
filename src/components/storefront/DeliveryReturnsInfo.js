@@ -29,7 +29,7 @@ const DeliveryReturnsInfo = ({
   shipping = [],
   settings,
   returnsWindowDays = STOREFRONT_CONFIG.returnsWindowDays,
-  currency = "INR",
+  currency,
 }) => {
   const methods = (Array.isArray(shipping) ? shipping : []).filter(
     (m) => m && m.isActive !== false

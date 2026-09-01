@@ -40,7 +40,7 @@ const FrequentlyBoughtTogether = ({
   anchor,
   companions = [],
   onAddToCart,
-  currency = "INR",
+  currency,
 }) => {
   const items = useMemo(
     () => (Array.isArray(companions) ? companions.filter(Boolean) : []),

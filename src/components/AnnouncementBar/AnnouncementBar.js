@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Icon } from "@iconify/react";
-import { FREE_SHIPPING_THRESHOLD, DEFAULT_CURRENCY } from "../../utils/constants";
+import { FREE_SHIPPING_THRESHOLD } from "../../utils/constants";
+import { useStoreSettings } from "../../context/StoreSettingsContext";
 import { DURATION, tween } from "../../theme/motion";
 import styles from "./AnnouncementBar.module.css";
 
@@ -24,14 +25,11 @@ import styles from "./AnnouncementBar.module.css";
  * shipping figure reads from FREE_SHIPPING_THRESHOLD (the same constant the cart
  * drawer's progress bar uses) so the two can never drift apart.
  */
-const shippingThreshold = `${DEFAULT_CURRENCY.symbol}${FREE_SHIPPING_THRESHOLD.toLocaleString(
-  "en-IN"
-)}`;
-
 // Kept short on purpose: set in tracked uppercase these have to survive a 375px
 // band without ellipsising, and a caption reads more editorial than a sentence.
 const ANNOUNCEMENTS = [
-  { id: "shipping", text: `Complimentary shipping above ${shippingThreshold}` },
+  // {amount} is filled in at render in the store's own currency.
+  { id: "shipping", text: "Complimentary shipping above {amount}" },
   { id: "giftwrap", text: "Complimentary gift wrapping" },
   { id: "origin", text: "Handwoven in Sualkuchi, Assam" },
 ];
@@ -45,7 +43,11 @@ const prefersReducedMotion = () =>
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const AnnouncementBar = ({ messages = ANNOUNCEMENTS, className = "" }) => {
-  const list = messages && messages.length ? messages : ANNOUNCEMENTS;
+  const { formatPrice } = useStoreSettings();
+  const shippingThreshold = formatPrice(FREE_SHIPPING_THRESHOLD, { decimals: 0 });
+  const list = (messages && messages.length ? messages : ANNOUNCEMENTS).map(
+    (m) => ({ ...m, text: m.text.replace("{amount}", shippingThreshold) })
+  );
 
   const [dismissed, setDismissed] = useState(false);
   const [index, setIndex] = useState(0);

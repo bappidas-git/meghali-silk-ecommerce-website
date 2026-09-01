@@ -34,14 +34,14 @@ import styles from "./VariantSelector.module.css";
 //   value          object  the selected variant (controlled)
 //   onChange       fn      (variant) => void
 //   productStock   number  product-level stock fallback
-//   currency       string  default "INR"
+//   currency       string  defaults to the store's own currency
 // =============================================================================
 const VariantSelector = ({
   variants = [],
   value,
   onChange,
   productStock,
-  currency = "INR",
+  currency,
 }) => {
   if (!Array.isArray(variants) || variants.length === 0) return null;
 

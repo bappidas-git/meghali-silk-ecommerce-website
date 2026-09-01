@@ -27,7 +27,7 @@ const AddToCartBar = ({
   anchorRef,
   price = 0,
   comparePrice = 0,
-  currency = "INR",
+  currency,
   image,
   name,
   disabled = false,
