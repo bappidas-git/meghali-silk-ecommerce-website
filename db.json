@@ -86,51 +86,6 @@
       "isActive": true,
       "sortOrder": 3,
       "updatedAt": "2026-09-01T00:00:00.000Z"
-    },
-    {
-      "title": "none",
-      "subtitle": "none###",
-      "eyebrow": "",
-      "cta": "Shop the Collection",
-      "link": "/products",
-      "secondaryCtaLabel": "",
-      "secondaryCtaLink": "",
-      "backgroundType": "image",
-      "gradient": "linear-gradient(135deg,#1D1A16 0%,#3A2E1B 60%,#8A6118 100%)",
-      "image": "https://i0.wp.com/picjumbo.com/wp-content/uploads/dark-portrait-of-woman-with-hair-over-her-face-free-image.jpeg?h=800&quality=80",
-      "imagePosition": "right center",
-      "videoUrl": "",
-      "videoPoster": "",
-      "overlayOpacity": null,
-      "textAlign": "left",
-      "durationMs": 0,
-      "isActive": false,
-      "sortOrder": 4,
-      "updatedAt": "2026-09-01T12:38:36.399Z",
-      "id": 5
-    },
-    {
-      "title": "none (copy)",
-      "subtitle": "none###",
-      "eyebrow": "",
-      "cta": "Shop the Collection",
-      "link": "/products",
-      "secondaryCtaLabel": "",
-      "secondaryCtaLink": "",
-      "backgroundType": "image",
-      "gradient": "linear-gradient(135deg,#1D1A16 0%,#3A2E1B 60%,#8A6118 100%)",
-      "image": "https://i0.wp.com/picjumbo.com/wp-content/uploads/dark-portrait-of-woman-with-hair-over-her-face-free-image.jpeg?h=800&quality=80",
-      "imagePosition": "right center",
-      "videoUrl": "",
-      "videoPoster": "",
-      "overlayOpacity": null,
-      "textAlign": "left",
-      "durationMs": 0,
-      "isActive": false,
-      "sortOrder": 5,
-      "createdAt": "2026-09-01T12:38:38.851Z",
-      "updatedAt": "2026-09-01T12:38:38.851Z",
-      "id": 6
     }
   ],
   "heroConfig": {
@@ -380,6 +335,19 @@
       "createdAt": "2026-09-01T10:29:45.022Z",
       "updatedAt": "2026-09-01T10:29:45.022Z",
       "id": 4
+    },
+    {
+      "firstName": "Shubendu",
+      "lastName": "Das",
+      "email": "shubendu@assamdigital.com",
+      "phone": "+916901608721",
+      "password": "Qwertyu",
+      "avatar": null,
+      "addresses": [],
+      "isActive": true,
+      "createdAt": "2026-09-01T19:19:19.163Z",
+      "updatedAt": "2026-09-01T19:19:19.163Z",
+      "id": 5
     }
   ],
   "admins": [
@@ -456,7 +424,7 @@
       "price": 41,
       "comparePrice": 380000000000,
       "costPrice": 22400,
-      "stock": 9,
+      "stock": 10,
       "lowStockThreshold": 3,
       "weight": 1.15,
       "dimensions": {
@@ -469,7 +437,7 @@
           "id": "v1",
           "name": "Natural Gold",
           "price": 3250000000,
-          "stock": 5,
+          "stock": 6,
           "sku": "MEK-MUG-001-NGD"
         },
         {
@@ -498,7 +466,7 @@
       "metaTitle": "Sualkuchi Muga Mekhela Chador — Natural Gold | Meghali's Silk",
       "metaDescription": "A two-piece Muga Mekhela Chador in undyed golden yarn, handwoven on Sualkuchi looms.",
       "createdAt": "2025-03-12T00:00:00.000Z",
-      "updatedAt": "2026-09-01T19:03:30.628Z",
+      "updatedAt": "2026-09-01T19:23:01.540Z",
       "frequentlyBoughtTogetherIds": [
         28,
         19
@@ -1832,6 +1800,175 @@
         "by": "Admin User"
       },
       "storeCreditReturned": true
+    },
+    {
+      "items": [
+        {
+          "productId": 1,
+          "variantId": "v1",
+          "name": "Sualkuchi Muga Mekhela Chador — Natural Gold - Natural Gold",
+          "image": "https://res.cloudinary.com/v8vrixwq/image/upload/v1788289312/muga_1_V1.png",
+          "sku": "",
+          "price": 3250000000,
+          "quantity": 1,
+          "subtotal": 3250000000
+        }
+      ],
+      "shippingAddress": {
+        "firstName": "Shubendu",
+        "lastName": "Das",
+        "phone": "+916901608721",
+        "addressLine1": "test",
+        "addressLine2": "rest",
+        "city": "bongaigaon",
+        "state": "assam",
+        "postalCode": "783380",
+        "country": "India"
+      },
+      "billingAddress": {
+        "firstName": "Shubendu",
+        "lastName": "Das",
+        "phone": "+916901608721",
+        "addressLine1": "test",
+        "addressLine2": "rest",
+        "city": "bongaigaon",
+        "state": "assam",
+        "postalCode": "783380",
+        "country": "India"
+      },
+      "subtotal": 3250000000,
+      "discountAmount": 0,
+      "couponCode": null,
+      "shippingAmount": 499,
+      "taxAmount": 162500000,
+      "codFee": 0,
+      "total": 3412500499,
+      "storeCreditUsed": 0,
+      "amountPayable": 3412500499,
+      "paymentMethod": "wallet",
+      "paymentStatus": "paid",
+      "fulfillmentStatus": "cancelled",
+      "shippingStatus": "pending",
+      "trackingNumber": null,
+      "notes": "",
+      "userId": 5,
+      "orderNumber": "ORD-MTJ1YI2H-UKFX",
+      "shiprocketOrderId": null,
+      "createdAt": "2026-09-01T19:20:44.537Z",
+      "updatedAt": "2026-09-01T19:23:01.361Z",
+      "statusHistory": [
+        {
+          "at": "2026-09-01T19:20:44.538Z",
+          "by": "Customer",
+          "action": "Order placed"
+        },
+        {
+          "at": "2026-09-01T19:23:01.363Z",
+          "by": "Customer",
+          "action": "Order cancelled",
+          "note": "Cancelled by customer"
+        },
+        {
+          "at": "2026-09-01T19:23:01.364Z",
+          "by": "Customer",
+          "action": "Refund initiated",
+          "note": "₹3,41,25,00,499 via original payment — settlement pending"
+        }
+      ],
+      "id": 12,
+      "cancelReason": "Cancelled by customer",
+      "cancelledAt": "2026-09-01T19:23:01.361Z",
+      "refundStatus": "processing",
+      "refundMethod": "original_payment",
+      "pendingRefund": {
+        "amount": 3412500499,
+        "method": "original_payment",
+        "reason": "Cancelled by customer",
+        "reference": null,
+        "initiatedAt": "2026-09-01T19:23:01.361Z",
+        "by": "Customer"
+      }
+    },
+    {
+      "items": [
+        {
+          "productId": 19,
+          "variantId": "v1",
+          "name": "Eri Silk Shawl — Undyed Ivory - Undyed Ivory",
+          "image": "https://res.cloudinary.com/v8vrixwq/image/upload/v1788289290/Eri_2_v1.png",
+          "sku": "",
+          "price": 4800,
+          "quantity": 1,
+          "subtotal": 4800
+        }
+      ],
+      "shippingAddress": {
+        "firstName": "Shubendu",
+        "lastName": "Das",
+        "phone": "+916901608721",
+        "addressLine1": "test",
+        "addressLine2": "rest",
+        "city": "bongaigaon",
+        "state": "assam",
+        "postalCode": "783354",
+        "country": "India"
+      },
+      "billingAddress": {
+        "firstName": "Shubendu",
+        "lastName": "Das",
+        "phone": "+916901608721",
+        "addressLine1": "test",
+        "addressLine2": "rest",
+        "city": "bongaigaon",
+        "state": "assam",
+        "postalCode": "783354",
+        "country": "India"
+      },
+      "subtotal": 4800,
+      "discountAmount": 4800,
+      "couponCode": "NNNN",
+      "shippingAmount": 22,
+      "taxAmount": 0,
+      "codFee": 0,
+      "total": 22,
+      "storeCreditUsed": 0,
+      "amountPayable": 22,
+      "paymentMethod": "cod",
+      "paymentStatus": "paid",
+      "fulfillmentStatus": "fulfilled",
+      "shippingStatus": "delivered",
+      "trackingNumber": null,
+      "notes": "",
+      "userId": 5,
+      "orderNumber": "ORD-MTJ2138B-VZBL",
+      "shiprocketOrderId": null,
+      "createdAt": "2026-09-01T19:22:45.275Z",
+      "updatedAt": "2026-09-01T19:23:45.831Z",
+      "statusHistory": [
+        {
+          "at": "2026-09-01T19:22:45.275Z",
+          "by": "Customer",
+          "action": "Order placed"
+        },
+        {
+          "at": "2026-09-01T19:23:38.158Z",
+          "by": "Admin User",
+          "action": "Fulfilled & shipped"
+        },
+        {
+          "at": "2026-09-01T19:23:42.651Z",
+          "by": "Admin User",
+          "action": "Marked delivered"
+        },
+        {
+          "at": "2026-09-01T19:23:45.862Z",
+          "by": "Admin User",
+          "action": "Payment marked as paid"
+        }
+      ],
+      "id": 13,
+      "trackingUrl": null,
+      "deliveredAt": "2026-09-01T19:23:42.618Z"
     }
   ],
   "returns": [
@@ -2269,6 +2406,47 @@
         "initiatedAt": "2026-09-01T14:03:01.448Z",
         "by": "Admin User"
       }
+    },
+    {
+      "orderId": 12,
+      "orderNumber": "ORD-MTJ1YI2H-UKFX",
+      "userId": 5,
+      "amount": 3412500499,
+      "currency": "INR",
+      "paymentMethod": "wallet",
+      "gateway": "razorpay",
+      "transactionId": "pay_MOCKMTJ1YI5S",
+      "gatewayOrderId": "order_MOCKMTJ1YI5S",
+      "status": "refund_pending",
+      "storeCreditApplied": 0,
+      "gatewayResponse": {},
+      "createdAt": "2026-09-01T19:20:44.656Z",
+      "updatedAt": "2026-09-01T19:23:01.409Z",
+      "id": 10,
+      "pendingRefund": {
+        "amount": 3412500499,
+        "method": "original_payment",
+        "reason": "Cancelled by customer",
+        "initiatedAt": "2026-09-01T19:23:01.409Z",
+        "by": "Admin"
+      }
+    },
+    {
+      "orderId": 13,
+      "orderNumber": "ORD-MTJ2138B-VZBL",
+      "userId": 5,
+      "amount": 22,
+      "currency": "INR",
+      "paymentMethod": "cod",
+      "gateway": "cod",
+      "transactionId": null,
+      "gatewayOrderId": null,
+      "status": "pending",
+      "storeCreditApplied": 0,
+      "gatewayResponse": {},
+      "createdAt": "2026-09-01T19:22:45.328Z",
+      "updatedAt": "2026-09-01T19:22:45.328Z",
+      "id": 11
     }
   ],
   "refunds": [
@@ -2416,6 +2594,27 @@
       "createdAt": "2026-09-01T14:03:01.489Z",
       "updatedAt": "2026-09-01T14:03:01.489Z",
       "id": 7
+    },
+    {
+      "refundNumber": "REF-20260901-H9F2",
+      "type": "order_cancellation",
+      "orderId": 12,
+      "orderNumber": "ORD-MTJ1YI2H-UKFX",
+      "returnId": null,
+      "returnNumber": null,
+      "paymentId": null,
+      "amount": 3412500499,
+      "method": "original_payment",
+      "reason": "Cancelled by customer",
+      "reference": null,
+      "status": "pending",
+      "couponRestored": false,
+      "initiatedAt": "2026-09-01T19:23:01.592Z",
+      "settledAt": null,
+      "by": "Customer",
+      "createdAt": "2026-09-01T19:23:01.592Z",
+      "updatedAt": "2026-09-01T19:23:01.592Z",
+      "id": 8
     }
   ],
   "shipping_methods": [
@@ -2587,9 +2786,9 @@
       "perUserLimit": null,
       "isActive": true,
       "expiresAt": null,
-      "usedCount": 0,
+      "usedCount": 1,
       "createdAt": "2026-09-01T10:53:52.642Z",
-      "updatedAt": "2026-09-01T10:53:52.642Z",
+      "updatedAt": "2026-09-01T19:22:45.416Z",
       "id": 7
     }
   ],
@@ -2998,7 +3197,7 @@
       "facebook": "https://facebook.com/meghalisilk",
       "instagram": "https://instagram.com/meghalisilk",
       "twitter": "https://twitter.com/meghalisilk",
-      "youtube": "https://youtube.com/@meghalisilk",
+      "youtube": "https://www.google.com/search?sca_esv=19477e370b385ecc&rlz=1C1CHBD_enIN1201IN1201&sxsrf=APpeQntNCC05FPwXnWZFPscfPt4KNFN6vA:1788282364778&udm=2&fbs=ABfTbFVyMZGZf1hfvX9uKjN_-G8c4u0nXx4bEIpwm1lnNH832VstEKsVDqPorK0Gahnm2nq-aQnTz_mBV-EZYISbLc-S3LQBbMYAGT8xXTqdTxRg035UMv2Z78Np7XNhc7R_0KDLpOk9LBXOLKOfTUeXYi8vwbQzxPoRPLg7Wg8n7dnWTU8xZYJttHjDToCxfQISOR4pr9zPLEQLe4W2O2PGIvvU_dK1jg&q=images&sa=X&sqi=2&ved=2ahUKEwi6_vD47s2WAxXMleEIHX1FGFUQtKgLegQIEhAB&biw=1536&bih=730&dpr=1.25#sv=CAMSURoyKhBlLUhaQ1lHdTdITTcxWjhNMg5IWkNZR3U3SE03MVo4TToOaWVQQzdqcjJTNEU3ZU0gBCoXCgFzEhBlLUhaQ1lHdTdITTcxWjhNGAEwARgHIP6453w6AEoIEAEYASABKAE",
       "whatsapp": "https://wa.me/913340001100"
     }
   },
