@@ -81,6 +81,34 @@ export const extractMeta = (response) => {
   return response.data?.meta || null;
 };
 
+/**
+ * Storefront visibility gate for a single product.
+ *
+ * Admin → Products → "Active (visible on store)" writes `isActive`. A product
+ * saved as a draft must disappear from every shopper-facing surface; the admin
+ * console keeps seeing it through admin.getProducts(). `!== false` (rather than
+ * `=== true`) matches the convention already used for categories, coupons and
+ * shipping methods, so catalogue rows that predate the flag stay visible.
+ */
+export const isVisibleProduct = (product) => !!product && product.isActive !== false;
+
+/** Same gate over a list; non-array input passes through untouched. */
+export const visibleProducts = (list) =>
+  Array.isArray(list) ? list.filter(isVisibleProduct) : list;
+
+/**
+ * Rejection thrown when a deactivated account tries to sign in — the mock-mode
+ * stand-in for Laravel's 403. Tagged so callers can tell it apart from a
+ * genuine transport failure and keep it out of the console.
+ */
+const accountDisabledError = () => {
+  const err = new Error(
+    "This account has been deactivated. Please contact support if you think this is a mistake."
+  );
+  err.code = "ACCOUNT_DISABLED";
+  return err;
+};
+
 /** Extract human-readable error message */
 export const getErrorMessage = (error) => {
   if (error.response?.data) {
@@ -350,6 +378,33 @@ const redeemCouponByCode = async (code) => {
     }
   } catch (e) {
     console.error("Redeem coupon error:", e);
+  }
+};
+
+// How many times the signed-in shopper has already redeemed this code — the
+// figure Admin → Coupons → "Per User Limit" is checked against. Counted from
+// their own orders, matched the same case-insensitive way as redeemCouponByCode,
+// and skipping orders whose redemption was already handed back (a full
+// cancellation or return sets `couponRestored`, which frees the slot globally —
+// it has to free the shopper's slot too, or a returned order would lock them
+// out of a coupon nobody consumed). Mock-only; the Laravel branch counts this
+// server-side inside coupons/validate.
+const countUserRedemptions = async (code, userId) => {
+  const normalized = (code || "").trim().toLowerCase();
+  if (!normalized || userId == null) return 0;
+  try {
+    const res = await api.get("/orders", { params: { userId } });
+    const orders = Array.isArray(res.data) ? res.data : [];
+    return orders.filter(
+      (o) =>
+        !o.couponRestored &&
+        String(o.couponCode || "").trim().toLowerCase() === normalized
+    ).length;
+  } catch (e) {
+    // Never block a redemption because the order history could not be read —
+    // the global usageLimit still applies, and Laravel is authoritative anyway.
+    console.error("Count coupon redemptions error:", e);
+    return 0;
   }
 };
 
@@ -786,6 +841,11 @@ const apiService = {
           const response = await api.get("/users", { params: { email: creds.email, password: creds.password } });
           const user = response.data[0] || null;
           if (!user) return null;
+          // Admin → Users → "Deactivate" writes isActive:false. Honour it here,
+          // or the deactivation is cosmetic and the account keeps signing in.
+          // Distinct from the null (bad credentials) branch: the shopper's
+          // password is fine and telling them so saves a pointless reset.
+          if (user.isActive === false) throw accountDisabledError();
           // Store a token like the Laravel branch does — AuthContext only
           // restores a session on reload when BOTH user and token exist, so
           // without this a mock-mode login is lost on every refresh.
@@ -798,7 +858,13 @@ const apiService = {
         const data = extractData(response);
         if (data?.token) authStorage.set("token", data.token, remember);
         return data?.user || null;
-      } catch (error) { console.error("Login error:", error); throw error; }
+      } catch (error) {
+        // A disabled account is an expected outcome, not a fault — keep the
+        // console clean and let AuthContext show the message (same rule the
+        // coupon validator follows for a rejected code).
+        if (error.code !== "ACCOUNT_DISABLED") console.error("Login error:", error);
+        throw error;
+      }
     },
 
     register: async (userData) => {
@@ -890,28 +956,41 @@ const apiService = {
   // Products
   // ===========================================================================
   products: {
+    // Every storefront read below goes through visibleProducts()/isVisibleProduct()
+    // so Admin → Products → "Active (visible on store)" is the single switch that
+    // decides whether shoppers can reach a product — catalogue, search, home
+    // rails, category pages, related rails and the PDP alike. Admin screens use
+    // admin.getProducts(), which deliberately returns drafts too. Same
+    // `!== false` convention the categories/coupons/shipping readers use, so a
+    // legacy row with no isActive field stays visible.
     getAll: async (params = {}) => {
       try {
         const response = await api.get("/products", { params });
-        return extractData(response);
+        return visibleProducts(extractData(response));
       } catch (error) { console.error("Get products error:", error); throw error; }
     },
 
     getById: async (id) => {
       try {
         const response = await api.get(`/products/${id}`);
-        return extractData(response);
+        const product = extractData(response);
+        // A draft reached by its direct URL must 404 like any hidden page, not
+        // render a buyable PDP. ProductDetails treats null as "not found".
+        return isVisibleProduct(product) ? product : null;
       } catch (error) { console.error("Get product error:", error); throw error; }
     },
 
     getBySlug: async (slug) => {
       try {
+        let product;
         if (IS_MOCK_API) {
           const response = await api.get("/products", { params: { slug } });
-          return Array.isArray(response.data) ? response.data[0] : response.data;
+          product = Array.isArray(response.data) ? response.data[0] : response.data;
+        } else {
+          const response = await api.get(`/products/slug/${slug}`);
+          product = extractData(response);
         }
-        const response = await api.get(`/products/slug/${slug}`);
-        return extractData(response);
+        return isVisibleProduct(product) ? product : null;
       } catch (error) { console.error("Get product by slug error:", error); throw error; }
     },
 
@@ -919,10 +998,10 @@ const apiService = {
       try {
         if (IS_MOCK_API) {
           const response = await api.get("/products", { params: { featured: true } });
-          return response.data.slice(0, limit);
+          return visibleProducts(response.data).slice(0, limit);
         }
         const response = await api.get("/products/featured", { params: { limit } });
-        return extractData(response);
+        return visibleProducts(extractData(response));
       } catch (error) { console.error("Get featured products error:", error); throw error; }
     },
 
@@ -930,10 +1009,10 @@ const apiService = {
       try {
         if (IS_MOCK_API) {
           const response = await api.get("/products", { params: { trending: true } });
-          return response.data.slice(0, limit);
+          return visibleProducts(response.data).slice(0, limit);
         }
         const response = await api.get("/products/trending", { params: { limit } });
-        return extractData(response);
+        return visibleProducts(extractData(response));
       } catch (error) { console.error("Get trending products error:", error); throw error; }
     },
 
@@ -941,10 +1020,10 @@ const apiService = {
       try {
         if (IS_MOCK_API) {
           const response = await api.get("/products", { params: { categoryId } });
-          return response.data;
+          return visibleProducts(response.data);
         }
         const response = await api.get(`/products/category/${categoryId}`);
-        return extractData(response);
+        return visibleProducts(extractData(response));
       } catch (error) { console.error("Get products by category error:", error); throw error; }
     },
 
@@ -952,10 +1031,10 @@ const apiService = {
       try {
         if (IS_MOCK_API) {
           const response = await api.get("/products", { params: { q: query } });
-          return response.data;
+          return visibleProducts(response.data);
         }
         const response = await api.get("/products", { params: { search: query } });
-        return extractData(response);
+        return visibleProducts(extractData(response));
       } catch (error) { console.error("Search products error:", error); throw error; }
     },
 
@@ -1424,6 +1503,16 @@ const apiService = {
         err.code = "COUPON_INVALID";
         return err;
       };
+      // The shopper is read here rather than passed in, so every call site — the
+      // cart drawer and checkout alike — is covered by the per-user rule without
+      // having to remember to thread the id through.
+      const currentUserId = (() => {
+        try {
+          return JSON.parse(authStorage.get("user") || "null")?.id ?? null;
+        } catch {
+          return null;
+        }
+      })();
       try {
         if (IS_MOCK_API) {
           const response = await api.get("/coupons", { params: { code, isActive: true } });
@@ -1431,10 +1520,24 @@ const apiService = {
           if (!coupon) throw reject("Invalid coupon code");
           if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) throw reject("Coupon has expired");
           if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) throw reject("Coupon usage limit reached");
+          // Admin → Coupons → "Per User Limit" was stored and then never read, so
+          // a one-per-customer code could be redeemed on every order. A guest has
+          // no order history to count against, so the rule applies once signed in
+          // — which is also when the redemption gets attributed to them.
+          if (coupon.perUserLimit && currentUserId != null) {
+            const used = await countUserRedemptions(coupon.code, currentUserId);
+            if (used >= coupon.perUserLimit) {
+              throw reject(
+                coupon.perUserLimit === 1
+                  ? "You have already used this coupon"
+                  : `You have already used this coupon ${coupon.perUserLimit} times`
+              );
+            }
+          }
           if (orderAmount < coupon.minOrderAmount) throw reject(`Minimum order amount is ${money(coupon.minOrderAmount)}`);
           return coupon;
         }
-        const response = await api.post("/coupons/validate", { code, orderAmount });
+        const response = await api.post("/coupons/validate", { code, orderAmount, userId: currentUserId });
         return extractData(response);
       } catch (error) {
         // Rejected coupons (unknown/expired/below minimum — or a 4xx from the
@@ -1601,6 +1704,8 @@ const apiService = {
           const response = await api.get("/admins", { params: { email: credentials.email, password: credentials.password } });
           const admin = response.data[0] || null;
           if (!admin) return null;
+          // A revoked admin account must not sign in either (mirrors auth.login).
+          if (admin.isActive === false) throw accountDisabledError();
           // Never let the db.json password reach component state / sessionStorage
           // (mirrors auth.login). AdminContext persists exactly what we return.
           const { password, ...safeAdmin } = admin;
@@ -1610,7 +1715,11 @@ const apiService = {
         const data = extractData(response);
         if (data?.token) sessionStorage.setItem("adminToken", data.token);
         return data?.admin || null;
-      } catch (error) { console.error("Admin login error:", error); throw error; }
+      } catch (error) {
+        // A revoked account is an expected rejection, not a fault (see auth.login).
+        if (error.code !== "ACCOUNT_DISABLED") console.error("Admin login error:", error);
+        throw error;
+      }
     },
 
     logout: async () => {

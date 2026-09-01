@@ -431,16 +431,23 @@ const AdminLeads = () => {
               </TableRow>
             </TableHead>
             <TableBody>
+              {/* TableRow outside, motion.tr as its element — not the reverse.
+                  A bare <motion.tr> understands none of MUI's props, so
+                  `component`/`hover`/`sx` were dropped on the floor: no row
+                  styling, no hover feedback, and the blue tint that marks an
+                  unread lead never rendered (`hover` also leaked to the DOM as
+                  a React attribute warning). This way MUI owns the styling and
+                  forwards the motion props to the underlying <tr>. */}
               <AnimatePresence>
                 {filteredLeads
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                   .map((lead) => (
-                    <motion.tr
+                    <TableRow
                       key={lead.id}
+                      component={motion.tr}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      component={TableRow}
                       hover
                       sx={{
                         bgcolor: lead.status === "new" ? "rgba(59, 130, 246, 0.05)" : "transparent",
@@ -531,7 +538,7 @@ const AdminLeads = () => {
                           </IconButton>
                         </Tooltip>
                       </TableCell>
-                    </motion.tr>
+                    </TableRow>
                   ))}
               </AnimatePresence>
               {filteredLeads.length === 0 && (

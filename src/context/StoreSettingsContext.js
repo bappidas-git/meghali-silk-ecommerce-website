@@ -15,6 +15,7 @@ import {
   fillStoreCopy,
 } from "../utils/storeSettings";
 import { setActiveCurrency } from "../utils/helpers";
+import { applyStoreTitle, storeDocumentTitle } from "../utils/documentTitle";
 
 // =============================================================================
 // StoreSettingsContext
@@ -94,12 +95,13 @@ export const StoreSettingsProvider = ({ children }) => {
   // read the new symbol.
   setActiveCurrency(store.currency, store.currencySymbol);
 
-  // The browser tab is part of the storefront too.
+  // The browser tab is part of the storefront too. applyStoreTitle stands down
+  // while a page holds the tab (the PDP, for its SEO meta title) — settings
+  // resolve on their own schedule, so a plain assignment here would overwrite
+  // whatever the page had already set.
   useEffect(() => {
-    if (store.name) document.title = store.tagline
-      ? `${store.name} — ${store.tagline}`
-      : store.name;
-  }, [store.name, store.tagline]);
+    applyStoreTitle(storeDocumentTitle(store));
+  }, [store.name, store.tagline]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const value = useMemo(() => {
     const formatPrice = (amount, options = {}) =>
