@@ -63,19 +63,38 @@ import { useStoreSettings } from "../../context/StoreSettingsContext";
 import styles from "./AboutUs.module.css";
 
 // ---- Imagery --------------------------------------------------------------
-// Recoloured placehold.co panels in the sampled brand palette — the same
-// generator and the same ink/gold values the Prompt 12 hero and the Prompt 02
-// catalogue seed use. The hexes below are URL parameters for that service, not
-// CSS: the stylesheet itself carries no hex. The storefront therefore ships no
-// third-party photography and never shows Meghali's Silk's own copyrighted
-// images; onImageError degrades each one to the inline placeholder.
+// The two banding shots are recoloured placehold.co panels in the sampled brand
+// palette — the same generator and the same ink/gold values the Prompt 12 hero
+// and the Prompt 02 catalogue seed use. The hexes below are URL parameters for
+// that service, not CSS: the stylesheet itself carries no hex. The collection
+// slot is the exception: the house's own photograph of a Muga Mekhela Chador,
+// served from Cloudinary. onImageError degrades any of them to the inline
+// placeholder.
 const IMAGES = {
   establishing:
     "https://placehold.co/2400x1000/1D1A16/C8912A?text=The+Looms+of+Sualkuchi",
   collection:
-    "https://placehold.co/1200x1500/33261E/F0D06B?text=Muga+Mekhela+Chador",
+    "https://res.cloudinary.com/v8vrixwq/image/upload/v1788289312/muga_1_V1.png",
   loom: "https://placehold.co/2000x1000/1D1A16/8A6118?text=In+the+Loom+Room",
 };
+
+// The collection photograph is 1122 × 1402 and a 2 MB PNG at the URL above —
+// far more than a phone should pull down for one picture. Cloudinary's delivery
+// transforms (f_auto for WebP/AVIF, q_auto, w_ for the width) bring that to
+// ~28 KB at phone width and ~117 KB at the widest the slot ever gets; the plain
+// URL stays the src so the picture still lands if a transform is ever refused.
+const COLLECTION_SRCSET = [480, 720, 1122]
+  .map(
+    (w) =>
+      `https://res.cloudinary.com/v8vrixwq/image/upload/f_auto,q_auto,w_${w}/v1788289312/muga_1_V1.png ${w}w`
+  )
+  .join(", ");
+
+// What the slot actually measures: the full container width once the feature
+// stacks at 900px, half of it (less the gap) above that, and a flat 584px once
+// the container stops growing.
+const COLLECTION_SIZES =
+  "(max-width: 900px) calc(100vw - 48px), (min-width: 1328px) 584px, calc((100vw - 112px) / 2)";
 
 // ---- The opening meta line ------------------------------------------------
 // Three facts, tracked and ruled. The founding year is the Support page's; the
@@ -363,9 +382,11 @@ const AboutUs = () => {
             <div className={styles.featureMedia}>
               <img
                 src={IMAGES.collection}
-                alt="A Muga Mekhela Chador in its natural honey gold, laid out full length"
-                width="1200"
-                height="1500"
+                srcSet={COLLECTION_SRCSET}
+                sizes={COLLECTION_SIZES}
+                alt="A Muga Mekhela Chador in undyed Muga gold — the mekhela and the chador draped together, floral butis through the body and a wide woven border at the hem"
+                width="1122"
+                height="1402"
                 loading="lazy"
                 onError={onImageError}
               />
