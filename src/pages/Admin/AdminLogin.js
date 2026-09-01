@@ -15,6 +15,7 @@ import { ThemeProvider } from "@mui/material/styles";
 import { Icon } from "@iconify/react";
 import { useAdmin } from "../../context/AdminContext";
 import { useTheme } from "../../context/ThemeContext";
+import { useStoreSettings } from "../../context/StoreSettingsContext";
 import buildAdminTheme from "../../theme/adminTheme";
 import useAdminBodyClass from "../../hooks/useAdminBodyClass";
 
@@ -31,6 +32,7 @@ const AdminLogin = () => {
   const navigate = useNavigate();
   const { login, isAuthenticated, isLoading: adminLoading } = useAdmin();
   const { isDarkMode } = useTheme();
+  const { storeName } = useStoreSettings();
   useAdminBodyClass();
 
   const [formData, setFormData] = useState({
@@ -151,7 +153,7 @@ const AdminLogin = () => {
               >
                 <img
                   src={isDarkMode ? LOGO_WHITE : LOGO_LIGHT}
-                  alt={process.env.REACT_APP_NAME || "Meghali's Silk Admin"}
+                  alt={`${storeName} Admin`}
                   style={{ height: 60, width: "auto", maxWidth: "100%", display: "block" }}
                 />
               </Box>

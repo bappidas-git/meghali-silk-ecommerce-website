@@ -8,8 +8,12 @@ import {
 import { Icon } from "@iconify/react";
 import Swal from "sweetalert2";
 import apiService from "../../services/api";
+import { useStoreSettings } from "../../context/StoreSettingsContext";
 
 const AdminUsers = () => {
+  // Currency comes from the admin's own Settings > General, so every figure
+  // on this screen speaks the same money as the storefront.
+  const { formatPrice } = useStoreSettings();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -72,7 +76,7 @@ const AdminUsers = () => {
   };
 
   const formatDate = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "—";
-  const formatCurrency = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
+  const formatCurrency = (n) => formatPrice(n, { decimals: 0 });
 
   const filtered = users.filter((u) => {
     const q = search.toLowerCase();

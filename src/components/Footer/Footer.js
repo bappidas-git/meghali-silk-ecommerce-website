@@ -1,18 +1,13 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useDealsConfig } from "../../context/DealsConfigContext";
+import { useStoreSettings } from "../../context/StoreSettingsContext";
 import apiService from "../../services/api";
 import {
-  APP_NAME,
-  APP_TAGLINE,
-  DEFAULT_CURRENCY,
   FREE_SHIPPING_THRESHOLD,
   POLICY_LAST_UPDATED,
   SOCIAL_LINKS,
-  SUPPORT_ADDRESS,
-  SUPPORT_EMAIL,
   SUPPORT_HOURS,
-  SUPPORT_PHONE,
 } from "../../utils/constants";
 import { isEmailValid } from "../../utils/helpers";
 import styles from "./Footer.module.css";
@@ -55,12 +50,6 @@ const LOGO_H = 162;
 const EMAIL_INPUT_ID = "footer-newsletter-email";
 const EMAIL_ERROR_ID = "footer-newsletter-error";
 
-// Same idiom as the AnnouncementBar, from the same constant, so the two figures
-// can never drift apart.
-const shippingThreshold = `${DEFAULT_CURRENCY.symbol}${FREE_SHIPPING_THRESHOLD.toLocaleString(
-  "en-IN"
-)}`;
-
 // Store-attested promises only. Every line here is written down elsewhere in the
 // storefront — the 7-day window in RefundPolicy and the FAQ, the figure in
 // FREE_SHIPPING_THRESHOLD, the fabrics in the catalogue. No ratings, no
@@ -78,7 +67,10 @@ const TRUST_ITEMS = [
   },
   {
     id: "shipping",
-    label: `Free shipping above ${shippingThreshold}`,
+    // {amount} is filled in at render in the store's own currency — same idiom
+    // and same constant as the AnnouncementBar, so the two figures can never
+    // drift apart.
+    label: "Free shipping above {amount}",
     path: "M18 18.5a1.5 1.5 0 001.5-1.5 1.5 1.5 0 00-1.5-1.5 1.5 1.5 0 00-1.5 1.5 1.5 1.5 0 001.5 1.5zM19.5 9.5h-3V12h4.46L19.5 9.5zM6 18.5A1.5 1.5 0 007.5 17 1.5 1.5 0 006 15.5 1.5 1.5 0 004.5 17 1.5 1.5 0 006 18.5zM20 8l3 4v5h-2c0 1.66-1.34 3-3 3s-3-1.34-3-3H9c0 1.66-1.34 3-3 3s-3-1.34-3-3H1V6c0-1.11.89-2 2-2h14v4h3zM3 6v9h.76c.55-.61 1.35-1 2.24-1 .89 0 1.69.39 2.24 1H15V6H3z",
   },
   {
@@ -90,6 +82,20 @@ const TRUST_ITEMS = [
 
 const Footer = () => {
   const { enabled: dealsEnabled } = useDealsConfig();
+  // Wordmark label, brand line, contact block and the shipping figure all come
+  // from the admin's Settings > General, so the close of every page states what
+  // the store itself says.
+  const {
+    storeName,
+    tagline,
+    email: supportEmail,
+    phone: supportPhone,
+    address: supportAddress,
+    emailHref,
+    phoneHref,
+    formatPrice,
+  } = useStoreSettings();
+  const freeShippingLabel = formatPrice(FREE_SHIPPING_THRESHOLD, { decimals: 0 });
   const [email, setEmail] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [subscribeStatus, setSubscribeStatus] = useState("idle"); // idle | success | error
@@ -281,13 +287,13 @@ const Footer = () => {
               <img
                 className={styles.logo}
                 src={LOGO_SRC}
-                alt={APP_NAME}
+                alt={storeName}
                 width={LOGO_W}
                 height={LOGO_H}
                 loading="lazy"
                 decoding="async"
               />
-              <p className={styles.brandLine}>{APP_TAGLINE}</p>
+              <p className={styles.brandLine}>{tagline}</p>
               <p className={styles.brandNote}>
                 Muga, Eri and Pat silk, handwoven on the looms of Sualkuchi,
                 Assam.
@@ -295,20 +301,17 @@ const Footer = () => {
 
               <dl className={styles.contact}>
                 <dt className={styles.contactLabel}>Studio</dt>
-                <dd className={styles.contactValue}>{SUPPORT_ADDRESS}</dd>
+                <dd className={styles.contactValue}>{supportAddress}</dd>
                 <dt className={styles.contactLabel}>Write</dt>
                 <dd className={styles.contactValue}>
-                  <a className={styles.contactLink} href={`mailto:${SUPPORT_EMAIL}`}>
-                    {SUPPORT_EMAIL}
+                  <a className={styles.contactLink} href={emailHref}>
+                    {supportEmail}
                   </a>
                 </dd>
                 <dt className={styles.contactLabel}>Call</dt>
                 <dd className={styles.contactValue}>
-                  <a
-                    className={styles.contactLink}
-                    href={`tel:${SUPPORT_PHONE.replace(/\s/g, "")}`}
-                  >
-                    {SUPPORT_PHONE}
+                  <a className={styles.contactLink} href={phoneHref}>
+                    {supportPhone}
                   </a>
                 </dd>
                 <dt className={styles.contactLabel}>Hours</dt>
@@ -384,7 +387,7 @@ const Footer = () => {
                   >
                     <path d={item.path} />
                   </svg>
-                  <span>{item.label}</span>
+                  <span>{item.label.replace("{amount}", freeShippingLabel)}</span>
                 </li>
               ))}
             </ul>
@@ -433,7 +436,7 @@ const Footer = () => {
         <div className={styles.container}>
           <div className={styles.bottomInner}>
             <p className={styles.copyright}>
-              &copy; {currentYear} {APP_NAME}. All rights reserved.
+              &copy; {currentYear} {storeName}. All rights reserved.
               <span className={styles.policyDate}>
                 {" "}
                 Policies last updated {POLICY_LAST_UPDATED}.

@@ -26,6 +26,8 @@ import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
 import apiService from "../../services/api";
 import { normalizeHeroConfig, normalizeHeroSlides } from "../../utils/heroConfig";
+import { SUPPORTED_CURRENCIES } from "../../utils/storeSettings";
+import { notifyStoreSettingsUpdated } from "../../context/StoreSettingsContext";
 
 // Tab Panel component
 function TabPanel(props) {
@@ -44,16 +46,9 @@ function TabPanel(props) {
 }
 
 // Supported currencies. Selecting one fills in the matching symbol (still
-// editable, for currencies/variants not listed here).
-const CURRENCIES = [
-  { code: "INR", symbol: "₹", label: "Indian Rupee (₹)" },
-  { code: "USD", symbol: "$", label: "US Dollar ($)" },
-  { code: "EUR", symbol: "€", label: "Euro (€)" },
-  { code: "GBP", symbol: "£", label: "British Pound (£)" },
-  { code: "AED", symbol: "د.إ", label: "UAE Dirham (د.إ)" },
-  { code: "AUD", symbol: "A$", label: "Australian Dollar (A$)" },
-  { code: "CAD", symbol: "C$", label: "Canadian Dollar (C$)" },
-];
+// editable, for currencies/variants not listed here). Shared with the
+// storefront so the dropdown and every price agree on what a code prints as.
+const CURRENCIES = SUPPORTED_CURRENCIES;
 
 const AdminSettings = () => {
   const navigate = useNavigate();
@@ -188,6 +183,10 @@ const AdminSettings = () => {
         codMaxOrder: Number(paymentForm.codMaxOrder) || 0,
       });
       setSnackbar({ open: true, message: "Settings saved successfully", severity: "success" });
+      // Tell every StoreSettingsProvider consumer to refetch, so the admin shell
+      // and any storefront tab pick the new name, currency, contact details, tax
+      // rate and COD rules up without a reload.
+      notifyStoreSettingsUpdated();
       // Reload so the form reflects exactly what was persisted.
       loadSettings();
     } catch (error) {

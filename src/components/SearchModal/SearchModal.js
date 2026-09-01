@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import apiService from "../../services/api";
+import { useStoreSettings } from "../../context/StoreSettingsContext";
 import { formatCurrency, getProductMinPrice, productPath } from "../../utils/helpers";
 import StarRating from "../storefront/StarRating";
 import { DURATION, RISE, overlay, staggerDelay, t } from "../../theme/motion";
@@ -286,6 +287,7 @@ const Icon = {
 // ---------------------------------------------------------------------------
 const SearchModal = ({ open, onClose }) => {
   const navigate = useNavigate();
+  const { storeName } = useStoreSettings();
   const reduceMotion = useReducedMotion();
   const inputRef = useRef(null);
   const modalRef = useRef(null);
@@ -585,7 +587,7 @@ const SearchModal = ({ open, onClose }) => {
           onClick={onClose}
           role="dialog"
           aria-modal="true"
-          aria-label="Search Meghali's Silk"
+          aria-label={`Search ${storeName}`}
         >
           <motion.div
             ref={modalRef}
@@ -632,7 +634,7 @@ const SearchModal = ({ open, onClose }) => {
                     value={query}
                     onChange={handleInputChange}
                     autoComplete="off"
-                    aria-label="Search Meghali's Silk"
+                    aria-label={`Search ${storeName}`}
                   />
                   {query && (
                     <button

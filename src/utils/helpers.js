@@ -1,3 +1,9 @@
+import {
+  DEFAULT_STORE_SETTINGS,
+  SUPPORTED_CURRENCIES,
+  formatMoney,
+} from "./storeSettings";
+
 // Inline SVG placeholder (no network) used when an image is missing or its URL
 // fails to load, so image-bearing cards always degrade gracefully.
 //
@@ -24,14 +30,48 @@ export const onImageError = (e) => {
   e.currentTarget.src = PLACEHOLDER_IMG;
 };
 
-export const formatCurrency = (amount, currency = "INR") => {
-  const locale = currency === "INR" ? "en-IN" : "en-US";
-  return new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency: currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
+// ── Active currency ─────────────────────────────────────────────
+// The currency the admin picked in Settings > General, mirrored here as module
+// state by StoreSettingsProvider. formatCurrency() is called from ~20 places
+// that have no reason to know where the setting came from, so they keep calling
+// it with just an amount and quietly follow the store's currency.
+//
+// Components that must repaint the instant the setting changes (every price on
+// the storefront and in the admin) read `formatPrice` off useStoreSettings()
+// instead; this default is what keeps the stragglers correct.
+let activeCurrency = {
+  code: DEFAULT_STORE_SETTINGS.store.currency,
+  symbol: DEFAULT_STORE_SETTINGS.store.currencySymbol,
+};
+
+export const setActiveCurrency = (code, symbol) => {
+  activeCurrency = {
+    code: code || DEFAULT_STORE_SETTINGS.store.currency,
+    symbol: symbol || code || DEFAULT_STORE_SETTINGS.store.currencySymbol,
+  };
+};
+
+export const getActiveCurrency = () => activeCurrency;
+
+// The symbol to print for a currency code: the admin's own symbol when the code
+// is the one they configured (so a hand-typed "Rs." survives), otherwise the
+// table, otherwise the code itself.
+export const currencySymbolFor = (code) => {
+  if (!code || code === activeCurrency.code) return activeCurrency.symbol;
+  const known = SUPPORTED_CURRENCIES.find((c) => c.code === code);
+  return known ? known.symbol : code;
+};
+
+// formatCurrency(1299)                        -> "₹1,299.00" (store currency)
+// formatCurrency(1299, "USD")                 -> "$1,299.00"
+// formatCurrency(1299, null, { decimals: 0 }) -> "₹1,299"
+export const formatCurrency = (amount, currency, options = {}) => {
+  const code = currency || activeCurrency.code;
+  return formatMoney(amount, {
+    currency: code,
+    currencySymbol: options.symbol || currencySymbolFor(code),
+    decimals: options.decimals ?? 2,
+  });
 };
 
 // Get the minimum price from product variants

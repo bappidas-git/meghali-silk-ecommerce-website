@@ -8,24 +8,27 @@
 // the stylesheet header for the shared vocabulary.
 //
 // WHAT THE REBUILD CORRECTED
-//   • THE GST CLAUSE WAS WRONG. It read "prices … are inclusive of applicable
-//     GST", but the store does the opposite: `settings.store.taxIncluded` is
-//     false and Checkout adds `taxRate` (5%) on top of the discounted subtotal
-//     as its own "Tax (5% GST)" line. The clause now says what the checkout
-//     actually does.
+//   • THE TAX CLAUSE WAS WRONG, AND THEN IT WAS FROZEN. It read "prices … are
+//     inclusive of applicable GST" while the checkout did the opposite. It now
+//     WRITES ITSELF from `settings.store` — currency, symbol, taxRate and
+//     taxIncluded — so changing any of them in Settings > General re-words the
+//     clause instead of leaving a false one on the page.
 //   • THE SHIPPING CLAUSE WAS ONE LONG SENTENCE. The rates and windows are the
 //     part a reader comes for, so the three live methods in `shipping_methods`
 //     — ₹99 free above ₹999, ₹199 free above ₹4,999, ₹499 same-day in Kolkata —
 //     are now a hairline definitions list instead of prose.
-//   • THE PAYMENT CLAUSE OMITTED THE COD CEILING. Cash on delivery is capped at
-//     ₹50,000 by `settings.payment.codMaxOrder`; the clause now states it.
+//   • THE PAYMENT CLAUSE OMITTED THE COD CEILING. It now states the live
+//     `settings.payment` ceiling, and drops the sentence entirely when the
+//     admin turns cash on delivery off.
 //   • THE RETURN WINDOW IS NO LONGER A LITERAL. It interpolates
 //     `STOREFRONT_CONFIG.returnsWindowDays`, the same value the buy-box badge
 //     and the Refund Policy read, so the three can never drift apart.
 //
 // STATIC BY DESIGN
-//   No API calls and none needed. `POLICY_LAST_UPDATED` is shared with the
-//   other three policy pages so they can never disagree about their date.
+//   No API calls of its own — the store's name, contact details, currency, tax
+//   treatment and COD rules arrive through StoreSettingsContext.
+//   `POLICY_LAST_UPDATED` is shared with the other three policy pages so they
+//   can never disagree about their date.
 //
 // THEMING
 //   Tokens only; ThemeContext is consumed for nothing but the `color-scheme`
@@ -38,16 +41,46 @@ import { reveal as sharedReveal } from "../../theme/motion";
 import { useTheme } from "../../context/ThemeContext";
 import { STOREFRONT_CONFIG } from "../../theme/tokens";
 import {
-  APP_NAME,
-  SUPPORT_EMAIL,
-  SUPPORT_ADDRESS,
   POLICY_LAST_UPDATED,
 } from "../../utils/constants";
+import { useStoreSettings } from "../../context/StoreSettingsContext";
+import { SUPPORTED_CURRENCIES } from "../../utils/storeSettings";
+import { formatCurrency } from "../../utils/helpers";
 import styles from "./TermsOfService.module.css";
 
 const RETURN_DAYS = STOREFRONT_CONFIG.returnsWindowDays;
 
 const TermsOfService = () => {
+  // Store name and contact details are whatever the admin last saved in
+  // Settings > General, so the policy never names a store that no longer exists.
+  const {
+    storeName,
+    email: supportEmail,
+    address: supportAddress,
+    emailHref,
+    currency,
+    currencySymbol,
+    taxRate,
+    taxIncluded,
+    payment,
+  } = useStoreSettings();
+
+  // The pricing and payment clauses have to state what the checkout actually
+  // does, so they are written from the live settings rather than typed out.
+  const currencyName =
+    SUPPORTED_CURRENCIES.find((c) => c.code === currency)?.label.replace(
+      / *([^)]*)$/,
+      ""
+    ) || currency;
+  const codClause = !payment.codEnabled
+    ? "Cash on delivery is not currently offered."
+    : payment.codMaxOrder
+    ? `Cash on delivery is available on orders up to ${formatCurrency(
+        payment.codMaxOrder,
+        null,
+        { decimals: 0 }
+      )} and may be withheld for addresses with a history of refused deliveries.`
+    : "Cash on delivery is available and may be withheld for addresses with a history of refused deliveries.";
   const { isDarkMode } = useTheme();
   const prefersReducedMotion = useReducedMotion();
 
@@ -60,7 +93,7 @@ const TermsOfService = () => {
     {
       title: "Accepting these terms",
       body: [
-        `By browsing or buying from ${APP_NAME}, operated by Galleria Producer Company Limited of Kolkata, West Bengal, you agree to the terms set out below. If you do not agree with them, please do not use the site.`,
+        `By browsing or buying from ${storeName}, operated by Galleria Producer Company Limited of Kolkata, West Bengal, you agree to the terms set out below. If you do not agree with them, please do not use the site.`,
         "We may revise these terms from time to time. The version published here at the moment you place an order is the one that governs it.",
       ],
     },
@@ -74,7 +107,13 @@ const TermsOfService = () => {
     {
       title: "Orders and pricing",
       body: [
-        "All prices are shown in Indian Rupees (₹) and are exclusive of GST. GST is calculated at checkout and appears as its own line on the order summary and on your invoice.",
+        `All prices are shown in ${currencyName} (${currencySymbol}) and are ${
+          taxIncluded ? "inclusive of" : "exclusive of"
+        } tax at ${taxRate}%. ${
+          taxIncluded
+            ? "The tax already inside the price is broken out on the order summary and on your invoice."
+            : "Tax is calculated at checkout and appears as its own line on the order summary and on your invoice."
+        }`,
         "Prices, offers and coupon terms may change without notice, but never after you have placed an order. Every piece is handwoven and held in small numbers, so an order is an offer to buy that we accept when we confirm it — if a piece has sold in the meantime we will tell you and refund you in full.",
         "Handloom silk varies. Slight irregularities in the weave, and small differences between the colour on your screen and the colour in your hands, are characteristics of the cloth rather than faults.",
       ],
@@ -83,7 +122,7 @@ const TermsOfService = () => {
       title: "Payment",
       body: [
         "We accept credit and debit cards, UPI, net banking, wallets, and cash on delivery. Cards and UPI are handled by PCI-DSS-compliant gateways on their own pages; we never see or store your full card number.",
-        "Cash on delivery is available on orders up to ₹50,000 and may be withheld for addresses with a history of refused deliveries. Store credit behaves like a prepaid gift card: it is applied last, against the grand total after discounts, shipping and GST, and anything still outstanding is collected by your chosen method.",
+        `${codClause} Store credit behaves like a prepaid gift card: it is applied last, against the grand total after discounts, shipping and tax, and anything still outstanding is collected by your chosen method.`,
       ],
     },
     {
@@ -127,7 +166,7 @@ const TermsOfService = () => {
     {
       title: "Intellectual property",
       body: [
-        `Everything published on ${APP_NAME} — the photographs, the written descriptions, the wordmark and the site itself — belongs to Galleria Producer Company Limited or is used by us under licence. You may not copy, republish or make derivative works from it without our written permission.`,
+        `Everything published on ${storeName} — the photographs, the written descriptions, the wordmark and the site itself — belongs to Galleria Producer Company Limited or is used by us under licence. You may not copy, republish or make derivative works from it without our written permission.`,
         "Traditional Assamese motifs are the shared inheritance of the weaving communities of Assam; nothing here claims ownership of them. Our claim is to our own photographs, text and design.",
       ],
     },
@@ -172,7 +211,7 @@ const TermsOfService = () => {
               Last updated: {POLICY_LAST_UPDATED}
             </p>
             <p className={styles.standfirst}>
-              The agreement between you and {APP_NAME} when you shop with us —
+              The agreement between you and {storeName} when you shop with us —
               what we undertake to do, what we ask of you, and where each of us
               stands if something goes wrong.
             </p>
@@ -220,8 +259,8 @@ const TermsOfService = () => {
             <p className={styles.colophonLabel}>Questions about these terms</p>
             <p className={styles.colophonText}>
               Write to{" "}
-              <a href={`mailto:${SUPPORT_EMAIL}`} className={styles.link}>
-                {SUPPORT_EMAIL}
+              <a href={emailHref} className={styles.link}>
+                {supportEmail}
               </a>
               , or read the{" "}
               <Link to="/privacy" className={styles.link}>
@@ -229,7 +268,7 @@ const TermsOfService = () => {
               </Link>{" "}
               for how we handle your data.
             </p>
-            <p className={styles.colophonText}>{SUPPORT_ADDRESS}</p>
+            <p className={styles.colophonText}>{supportAddress}</p>
           </div>
         </div>
       </div>

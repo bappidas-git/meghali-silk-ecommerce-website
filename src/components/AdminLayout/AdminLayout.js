@@ -31,6 +31,7 @@ import { ThemeProvider, alpha } from "@mui/material/styles";
 import { Icon } from "@iconify/react";
 import { useAdmin } from "../../context/AdminContext";
 import { useThemeContext } from "../../context/ThemeContext";
+import { useStoreSettings } from "../../context/StoreSettingsContext";
 import buildAdminTheme from "../../theme/adminTheme";
 import useAdminBodyClass from "../../hooks/useAdminBodyClass";
 import apiService from "../../services/api";
@@ -147,6 +148,11 @@ const AdminLayout = () => {
   const location = useLocation();
   const { admin, isAuthenticated, isLoading: adminLoading, logout } = useAdmin();
   const { mode, toggleTheme } = useThemeContext();
+  // Names the shell after the store the admin configured — and, by subscribing
+  // here at the root of the admin tree, makes a currency change repaint every
+  // figure on the page under it (the admin screens format with the plain
+  // formatCurrency() helper, which cannot ask React for a re-render itself).
+  const { storeName } = useStoreSettings();
   // Dedicated flat/professional admin theme; tracks the same light/dark mode
   // as the storefront toggle but swaps the whole design language.
   const adminTheme = useMemo(() => buildAdminTheme(mode), [mode]);
@@ -360,7 +366,7 @@ const AdminLayout = () => {
         >
           <img
             src={mode === "dark" ? LOGO_WHITE : LOGO_LIGHT}
-            alt={process.env.REACT_APP_NAME || "Meghali's Silk Admin"}
+            alt={`${storeName} Admin`}
             style={{ height: 36, width: "auto", maxWidth: "100%", display: "block" }}
           />
         </Box>

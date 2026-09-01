@@ -19,7 +19,7 @@ import styles from "./PriceBlock.module.css";
 // Props:
 //   price        number   current/selling price (required)
 //   comparePrice number   original price (optional)
-//   currency     string   ISO code (default "INR")
+//   currency     string   ISO code (defaults to the store's own currency)
 //   size         "sm"|"md"|"lg"  visual scale (default "lg" for the PDP)
 //   showSavings  boolean  show "You save ₹X" line (default true on lg)
 //   taxNote      string   optional transparency note, e.g. "Inclusive of all taxes"
@@ -27,7 +27,7 @@ import styles from "./PriceBlock.module.css";
 const PriceBlock = ({
   price = 0,
   comparePrice = 0,
-  currency = "INR",
+  currency,
   size = "lg",
   showSavings,
   taxNote,

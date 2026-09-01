@@ -9,8 +9,12 @@ import {
 import { Icon } from "@iconify/react";
 import Swal from "sweetalert2";
 import apiService from "../../services/api";
+import { useStoreSettings } from "../../context/StoreSettingsContext";
 
 const AdminCoupons = () => {
+  // Currency comes from the admin's own Settings > General, so every figure
+  // on this screen speaks the same money as the storefront.
+  const { currencySymbol, formatPrice } = useStoreSettings();
   const [coupons, setCoupons] = useState([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -98,7 +102,8 @@ const AdminCoupons = () => {
   };
 
   const formatDate = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "No expiry";
-  const formatValue = (coupon) => coupon.type === "percentage" ? `${coupon.value}%` : `₹${coupon.value}`;
+  const formatValue = (coupon) =>
+    coupon.type === "percentage" ? `${coupon.value}%` : formatPrice(coupon.value, { decimals: 0 });
   const isExpired = (coupon) => coupon.expiresAt && new Date(coupon.expiresAt) < new Date();
   const usagePercent = (coupon) => coupon.usageLimit ? Math.min((coupon.usedCount / coupon.usageLimit) * 100, 100) : null;
 
@@ -170,9 +175,9 @@ const AdminCoupons = () => {
                       </TableCell>
                       <TableCell>
                         <Chip label={formatValue(coupon)} size="small" color={coupon.type === "percentage" ? "primary" : "secondary"} />
-                        {coupon.maxDiscount && <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>Max: ₹{coupon.maxDiscount}</Typography>}
+                        {coupon.maxDiscount && <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>Max: {formatPrice(coupon.maxDiscount, { decimals: 0 })}</Typography>}
                       </TableCell>
-                      <TableCell><Typography variant="body2">₹{coupon.minOrderAmount || 0}</Typography></TableCell>
+                      <TableCell><Typography variant="body2">{formatPrice(coupon.minOrderAmount || 0, { decimals: 0 })}</Typography></TableCell>
                       <TableCell sx={{ minWidth: 140 }}>
                         <Typography variant="caption">{coupon.usedCount} {coupon.usageLimit ? `/ ${coupon.usageLimit}` : "uses"}</Typography>
                         {pct !== null && <LinearProgress variant="determinate" value={pct} sx={{ mt: 0.5, height: 4, borderRadius: 1 }} color={pct >= 90 ? "error" : pct >= 70 ? "warning" : "primary"} />}
@@ -226,20 +231,20 @@ const AdminCoupons = () => {
                 <InputLabel>Type</InputLabel>
                 <Select value={form.type} label="Type" onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}>
                   <MenuItem value="percentage">Percentage (%)</MenuItem>
-                  <MenuItem value="fixed">Fixed Amount (₹)</MenuItem>
+                  <MenuItem value="fixed">Fixed Amount ({currencySymbol})</MenuItem>
                 </Select>
               </FormControl>
               <TextField
-                label={form.type === "percentage" ? "Value (%)" : "Value (₹)"}
+                label={form.type === "percentage" ? "Value (%)" : `Value (${currencySymbol})`}
                 type="number" value={form.value}
                 onChange={(e) => setForm((f) => ({ ...f, value: parseFloat(e.target.value) || 0 }))}
                 size="small" sx={{ flex: 1 }}
-                InputProps={{ endAdornment: <InputAdornment position="end">{form.type === "percentage" ? "%" : "₹"}</InputAdornment> }}
+                InputProps={{ endAdornment: <InputAdornment position="end">{form.type === "percentage" ? "%" : currencySymbol}</InputAdornment> }}
               />
             </Box>
             <Box sx={{ display: "flex", gap: 2 }}>
-              <TextField label="Min. Order Amount (₹)" type="number" value={form.minOrderAmount} onChange={(e) => setForm((f) => ({ ...f, minOrderAmount: parseFloat(e.target.value) || 0 }))} size="small" sx={{ flex: 1 }} />
-              <TextField label="Max. Discount (₹)" type="number" value={form.maxDiscount || ""} onChange={(e) => setForm((f) => ({ ...f, maxDiscount: e.target.value ? parseFloat(e.target.value) : null }))} size="small" sx={{ flex: 1 }} helperText="Optional cap" />
+              <TextField label={`Min. Order Amount (${currencySymbol})`} type="number" value={form.minOrderAmount} onChange={(e) => setForm((f) => ({ ...f, minOrderAmount: parseFloat(e.target.value) || 0 }))} size="small" sx={{ flex: 1 }} />
+              <TextField label={`Max. Discount (${currencySymbol})`} type="number" value={form.maxDiscount || ""} onChange={(e) => setForm((f) => ({ ...f, maxDiscount: e.target.value ? parseFloat(e.target.value) : null }))} size="small" sx={{ flex: 1 }} helperText="Optional cap" />
             </Box>
             <Box sx={{ display: "flex", gap: 2 }}>
               <TextField label="Total Usage Limit" type="number" value={form.usageLimit || ""} onChange={(e) => setForm((f) => ({ ...f, usageLimit: e.target.value ? parseInt(e.target.value) : null }))} size="small" sx={{ flex: 1 }} helperText="Blank = unlimited" />

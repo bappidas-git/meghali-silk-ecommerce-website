@@ -163,7 +163,7 @@ export const FAQ_ITEMS = [
     id: 5,
     question: "How long does delivery take, and is shipping free?",
     answer:
-      "Standard delivery reaches most of India in 5-7 business days and is free on orders above ₹999. Express delivery arrives in 2-3 business days, and same-day delivery is available within select Kolkata pin codes. Every order is packed in insured silk packaging, and the exact delivery charge for your address is shown at checkout before you pay.",
+      "Standard delivery reaches most of India in 5-7 business days and is free on orders above {freeShipping}. Express delivery arrives in 2-3 business days, and same-day delivery is available within select Kolkata pin codes. Every order is packed in insured silk packaging, and the exact delivery charge for your address is shown at checkout before you pay.",
   },
   {
     id: 6,
@@ -175,7 +175,7 @@ export const FAQ_ITEMS = [
     id: 7,
     question: "Which payments do you accept, and is Cash on Delivery available?",
     answer:
-      "UPI, credit and debit cards, net banking and wallets are all accepted, and every payment is handled over an encrypted connection by the payment gateway. Cash on Delivery is available on orders up to ₹50,000 across most pin codes in India. Prices are shown exclusive of GST, which is calculated at checkout.",
+      "UPI, credit and debit cards, net banking and wallets are all accepted, and every payment is handled over an encrypted connection by the payment gateway. {codSentence} Prices are shown {taxNote}.",
   },
   {
     id: 8,
@@ -207,7 +207,7 @@ export const WHY_CHOOSE_US = [
   },
   {
     id: 3,
-    title: "Free shipping above ₹999",
+    title: "Free shipping above {freeShipping}",
     description: "Complimentary insured delivery on every order over the threshold",
     icon: "mdi:truck-fast",
   },

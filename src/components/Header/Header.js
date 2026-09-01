@@ -5,9 +5,9 @@ import { useCart } from "../../hooks/useCart";
 import { useAuth } from "../../hooks/useAuth";
 import { useWishlist } from "../../context/WishlistContext";
 import { useDealsConfig } from "../../context/DealsConfigContext";
+import { useStoreSettings } from "../../context/StoreSettingsContext";
 import apiService from "../../services/api";
 import { categoryParam, getMainMenuCategories } from "../../utils/categories";
-import { APP_NAME } from "../../utils/constants";
 import AnnouncementBar from "../AnnouncementBar";
 import TrustStrip from "../TrustStrip";
 import CartDrawer from "../CartDrawer/CartDrawer";
@@ -66,6 +66,9 @@ const Header = () => {
   const { getWishlistCount } = useWishlist();
   // The "Today's Deals" link is hidden when the admin turns the deals page off.
   const { enabled: dealsEnabled } = useDealsConfig();
+  // Store name comes from Settings > General, so renaming the store renames the
+  // lockup's label everywhere the artwork itself cannot say it.
+  const { storeName } = useStoreSettings();
   const isMobile = useMediaQuery("(max-width:768px)");
   const isTablet = useMediaQuery("(max-width:1024px)");
 
@@ -311,11 +314,11 @@ const Header = () => {
             )}
 
             {/* Wordmark — transparent-ground artwork straight on the ivory. */}
-            <Link to="/" className={styles.logoLink} aria-label={APP_NAME}>
+            <Link to="/" className={styles.logoLink} aria-label={storeName}>
               <img
                 className={styles.logoImg}
                 src={LOGO_SRC}
-                alt={APP_NAME}
+                alt={storeName}
                 width={LOGO_W}
                 height={LOGO_H}
                 loading="eager"

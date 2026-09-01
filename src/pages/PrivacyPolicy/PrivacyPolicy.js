@@ -36,14 +36,15 @@ import { motion, useReducedMotion } from "framer-motion";
 import { reveal as sharedReveal } from "../../theme/motion";
 import { useTheme } from "../../context/ThemeContext";
 import {
-  APP_NAME,
-  SUPPORT_EMAIL,
-  SUPPORT_ADDRESS,
   POLICY_LAST_UPDATED,
 } from "../../utils/constants";
+import { useStoreSettings } from "../../context/StoreSettingsContext";
 import styles from "./PrivacyPolicy.module.css";
 
 const PrivacyPolicy = () => {
+  // Store name and contact details are whatever the admin last saved in
+  // Settings > General, so the policy never names a store that no longer exists.
+  const { storeName, email: supportEmail, address: supportAddress, emailHref } = useStoreSettings();
   const { isDarkMode } = useTheme();
   const prefersReducedMotion = useReducedMotion();
 
@@ -59,7 +60,7 @@ const PrivacyPolicy = () => {
     {
       title: "What we collect",
       body: [
-        `Galleria Producer Company Limited, the company behind ${APP_NAME}, collects the details you give us when you open an account, place an order or write to us: your name, email address, phone number, and your delivery and billing addresses. If you order a blouse stitched to measure, we also hold the measurements you send us for as long as that order is open.`,
+        `Galleria Producer Company Limited, the company behind ${storeName}, collects the details you give us when you open an account, place an order or write to us: your name, email address, phone number, and your delivery and billing addresses. If you order a blouse stitched to measure, we also hold the measurements you send us for as long as that order is open.`,
         "We record how the site is used — the pages you view, your device and browser, and an approximate location from your IP address — together with the cookies described in our Cookie Policy. Card, UPI and net-banking credentials are entered on our payment provider's own page and never reach our servers.",
       ],
     },
@@ -148,7 +149,7 @@ const PrivacyPolicy = () => {
               Last updated: {POLICY_LAST_UPDATED}
             </p>
             <p className={styles.standfirst}>
-              {APP_NAME} is a small house selling handwoven Assamese silk. This
+              {storeName} is a small house selling handwoven Assamese silk. This
               policy sets out what we collect when you shop with us, why we hold
               it, and how to have it corrected or removed.
             </p>
@@ -183,12 +184,12 @@ const PrivacyPolicy = () => {
             <p className={styles.colophonLabel}>Privacy questions</p>
             <p className={styles.colophonText}>
               Write to{" "}
-              <a href={`mailto:${SUPPORT_EMAIL}`} className={styles.link}>
-                {SUPPORT_EMAIL}
+              <a href={emailHref} className={styles.link}>
+                {supportEmail}
               </a>{" "}
               and mark your message for the privacy desk.
             </p>
-            <p className={styles.colophonText}>{SUPPORT_ADDRESS}</p>
+            <p className={styles.colophonText}>{supportAddress}</p>
           </div>
         </div>
       </div>

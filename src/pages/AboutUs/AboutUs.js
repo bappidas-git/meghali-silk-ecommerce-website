@@ -59,6 +59,7 @@ import { Link } from "react-router-dom";
 import { motion, useReducedMotion } from "framer-motion";
 import { reveal as sharedReveal } from "../../theme/motion";
 import { onImageError } from "../../utils/helpers";
+import { useStoreSettings } from "../../context/StoreSettingsContext";
 import styles from "./AboutUs.module.css";
 
 // ---- Imagery --------------------------------------------------------------
@@ -144,7 +145,7 @@ const JOURNEY = [
     year: "2010",
     title: "The house opens",
     text:
-      "Meghali's Silk begins in Kolkata as the flagship label of Galleria Producer Company Limited, selling Assamese handloom silk to people who could not get to the looms themselves.",
+      "{store} begins in Kolkata as the flagship label of Galleria Producer Company Limited, selling Assamese handloom silk to people who could not get to the looms themselves.",
   },
   {
     year: "2014",
@@ -196,6 +197,7 @@ const Arrow = () => (
 
 const AboutUs = () => {
   const prefersReducedMotion = useReducedMotion();
+  const { storeName } = useStoreSettings();
 
   // The shared in-view reveal from theme/motion.js — the same gentle fade and
   // rise a home section or a policy clause gets. It returns nothing at all
@@ -233,7 +235,7 @@ const AboutUs = () => {
             Three silks, one river, and the families who weave them.
           </h1>
           <p className={styles.standfirst}>
-            Meghali's Silk began in Kolkata in 2010 on a single conviction: that
+            {storeName} began in Kolkata in 2010 on a single conviction: that
             the silk worth keeping is still made by hand, on the north bank of
             the Brahmaputra, by weavers who learned the loom from their mothers.
           </p>
@@ -270,7 +272,7 @@ const AboutUs = () => {
               </h2>
               <div className={styles.prose}>
                 <p className={styles.proseLead}>
-                  Meghali's Silk is the flagship label of{" "}
+                  {storeName} is the flagship label of{" "}
                   <strong>Galleria Producer Company Limited</strong>, a producer
                   company on Park Street in Kolkata built around a single trade:
                   Assamese handloom silk.
@@ -456,7 +458,9 @@ const AboutUs = () => {
                     <span className={styles.stepYear}>{step.year}</span>
                     <div className={styles.stepBody}>
                       <h3 className={styles.stepTitle}>{step.title}</h3>
-                      <p className={styles.stepText}>{step.text}</p>
+                      <p className={styles.stepText}>
+                        {step.text.replace("{store}", storeName)}
+                      </p>
                     </div>
                   </li>
                 ))}
@@ -474,7 +478,7 @@ const AboutUs = () => {
               &ldquo;We don't manufacture silk. We keep a craft alive, one loom
               at a time.&rdquo;
             </p>
-            <cite className={styles.quoteCite}>Meghali's Silk</cite>
+            <cite className={styles.quoteCite}>{storeName}</cite>
           </blockquote>
         </div>
       </motion.section>

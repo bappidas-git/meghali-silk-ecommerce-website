@@ -39,11 +39,9 @@ import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
+import { useStoreSettings } from "../../context/StoreSettingsContext";
 import apiService from "../../services/api";
 import {
-  SUPPORT_EMAIL,
-  SUPPORT_PHONE,
-  SUPPORT_ADDRESS,
   SUPPORT_HOURS,
   SOCIAL_LINKS,
   WHY_CHOOSE_US,
@@ -145,43 +143,39 @@ const MARKS = [
 // A message has to say something — the same floor the old form enforced.
 const MESSAGE_MIN = 20;
 
-// Live tel: / maps links, derived once from the constants above.
-const PHONE_TEL = `tel:${SUPPORT_PHONE.replace(/[^\d+]/g, "")}`;
-const MAPS_URL = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-  SUPPORT_ADDRESS
-)}`;
-
-// The three ways in. WhatsApp is only offered when a URL exists — an empty
+// The three ways in, built from the store's own contact details (the admin's
+// Settings > General). WhatsApp is only offered when a URL exists — an empty
 // entry drops the card rather than printing a dead one.
-const CHANNELS = [
-  {
-    key: "call",
-    glyph: "phone",
-    label: "Call",
-    value: SUPPORT_PHONE,
-    note: "Speak to the desk during showroom hours",
-    href: PHONE_TEL,
-    external: false,
-  },
-  {
-    key: "email",
-    glyph: "mail",
-    label: "Email",
-    value: SUPPORT_EMAIL,
-    note: "For measurements, care and considered questions",
-    href: `mailto:${SUPPORT_EMAIL}`,
-    external: false,
-  },
-  {
-    key: "whatsapp",
-    glyph: "whatsapp",
-    label: "WhatsApp",
-    value: "Start a chat",
-    note: "Send a photograph of the piece you are asking about",
-    href: SOCIAL_LINKS.WHATSAPP,
-    external: true,
-  },
-].filter((channel) => !!channel.href);
+const buildChannels = ({ phone, email, phoneHref, emailHref }) =>
+  [
+    {
+      key: "call",
+      glyph: "phone",
+      label: "Call",
+      value: phone,
+      note: "Speak to the desk during showroom hours",
+      href: phone ? phoneHref : "",
+      external: false,
+    },
+    {
+      key: "email",
+      glyph: "mail",
+      label: "Email",
+      value: email,
+      note: "For measurements, care and considered questions",
+      href: email ? emailHref : "",
+      external: false,
+    },
+    {
+      key: "whatsapp",
+      glyph: "whatsapp",
+      label: "WhatsApp",
+      value: "Start a chat",
+      note: "Send a photograph of the piece you are asking about",
+      href: SOCIAL_LINKS.WHATSAPP,
+      external: true,
+    },
+  ].filter((channel) => !!channel.href);
 
 // Follow our journey — the same filtered-by-URL rule the Footer uses.
 const SOCIALS = [
@@ -207,6 +201,24 @@ const EMPTY_LEAD = {
 const Support = () => {
   const { isDarkMode } = useTheme();
   const { user } = useAuth();
+  // Phone, email and the showroom address are whatever the admin last saved.
+  const {
+    email: supportEmail,
+    phone: supportPhone,
+    address: supportAddress,
+    emailHref,
+    phoneHref,
+    fillCopy,
+  } = useStoreSettings();
+  const channels = buildChannels({
+    phone: supportPhone,
+    email: supportEmail,
+    phoneHref,
+    emailHref,
+  });
+  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+    supportAddress
+  )}`;
 
   const [formData, setFormData] = useState(EMPTY_LEAD);
   const [errors, setErrors] = useState({});
@@ -320,7 +332,7 @@ const Support = () => {
 
         {/* ── 2. THE CHANNELS ───────────────────────────────────────────── */}
         <section className={styles.channels} aria-label="Ways to reach us">
-          {CHANNELS.map((channel) => (
+          {channels.map((channel) => (
             <a
               key={channel.key}
               className={styles.channel}
@@ -517,7 +529,7 @@ const Support = () => {
                 <span className={styles.railIcon}>
                   <Glyph name="pin" size={16} />
                 </span>
-                <span>{SUPPORT_ADDRESS}</span>
+                <span>{supportAddress}</span>
               </p>
               <p className={styles.railLine}>
                 <span className={styles.railIcon}>
@@ -527,7 +539,7 @@ const Support = () => {
               </p>
               <a
                 className={styles.railLink}
-                href={MAPS_URL}
+                href={mapsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
               >
@@ -566,7 +578,7 @@ const Support = () => {
               <ul className={styles.why}>
                 {WHY_CHOOSE_US.map((item) => (
                   <li key={item.id} className={styles.whyRow}>
-                    <span className={styles.whyTitle}>{item.title}</span>
+                    <span className={styles.whyTitle}>{fillCopy(item.title)}</span>
                     <span className={styles.whyDesc}>{item.description}</span>
                   </li>
                 ))}

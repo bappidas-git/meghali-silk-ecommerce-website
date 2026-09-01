@@ -9,6 +9,7 @@ import {
 import { Icon } from "@iconify/react";
 import Swal from "sweetalert2";
 import apiService from "../../services/api";
+import { useStoreSettings } from "../../context/StoreSettingsContext";
 
 const emptyProduct = {
   name: "", slug: "", sku: "", shortDescription: "", description: "",
@@ -34,6 +35,9 @@ const clampNum = (v, { int = false, fallback = 0 } = {}) => {
 const newVariantId = () => `v-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
 const AdminProducts = () => {
+  // Currency comes from the admin's own Settings > General, so every figure
+  // on this screen speaks the same money as the storefront.
+  const { currencySymbol, formatPrice } = useStoreSettings();
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -252,7 +256,7 @@ const AdminProducts = () => {
   };
 
   const getCategoryName = (id) => categories.find((c) => String(c.id) === String(id))?.name || "—";
-  const fc = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
+  const fc = (n) => formatPrice(n, { decimals: 0 });
 
   // For variant products the product-level stock is rarely the real figure, so
   // show the summed variant stock; the chip colour follows the same total.
@@ -418,17 +422,17 @@ const AdminProducts = () => {
             <Grid item xs={12}><Divider /><Typography variant="subtitle2" color="text.secondary" fontWeight={600} sx={{ mt: 1 }}>Pricing</Typography></Grid>
             <Grid item xs={12} sm={4}>
               <TextField
-                label="Selling Price (₹) *" type="number" value={form.price}
+                label={`Selling Price (${currencySymbol}) *`} type="number" value={form.price}
                 onChange={(e) => setField("price", clampNum(e.target.value))}
                 fullWidth size="small" inputProps={{ min: 0 }}
                 error={!!errors.price} helperText={errors.price}
               />
             </Grid>
             <Grid item xs={12} sm={4}>
-              <TextField label="Compare-at Price (₹)" type="number" value={form.comparePrice} onChange={(e) => setField("comparePrice", clampNum(e.target.value))} fullWidth size="small" inputProps={{ min: 0 }} helperText="Strikethrough price" />
+              <TextField label={`Compare-at Price (${currencySymbol})`} type="number" value={form.comparePrice} onChange={(e) => setField("comparePrice", clampNum(e.target.value))} fullWidth size="small" inputProps={{ min: 0 }} helperText="Strikethrough price" />
             </Grid>
             <Grid item xs={12} sm={4}>
-              <TextField label="Cost Price (₹)" type="number" value={form.costPrice} onChange={(e) => setField("costPrice", clampNum(e.target.value))} fullWidth size="small" inputProps={{ min: 0 }} helperText="For margin calculation" />
+              <TextField label={`Cost Price (${currencySymbol})`} type="number" value={form.costPrice} onChange={(e) => setField("costPrice", clampNum(e.target.value))} fullWidth size="small" inputProps={{ min: 0 }} helperText="For margin calculation" />
             </Grid>
 
             {/* Inventory */}
@@ -485,7 +489,7 @@ const AdminProducts = () => {
                       placeholder="e.g., 16GB / 512GB"
                     />
                     <TextField
-                      label="Price (₹)" type="number" value={v.price}
+                      label={`Price (${currencySymbol})`} type="number" value={v.price}
                       onChange={(e) => updateVariant(idx, "price", clampNum(e.target.value))}
                       size="small" sx={{ flex: 1, minWidth: 100 }} inputProps={{ min: 0 }}
                     />

@@ -8,6 +8,7 @@ import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import apiService from "../../services/api";
+import { useStoreSettings } from "../../context/StoreSettingsContext";
 
 // Keep status chip labels/colors identical to the Orders page (src/pages/Admin/AdminOrders.js)
 const FULFILLMENT_STATUS = {
@@ -60,6 +61,9 @@ const StatCard = ({ title, value, icon, color, subtitle, onClick }) => (
 );
 
 const AdminDashboard = () => {
+  // Currency comes from the admin's own Settings > General, so every figure
+  // on this screen speaks the same money as the storefront.
+  const { formatPrice } = useStoreSettings();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -97,7 +101,7 @@ const AdminDashboard = () => {
   };
 
   // Matches the currency style used across the admin pages (Orders, Payments, Users…).
-  const fc = (n) => `₹${Number(n || 0).toLocaleString("en-IN")}`;
+  const fc = (n) => formatPrice(n, { decimals: 0 });
 
   const formatDate = (d) => d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "2-digit" }) : "—";
 

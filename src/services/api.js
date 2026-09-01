@@ -1,6 +1,11 @@
 import axios from "axios";
 import BASE_URL, { IS_MOCK_API } from "./baseURL";
 import authStorage from "../utils/authStorage";
+import { formatCurrency } from "../utils/helpers";
+
+// Money inside a timeline entry or an error message, in whole units and in the
+// store's own currency (Settings > General) rather than a baked-in rupee sign.
+const money = (n) => formatCurrency(n, null, { decimals: 0 });
 
 // =============================================================================
 // API Service
@@ -211,7 +216,7 @@ const reflectReturnRefund = async (ret) => {
     // A full return restores the coupon redemption (a partial one keeps it —
     // the refund already reflects the net, post-coupon value of the items).
     let couponRestored = false;
-    const events = [historyEvent(`Return refund processed (${ret.returnNumber || "return"})`, `₹${payable.toLocaleString("en-IN")} refunded`)];
+    const events = [historyEvent(`Return refund processed (${ret.returnNumber || "return"})`, `${money(payable)} refunded`)];
     if (order && order.couponCode && !order.couponRestored && isFullReturnOfOrder(order, ret)) {
       couponRestored = await restoreCouponByCode(order.couponCode);
       if (couponRestored) events.push(historyEvent("Coupon usage restored", `${order.couponCode} freed for reuse`));
@@ -655,7 +660,7 @@ const performCancel = async (id, opts = {}, actor = null) => {
     };
     events.push(historyEvent(
       "Refund initiated",
-      `₹${amount.toLocaleString("en-IN")} via ${method.replace(/_/g, " ")} — settlement pending`,
+      `${money(amount)} via ${method.replace(/_/g, " ")} — settlement pending`,
       actor
     ));
     await markPaymentRefundPending(id, { amount, method, reason: reason || "Order cancelled" });
@@ -690,7 +695,7 @@ const performCancel = async (id, opts = {}, actor = null) => {
       });
       if (returned) {
         patch.storeCreditReturned = true;
-        events.push(historyEvent("Store credit returned", `₹${spent.toLocaleString("en-IN")} added back to your wallet`, actor));
+        events.push(historyEvent("Store credit returned", `${money(spent)} added back to your wallet`, actor));
         // A fully-store-credit order's captured store_credit payment must be
         // reversed too, so Admin → Payments doesn't show captured money against
         // a cancelled order. (Partial orders reverse the EXTERNAL payment via the
@@ -1426,7 +1431,7 @@ const apiService = {
           if (!coupon) throw reject("Invalid coupon code");
           if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) throw reject("Coupon has expired");
           if (coupon.usageLimit && coupon.usedCount >= coupon.usageLimit) throw reject("Coupon usage limit reached");
-          if (orderAmount < coupon.minOrderAmount) throw reject(`Minimum order amount is ₹${coupon.minOrderAmount}`);
+          if (orderAmount < coupon.minOrderAmount) throw reject(`Minimum order amount is ${money(coupon.minOrderAmount)}`);
           return coupon;
         }
         const response = await api.post("/coupons/validate", { code, orderAmount });
@@ -1905,7 +1910,7 @@ const apiService = {
             pendingRefund: { amount: amt, method, reason: reason || "Refund", reference, initiatedAt: stamp, by: currentAdminName() },
             statusHistory: [
               ...(current.statusHistory || []),
-              historyEvent("Refund initiated", `₹${amt.toLocaleString("en-IN")} via ${method.replace(/_/g, " ")}${reference ? ` · ref ${reference}` : ""} — settlement pending`),
+              historyEvent("Refund initiated", `${money(amt)} via ${method.replace(/_/g, " ")}${reference ? ` · ref ${reference}` : ""} — settlement pending`),
             ],
             updatedAt: stamp,
           });
@@ -1955,7 +1960,7 @@ const apiService = {
             pendingRefund: null,
             statusHistory: [
               ...(current.statusHistory || []),
-              historyEvent("Refund completed", `₹${amt.toLocaleString("en-IN")} via ${(pending.method || current.refundMethod || "original_payment").replace(/_/g, " ")} settled to customer`),
+              historyEvent("Refund completed", `${money(amt)} via ${(pending.method || current.refundMethod || "original_payment").replace(/_/g, " ")} settled to customer`),
             ],
             updatedAt: stamp,
           });
@@ -2173,7 +2178,7 @@ const apiService = {
           const payment = (await api.get(`/payments/${paymentId}`)).data;
           const remaining = (Number(payment.amount) || 0) - (Number(payment.refundAmount) || 0);
           if (Number(amount) > remaining) {
-            const err = new Error(`Refund exceeds the remaining ₹${remaining}`);
+            const err = new Error(`Refund exceeds the remaining ${money(remaining)}`);
             err.code = "REFUND_EXCEEDS";
             throw err;
           }
@@ -2181,7 +2186,7 @@ const apiService = {
           await reflectPaymentOnOrder(
             payment.orderId,
             updated.status === "refunded" ? "refunded" : "partially_refunded",
-            `Refund issued (₹${Number(amount).toLocaleString("en-IN")})`,
+            `Refund issued (${money(amount)})`,
             reason
           );
           // Record it in the refund ledger (Admin → Payments · Refunds).

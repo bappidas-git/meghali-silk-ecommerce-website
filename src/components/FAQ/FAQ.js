@@ -1,9 +1,12 @@
 import React, { useState } from "react";
 import { FAQ_ITEMS } from "../../utils/constants";
+import { useStoreSettings } from "../../context/StoreSettingsContext";
 import styles from "./FAQ.module.css";
 
 const FAQ = () => {
   const [openId, setOpenId] = useState(null);
+  // The shipping, COD and tax figures in the answers are the store's own.
+  const { fillCopy } = useStoreSettings();
 
   return (
     <section className={styles.faq}>
@@ -31,7 +34,7 @@ const FAQ = () => {
                   aria-labelledby={`faq-question-${faq.id}`}
                   aria-hidden={!isOpen}
                 >
-                  <div className={styles.answerInner}><p>{faq.answer}</p></div>
+                  <div className={styles.answerInner}><p>{fillCopy(faq.answer)}</p></div>
                 </div>
               </div>
             );
