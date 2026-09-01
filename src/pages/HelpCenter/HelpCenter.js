@@ -19,19 +19,19 @@
 //      `/support`.
 //
 // THE COPY IS NOT WRITTEN HERE
-//   Every answer comes from FAQ_ITEMS in constants.js — the same set the home
-//   FAQ block and the PDP panel read, where each window and threshold is one
-//   the store actually runs on. The hours, email and phone are the same
-//   constants the Footer and the Contact page print.
+//   Every answer comes from the admin's FAQ set (Admin > Storefront > FAQs),
+//   read through FaqContext — the same collection the shared FAQ block and the
+//   PDP panel read, where each window and threshold is one the store actually
+//   runs on. Only the answers switched on for the Help Centre appear here. The
+//   hours, email and phone are the same constants the Footer and the Contact
+//   page print.
 // =============================================================================
 import React, { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
 import { useStoreSettings } from "../../context/StoreSettingsContext";
-import {
-  FAQ_ITEMS,
-  SUPPORT_HOURS,
-} from "../../utils/constants";
+import { useFaqs } from "../../context/FaqContext";
+import { SUPPORT_HOURS } from "../../utils/constants";
 import styles from "./HelpCenter.module.css";
 
 // ---- Inline icon set ------------------------------------------------------
@@ -171,19 +171,22 @@ const HelpCenter = () => {
   } = useStoreSettings();
   const [openFaq, setOpenFaq] = useState(null);
   const [query, setQuery] = useState("");
+  // The answers the admin has switched on for the Help Centre, in their order.
+  const { forPlacement } = useFaqs();
+  const helpFaqs = useMemo(() => forPlacement("help"), [forPlacement]);
 
   // Unchanged behaviour: a match on the question OR anywhere in the answer.
   // Searched against the FILLED answer, so a shopper who types the store's own
   // COD ceiling or shipping figure finds the line that prints it.
   const filteredFaqs = useMemo(() => {
     const term = query.trim().toLowerCase();
-    if (!term) return FAQ_ITEMS;
-    return FAQ_ITEMS.filter(
+    if (!term) return helpFaqs;
+    return helpFaqs.filter(
       (faq) =>
         faq.question.toLowerCase().includes(term) ||
         fillCopy(faq.answer).toLowerCase().includes(term)
     );
-  }, [query, fillCopy]);
+  }, [query, fillCopy, helpFaqs]);
 
   const isSearching = query.trim().length > 0;
 

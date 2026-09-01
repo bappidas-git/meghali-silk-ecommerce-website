@@ -116,6 +116,11 @@ const menuItems = [
     path: "/admin/hero-section",
   },
   {
+    title: "FAQs",
+    icon: "mdi:comment-question-outline",
+    path: "/admin/faqs",
+  },
+  {
     title: "Operations",
     icon: null,
     isSection: true,

@@ -5,6 +5,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { useCart } from "../../hooks/useCart";
 import { useWishlist } from "../../context/WishlistContext";
 import { useStoreSettings } from "../../context/StoreSettingsContext";
+import { useFaqs } from "../../context/FaqContext";
 import apiService from "../../services/api";
 import { categoryParam } from "../../utils/categories";
 import { productFlagMarks } from "../../utils/helpers";
@@ -15,7 +16,6 @@ import {
 } from "../../utils/documentTitle";
 import { STOREFRONT_CONFIG } from "../../theme/tokens";
 import { DURATION, RISE, tween } from "../../theme/motion";
-import { FAQ_ITEMS } from "../../utils/constants";
 import {
   ProductGallery,
   SocialProof,
@@ -282,25 +282,10 @@ const deriveFabricCraft = (product) => {
   return { story, facts };
 };
 
-// FAQs — product-specific first, then the shared brand FAQs, de-duped by
-// question. Each entry is normalized to { question, answer }.
-const buildFaqs = (product) => {
-  const productFaqs = Array.isArray(product?.faqs) ? product.faqs : [];
-  const normalize = (f) => ({
-    question: cleanSpecValue(f?.question || f?.q),
-    answer: cleanSpecValue(f?.answer || f?.a),
-  });
-  const seen = new Set();
-  return [...productFaqs, ...FAQ_ITEMS]
-    .map(normalize)
-    .filter((f) => f.question && f.answer)
-    .filter((f) => {
-      const key = f.question.toLowerCase();
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    });
-};
+// FAQs are no longer assembled here. They come from the admin-managed `faqs`
+// collection through FaqContext: the product's own inline answers first, then
+// the ones written for this product, then the general product-page ones —
+// de-duped by question, so the most specific answer wins. See utils/faqs.js.
 
 // ═══════════════════════════════════════════════════════════════════════════
 const ProductDetails = () => {
@@ -322,6 +307,8 @@ const ProductDetails = () => {
     fillCopy,
   } = useStoreSettings();
   const settings = { store: settingsStore, payment: settingsPayment };
+  // The FAQs tab reads the admin's answer set — see Admin > Storefront > FAQs.
+  const { forProduct: faqsForThisProduct } = useFaqs();
   const prefersReducedMotion = useReducedMotion();
   const tabsRef = useRef(null);
   const tabRefs = useRef([]); // roving focus across the tablist
@@ -619,7 +606,7 @@ const ProductDetails = () => {
       ? silkSpecRows
       : deriveGenericSpecRows(product, category, currentSku);
   const fabricCraft = deriveFabricCraft(product);
-  const faqs = buildFaqs(product);
+  const faqs = faqsForThisProduct(product);
 
   // The description is typeset, not dumped: blank lines become real paragraphs
   // so the panel can lead with a drop cap and hold a comfortable measure. A

@@ -26,6 +26,7 @@ import { Icon } from "@iconify/react";
 import { motion } from "framer-motion";
 import apiService from "../../services/api";
 import { normalizeHeroConfig, normalizeHeroSlides } from "../../utils/heroConfig";
+import { normalizeFaqs } from "../../utils/faqs";
 import { SUPPORTED_CURRENCIES } from "../../utils/storeSettings";
 import { notifyStoreSettingsUpdated } from "../../context/StoreSettingsContext";
 
@@ -60,6 +61,9 @@ const AdminSettings = () => {
   // Surfaced on the Hero Section tab so the pointer card can say what is
   // currently live without an admin having to open the manager to find out.
   const [heroSummary, setHeroSummary] = useState(null);
+  // Same idea for the FAQs manager: how many answers are written, and how many
+  // of them a shopper can currently read.
+  const [faqSummary, setFaqSummary] = useState(null);
 
   // General settings forms (backed by db.json `settings.store` + `settings.payment`)
   const [storeForm, setStoreForm] = useState({
@@ -93,11 +97,12 @@ const AdminSettings = () => {
   const loadSettings = async () => {
     try {
       setLoading(true);
-      const [settings, cats, heroConfig, heroSlides] = await Promise.all([
+      const [settings, cats, heroConfig, heroSlides, faqRows] = await Promise.all([
         apiService.admin.getSettings(),
         apiService.admin.getCategories().catch(() => []),
         apiService.admin.getHeroConfig().catch(() => null),
         apiService.admin.getBanners().catch(() => []),
+        apiService.admin.getFaqs().catch(() => []),
       ]);
       const store = settings?.store || {};
       const payment = settings?.payment || {};
@@ -124,6 +129,14 @@ const AdminSettings = () => {
         enabled: normalizeHeroConfig(heroConfig).enabled,
         total: slides.length,
         live: slides.filter((s) => s.isActive).length,
+      });
+      const answers = normalizeFaqs(faqRows);
+      setFaqSummary({
+        total: answers.length,
+        live: answers.filter((f) => f.isActive).length,
+        onProduct: answers.filter(
+          (f) => f.isActive && f.placements.includes("product")
+        ).length,
       });
     } catch (error) {
       console.error("Error loading settings:", error);
@@ -253,6 +266,7 @@ const AdminSettings = () => {
           <Tab icon={<Icon icon="mdi:cog" style={{ fontSize: 20 }} />} iconPosition="start" label="General" />
           <Tab icon={<Icon icon="mdi:folder-multiple" style={{ fontSize: 20 }} />} iconPosition="start" label="Categories" />
           <Tab icon={<Icon icon="mdi:view-carousel-outline" style={{ fontSize: 20 }} />} iconPosition="start" label="Hero Section" />
+          <Tab icon={<Icon icon="mdi:comment-question-outline" style={{ fontSize: 20 }} />} iconPosition="start" label="FAQs" />
         </Tabs>
       </Paper>
 
@@ -518,6 +532,64 @@ const AdminSettings = () => {
                 onClick={() => navigate("/admin/hero-section")}
               >
                 Open Hero Section Manager
+              </Button>
+            </Box>
+          </Box>
+        </Paper>
+      </TabPanel>
+
+      {/* FAQs Tab — the same reconciliation again: the answers live in one
+          manager at /admin/faqs, and Settings only points at it. */}
+      <TabPanel value={activeTab} index={3}>
+        <Paper sx={{ p: { xs: 3, sm: 5 }, border: "1px solid", borderColor: "divider" }} elevation={0}>
+          <Box sx={{ maxWidth: 560, mx: "auto", textAlign: "center" }}>
+            <Box
+              sx={{
+                width: 64,
+                height: 64,
+                mx: "auto",
+                mb: 2,
+                borderRadius: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                bgcolor: "primary.main",
+              }}
+            >
+              <Icon icon="mdi:comment-question-outline" style={{ fontSize: 32, color: "#fff" }} />
+            </Box>
+            <Typography variant="h6" gutterBottom>
+              Manage the answered questions
+            </Typography>
+            <Typography color="text.secondary" sx={{ mb: 2 }}>
+              Every FAQ on the storefront lives in the dedicated <strong>FAQs</strong> manager — the
+              question and its answer, the order they are read in, whether each one appears in the
+              FAQs tab of a product page, in the Help Centre or in the shared FAQ block, and which
+              products it is written for.
+            </Typography>
+            {faqSummary && (
+              <Box sx={{ display: "flex", gap: 1, justifyContent: "center", flexWrap: "wrap", mb: 3 }}>
+                <Chip
+                  icon={<Icon icon={faqSummary.live > 0 ? "mdi:eye-outline" : "mdi:eye-off-outline"} />}
+                  color={faqSummary.live > 0 ? "success" : "warning"}
+                  label={`${faqSummary.live} live of ${faqSummary.total} ${
+                    faqSummary.total === 1 ? "answer" : "answers"
+                  }`}
+                />
+                <Chip
+                  icon={<Icon icon="mdi:package-variant-closed" />}
+                  label={`${faqSummary.onProduct} on product pages`}
+                />
+              </Box>
+            )}
+            <Box>
+              <Button
+                variant="contained"
+                size="large"
+                startIcon={<Icon icon="mdi:comment-edit-outline" />}
+                onClick={() => navigate("/admin/faqs")}
+              >
+                Open FAQ Manager
               </Button>
             </Box>
           </Box>

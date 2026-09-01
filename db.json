@@ -173,6 +173,128 @@
     },
     "updatedAt": "2026-09-01T12:31:51.228Z"
   },
+  "faqs": [
+    {
+      "id": 1,
+      "question": "How should I care for Muga, Pat and Eri silk?",
+      "answer": "Dry-clean for the first couple of years, then a gentle cold hand wash with a mild detergent — Muga in particular grows softer and deepens in lustre each time it is washed. Dry in the shade, never in direct sun, and press on the reverse with a warm iron. Store the piece folded in unbleached muslin rather than plastic, refold it along a different line every few months so no crease ever sets, and keep perfume and deodorant off the fabric.",
+      "placements": [
+        "product",
+        "help",
+        "home"
+      ],
+      "productIds": [],
+      "isActive": true,
+      "sortOrder": 0,
+      "createdAt": "2026-09-01T00:00:00.000Z",
+      "updatedAt": "2026-09-01T00:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "question": "Is the silk really handwoven in Assam?",
+      "answer": "Yes. Every piece is woven on a handloom and bought directly from weaving families in and around Sualkuchi, the weaving village on the north bank of the Brahmaputra. Undyed Muga is sold undyed — the deep honey gold is the fibre's own colour and not a dye — and Eri is handspun before it is woven. Each product page carries the details the weaver gave us for that particular piece.",
+      "placements": [
+        "product",
+        "help",
+        "home"
+      ],
+      "productIds": [],
+      "isActive": true,
+      "sortOrder": 1,
+      "createdAt": "2026-09-01T00:00:00.000Z",
+      "updatedAt": "2026-09-01T00:00:00.000Z"
+    },
+    {
+      "id": 3,
+      "question": "What is the difference between Muga, Pat, Eri and Nuni silk?",
+      "answer": "Muga is the golden silk unique to Assam — undyed, unusually strong, and it only improves with age. Pat is the bright ivory-to-white mulberry silk, the one most often woven with zari for weddings and festivals. Eri is soft, matte and handspun; it behaves more like a fine wool and is warm to wear, which is why it is used for shawls and stoles. Nuni is a mulberry silk with a quieter, everyday finish. Every listing states which of them the piece is woven in.",
+      "placements": [
+        "product",
+        "help",
+        "home"
+      ],
+      "productIds": [],
+      "isActive": true,
+      "sortOrder": 2,
+      "createdAt": "2026-09-01T00:00:00.000Z",
+      "updatedAt": "2026-09-01T00:00:00.000Z"
+    },
+    {
+      "id": 4,
+      "question": "What comes in a Mekhela Chador set, and does it arrive stitched?",
+      "answer": "A set is the two-piece drape: the mekhela, worn as the lower wrap, and the chador that goes over it. Both arrive unstitched and unpleated so your tailor can pleat, hem and finish them to your own measurements. A matching blouse piece is listed separately where one has been woven for the set. Lengths and widths appear on the product page wherever the weaver has supplied them — if a measurement you need is not listed, write to us before you order.",
+      "placements": [
+        "product",
+        "help",
+        "home"
+      ],
+      "productIds": [],
+      "isActive": true,
+      "sortOrder": 3,
+      "createdAt": "2026-09-01T00:00:00.000Z",
+      "updatedAt": "2026-09-01T00:00:00.000Z"
+    },
+    {
+      "id": 5,
+      "question": "How long does delivery take, and is shipping free?",
+      "answer": "Standard delivery reaches most of India in 5-7 business days and is free on orders above {freeShipping}. Express delivery arrives in 2-3 business days, and same-day delivery is available within select Kolkata pin codes. Every order is packed in insured silk packaging, and the exact delivery charge for your address is shown at checkout before you pay.",
+      "placements": [
+        "product",
+        "help",
+        "home"
+      ],
+      "productIds": [],
+      "isActive": true,
+      "sortOrder": 4,
+      "createdAt": "2026-09-01T00:00:00.000Z",
+      "updatedAt": "2026-09-01T00:00:00.000Z"
+    },
+    {
+      "id": 6,
+      "question": "What is your return policy?",
+      "answer": "We offer a 7-day return. Request one from My Orders within 7 days of delivery and send the piece back unworn, unwashed and with its original tags and packaging intact. Once it reaches us and passes inspection, the refund is processed to your original payment method within 5-7 business days. Blouses stitched to measure and made-to-order pieces cannot be returned, since they were finished to your own measurements.",
+      "placements": [
+        "product",
+        "help",
+        "home"
+      ],
+      "productIds": [],
+      "isActive": true,
+      "sortOrder": 5,
+      "createdAt": "2026-09-01T00:00:00.000Z",
+      "updatedAt": "2026-09-01T00:00:00.000Z"
+    },
+    {
+      "id": 7,
+      "question": "Which payments do you accept, and is Cash on Delivery available?",
+      "answer": "UPI, credit and debit cards, net banking and wallets are all accepted, and every payment is handled over an encrypted connection by the payment gateway. {codSentence} Prices are shown {taxNote}.",
+      "placements": [
+        "product",
+        "help",
+        "home"
+      ],
+      "productIds": [],
+      "isActive": true,
+      "sortOrder": 6,
+      "createdAt": "2026-09-01T00:00:00.000Z",
+      "updatedAt": "2026-09-01T00:00:00.000Z"
+    },
+    {
+      "id": 8,
+      "question": "How do I track my order?",
+      "answer": "You will receive an email with a tracking number as soon as your order is dispatched. You can also follow it at any time from the My Orders section of your account, where the current stage of every order is shown.",
+      "placements": [
+        "product",
+        "help",
+        "home"
+      ],
+      "productIds": [],
+      "isActive": true,
+      "sortOrder": 7,
+      "createdAt": "2026-09-01T00:00:00.000Z",
+      "updatedAt": "2026-09-01T00:00:00.000Z"
+    }
+  ],
   "users": [
     {
       "id": 1,
