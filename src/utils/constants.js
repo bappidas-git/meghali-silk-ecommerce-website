@@ -105,9 +105,11 @@ export const DEFAULT_CURRENCY = CURRENCIES.INR;
 // shared by the Header banner and the CartDrawer progress bar.
 export const FREE_SHIPPING_THRESHOLD = 999;
 
-// Social links (sensible defaults — update per project). The Footer renders an
-// icon only for entries with a non-empty URL, so blanking one here hides it
-// instead of leaving a dead link.
+// Social links — the SEED values only. Where the marks actually point is owned
+// by the admin now (Settings > Social Links, persisted as `settings.social`);
+// these are what a store starts with, and what utils/socialLinks.js falls back
+// to when a settings record carries no `social` section at all. Editing them
+// will not move a live store's links — edit those in the admin.
 export const SOCIAL_LINKS = {
   FACEBOOK: "https://facebook.com/meghalisilk",
   TWITTER: "https://twitter.com/meghalisilk",

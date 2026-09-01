@@ -6,7 +6,6 @@ import apiService from "../../services/api";
 import {
   FREE_SHIPPING_THRESHOLD,
   POLICY_LAST_UPDATED,
-  SOCIAL_LINKS,
   SUPPORT_HOURS,
 } from "../../utils/constants";
 import { isEmailValid } from "../../utils/helpers";
@@ -85,6 +84,12 @@ const Footer = () => {
   // Wordmark label, brand line, contact block and the shipping figure all come
   // from the admin's Settings > General, so the close of every page states what
   // the store itself says.
+  //
+  // `socialLinks` is the same story for the marks below the wordmark: the admin
+  // owns them in Settings > Social Links, and the list arrives already filtered
+  // to the platforms that have a URL, in canonical order, each carrying its own
+  // label and art. Clearing a link there takes its icon off this row rather than
+  // leaving a dead one — exactly what blanking the old constant did.
   const {
     storeName,
     tagline,
@@ -94,6 +99,7 @@ const Footer = () => {
     emailHref,
     phoneHref,
     formatPrice,
+    socialLinks,
   } = useStoreSettings();
   const freeShippingLabel = formatPrice(FREE_SHIPPING_THRESHOLD, { decimals: 0 });
   const [email, setEmail] = useState("");
@@ -171,36 +177,6 @@ const Footer = () => {
     { label: "Cookie Policy", path: "/cookies" },
     { label: "Refund Policy", path: "/refund" },
   ];
-
-  // Social links are sourced from constants (SOCIAL_LINKS) so a new store
-  // updates them in one place; only entries with a URL are rendered.
-  const socialLinks = [
-    {
-      label: "Facebook",
-      url: SOCIAL_LINKS.FACEBOOK,
-      path: "M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z",
-    },
-    {
-      label: "Instagram",
-      url: SOCIAL_LINKS.INSTAGRAM,
-      path: "M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z",
-    },
-    {
-      label: "YouTube",
-      url: SOCIAL_LINKS.YOUTUBE,
-      path: "M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z",
-    },
-    {
-      label: "X",
-      url: SOCIAL_LINKS.TWITTER,
-      path: "M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z",
-    },
-    {
-      label: "WhatsApp",
-      url: SOCIAL_LINKS.WHATSAPP,
-      path: "M12.04 2c-5.46 0-9.91 4.45-9.91 9.91 0 1.75.46 3.45 1.32 4.95L2.05 22l5.25-1.38a9.9 9.9 0 004.74 1.21h.01c5.46 0 9.91-4.45 9.91-9.91 0-2.65-1.03-5.14-2.9-7.01A9.82 9.82 0 0012.04 2zm.01 1.67c2.2 0 4.26.86 5.82 2.42a8.2 8.2 0 012.41 5.83c0 4.54-3.7 8.23-8.24 8.23a8.2 8.2 0 01-4.19-1.15l-.3-.17-3.12.82.83-3.04-.2-.32a8.19 8.19 0 01-1.26-4.37c0-4.54 3.69-8.25 8.25-8.25zM8.53 7.33c-.16 0-.43.06-.66.31-.22.25-.87.85-.87 2.07s.89 2.4 1.01 2.56c.12.17 1.75 2.67 4.23 3.74.59.26 1.05.41 1.41.53.59.19 1.13.16 1.56.1.48-.07 1.46-.6 1.67-1.18.21-.58.21-1.07.14-1.18-.06-.1-.22-.16-.47-.28-.25-.12-1.47-.72-1.69-.81-.23-.08-.39-.12-.56.12-.16.25-.64.81-.78.97-.14.17-.29.19-.53.07-.25-.13-1.06-.39-2.02-1.24-.75-.66-1.25-1.48-1.4-1.73-.14-.24-.01-.37.11-.5.11-.11.25-.29.37-.44.11-.15.15-.25.23-.41.08-.17.04-.31-.02-.43-.06-.12-.56-1.34-.76-1.84-.2-.48-.4-.42-.55-.42h-.47z",
-    },
-  ].filter((s) => s.url);
 
   const currentYear = new Date().getFullYear();
 
@@ -322,7 +298,7 @@ const Footer = () => {
                 <div className={styles.social}>
                   {socialLinks.map((social) => (
                     <a
-                      key={social.label}
+                      key={social.key}
                       href={social.url}
                       target="_blank"
                       rel="noopener noreferrer"
