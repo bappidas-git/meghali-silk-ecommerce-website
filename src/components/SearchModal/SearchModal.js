@@ -20,7 +20,7 @@ const CURATED_SUGGESTIONS = [
   "Muga Mekhela Chador",
   "Pat silk saree",
   "Eri shawl",
-  "Bridal Muga",
+  "Toss silk saree",
 ];
 
 // Fallback for the Trending block, used only when the trending endpoint returns
@@ -31,7 +31,7 @@ const CURATED_TRENDING = [
   "Muga silk",
   "Pat silk",
   "Eri silk",
-  "Gamosa",
+  "Toss silk",
 ];
 
 // Category filter chips (and the slugs each one matches) are derived at runtime

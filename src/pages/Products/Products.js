@@ -128,10 +128,10 @@ const FOCUSABLE_SELECTOR = [
 ].join(",");
 
 // The Assamese fabric vocabulary — the "Fabric" facet. Labels and match tokens
-// mirror `variants[].attributes.Fabric` in the reseeded catalogue: the four
-// silks Sualkuchi weaves (Muga, Pat, Eri, Nuni), the two blends, and the
-// handloom cotton the gamosa gift sets are woven from. Order here is the
-// display order — silks first, then blends, then cotton.
+// mirror `variants[].attributes.Fabric` in the catalogue: the four silks the
+// collections are organised by (Muga, Pat, Eri, Toss), the cotton-and-kesapat
+// weave, and the handloom cotton the gamosa gift sets are woven from. Order
+// here is the display order — silks first, then the cottons.
 //
 // The facet is still DERIVED FROM THE LOADED DATA, never from this list alone: a
 // family only appears when at least one real product exposes it (see
@@ -149,9 +149,8 @@ const FABRIC_FAMILIES = [
   { label: "Muga Silk", match: ["muga silk"] },
   { label: "Pat Silk", match: ["pat silk"] },
   { label: "Eri Silk", match: ["eri silk"] },
-  { label: "Nuni Silk", match: ["nuni silk"] },
-  { label: "Muga Pat Blend", match: ["muga pat blend"] },
-  { label: "Eri Cotton Blend", match: ["eri cotton blend"] },
+  { label: "Toss Silk", match: ["toss silk"] },
+  { label: "Cotton Kesapat", match: ["cotton kesapat"] },
   { label: "Handloom Cotton", match: ["handloom cotton"] },
 ];
 
