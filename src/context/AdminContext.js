@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import Swal from "sweetalert2";
-import apiService from "../services/api";
+import apiService, { getErrorMessage } from "../services/api";
 
 const AdminContext = createContext();
 
@@ -60,7 +60,10 @@ export const AdminProvider = ({ children }) => {
       });
       return { success: false, error: "Invalid credentials" };
     } catch (error) {
-      const msg = error.response?.data?.message || "An error occurred. Please try again.";
+      // Same helper AuthContext uses, so an unreachable backend or a timeout
+      // reports what actually failed instead of a generic line that reads like
+      // the credentials were rejected.
+      const msg = getErrorMessage(error) || "An error occurred. Please try again.";
       Swal.fire({
         icon: "error",
         title: "Login Error",
