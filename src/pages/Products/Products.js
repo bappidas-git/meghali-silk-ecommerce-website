@@ -37,6 +37,11 @@ import styles from "./Products.module.css";
 //   clamping and the post-commit scroll are all unchanged code — this prompt
 //   restyled the page around them.
 //
+//   ONE param has since joined that contract: ?highlight=<comma flags>, for the
+//   merchant's Visibility & Flags switches. It is URL-backed rather than
+//   session-only precisely so Home's Featured and Trending rails have a real
+//   "View all" to point at, and so a flagged edit is a shareable link.
+//
 // THEMING
 //   Tokens only. This page deliberately does not consume ThemeContext: every
 //   colour resolves through `--sf-*`, which flips under `body.dark`, so light
@@ -90,6 +95,26 @@ const PRICE_RANGES = [
 
 const RATING_OPTIONS = [4, 3, 2, 1];
 const DISCOUNT_OPTIONS = [50, 30, 20, 10];
+
+// The "Highlights" facet — the three switches a merchant throws in
+// Admin → Products → Visibility & Flags, offered here as a filter so they are
+// something a shopper can actually browse by rather than only a mark on a card.
+// `key` IS the product field and IS the URL token, so ?highlight=trending,hot
+// reads the way it looks. Matching is `=== true`, the same honest-data rule the
+// PREMIUM ribbon follows, and an unknown token simply matches nothing.
+const HIGHLIGHT_OPTIONS = [
+  { key: "featured", label: "Featured" },
+  { key: "trending", label: "Trending" },
+  { key: "hot", label: "Hot" },
+];
+
+const HIGHLIGHT_KEYS = HIGHLIGHT_OPTIONS.map((h) => h.key);
+
+const parseHighlights = (raw) =>
+  (raw ? String(raw).split(",") : [])
+    .map((t) => t.trim().toLowerCase())
+    .filter((t) => HIGHLIGHT_KEYS.includes(t));
+
 const PER_PAGE_OPTIONS = [12, 24, 48];
 
 // The panel's own focus ring, for the Tab trap. Same selector list the cart tray
@@ -346,6 +371,7 @@ const Products = () => {
   const urlPerPage = parseInt(searchParams.get("per_page"), 10);
   const urlMinPrice = searchParams.get("min_price") || "";
   const urlMaxPrice = searchParams.get("max_price") || "";
+  const urlHighlight = searchParams.get("highlight") || "";
 
   // ---- Filter state (local, synced to URL) ----
   const [selectedCategories, setSelectedCategories] = useState(() => (urlCategory ? urlCategory.split(",") : []));
@@ -356,6 +382,9 @@ const Products = () => {
   const [inStockOnly, setInStockOnly] = useState(false);
   const [selectedBrands, setSelectedBrands] = useState([]);
   const [selectedFabrics, setSelectedFabrics] = useState([]); // session-only facet
+  const [selectedHighlights, setSelectedHighlights] = useState(() =>
+    parseHighlights(urlHighlight)
+  );
   const [sortBy, setSortBy] = useState(urlSort);
   const [currentPage, setCurrentPage] = useState(urlPage);
   const [perPage, setPerPage] = useState(() =>
@@ -427,6 +456,10 @@ const Products = () => {
 
     setMinPrice((prev) => (prev === urlMinPrice ? prev : urlMinPrice));
     setMaxPrice((prev) => (prev === urlMaxPrice ? prev : urlMaxPrice));
+    setSelectedHighlights((prev) => {
+      const next = parseHighlights(urlHighlight);
+      return prev.join(",") === next.join(",") ? prev : next;
+    });
     setSortBy((prev) => (prev === urlSort ? prev : urlSort));
     setCurrentPage((prev) => (prev === urlPage ? prev : urlPage));
     setPerPage((prev) => {
@@ -434,7 +467,7 @@ const Products = () => {
       return prev === next ? prev : next;
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [urlCategory, urlSearch, urlSort, urlPage, urlPerPage, urlMinPrice, urlMaxPrice, categories]);
+  }, [urlCategory, urlSearch, urlSort, urlPage, urlPerPage, urlMinPrice, urlMaxPrice, urlHighlight, categories]);
 
   // ---- Sync URL params when filters change ----
   // NOTE: any param mutated in the same handler MUST be passed as an override —
@@ -449,6 +482,8 @@ const Products = () => {
         per_page: overrides.per_page !== undefined ? overrides.per_page : perPage,
         min_price: overrides.min_price !== undefined ? overrides.min_price : minPrice,
         max_price: overrides.max_price !== undefined ? overrides.max_price : maxPrice,
+        highlight:
+          overrides.highlight !== undefined ? overrides.highlight : selectedHighlights,
       };
       const params = new URLSearchParams();
       if (merged.category && merged.category.length) params.set("category", Array.isArray(merged.category) ? merged.category.join(",") : merged.category);
@@ -458,9 +493,14 @@ const Products = () => {
       if (merged.per_page && Number(merged.per_page) !== 12) params.set("per_page", String(merged.per_page));
       if (merged.min_price) params.set("min_price", merged.min_price);
       if (merged.max_price) params.set("max_price", merged.max_price);
+      if (merged.highlight && merged.highlight.length)
+        params.set(
+          "highlight",
+          Array.isArray(merged.highlight) ? merged.highlight.join(",") : merged.highlight
+        );
       setSearchParams(params, { replace: true });
     },
-    [selectedCategories, urlSearch, sortBy, currentPage, perPage, minPrice, maxPrice, setSearchParams]
+    [selectedCategories, urlSearch, sortBy, currentPage, perPage, minPrice, maxPrice, selectedHighlights, setSearchParams]
   );
 
   // Reset to page 1 and drop the stale page param from the URL. Use this for the
@@ -491,6 +531,19 @@ const Products = () => {
     });
     return FABRIC_FAMILIES.map((f) => f.label).filter((label) => present.has(label));
   }, [allProducts]);
+
+  // ---- Derived: highlights the VISIBLE catalogue actually carries ----
+  // Same pattern again, plus the count each flag would return. A flag no live
+  // product carries is dropped rather than offered as a dead end, so the whole
+  // facet disappears on a catalogue where the merchant has set no flags at all.
+  const availableHighlights = useMemo(
+    () =>
+      HIGHLIGHT_OPTIONS.map((h) => ({
+        ...h,
+        count: allProducts.filter((p) => p[h.key] === true).length,
+      })).filter((h) => h.count > 0),
+    [allProducts]
+  );
 
   // ---- Derived: product count per category id ----
   // Counts honour the parent-includes-children rule: a category's count is the
@@ -603,6 +656,13 @@ const Products = () => {
       });
     }
 
+    // Highlights — the merchant's own Featured / Trending / Hot switches. OR
+    // within the facet, like every other multi-select here: a product passes if
+    // it carries ANY of the selected flags.
+    if (selectedHighlights.length > 0) {
+      result = result.filter((p) => selectedHighlights.some((k) => p[k] === true));
+    }
+
     // Sorting
     switch (sortBy) {
       case "price-low":
@@ -625,7 +685,7 @@ const Products = () => {
     }
 
     return result;
-  }, [allProducts, categories, urlSearch, selectedCategories, minPrice, maxPrice, minRating, minDiscount, inStockOnly, selectedBrands, selectedFabrics, sortBy]);
+  }, [allProducts, categories, urlSearch, selectedCategories, minPrice, maxPrice, minRating, minDiscount, inStockOnly, selectedBrands, selectedFabrics, selectedHighlights, sortBy]);
 
   // ---- Pagination ----
   const totalPages = Math.max(1, Math.ceil(filteredProducts.length / perPage));
@@ -713,6 +773,7 @@ const Products = () => {
     inStockOnly ||
     selectedBrands.length > 0 ||
     selectedFabrics.length > 0 ||
+    selectedHighlights.length > 0 ||
     sortBy !== "relevance";
 
   // Whether anything is constraining the result set — includes the search query
@@ -728,6 +789,7 @@ const Products = () => {
     setInStockOnly(false);
     setSelectedBrands([]);
     setSelectedFabrics([]);
+    setSelectedHighlights([]);
     setSortBy("relevance");
     setCurrentPage(1);
     // Pass every reset value as an explicit override so no stale param survives.
@@ -738,6 +800,7 @@ const Products = () => {
       sort: "relevance",
       min_price: "",
       max_price: "",
+      highlight: [],
       page: 1,
     });
   }, [syncUrlParams]);
@@ -884,6 +947,23 @@ const Products = () => {
     [resetToFirstPage]
   );
 
+  // URL-backed, so it follows the category pattern rather than the session-only
+  // one: push the NEXT value through syncUrlParams from inside the updater,
+  // because the callback still closes over this render's state.
+  const handleHighlightToggle = useCallback(
+    (key) => {
+      setSelectedHighlights((prev) => {
+        const next = prev.includes(key)
+          ? prev.filter((h) => h !== key)
+          : [...prev, key];
+        setCurrentPage(1);
+        syncUrlParams({ highlight: next, page: 1 });
+        return next;
+      });
+    },
+    [syncUrlParams]
+  );
+
   // ---- Category name helper ----
   const getCategoryName = useCallback(
     (slug) => {
@@ -968,7 +1048,11 @@ const Products = () => {
   // SET, so sort (a view preference, not a filter) is deliberately excluded and
   // a price range counts once however it was set.
   const activeFilterCount = useMemo(() => {
-    let n = selectedCategories.length + selectedFabrics.length + selectedBrands.length;
+    let n =
+      selectedCategories.length +
+      selectedFabrics.length +
+      selectedBrands.length +
+      selectedHighlights.length;
     if (minPrice !== "" || maxPrice !== "") n += 1;
     if (minRating > 0) n += 1;
     if (minDiscount > 0) n += 1;
@@ -978,6 +1062,7 @@ const Products = () => {
     selectedCategories,
     selectedFabrics,
     selectedBrands,
+    selectedHighlights,
     minPrice,
     maxPrice,
     minRating,
@@ -1071,6 +1156,31 @@ const Products = () => {
           </button>
         </div>
       </section>
+
+      {/* Highlights — the merchant's Visibility & Flags switches, present only
+          when the live catalogue actually carries one of them */}
+      {availableHighlights.length > 0 && (
+        <section className={styles.facet}>
+          <h3 className={styles.facetTitle}>Highlights</h3>
+          <div className={styles.facetList}>
+            {availableHighlights.map((h) => (
+              <label key={h.key} className={styles.option}>
+                <input
+                  type="checkbox"
+                  className={styles.control}
+                  checked={selectedHighlights.includes(h.key)}
+                  onChange={() => handleHighlightToggle(h.key)}
+                />
+                <span className={styles.box} aria-hidden="true">
+                  <TickMark />
+                </span>
+                <span className={styles.optionText}>{h.label}</span>
+                <span className={styles.optionCount}>{h.count}</span>
+              </label>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* Fabric — present only when the catalogue actually exposes one */}
       {availableFabrics.length > 0 && (
@@ -1309,6 +1419,16 @@ const Products = () => {
                 {availableFabrics.map((fabric) =>
                   renderChip(fabric, fabric, selectedFabrics.includes(fabric), () =>
                     handleFabricToggle(fabric)
+                  )
+                )}
+              </div>
+            )}
+
+            {availableHighlights.length > 0 && (
+              <div className={styles.chipGroup} role="group" aria-label="Highlights">
+                {availableHighlights.map((h) =>
+                  renderChip(h.key, h.label, selectedHighlights.includes(h.key), () =>
+                    handleHighlightToggle(h.key)
                   )
                 )}
               </div>

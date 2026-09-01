@@ -169,6 +169,17 @@
   gap: var(--sf-space-3);
 }
 
+/* The eyebrow ROW — the category label, then the merchant's TRENDING / HOT
+   marks. Wraps instead of truncating, so a 320px buy box drops the marks onto
+   their own line rather than squeezing the category name. */
+.headMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sf-space-3);
+  min-width: 0;
+}
+
 /* The eyebrow — the same tracked gold label that opens every section of the
    storefront, minus the rule (the name below it is doing the anchoring). */
 .categoryLabel {

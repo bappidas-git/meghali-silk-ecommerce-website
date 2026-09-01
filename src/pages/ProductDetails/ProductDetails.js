@@ -7,6 +7,7 @@ import { useWishlist } from "../../context/WishlistContext";
 import { useStoreSettings } from "../../context/StoreSettingsContext";
 import apiService from "../../services/api";
 import { categoryParam } from "../../utils/categories";
+import { productFlagMarks } from "../../utils/helpers";
 import {
   setPageTitle,
   releasePageTitle,
@@ -77,6 +78,9 @@ const NotFound = () => (
 // ─── Authenticity helpers (PREMIUM ribbon + KEY FEATURES) ─────────────────────
 // The gold "PREMIUM" ribbon shows ONLY when the product is genuinely flagged —
 // same rule the storefront ProductCard uses (featured / bridal / premium tag).
+// TRENDING / HOT are the merchant's other two switches and are read the same
+// way, through `productFlagMarks` — set beside the eyebrow in the buy head
+// rather than on the plate, exactly as the card sets them beside its brand.
 const isPremiumProduct = (product) => {
   const tags = Array.isArray(product?.tags) ? product.tags : [];
   return (
@@ -604,6 +608,7 @@ const ProductDetails = () => {
 
   const wishlisted = isInWishlist(product.id);
   const premium = isPremiumProduct(product);
+  const flagMarks = productFlagMarks(product);
   const keyFeatures = deriveKeyFeatures(product);
   const categoryLabel = category?.name || product.brand;
 
@@ -770,8 +775,19 @@ const ProductDetails = () => {
           <div className={styles.infoSection}>
             {/* ── The head: eyebrow, the name in the serif, one line of fact ── */}
             <header className={styles.buyHead}>
-              {categoryLabel && (
-                <span className={styles.categoryLabel}>{categoryLabel}</span>
+              {/* The eyebrow row — the category, then whatever flags the
+                  merchant has actually set. Wraps on a phone. */}
+              {(categoryLabel || flagMarks.length > 0) && (
+                <div className={styles.headMeta}>
+                  {categoryLabel && (
+                    <span className={styles.categoryLabel}>{categoryLabel}</span>
+                  )}
+                  {flagMarks.map((flag) => (
+                    <span key={flag.key} className={`sf-flag ${flag.className}`}>
+                      {flag.label}
+                    </span>
+                  ))}
+                </div>
               )}
               <h1 className={styles.productName}>{product.name}</h1>
 

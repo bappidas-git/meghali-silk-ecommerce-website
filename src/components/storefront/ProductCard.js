@@ -7,6 +7,7 @@ import {
   buildCartItem,
   productPath,
   truncateText,
+  productFlagMarks,
   PLACEHOLDER_IMG,
   onImageError,
 } from "../../utils/helpers";
@@ -41,6 +42,10 @@ import styles from "./ProductCard.module.css";
 //   • The discount badge / struck compare / "Save ₹X" all derive from real
 //     price vs comparePrice (via PriceBlock) — nothing can be typed in.
 //   • The gold PREMIUM ribbon shows ONLY on a real flag (featured / bridal).
+//   • TRENDING / HOT show ONLY when the merchant has actually thrown that switch
+//     in Admin → Products. They are set in the text stack beside the brand line,
+//     not on the photograph, whose corners are already spoken for — see the
+//     `.sf-flag` primitive. They are a merchant's note, not scarcity theatre.
 //   • Out of stock is the only urgency this card knows how to express.
 //
 // Props (stable contract — consumed by Home, Products, Wishlist, PDP rails):
@@ -75,6 +80,10 @@ const ProductCard = ({
     product.featured === true ||
     tags.includes("bridal") ||
     tags.includes("premium");
+
+  // TRENDING / HOT — the merchant's own switches, read through the one shared
+  // reader so this card, the PDP and the listing facet agree.
+  const flagMarks = productFlagMarks(product);
 
   const handleAdd = (e) => {
     e.preventDefault();
@@ -151,7 +160,21 @@ const ProductCard = ({
       </div>
 
       <div className={styles.body}>
-        {product.brand && <span className={styles.brand}>{product.brand}</span>}
+        {/* The eyebrow line: the brand, then whatever flags the merchant has set.
+            One wrapping row, so a 166px card drops the marks under the brand
+            instead of pushing the text stack sideways. */}
+        {(product.brand || flagMarks.length > 0) && (
+          <div className={styles.meta}>
+            {product.brand && (
+              <span className={styles.brand}>{product.brand}</span>
+            )}
+            {flagMarks.map((flag) => (
+              <span key={flag.key} className={`sf-flag ${flag.className}`}>
+                {flag.label}
+              </span>
+            ))}
+          </div>
+        )}
 
         <Link to={productPath(product)} className={styles.name}>
           {truncateText(product.name, 48)}
