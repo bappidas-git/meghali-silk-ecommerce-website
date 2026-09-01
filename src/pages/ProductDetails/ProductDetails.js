@@ -7,6 +7,11 @@ import { useWishlist } from "../../context/WishlistContext";
 import { useStoreSettings } from "../../context/StoreSettingsContext";
 import apiService from "../../services/api";
 import { categoryParam } from "../../utils/categories";
+import {
+  setPageTitle,
+  releasePageTitle,
+  storeDocumentTitle,
+} from "../../utils/documentTitle";
 import { STOREFRONT_CONFIG } from "../../theme/tokens";
 import { DURATION, RISE, tween } from "../../theme/motion";
 import { FAQ_ITEMS } from "../../utils/constants";
@@ -460,6 +465,47 @@ const ProductDetails = () => {
       fetchAov();
     }
   }, [product, fetchReviews, fetchAov]);
+
+  // ── SEO — Admin → Products → SEO (Optional) ────────────────────────────
+  // metaTitle / metaDescription were persisted by the product editor but read
+  // by nothing, so filling them in changed neither the tab nor the description
+  // a link preview quotes. This is the reader. Each falls back to real product
+  // copy when the admin left the field blank, and the cleanup hands the tab and
+  // the meta tag back to the store-wide defaults.
+  useEffect(() => {
+    if (!product) return;
+
+    const title =
+      product.metaTitle?.trim() ||
+      [product.name, settingsStore?.name].filter(Boolean).join(" | ");
+
+    const description =
+      product.metaDescription?.trim() ||
+      product.shortDescription?.trim() ||
+      "";
+
+    setPageTitle(title);
+
+    let tag = document.querySelector('meta[name="description"]');
+    const hadTag = !!tag;
+    const previousDescription = tag?.getAttribute("content") ?? "";
+    if (description) {
+      if (!tag) {
+        tag = document.createElement("meta");
+        tag.setAttribute("name", "description");
+        document.head.appendChild(tag);
+      }
+      tag.setAttribute("content", description);
+    }
+
+    return () => {
+      releasePageTitle(storeDocumentTitle(settingsStore));
+      if (!description) return;
+      // Put back whatever was there — or take our own tag away again.
+      if (hadTag) tag.setAttribute("content", previousDescription);
+      else tag.remove();
+    };
+  }, [product, settingsStore]);
 
   // ── Derived values ─────────────────────────────────────────────────────
   const images =

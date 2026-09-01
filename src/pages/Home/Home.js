@@ -276,15 +276,33 @@ const Home = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const [cats, featured, trending] = await Promise.all([
+        const [cats, featured, trending, catalogue] = await Promise.all([
           apiService.categories.getAll().catch(() => []),
           apiService.products.getFeatured(8).catch(() => []),
           apiService.products.getTrending(8).catch(() => []),
+          apiService.products.getAll().catch(() => []),
         ]);
 
         setCategories(Array.isArray(cats) ? cats : []);
         setFeaturedProducts(Array.isArray(featured) ? featured.slice(0, 8) : []);
         setTrendingProducts(Array.isArray(trending) ? trending.slice(0, 8) : []);
+
+        // Recently viewed is a localStorage snapshot written by the PDP, so it
+        // keeps naming products that have since been set to Draft or deleted in
+        // Admin → Products — the rail went on offering them and every click
+        // landed on the 404. Reconcile against the live catalogue (which is
+        // already visibility-filtered): keep the browsing order, drop what a
+        // shopper can no longer reach, and render the current record instead of
+        // the stale snapshot. localStorage itself is left alone, so a product
+        // that comes back from Draft reappears in the rail.
+        const live = new Map(
+          (Array.isArray(catalogue) ? catalogue : []).map((p) => [String(p.id), p])
+        );
+        setRecentlyViewed(
+          getRecentlyViewed()
+            .map((item) => live.get(String(item.id)))
+            .filter(Boolean)
+        );
 
         // Flash deals: ONLY products with a real comparePrice discount. De-dupe
         // by id across the featured + trending pools, then keep real discounts.
@@ -305,7 +323,6 @@ const Home = () => {
     };
 
     fetchData();
-    setRecentlyViewed(getRecentlyViewed());
   }, []);
 
   // ── Rails ─────────────────────────────────────────────────────────────────
