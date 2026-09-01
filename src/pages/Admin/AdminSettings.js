@@ -28,6 +28,11 @@ import apiService from "../../services/api";
 import { normalizeHeroConfig, normalizeHeroSlides } from "../../utils/heroConfig";
 import { normalizeFaqs } from "../../utils/faqs";
 import { SUPPORTED_CURRENCIES } from "../../utils/storeSettings";
+import {
+  SOCIAL_PLATFORMS,
+  normalizeSocialUrl,
+  activeSocialLinks,
+} from "../../utils/socialLinks";
 import { notifyStoreSettingsUpdated } from "../../context/StoreSettingsContext";
 
 // Tab Panel component
@@ -50,6 +55,30 @@ function TabPanel(props) {
 // editable, for currencies/variants not listed here). Shared with the
 // storefront so the dropdown and every price agree on what a code prints as.
 const CURRENCIES = SUPPORTED_CURRENCIES;
+
+// Every social field starts blank; loadSettings fills in what is saved. Built
+// from SOCIAL_PLATFORMS so adding a platform there needs no edit here.
+const EMPTY_SOCIAL_FORM = SOCIAL_PLATFORMS.reduce(
+  (acc, p) => ({ ...acc, [p.key]: "" }),
+  {}
+);
+
+// What the admin typed will be repaired on save (a bare handle gets an https://
+// prefix, a WhatsApp phone number becomes a wa.me link). This flags the values
+// that cannot be repaired into a link at all, so the field says so before the
+// save rather than the storefront printing a broken mark afterwards.
+const socialFieldError = (value, key) => {
+  const repaired = normalizeSocialUrl(value, key);
+  if (!repaired) return "";
+  try {
+    const url = new URL(repaired);
+    if (!/^https?:$/.test(url.protocol)) return "Use an http:// or https:// link";
+    if (!url.hostname.includes(".")) return "That does not look like a web address";
+    return "";
+  } catch {
+    return "That does not look like a web address";
+  }
+};
 
 const AdminSettings = () => {
   const navigate = useNavigate();
@@ -83,6 +112,11 @@ const AdminSettings = () => {
     codMinOrder: 0,
     codMaxOrder: 0,
   });
+
+  // Social links (backed by db.json `settings.social`) — saved on their own tab
+  // and their own button, so a URL change never re-writes the store's identity.
+  const [socialForm, setSocialForm] = useState(EMPTY_SOCIAL_FORM);
+  const [savingSocial, setSavingSocial] = useState(false);
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -123,6 +157,15 @@ const AdminSettings = () => {
         codMinOrder: payment.codMinOrder ?? 0,
         codMaxOrder: payment.codMaxOrder ?? 0,
       });
+      // Raw, not normalised: the field shows exactly what was saved so an admin
+      // recognises their own typing. Repair happens on the way back out.
+      const social = settings?.social || {};
+      setSocialForm(
+        SOCIAL_PLATFORMS.reduce(
+          (acc, p) => ({ ...acc, [p.key]: social[p.key] || "" }),
+          {}
+        )
+      );
       setCategoryCount(Array.isArray(cats) ? cats.length : 0);
       const slides = normalizeHeroSlides(heroSlides);
       setHeroSummary({
@@ -162,6 +205,9 @@ const AdminSettings = () => {
 
   const handlePaymentChange = (field, value) =>
     setPaymentForm((prev) => ({ ...prev, [field]: value }));
+
+  const handleSocialChange = (key, value) =>
+    setSocialForm((prev) => ({ ...prev, [key]: value }));
 
   const handleSaveGeneral = async () => {
     if (!storeForm.name.trim()) {
@@ -214,7 +260,56 @@ const AdminSettings = () => {
     }
   };
 
+  const handleSaveSocial = async () => {
+    // Blank is legal and meaningful — it is how a mark is taken off the
+    // storefront — so only values that cannot be repaired into a link block the
+    // save, and the offending field is named.
+    const bad = SOCIAL_PLATFORMS.find((p) => socialFieldError(socialForm[p.key], p.key));
+    if (bad) {
+      setSnackbar({
+        open: true,
+        message: `${bad.label}: ${socialFieldError(socialForm[bad.key], bad.key)}`,
+        severity: "error",
+      });
+      return;
+    }
+
+    try {
+      setSavingSocial(true);
+      // Persist the repaired value, not the raw one, so every consumer reads a
+      // complete href and no surface has to guess at a missing scheme.
+      const payload = SOCIAL_PLATFORMS.reduce(
+        (acc, p) => ({ ...acc, [p.key]: normalizeSocialUrl(socialForm[p.key], p.key) }),
+        {}
+      );
+      await apiService.admin.updateSettings("social", payload);
+      setSnackbar({ open: true, message: "Social links saved", severity: "success" });
+      // Same broadcast the General tab uses: every storefront tab already open
+      // re-reads the settings record and repaints its footer row.
+      notifyStoreSettingsUpdated();
+      loadSettings();
+    } catch (error) {
+      console.error("Error saving social links:", error);
+      setSnackbar({
+        open: true,
+        message: error.response?.data?.message || error.message || "Failed to save social links",
+        severity: "error",
+      });
+    } finally {
+      setSavingSocial(false);
+    }
+  };
+
   const symbol = storeForm.currencySymbol || "₹";
+
+  // Exactly what the footer will render: the same helper the storefront calls,
+  // fed the repaired values, so the preview cannot drift from the real row.
+  const socialPreview = activeSocialLinks(
+    SOCIAL_PLATFORMS.reduce(
+      (acc, p) => ({ ...acc, [p.key]: normalizeSocialUrl(socialForm[p.key], p.key) }),
+      {}
+    )
+  );
 
   const sectionCardSx = { height: "100%" };
 
@@ -267,6 +362,7 @@ const AdminSettings = () => {
           <Tab icon={<Icon icon="mdi:folder-multiple" style={{ fontSize: 20 }} />} iconPosition="start" label="Categories" />
           <Tab icon={<Icon icon="mdi:view-carousel-outline" style={{ fontSize: 20 }} />} iconPosition="start" label="Hero Section" />
           <Tab icon={<Icon icon="mdi:comment-question-outline" style={{ fontSize: 20 }} />} iconPosition="start" label="FAQs" />
+          <Tab icon={<Icon icon="mdi:share-variant" style={{ fontSize: 20 }} />} iconPosition="start" label="Social Links" />
         </Tabs>
       </Paper>
 
@@ -594,6 +690,211 @@ const AdminSettings = () => {
             </Box>
           </Box>
         </Paper>
+      </TabPanel>
+
+
+      {/* Social Links Tab — unlike Categories / Hero / FAQs this one is edited
+          in place: it is five URLs on the same settings record the General tab
+          writes, not a collection that needs a manager of its own. Its own Save
+          button writes only the `social` section, so moving an Instagram handle
+          can never re-write the store's name or currency. */}
+      <TabPanel value={activeTab} index={4}>
+        {loading ? (
+          <Card>
+            <CardContent>
+              <Skeleton variant="text" width={200} height={32} sx={{ mb: 2 }} />
+              {SOCIAL_PLATFORMS.map((p) => (
+                <Skeleton key={p.key} variant="rounded" height={48} sx={{ mb: 2 }} />
+              ))}
+            </CardContent>
+          </Card>
+        ) : (
+          <>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: 2,
+                mb: 3,
+              }}
+            >
+              <Typography variant="body2" color="text.secondary">
+                Where the marks in the storefront footer and on the Contact page point.
+                Leave a field empty to take that icon off the site.
+              </Typography>
+              <Button
+                variant="contained"
+                onClick={handleSaveSocial}
+                disabled={savingSocial}
+                startIcon={
+                  savingSocial ? (
+                    <CircularProgress size={18} color="inherit" />
+                  ) : (
+                    <Icon icon="mdi:content-save" />
+                  )
+                }
+              >
+                {savingSocial ? "Saving..." : "Save Changes"}
+              </Button>
+            </Box>
+
+            <Grid container spacing={3}>
+              <Grid item xs={12} md={7}>
+                <Card sx={sectionCardSx}>
+                  <CardContent>
+                    <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                      <Icon icon="mdi:link-variant" style={{ fontSize: 24, marginRight: 8 }} />
+                      <Typography variant="h6">Profile Links</Typography>
+                    </Box>
+                    <Divider sx={{ mb: 3 }} />
+                    <Grid container spacing={2}>
+                      {SOCIAL_PLATFORMS.map((platform) => {
+                        const value = socialForm[platform.key] || "";
+                        const error = socialFieldError(value, platform.key);
+                        return (
+                          <Grid item xs={12} key={platform.key}>
+                            <TextField
+                              fullWidth
+                              size="small"
+                              label={platform.label}
+                              value={value}
+                              onChange={(e) => handleSocialChange(platform.key, e.target.value)}
+                              placeholder={platform.placeholder}
+                              error={!!error}
+                              helperText={
+                                error ||
+                                (platform.key === "whatsapp"
+                                  ? "A wa.me link, or just the number with its country code"
+                                  : "Empty hides this icon on the storefront")
+                              }
+                              InputProps={{
+                                startAdornment: (
+                                  <InputAdornment position="start">
+                                    <Icon icon={platform.adminIcon} style={{ fontSize: 20 }} />
+                                  </InputAdornment>
+                                ),
+                                endAdornment:
+                                  value && !error ? (
+                                    <InputAdornment position="end">
+                                      <Button
+                                        size="small"
+                                        component="a"
+                                        href={normalizeSocialUrl(value, platform.key)}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        sx={{ minWidth: 0, px: 1 }}
+                                        aria-label={"Open the " + platform.label + " link in a new tab"}
+                                      >
+                                        <Icon icon="mdi:open-in-new" style={{ fontSize: 18 }} />
+                                      </Button>
+                                    </InputAdornment>
+                                  ) : null,
+                              }}
+                            />
+                          </Grid>
+                        );
+                      })}
+                    </Grid>
+                  </CardContent>
+                </Card>
+              </Grid>
+
+              {/* Preview — built by the same activeSocialLinks() the storefront
+                  calls, on a deep ground like the footer band, so what an admin
+                  approves here is the row a shopper actually gets. */}
+              <Grid item xs={12} md={5}>
+                <Card sx={sectionCardSx}>
+                  <CardContent>
+                    <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+                      <Icon icon="mdi:eye-outline" style={{ fontSize: 24, marginRight: 8 }} />
+                      <Typography variant="h6">On the storefront</Typography>
+                    </Box>
+                    <Divider sx={{ mb: 3 }} />
+
+                    <Box
+                      sx={{
+                        bgcolor: "grey.900",
+                        // The admin's own card is already dark in dark mode, so
+                        // the strip needs an edge to still read as the footer's
+                        // separate band rather than more card.
+                        border: "1px solid",
+                        borderColor: "divider",
+                        borderRadius: 1,
+                        px: { xs: 1.5, sm: 2 },
+                        py: 2,
+                        mb: 2,
+                      }}
+                    >
+                      {socialPreview.length > 0 ? (
+                        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                          {socialPreview.map((social) => (
+                            <Box
+                              key={social.key}
+                              component="a"
+                              href={social.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              aria-label={social.label}
+                              title={social.url}
+                              sx={{
+                                width: 44,
+                                height: 44,
+                                display: "inline-flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                borderRadius: 1,
+                                color: "grey.400",
+                                transition: "color .2s",
+                                "&:hover": { color: "common.white" },
+                              }}
+                            >
+                              <svg
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                                width="18"
+                                height="18"
+                                aria-hidden="true"
+                                focusable="false"
+                              >
+                                <path d={social.path} />
+                              </svg>
+                            </Box>
+                          ))}
+                        </Box>
+                      ) : (
+                        <Typography variant="body2" sx={{ color: "grey.500", py: 1.5 }}>
+                          No links set — the footer will show no social row at all.
+                        </Typography>
+                      )}
+                    </Box>
+
+                    <Chip
+                      size="small"
+                      icon={
+                        <Icon
+                          icon={
+                            socialPreview.length > 0 ? "mdi:eye-outline" : "mdi:eye-off-outline"
+                          }
+                        />
+                      }
+                      color={socialPreview.length > 0 ? "success" : "warning"}
+                      label={socialPreview.length + " of " + SOCIAL_PLATFORMS.length + " showing"}
+                      sx={{ mb: 2 }}
+                    />
+
+                    <Alert severity="info" icon={<Icon icon="mdi:information-outline" />}>
+                      Saved links appear in the footer of every storefront page and in the
+                      Follow our journey card on Contact — on phones, tablets and desktop
+                      alike. Tabs already open pick the change up without a reload.
+                    </Alert>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          </>
+        )}
       </TabPanel>
 
       {/* Snackbar */}

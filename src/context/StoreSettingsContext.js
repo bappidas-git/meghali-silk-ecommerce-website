@@ -14,15 +14,16 @@ import {
   formatMoney,
   fillStoreCopy,
 } from "../utils/storeSettings";
+import { activeSocialLinks } from "../utils/socialLinks";
 import { setActiveCurrency } from "../utils/helpers";
 import { applyStoreTitle, storeDocumentTitle } from "../utils/documentTitle";
 
 // =============================================================================
 // StoreSettingsContext
 // =============================================================================
-// One shared read of the `settings` record the admin writes from
-// Settings > General. It sits above BOTH route trees in App.js, because the
-// same nine values dress both sides of the product:
+// One shared read of the `settings` record the admin writes from its Settings
+// screen. It sits above BOTH route trees in App.js, because the same handful of
+// values dress both sides of the product:
 //
 //   name / tagline   the header lockup, the sidebar, the footer, the document
 //                    title, the admin shell and the admin sign-in card
@@ -32,6 +33,8 @@ import { applyStoreTitle, storeDocumentTitle } from "../utils/documentTitle";
 //   taxRate/included  the checkout tax line and the PDP's tax note
 //   payment (COD)     whether Cash on Delivery is offered at checkout, and the
 //                    fee and order window it is offered within
+//   social            where the footer's marks and the Contact page's "Follow
+//                    our journey" card point
 //
 // Refetches when the tab regains focus, and again whenever an admin save fires
 // `store-settings:updated`, so a change made in one tab reaches the storefront
@@ -47,6 +50,10 @@ export const notifyStoreSettingsUpdated = () => {
 
 const defaultValue = {
   ...DEFAULT_STORE_SETTINGS,
+  // Same shape the provider hands down, so a consumer rendered outside it (a
+  // test, a stray subtree) still maps over a list rather than crashing on
+  // undefined.
+  socialLinks: activeSocialLinks(DEFAULT_STORE_SETTINGS.social),
   loading: true,
   refresh: () => {},
 };
@@ -86,7 +93,7 @@ export const StoreSettingsProvider = ({ children }) => {
     };
   }, [load]);
 
-  const { store, payment } = settings;
+  const { store, payment, social } = settings;
 
   // Mirror the currency into the helpers module so the plain
   // formatCurrency(amount) calls scattered through the app follow the store
@@ -128,6 +135,14 @@ export const StoreSettingsProvider = ({ children }) => {
       taxRate: store.taxRate,
       taxIncluded: store.taxIncluded,
 
+      // The raw map (every known key, blank where unset) for the admin form,
+      // and the render-ready list — canonical order, art and label attached,
+      // entries without a URL already dropped — for the storefront. Both
+      // surfaces map over `socialLinks` rather than each keeping their own
+      // copy of the platform table.
+      social,
+      socialLinks: activeSocialLinks(social),
+
       // `tel:` wants digits and a leading +, nothing else.
       phoneHref: `tel:${(store.phone || "").replace(/[^\d+]/g, "")}`,
       emailHref: `mailto:${store.email}`,
@@ -138,7 +153,7 @@ export const StoreSettingsProvider = ({ children }) => {
       // (FAQ answers, the promise strip) from these same settings.
       fillCopy: (text) => fillStoreCopy(text, { store, payment }),
     };
-  }, [store, payment, loading, load]);
+  }, [store, payment, social, loading, load]);
 
   return (
     <StoreSettingsContext.Provider value={value}>

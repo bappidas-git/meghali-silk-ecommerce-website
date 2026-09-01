@@ -41,11 +41,7 @@ import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
 import { useStoreSettings } from "../../context/StoreSettingsContext";
 import apiService from "../../services/api";
-import {
-  SUPPORT_HOURS,
-  SOCIAL_LINKS,
-  WHY_CHOOSE_US,
-} from "../../utils/constants";
+import { SUPPORT_HOURS, WHY_CHOOSE_US } from "../../utils/constants";
 import { isEmailValid, isValidPhone } from "../../utils/helpers";
 import styles from "./Support.module.css";
 
@@ -144,9 +140,10 @@ const MARKS = [
 const MESSAGE_MIN = 20;
 
 // The three ways in, built from the store's own contact details (the admin's
-// Settings > General). WhatsApp is only offered when a URL exists — an empty
-// entry drops the card rather than printing a dead one.
-const buildChannels = ({ phone, email, phoneHref, emailHref }) =>
+// Settings > General) and its WhatsApp link (Settings > Social Links). WhatsApp
+// is only offered when a URL exists — an empty entry drops the card rather than
+// printing a dead one.
+const buildChannels = ({ phone, email, phoneHref, emailHref, whatsappUrl }) =>
   [
     {
       key: "call",
@@ -172,19 +169,10 @@ const buildChannels = ({ phone, email, phoneHref, emailHref }) =>
       label: "WhatsApp",
       value: "Start a chat",
       note: "Send a photograph of the piece you are asking about",
-      href: SOCIAL_LINKS.WHATSAPP,
+      href: whatsappUrl,
       external: true,
     },
   ].filter((channel) => !!channel.href);
-
-// Follow our journey — the same filtered-by-URL rule the Footer uses.
-const SOCIALS = [
-  { key: "INSTAGRAM", glyph: "instagram", label: "Instagram" },
-  { key: "FACEBOOK", glyph: "facebook", label: "Facebook" },
-  { key: "TWITTER", glyph: "twitter", label: "Twitter" },
-  { key: "YOUTUBE", glyph: "youtube", label: "YouTube" },
-  { key: "WHATSAPP", glyph: "whatsapp", label: "WhatsApp" },
-].filter((social) => !!SOCIAL_LINKS[social.key]);
 
 const EMPTY_LEAD = {
   name: "",
@@ -201,7 +189,9 @@ const EMPTY_LEAD = {
 const Support = () => {
   const { isDarkMode } = useTheme();
   const { user } = useAuth();
-  // Phone, email and the showroom address are whatever the admin last saved.
+  // Phone, email, the showroom address and the social marks are whatever the
+  // admin last saved. `socialLinks` arrives filtered to the platforms that have
+  // a URL, so an empty entry simply is not in the list.
   const {
     email: supportEmail,
     phone: supportPhone,
@@ -209,12 +199,15 @@ const Support = () => {
     emailHref,
     phoneHref,
     fillCopy,
+    social,
+    socialLinks,
   } = useStoreSettings();
   const channels = buildChannels({
     phone: supportPhone,
     email: supportEmail,
     phoneHref,
     emailHref,
+    whatsappUrl: social.whatsapp,
   });
   const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
     supportAddress
@@ -548,17 +541,17 @@ const Support = () => {
               </a>
             </section>
 
-            {SOCIALS.length > 0 && (
+            {socialLinks.length > 0 && (
               <section className={styles.railCard} aria-labelledby="support-social">
                 <h2 className={styles.railTitle} id="support-social">
                   Follow our journey
                 </h2>
                 <ul className={styles.socials}>
-                  {SOCIALS.map((social) => (
+                  {socialLinks.map((social) => (
                     <li key={social.key}>
                       <a
                         className={styles.social}
-                        href={SOCIAL_LINKS[social.key]}
+                        href={social.url}
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={social.label}

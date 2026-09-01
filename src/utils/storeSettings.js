@@ -1,18 +1,19 @@
 // =============================================================================
 // Store settings — shape, defaults and normalisation
 // =============================================================================
-// The admin's Settings > General screen writes two sections of the `settings`
-// record in db.json: `store` (identity, currency, tax) and `payment` (Cash on
-// Delivery). Everything the storefront and the admin shell render from those
-// values goes through here first, so a half-filled or missing record can never
-// blank the header, the footer or a price.
+// The admin's Settings screen writes three sections of the `settings` record in
+// db.json: `store` (identity, currency, tax) and `payment` (Cash on Delivery)
+// from the General tab, and `social` (where the footer's marks point) from the
+// Social Links tab. Everything the storefront and the admin shell render from
+// those values goes through here first, so a half-filled or missing record can
+// never blank the header, the footer or a price.
 //
 // Falling back to the constants (rather than to empty strings) is deliberate:
 // the constants are the values the site was built with, so an unreachable API
 // degrades to the same page the visitor saw yesterday instead of an anonymous
 // one. A field the admin has explicitly cleared still falls back — an empty
 // store name is never a deliberate choice, and a blank <title> is worse than a
-// stale one.
+// stale one. `social` is the one exception, and says why at its own line below.
 // =============================================================================
 import {
   APP_NAME,
@@ -22,6 +23,7 @@ import {
   SUPPORT_ADDRESS,
   FREE_SHIPPING_THRESHOLD,
 } from "./constants";
+import { DEFAULT_SOCIAL_LINKS, normalizeSocialLinks } from "./socialLinks";
 
 // Currencies the admin can pick from. The symbol is what actually gets printed
 // (see formatMoney), so this map is the single source shared by the Settings
@@ -54,6 +56,10 @@ export const DEFAULT_STORE_SETTINGS = {
     codMinOrder: 0,
     codMaxOrder: 0,
   },
+  // Where the marks under the footer wordmark point. The keys, the repair rules
+  // and the render-ready list all live in ./socialLinks — this only names the
+  // section so a settings object is complete before the API has answered.
+  social: { ...DEFAULT_SOCIAL_LINKS },
 };
 
 // A trimmed string, or the fallback when the field is missing/blank.
@@ -99,6 +105,11 @@ export const normalizeStoreSettings = (raw) => {
       // test for absence rather than for a magic zero.
       codMaxOrder: num(payment.codMaxOrder, 0) || null,
     },
+    // Deliberately NOT run through text()'s fallback: a social field the admin
+    // has cleared is a real choice — blanking one is how a mark is taken off the
+    // footer, and falling back would put it straight back. Only a record with no
+    // `social` section at all seeds itself (handled in normalizeSocialLinks).
+    social: normalizeSocialLinks(raw?.social),
   };
 };
 
