@@ -56,6 +56,7 @@ import AdminUsers from "./pages/Admin/AdminUsers";
 import AdminShipping from "./pages/Admin/AdminShipping";
 import AdminCoupons from "./pages/Admin/AdminCoupons";
 import AdminSpecialOffers from "./pages/Admin/AdminSpecialOffers";
+import AdminHeroSection from "./pages/Admin/AdminHeroSection";
 import AdminReviews from "./pages/Admin/AdminReviews";
 import AdminLeads from "./pages/Admin/AdminLeads";
 import AdminSettings from "./pages/Admin/AdminSettings";
@@ -154,6 +155,7 @@ function App() {
                         <Route path="shipping" element={<AdminShipping />} />
                         <Route path="coupons" element={<AdminCoupons />} />
                         <Route path="special-offers" element={<AdminSpecialOffers />} />
+                        <Route path="hero-section" element={<AdminHeroSection />} />
                         <Route path="reviews" element={<AdminReviews />} />
                         <Route path="leads" element={<AdminLeads />} />
                         <Route path="settings" element={<AdminSettings />} />

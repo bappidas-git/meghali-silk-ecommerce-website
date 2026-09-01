@@ -2,13 +2,21 @@
  * HeroSection — Meghali's Silk cinematic opening
  * =============================================================================
  * Two strips, top to bottom:
- *   1. the STAGE     — full-bleed dark media, crossfading, with the editorial
- *                      copy set low-left and the slide hairlines low-right
+ *   1. the STAGE     — full-bleed dark media, transitioning, with the editorial
+ *                      copy block and the slide hairlines
  *   2. the OPENERS   — a hairline index row of tracked collection links
+ *
+ * EVERYTHING HERE IS ADMIN-DRIVEN
+ *   The stage height (per device), the scrim strength, the transition, which
+ *   chrome shows and how each slide is aligned all come from the `heroConfig`
+ *   record and the slide rows. This file declares the DESIGNED DEFAULTS as
+ *   custom properties on .hero; the component overwrites them with an inline
+ *   style. So the hero still renders exactly as designed if the config record
+ *   is missing, and re-skins itself the moment an admin saves.
  *
  * WHY THE STAGE IS PINNED
  *   Like the footer, the hero band is a dark room that must NOT flip with the
- *   app theme — the seeded banner gradients are ink→gold in both modes, and an
+ *   app theme — the seeded slide gradients are ink→gold in both modes, and an
  *   ivory stage would strand them. --sf-color-brand-green-deep is declared once
  *   in :root and never re-declared under body.dark, so pointing the ground at
  *   it gives an identical stage in light and dark. The mode-flipping surface
@@ -18,15 +26,33 @@
  *   pins --sf-shadow-focus so the shared .sf-btn ring reads on the dark ground.
  *   These are aliases over existing tokens — still no hardcoded hex anywhere.
  *
- * WHY THE CROSSFADE IS CSS, NOT JS
- *   Every banner's media is in the DOM at once; only opacity changes. The
- *   ACTIVE layer's resting style is opacity:1, so the hero is fully painted on
- *   the first frame and never waits on an animation timeline to become legible.
- *   Under prefers-reduced-motion the fade duration drops to 0 (below) and the
- *   component stops autoplaying, which leaves a static first slide.
+ * WHY THE TRANSITION IS CSS, NOT JS
+ *   Every slide's media is in the DOM at once; only opacity or transform
+ *   changes. The ACTIVE layer's resting style is fully painted, so the hero is
+ *   legible on the first frame and never waits on an animation timeline. Under
+ *   prefers-reduced-motion the duration drops to 0 (below), the component stops
+ *   autoplaying, background video stops and the progress bar is not rendered —
+ *   which leaves a static first slide.
  * ========================================================================== */
 
 .hero {
+  /* ---- Stage height (admin-overridable, per device) ---------------------- */
+  /* These reproduce the heights this file used to hardcode. The component
+     rewrites all nine from heroConfig.heights. */
+  --sf-hero-h-min: 520px;
+  --sf-hero-h-vh: 78vh;
+  --sf-hero-h-max: 780px;
+  --sf-hero-h-min-tablet: 480px;
+  --sf-hero-h-vh-tablet: 70vh;
+  --sf-hero-h-max-tablet: 640px;
+  --sf-hero-h-min-mobile: 460px;
+  --sf-hero-h-vh-mobile: 66vh;
+  --sf-hero-h-max-mobile: 600px;
+
+  /* Scrim strength, 0–1. 1 = the gradient as designed, 0 = bare media. Set
+     from the active slide's override, else the section setting. */
+  --sf-hero-scrim: 1;
+
   /* ---- Scoped stage palette (see header note) --------------------------- */
   --sf-hero-ground: var(--sf-color-brand-green-deep);
   --sf-hero-ink: var(--sf-color-primary-contrast);
@@ -34,9 +60,8 @@
   --sf-hero-ink-faint: color-mix(in srgb, var(--sf-color-primary-contrast) 45%, transparent);
   --sf-hero-rule: color-mix(in srgb, var(--sf-color-primary-contrast) 26%, transparent);
   --sf-hero-gold: var(--sf-color-gold-light);
-  /* The crossfade. Slow and decelerating — the only motion in the opening, and
-     now the shared slow tier rather than a hero-only 1.1s, so the stage speaks
-     the same motion language as the rest of the storefront. */
+  /* The transition. Slow and decelerating — the shared slow tier, so the stage
+     speaks the same motion language as the rest of the storefront. */
   --sf-hero-fade: var(--sf-duration-slow);
   /* Overrides the global ring for everything on the stage, so the gap layer is
      the stage itself rather than the page ivory. */
@@ -48,6 +73,21 @@
   font-family: var(--sf-font-family);
 }
 
+/* The whole section can be switched off from the admin. When it is, the only
+   thing left is a visually-hidden h1 — the hero's headline was the home page's
+   only top-level heading, and a page without one is a document with no name. */
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* =============================================================================
  * 1. THE STAGE
  * Full-bleed: .main-content sets no max-width, so the section already spans the
@@ -57,7 +97,7 @@
 .stage {
   position: relative;
   width: 100%;
-  height: clamp(520px, 78vh, 780px);
+  height: clamp(var(--sf-hero-h-min), var(--sf-hero-h-vh), var(--sf-hero-h-max));
   overflow: hidden;
   isolation: isolate;
   background: var(--sf-hero-ground);
@@ -75,24 +115,62 @@
 .slide {
   position: absolute;
   inset: 0;
+}
+
+/* ---- Transition modes -------------------------------------------------- */
+/* One of these three lands on .stage. Each owns the resting and active state
+   of .slide outright, so the modes can never half-apply to each other. */
+
+/* CROSSFADE (default) — stacked layers, only opacity moves. */
+.modeFade .slide {
   opacity: 0;
   transition: opacity var(--sf-hero-fade) var(--sf-ease);
 }
 
-.slideActive {
+.modeFade .slideActive {
   opacity: 1;
 }
 
-/* The seeded banner `gradient` is the slide's ground (an inline style overrides
-   this default), so each slide arrives with its own ink→gold cast. */
+/* SLIDE — every layer is opaque and parked (index − active) stage-widths
+   across. The component takes the short way round the loop, so only the two
+   neighbours are ever on screen: .slideNear (offset −1…+1) animates, and
+   anything further out snaps, which is invisible behind overflow:hidden and
+   keeps a wrap from rewinding the whole stack. */
+.modeSlide .slide {
+  opacity: 1;
+  transform: translateX(calc(var(--sf-slide-offset, 0) * 100%));
+  transition: none;
+  will-change: transform;
+}
+
+.modeSlide .slideNear {
+  transition: transform var(--sf-hero-fade) var(--sf-ease);
+}
+
+/* NONE — instant swap. */
+.modeNone .slide {
+  opacity: 0;
+  transition: none;
+}
+
+.modeNone .slideActive {
+  opacity: 1;
+}
+
+/* The slide's `gradient` is its ground (an inline style overrides this
+   default), so each slide arrives with its own ink→gold cast. It also backs an
+   image while that loads, and shows through any letterboxing on a video. */
 .slideGround {
   position: absolute;
   inset: 0;
   background: var(--sf-gradient-heritage);
 }
 
-/* Optional photographic layer — only rendered when a banner row carries an
-   `image`. Cover-cropped and pushed right, away from the copy column. */
+/* Optional photographic layer — only rendered when a slide is typed "image".
+   Cover-cropped; the focal point is the admin's (default "right center", which
+   pushes the art away from a left-aligned copy column). That choice now applies
+   at every width, so the admin's framing is what ships on phones too — no
+   media query second-guesses it. */
 .slideImage {
   position: absolute;
   inset: 0;
@@ -100,6 +178,21 @@
   height: 100%;
   object-fit: cover;
   object-position: right center;
+}
+
+/* Optional video layer — same box as the image. Muted + playsInline + loop are
+   set on the element; the component plays only the active slide and nothing at
+   all under prefers-reduced-motion, where the poster stands in. */
+.slideVideo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: right center;
+  /* A video element is inline by default, which would leave a baseline gap. */
+  display: block;
+  pointer-events: none;
 }
 
 /* A suggestion of warp and weft, drawn in CSS rather than shipped as an asset:
@@ -121,11 +214,19 @@
     );
 }
 
-/* Ink scrim — heavier at the left and along the bottom, where the copy sits, so
-   the ivory headline clears its contrast on any banner gradient or photograph. */
+/* Ink scrim — heaviest where the copy sits, so the ivory headline clears its
+   contrast on any slide gradient, photograph or video frame. Its strength is
+   the admin's (--sf-hero-scrim, 0–1) and it eases between slides so a per-slide
+   override does not snap. Its DIRECTION follows the active slide's alignment,
+   below — a left-heavy wash under centred copy would be wrong. */
 .scrim {
   position: absolute;
   inset: 0;
+  opacity: var(--sf-hero-scrim, 1);
+  transition: opacity var(--sf-hero-fade) var(--sf-ease);
+}
+
+.scrim.alignLeft {
   background-image:
     linear-gradient(
       90deg,
@@ -137,6 +238,33 @@
       0deg,
       color-mix(in srgb, var(--sf-hero-ground) 80%, transparent) 0%,
       transparent 60%
+    );
+}
+
+.scrim.alignRight {
+  background-image:
+    linear-gradient(
+      270deg,
+      color-mix(in srgb, var(--sf-hero-ground) 88%, transparent) 0%,
+      color-mix(in srgb, var(--sf-hero-ground) 62%, transparent) 42%,
+      transparent 80%
+    ),
+    linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--sf-hero-ground) 80%, transparent) 0%,
+      transparent 60%
+    );
+}
+
+/* Centred copy spans the stage, so the wash has to be even across it and lean
+   on the vertical instead. */
+.scrim.alignCenter {
+  background-image:
+    linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--sf-hero-ground) 88%, transparent) 0%,
+      color-mix(in srgb, var(--sf-hero-ground) 55%, transparent) 55%,
+      color-mix(in srgb, var(--sf-hero-ground) 30%, transparent) 100%
     );
 }
 
@@ -156,6 +284,53 @@
 
 .copyInner {
   max-width: 46rem;
+}
+
+/* Alignment — the admin sets it per slide. .copy is a column flexbox, so the
+   cross-axis alignment moves the whole copy block and text-align handles the
+   lines inside it; the eyebrow rule and the CTA row follow suit below. */
+.copy.alignLeft {
+  align-items: flex-start;
+  text-align: left;
+}
+
+.copy.alignCenter {
+  align-items: center;
+  text-align: center;
+}
+
+.copy.alignRight {
+  align-items: flex-end;
+  text-align: right;
+}
+
+/* The headline and lede are capped in `ch`, so off-left alignments need the
+   cap re-centred/-flushed or the block would still hang from the left edge. */
+.copy.alignCenter .headline,
+.copy.alignCenter .lede {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.copy.alignRight .headline,
+.copy.alignRight .lede {
+  margin-left: auto;
+}
+
+.copy.alignCenter .eyebrow,
+.copy.alignCenter .actions {
+  justify-content: center;
+}
+
+.copy.alignRight .eyebrow,
+.copy.alignRight .actions {
+  justify-content: flex-end;
+}
+
+/* The eyebrow's opening rule belongs on the outside of the line — so it flips
+   to the right-hand side when the copy is flushed right. */
+.copy.alignRight .eyebrow {
+  flex-direction: row-reverse;
 }
 
 /* Tracked eyebrow, opened by a short gold rule — the pattern every section
@@ -227,6 +402,56 @@
   color: var(--sf-hero-gold);
   border-color: var(--sf-hero-gold);
   background: color-mix(in srgb, var(--sf-color-primary-contrast) 8%, transparent);
+}
+
+/* ---- Prev / next arrows (optional) ------------------------------------- */
+/* Off unless an admin turns them on. The strip spans the stage so the two
+   buttons sit hard against its edges, but only the buttons take pointer events
+   — the empty middle must never swallow a click meant for the CTA under it. */
+
+.arrows {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--sf-space-4);
+  pointer-events: none;
+}
+
+.arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--sf-tap-target);
+  height: var(--sf-tap-target);
+  padding: 0;
+  border: 1px solid var(--sf-hero-rule);
+  border-radius: var(--sf-radius-sm);
+  background: color-mix(in srgb, var(--sf-hero-ground) 45%, transparent);
+  color: var(--sf-hero-ink);
+  cursor: pointer;
+  pointer-events: auto;
+  transition: color var(--sf-transition-fast), border-color var(--sf-transition-fast),
+    background-color var(--sf-transition-fast);
+}
+
+.arrow svg {
+  width: 20px;
+  height: 20px;
+}
+
+.arrow:hover {
+  color: var(--sf-hero-gold);
+  border-color: var(--sf-hero-gold);
+  background: color-mix(in srgb, var(--sf-hero-ground) 72%, transparent);
+}
+
+.arrow:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--sf-shadow-focus);
 }
 
 /* ---- Slide controls ---------------------------------------------------- */
@@ -326,9 +551,52 @@
   box-shadow: var(--sf-shadow-focus);
 }
 
+/* ---- Autoplay progress (optional) -------------------------------------- */
+/* A hairline across the stage floor that runs for exactly this slide's
+   duration. The component remounts it on every slide change (so it restarts)
+   and freezes it with animation-play-state while the stage is paused, which
+   keeps it in step with the JS timer — that banks its remaining time too.
+   Never rendered when autoplay is off or motion is reduced. */
+
+.progress {
+  position: absolute;
+  z-index: 3;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: color-mix(in srgb, var(--sf-hero-ink) 12%, transparent);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.progressBar {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform: scaleX(0);
+  transform-origin: left center;
+  background-image: var(--sf-gradient-gold);
+  animation-name: sfHeroProgress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+  /* animation-duration and -play-state come from the component. */
+}
+
+@keyframes sfHeroProgress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
 /* =============================================================================
  * 2. THE COLLECTION OPENERS
  * A single hairline row of tracked links — the index page of the storefront.
+ * The label and how many collections show are the admin's; the links are the
+ * live category tree.
  * ========================================================================== */
 
 .openers {
@@ -416,11 +684,17 @@
 
 /* =============================================================================
  * RESPONSIVE
+ * Each breakpoint swaps the stage height onto that device's admin-set trio, so
+ * a store owner tunes desktop, tablet and phone independently.
  * ========================================================================== */
 
 @media (max-width: 1024px) {
   .stage {
-    height: clamp(480px, 70vh, 640px);
+    height: clamp(
+      var(--sf-hero-h-min-tablet),
+      var(--sf-hero-h-vh-tablet),
+      var(--sf-hero-h-max-tablet)
+    );
   }
 
   .copy {
@@ -438,22 +712,24 @@
 
 @media (max-width: 768px) {
   .stage {
-    height: clamp(460px, 66vh, 600px);
+    height: clamp(
+      var(--sf-hero-h-min-mobile),
+      var(--sf-hero-h-vh-mobile),
+      var(--sf-hero-h-max-mobile)
+    );
   }
 
-  /* On a phone the copy owns the whole width, so the scrim turns vertical —
-     light at the top, deep behind the type. */
-  .scrim {
+  /* On a phone the copy owns the whole width whatever its alignment, so every
+     scrim turns vertical — light at the top, deep behind the type. */
+  .scrim.alignLeft,
+  .scrim.alignCenter,
+  .scrim.alignRight {
     background-image: linear-gradient(
       0deg,
       color-mix(in srgb, var(--sf-hero-ground) 92%, transparent) 0%,
       color-mix(in srgb, var(--sf-hero-ground) 70%, transparent) 45%,
       color-mix(in srgb, var(--sf-hero-ground) 30%, transparent) 100%
     );
-  }
-
-  .slideImage {
-    object-position: center top;
   }
 
   .copy {
@@ -481,6 +757,13 @@
 
   .control {
     width: 40px;
+  }
+
+  /* Arrows ride high on the media rather than sitting mid-stage, where they
+     would land on the headline once the copy takes the full width. */
+  .arrows {
+    align-items: flex-start;
+    padding: var(--sf-space-10) var(--sf-space-3) 0;
   }
 
   .openersInner {
@@ -524,8 +807,9 @@
 
 /* =============================================================================
  * REDUCED MOTION
- * No crossfade (the slide simply is), no growing hairlines. Autoplay is already
- * switched off in the component, so the first slide stands still.
+ * No transition (the slide simply is), no growing hairlines, no scrim easing.
+ * Autoplay, background video and the progress bar are already switched off in
+ * the component, which leaves the first slide standing still.
  * ========================================================================== */
 
 @media (prefers-reduced-motion: reduce) {
@@ -533,7 +817,12 @@
     --sf-hero-fade: 0s;
   }
 
-  .slide,
+  .modeFade .slide,
+  .modeSlide .slide,
+  .modeSlide .slideNear,
+  .modeNone .slide,
+  .scrim,
+  .arrow,
   .controlRule,
   .openerLink,
   .openerLink::after {

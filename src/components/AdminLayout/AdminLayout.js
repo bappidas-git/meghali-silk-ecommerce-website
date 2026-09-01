@@ -105,6 +105,16 @@ const menuItems = [
     path: "/admin/special-offers",
   },
   {
+    title: "Storefront",
+    icon: null,
+    isSection: true,
+  },
+  {
+    title: "Hero Section",
+    icon: "mdi:view-carousel-outline",
+    path: "/admin/hero-section",
+  },
+  {
     title: "Operations",
     icon: null,
     isSection: true,

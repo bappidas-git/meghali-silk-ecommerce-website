@@ -1095,6 +1095,33 @@ const apiService = {
   },
 
   // ===========================================================================
+  // Hero Section (Storefront)
+  // ===========================================================================
+  // Public read of the admin-managed config that drives the home hero: the
+  // master toggle, autoplay + default timer, transition, visible chrome, scrim
+  // strength, per-device stage height, shared secondary CTA and the collection
+  // openers row. The slides themselves come from `banners` (above).
+  //
+  // Never throws: a missing/unreachable record returns {} and the caller
+  // normalizes it to the designed defaults, so the hero degrades to exactly
+  // what it looked like before this record existed.
+  hero: {
+    getConfig: async () => {
+      try {
+        if (IS_MOCK_API) {
+          const response = await api.get("/heroConfig");
+          return response.data || {};
+        }
+        const response = await api.get("/hero/config");
+        return extractData(response);
+      } catch (error) {
+        console.error("Get hero config error:", error);
+        return {};
+      }
+    },
+  },
+
+  // ===========================================================================
   // Cart
   // ===========================================================================
   cart: {
@@ -2466,6 +2493,100 @@ const apiService = {
         const response = await api.put("/admin/deals/config", payload);
         return extractData(response);
       } catch (error) { console.error("Admin update deals config error:", error); throw error; }
+    },
+
+    // --- Hero section: config + slides ---
+    // The hero is two records: the `heroConfig` singleton (section-wide
+    // behaviour) and the `banners` collection (one row per slide). Both are
+    // managed from the Hero Section admin screen and read by the storefront —
+    // no hero copy, media or timing is hardcoded anywhere.
+    getHeroConfig: async () => {
+      try {
+        if (IS_MOCK_API) {
+          const response = await api.get("/heroConfig");
+          return response.data || {};
+        }
+        const response = await api.get("/admin/hero/config");
+        return extractData(response);
+      } catch (error) { console.error("Admin get hero config error:", error); throw error; }
+    },
+
+    updateHeroConfig: async (data) => {
+      try {
+        // The whole object is replaced on save (mirrors dealsConfig), so the
+        // admin form always holds and sends the complete config.
+        const payload = { ...data, updatedAt: new Date().toISOString() };
+        if (IS_MOCK_API) {
+          const response = await api.put("/heroConfig", payload);
+          return response.data;
+        }
+        const response = await api.put("/admin/hero/config", payload);
+        return extractData(response);
+      } catch (error) { console.error("Admin update hero config error:", error); throw error; }
+    },
+
+    // Every slide, inactive ones included — the admin table needs the full list
+    // (the storefront filters to active rows itself).
+    getBanners: async () => {
+      try {
+        const response = await api.get(IS_MOCK_API ? "/banners" : "/admin/banners");
+        return IS_MOCK_API ? response.data : extractData(response);
+      } catch (error) { console.error("Admin get banners error:", error); throw error; }
+    },
+
+    createBanner: async (data) => {
+      try {
+        const response = await api.post(IS_MOCK_API ? "/banners" : "/admin/banners", {
+          ...data,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        });
+        return IS_MOCK_API ? response.data : extractData(response);
+      } catch (error) { console.error("Admin create banner error:", error); throw error; }
+    },
+
+    updateBanner: async (id, data) => {
+      try {
+        const response = await api.put(
+          IS_MOCK_API ? `/banners/${id}` : `/admin/banners/${id}`,
+          { ...data, updatedAt: new Date().toISOString() }
+        );
+        return IS_MOCK_API ? response.data : extractData(response);
+      } catch (error) { console.error("Admin update banner error:", error); throw error; }
+    },
+
+    deleteBanner: async (id) => {
+      try {
+        const response = await api.delete(
+          IS_MOCK_API ? `/banners/${id}` : `/admin/banners/${id}`
+        );
+        return IS_MOCK_API ? response.data : extractData(response);
+      } catch (error) { console.error("Admin delete banner error:", error); throw error; }
+    },
+
+    // Persist a new slide order. `orderedIds` is the full id list, top first;
+    // each row's sortOrder becomes its index. json-server has no bulk endpoint,
+    // so mock mode PATCHes the rows whose position actually changed.
+    reorderBanners: async (orderedIds, current = []) => {
+      try {
+        if (IS_MOCK_API) {
+          const byId = new Map(current.map((b) => [String(b.id), b]));
+          const changed = orderedIds
+            .map((id, index) => ({ row: byId.get(String(id)), index }))
+            .filter(({ row, index }) => row && (row.sortOrder ?? -1) !== index);
+          await Promise.all(
+            changed.map(({ row, index }) =>
+              api.patch(`/banners/${row.id}`, {
+                sortOrder: index,
+                updatedAt: new Date().toISOString(),
+              })
+            )
+          );
+          return true;
+        }
+        const response = await api.put("/admin/banners/reorder", { order: orderedIds });
+        return extractData(response);
+      } catch (error) { console.error("Admin reorder banners error:", error); throw error; }
     },
   },
 };
