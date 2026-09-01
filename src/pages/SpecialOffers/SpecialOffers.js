@@ -17,6 +17,7 @@ import {
   truncateText,
   PLACEHOLDER_IMG,
   onImageError,
+  productFlagMarks,
 } from "../../utils/helpers";
 import { resolveCountdownTarget, diffToParts } from "../../utils/dealsConfig";
 import { RISE, reveal } from "../../theme/motion";
@@ -442,6 +443,7 @@ const ProductCard = React.forwardRef(
     const ratingCount = Number(product.totalReviews) || 0;
     const rating = Number(product.rating) || 0;
     const outOfStock = product.stock === 0;
+    const flagMarks = productFlagMarks(product);
     const [added, flashAdded] = useAddedFlash();
 
     const handleAdd = () => {
@@ -486,7 +488,19 @@ const ProductCard = React.forwardRef(
         </div>
 
         <div className={styles.cardBody}>
-          {categoryName && <span className={styles.cardEyebrow}>{categoryName}</span>}
+          {/* Eyebrow row — the category, then the merchant's TRENDING / HOT marks,
+              read through the same shared helper as the storefront card so an
+              offer piece is marked here exactly as it is everywhere else. */}
+          {(categoryName || flagMarks.length > 0) && (
+            <div className={styles.cardMeta}>
+              {categoryName && <span className={styles.cardEyebrow}>{categoryName}</span>}
+              {flagMarks.map((flag) => (
+                <span key={flag.key} className={`sf-flag ${flag.className}`}>
+                  {flag.label}
+                </span>
+              ))}
+            </div>
+          )}
 
           <Link to={productPath(product)} className={styles.cardName}>
             {truncateText(product.name, 48)}

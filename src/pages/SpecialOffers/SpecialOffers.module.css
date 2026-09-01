@@ -475,6 +475,17 @@
 }
 
 /* The tracked brand/category line — smallest, quietest thing on either card. */
+/* Eyebrow ROW — category, then the merchant's flag marks. Wraps on a narrow
+   card so the marks drop under the category rather than crowding it. */
+.cardMeta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sf-space-2);
+  min-width: 0;
+  max-width: 100%;
+}
+
 .cardEyebrow {
   font-size: var(--sf-text-xs);
   font-weight: var(--sf-font-medium);

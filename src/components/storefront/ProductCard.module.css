@@ -244,6 +244,21 @@
   padding: var(--sf-space-4) 0 0;
 }
 
+/* The eyebrow ROW — brand, then the merchant's TRENDING / HOT marks.
+   It wraps rather than truncates: at the narrow end of the range (a 166px plate
+   in the two-up phone listing) "MEGHALI'S SILK" and one mark cannot share a
+   line, so the marks drop under the brand and the card simply grows one line
+   taller. `min-width: 0` keeps a long brand from pushing the row past the
+   column and giving the grid a horizontal scrollbar. */
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sf-space-2);
+  min-width: 0;
+  max-width: 100%;
+}
+
 /* Tracked eyebrow — the smallest, quietest line on the card. */
 .brand {
   font-size: var(--sf-text-xs);

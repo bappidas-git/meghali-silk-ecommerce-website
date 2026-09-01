@@ -73,16 +73,18 @@ const PROMISE_DETAIL = {
   },
 };
 
-// Where the section "View all" links go. NOTE (verified against
-// `normalizeSort` / `SORT_ALIASES` in src/pages/Products/Products.js): the
-// listing understands relevance | price-low | price-high | newest | rating |
-// popularity plus a small alias table. `sort=featured`, `sort=trending` and
-// `sort=sale` are NOT in it — they silently fall back to relevance — so this
-// page links only to sorts that actually resolve, and sends the offers rail to
-// the real Special Offers page instead of a dead `?sort=sale`. If Prompt 14
-// adds those aliases to the listing, these two constants are the only edit.
+// Where the section "View all" links go. `sort=featured` / `sort=trending` are
+// still NOT sort values (see `normalizeSort` / `SORT_ALIASES` in
+// src/pages/Products/Products.js — they would silently fall back to relevance);
+// a merchandising flag is a FILTER, not an ordering, so the listing now carries
+// it as one: ?highlight=<comma flags>, matching the merchant's own switches in
+// Admin → Products → Visibility & Flags. That is what these two rails link to,
+// so "View all" lands on the same pieces the rail was showing rather than on an
+// unrelated ordering of the whole catalogue. The offers rail still goes to the
+// real Special Offers page instead of a dead `?sort=sale`.
 const ALL_PRODUCTS_LINK = "/products";
-const TRENDING_LINK = "/products?sort=popularity";
+const FEATURED_LINK = "/products?highlight=featured";
+const TRENDING_LINK = "/products?highlight=trending";
 
 const getRecentlyViewed = () => {
   try {
@@ -507,7 +509,7 @@ const Home = () => {
               titleId="edit-heading"
               lede="A short list from the loom — the pieces we would reach for first."
               linkText="View all"
-              linkTo={ALL_PRODUCTS_LINK}
+              linkTo={FEATURED_LINK}
             />
 
             <div className={styles.editGrid}>

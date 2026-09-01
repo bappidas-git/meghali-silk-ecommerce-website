@@ -160,6 +160,23 @@ export const productPath = (product) => {
   return `/products/${idPart}`;
 };
 
+// The merchandising flags a merchant sets by hand in
+// Admin → Products → Visibility & Flags. `featured` already owns two surfaces of
+// its own (Home's "Chosen this season" edit and the gold PREMIUM ribbon), so the
+// two that need a mark of their own are `trending` and `hot`.
+//
+// ONE reader, so the card, the PDP and the listing facet can never disagree
+// about what "Trending" means — and `=== true` on purpose: the same honest-data
+// rule the ribbon follows, so a stray truthy value can't invent a mark.
+// `className` names the global primitive in theme/storefront-primitives.css.
+export const PRODUCT_FLAG_MARKS = [
+  { key: "trending", label: "Trending", className: "sf-flag-trending" },
+  { key: "hot", label: "Hot", className: "sf-flag-hot" },
+];
+
+export const productFlagMarks = (product) =>
+  PRODUCT_FLAG_MARKS.filter((flag) => product?.[flag.key] === true);
+
 export const formatNumber = (num) => {
   return new Intl.NumberFormat("en-US").format(num);
 };

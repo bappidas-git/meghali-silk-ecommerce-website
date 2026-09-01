@@ -199,6 +199,51 @@
   border-radius: var(--sf-radius-sm);
 }
 
+/* Merchant flag marks — TRENDING / HOT.
+   The third kind of mark a product can carry, beside the discount badge and the
+   gold PREMIUM ribbon, and set from the merchant's own switch in
+   Admin → Products → Visibility & Flags.
+
+   They deliberately do NOT go on the photograph. Its corners are already spoken
+   for — discount top-left, ribbon top-right, heart under it, out-of-stock across
+   the foot — and the card already steps those around each other by container
+   query; a fifth and a sixth mark up there would print on top of one another on
+   a 166px plate. These are metadata, so they are set in the TEXT STACK beside
+   the brand line instead: quieter than a sticker, legible at every card width,
+   and unable to collide with anything.
+
+   Geometry follows the ribbon (line-height 1 at --sf-text-xs) so a row of marks
+   stays optically level whatever mix of them a product carries. Colour comes
+   from the storefront's own accent family, which inverts with the theme — and
+   never from --sf-color-danger: HOT is a merchandising note, not an error. */
+.sf-flag {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--sf-space-1) var(--sf-space-2);
+  background: transparent;
+  border: 1px solid transparent;
+  font-family: var(--sf-font-family);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-font-semibold);
+  text-transform: uppercase;
+  letter-spacing: var(--sf-tracking-wide);
+  line-height: 1;
+  white-space: nowrap;
+  border-radius: var(--sf-radius-sm);
+}
+
+.sf-flag-trending {
+  background: color-mix(in srgb, var(--sf-cat-blue) 10%, transparent);
+  color: var(--sf-cat-blue);
+  border-color: color-mix(in srgb, var(--sf-cat-blue) 40%, transparent);
+}
+
+.sf-flag-hot {
+  background: color-mix(in srgb, var(--sf-cat-red) 10%, transparent);
+  color: var(--sf-cat-red);
+  border-color: color-mix(in srgb, var(--sf-cat-red) 40%, transparent);
+}
+
 /* Category chip — a filter tab, not a bubble. Sits on the page ground. */
 .sf-chip {
   display: inline-flex;
