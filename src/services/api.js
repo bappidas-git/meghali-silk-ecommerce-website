@@ -86,6 +86,21 @@ export const getErrorMessage = (error) => {
       return Array.isArray(first) ? first[0] : first;
     }
   }
+  // No response at all — the request never reached a server, so this is a
+  // transport failure, not a rejected request. Say that plainly: a generic
+  // "an error occurred" on a login form reads as "wrong password" and sends
+  // people off checking credentials that were fine all along. In mock mode
+  // it's almost always json-server being down, so name the fix.
+  if (!error.response) {
+    if (error.code === "ECONNABORTED") {
+      return "The server took too long to respond. Please try again.";
+    }
+    if (error.code === "ERR_NETWORK" || error.message === "Network Error") {
+      return IS_MOCK_API
+        ? `Cannot reach the mock API at ${BASE_URL}. Start it with "npm run dev" (or "npm run server" in a second terminal), then try again.`
+        : "Cannot reach the server. Check your connection and try again.";
+    }
+  }
   return error.message || "An error occurred";
 };
 
