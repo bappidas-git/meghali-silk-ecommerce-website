@@ -175,9 +175,8 @@
   },
   "faqs": [
     {
-      "id": 1,
-      "question": "How should I care for Muga, Pat and Eri silk?",
-      "answer": "Dry-clean for the first couple of years, then a gentle cold hand wash with a mild detergent — Muga in particular grows softer and deepens in lustre each time it is washed. Dry in the shade, never in direct sun, and press on the reverse with a warm iron. Store the piece folded in unbleached muslin rather than plastic, refold it along a different line every few months so no crease ever sets, and keep perfume and deodorant off the fabric.",
+      "question": "How should I care for Muga, Pat and Eri silk?###",
+      "answer": "Dry-clean for the first couple of years, then a gentle cold hand wash with a mild detergent — Muga in particular grows softer and deepens in lustre each time it is washed. Dry in the shade, never in direct sun, and press on the reverse with a warm iron. Store the piece folded in unbleached muslin rather than plastic, refold it along a different line every few months so no crease ever sets, and keep perfume and deodorant off the fabric.####bhbhhjh",
       "placements": [
         "product",
         "help",
@@ -187,7 +186,8 @@
       "isActive": true,
       "sortOrder": 0,
       "createdAt": "2026-09-01T00:00:00.000Z",
-      "updatedAt": "2026-09-01T00:00:00.000Z"
+      "updatedAt": "2026-09-01T18:24:18.228Z",
+      "id": 1
     },
     {
       "id": 2,
@@ -205,7 +205,6 @@
       "updatedAt": "2026-09-01T00:00:00.000Z"
     },
     {
-      "id": 3,
       "question": "What is the difference between Muga, Pat, Eri and Nuni silk?",
       "answer": "Muga is the golden silk unique to Assam — undyed, unusually strong, and it only improves with age. Pat is the bright ivory-to-white mulberry silk, the one most often woven with zari for weddings and festivals. Eri is soft, matte and handspun; it behaves more like a fine wool and is warm to wear, which is why it is used for shawls and stoles. Nuni is a mulberry silk with a quieter, everyday finish. Every listing states which of them the piece is woven in.",
       "placements": [
@@ -217,7 +216,8 @@
       "isActive": true,
       "sortOrder": 2,
       "createdAt": "2026-09-01T00:00:00.000Z",
-      "updatedAt": "2026-09-01T00:00:00.000Z"
+      "updatedAt": "2026-09-01T18:24:16.974Z",
+      "id": 3
     },
     {
       "id": 4,
@@ -400,70 +400,42 @@
       "name": "Muga Silk",
       "slug": "muga-silk",
       "description": "Assam's own golden silk, undyed — the honey colour is the fibre's, not a dye. Strong, lustrous, and it deepens with every wash.",
-      "image": "https://placehold.co/400x300/F2ECE1/8A6118?text=Muga+Silk",
+      "image": "https://res.cloudinary.com/v8vrixwq/image/upload/v1788289312/muga_2_V1.png",
       "parentId": null,
       "isActive": true,
       "sortOrder": 1,
       "showInMainMenu": true,
       "menuOrder": 1,
       "createdAt": "2026-09-01T00:00:00.000Z",
-      "updatedAt": "2026-09-01T00:00:00.000Z"
+      "updatedAt": "2026-09-01T19:12:50.877Z"
     },
     {
       "id": 2,
       "name": "Pat Silk",
       "slug": "pat-silk",
       "description": "Bright ivory-to-white mulberry silk, the weave most often carried with zari for weddings and Bihu.",
-      "image": "https://placehold.co/400x300/FAF6EC/8A6118?text=Pat+Silk",
+      "image": "https://res.cloudinary.com/v8vrixwq/image/upload/v1788289300/pat_2_v1.png",
       "parentId": null,
       "isActive": true,
       "sortOrder": 2,
       "showInMainMenu": true,
       "menuOrder": 2,
       "createdAt": "2026-09-01T00:00:00.000Z",
-      "updatedAt": "2026-09-01T00:00:00.000Z"
+      "updatedAt": "2026-09-01T19:13:18.790Z"
     },
     {
       "id": 3,
       "name": "Eri Silk",
       "slug": "eri-silk",
       "description": "Handspun, matte and warm — Eri behaves more like a fine wool than a silk, which is why it makes the shawls.",
-      "image": "https://placehold.co/400x300/F5F1E6/5C554A?text=Eri+Silk",
+      "image": "https://res.cloudinary.com/v8vrixwq/image/upload/v1788289291/Eri_1-V3.png",
       "parentId": null,
       "isActive": true,
       "sortOrder": 3,
       "showInMainMenu": true,
       "menuOrder": 3,
       "createdAt": "2026-09-01T00:00:00.000Z",
-      "updatedAt": "2026-09-01T00:00:00.000Z"
-    },
-    {
-      "id": 4,
-      "name": "Toss Silk",
-      "slug": "toss-silk",
-      "description": "The wild tussar of the Assam foothills — a coarser, honey-beige yarn with visible slub and a dry, textured hand.",
-      "image": "https://placehold.co/400x300/F2ECE1/A9682F?text=Toss+Silk",
-      "parentId": null,
-      "isActive": true,
-      "sortOrder": 4,
-      "showInMainMenu": true,
-      "menuOrder": 4,
-      "createdAt": "2026-09-01T00:00:00.000Z",
-      "updatedAt": "2026-09-01T00:00:00.000Z"
-    },
-    {
-      "id": 5,
-      "name": "Cotton and Kesapat",
-      "slug": "cotton-and-kesapat",
-      "description": "Everyday handloom — cotton gamosas and cotton-and-kesapat drapes, woven light for Assam's humidity and easy to wash at home.",
-      "image": "https://placehold.co/400x300/FAF6EC/6B7A5A?text=Cotton+and+Kesapat",
-      "parentId": null,
-      "isActive": true,
-      "sortOrder": 5,
-      "showInMainMenu": true,
-      "menuOrder": 5,
-      "createdAt": "2026-09-01T00:00:00.000Z",
-      "updatedAt": "2026-09-01T00:00:00.000Z"
+      "updatedAt": "2026-09-01T19:13:43.681Z"
     }
   ],
   "products": [
@@ -477,13 +449,12 @@
       "categoryId": 1,
       "brand": "Meghali's Silk",
       "images": [
-        "https://placehold.co/600x800/F2ECE1/8A6118?text=Muga+Mekhela",
-        "https://placehold.co/600x800/F2ECE1/8A6118?text=Chador+Anchal",
-        "https://placehold.co/600x800/F2ECE1/8A6118?text=Kesa+Border",
-        "https://placehold.co/600x800/F2ECE1/8A6118?text=Full+Drape"
+        "https://res.cloudinary.com/v8vrixwq/image/upload/v1788289312/muga_1_V1.png",
+        "https://res.cloudinary.com/v8vrixwq/image/upload/v1788289308/muga_1_V2.png",
+        "https://res.cloudinary.com/v8vrixwq/image/upload/v1788289311/muga_1_V3.png"
       ],
-      "price": 32500,
-      "comparePrice": 38000,
+      "price": 41,
+      "comparePrice": 380000000000,
       "costPrice": 22400,
       "stock": 9,
       "lowStockThreshold": 3,
@@ -497,26 +468,16 @@
         {
           "id": "v1",
           "name": "Natural Gold",
-          "price": 32500,
+          "price": 3250000000,
           "stock": 5,
-          "sku": "MEK-MUG-001-NGD",
-          "attributes": {
-            "Fabric": "Muga Silk",
-            "Color": "Natural Gold"
-          },
-          "swatchHex": "#C6A050"
+          "sku": "MEK-MUG-001-NGD"
         },
         {
           "id": "v2",
           "name": "Gold with Rust Border",
-          "price": 33500,
+          "price": 335000000000,
           "stock": 4,
-          "sku": "MEK-MUG-001-GRB",
-          "attributes": {
-            "Fabric": "Muga Silk",
-            "Color": "Gold Rust"
-          },
-          "swatchHex": "#A9682F"
+          "sku": "MEK-MUG-001-GRB"
         }
       ],
       "tags": [
@@ -537,7 +498,7 @@
       "metaTitle": "Sualkuchi Muga Mekhela Chador — Natural Gold | Meghali's Silk",
       "metaDescription": "A two-piece Muga Mekhela Chador in undyed golden yarn, handwoven on Sualkuchi looms.",
       "createdAt": "2025-03-12T00:00:00.000Z",
-      "updatedAt": "2026-09-01T00:00:00.000Z",
+      "updatedAt": "2026-09-01T19:03:30.628Z",
       "frequentlyBoughtTogetherIds": [
         28,
         19
@@ -559,10 +520,9 @@
       "categoryId": 2,
       "brand": "Meghali's Silk",
       "images": [
-        "https://placehold.co/600x800/FAF6EC/8A6118?text=Pat+Mekhela",
-        "https://placehold.co/600x800/FAF6EC/8A6118?text=Zari+Border",
-        "https://placehold.co/600x800/FAF6EC/8A6118?text=Anchal+Detail",
-        "https://placehold.co/600x800/FAF6EC/8A6118?text=Drape"
+        "https://res.cloudinary.com/v8vrixwq/image/upload/v1788289295/Pat_2_V2.png",
+        "https://res.cloudinary.com/v8vrixwq/image/upload/v1788289300/pat_2_v1.png",
+        "https://res.cloudinary.com/v8vrixwq/image/upload/v1788289299/pat_2_V3.png"
       ],
       "price": 18500,
       "comparePrice": 22000,
@@ -581,24 +541,14 @@
           "name": "Ivory",
           "price": 18500,
           "stock": 7,
-          "sku": "MEK-PAT-006-IVY",
-          "attributes": {
-            "Fabric": "Pat Silk",
-            "Color": "Ivory"
-          },
-          "swatchHex": "#EFE7D6"
+          "sku": "MEK-PAT-006-IVY"
         },
         {
           "id": "v2",
           "name": "Off White",
           "price": 18500,
           "stock": 5,
-          "sku": "MEK-PAT-006-OFW",
-          "attributes": {
-            "Fabric": "Pat Silk",
-            "Color": "Off White"
-          },
-          "swatchHex": "#F5F1E6"
+          "sku": "MEK-PAT-006-OFW"
         }
       ],
       "tags": [
@@ -620,7 +570,7 @@
       "metaTitle": "Pat Silk Mekhela Chador — Ivory & Gold | Meghali's Silk",
       "metaDescription": "Ivory Pat silk with a gold zari border — the drape worn at Bihu across Assam.",
       "createdAt": "2025-01-28T00:00:00.000Z",
-      "updatedAt": "2026-09-01T00:00:00.000Z",
+      "updatedAt": "2026-09-01T19:06:10.418Z",
       "frequentlyBoughtTogetherIds": [
         28,
         19
@@ -642,13 +592,12 @@
       "categoryId": 3,
       "brand": "Meghali's Silk",
       "images": [
-        "https://placehold.co/600x800/FAF6EC/5C554A?text=Eri+Mekhela",
-        "https://placehold.co/600x800/FAF6EC/5C554A?text=Matte+Weave",
-        "https://placehold.co/600x800/FAF6EC/5C554A?text=Border+Detail",
-        "https://placehold.co/600x800/FAF6EC/5C554A?text=Drape"
+        "https://res.cloudinary.com/v8vrixwq/image/upload/v1788289289/Eri_1_v2.png",
+        "https://res.cloudinary.com/v8vrixwq/image/upload/v1788289293/Eri_1_v1.png",
+        "https://res.cloudinary.com/v8vrixwq/image/upload/v1788289291/Eri_1-V3.png"
       ],
       "price": 11500,
-      "comparePrice": null,
+      "comparePrice": 0,
       "costPrice": 7900,
       "stock": 16,
       "lowStockThreshold": 5,
@@ -664,24 +613,14 @@
           "name": "Natural Oatmeal",
           "price": 11500,
           "stock": 9,
-          "sku": "MEK-ERI-010-NAT",
-          "attributes": {
-            "Fabric": "Eri Silk",
-            "Color": "Natural Oatmeal"
-          },
-          "swatchHex": "#D9CDB8"
+          "sku": "MEK-ERI-010-NAT"
         },
         {
           "id": "v2",
           "name": "Natural with Rust",
           "price": 11500,
           "stock": 7,
-          "sku": "MEK-ERI-010-RST",
-          "attributes": {
-            "Fabric": "Eri Silk",
-            "Color": "Natural Rust"
-          },
-          "swatchHex": "#A44B2E"
+          "sku": "MEK-ERI-010-RST"
         }
       ],
       "tags": [
@@ -702,7 +641,7 @@
       "metaTitle": "Eri Silk Mekhela Chador — Undyed Natural | Meghali's Silk",
       "metaDescription": "Undyed Eri in its own oatmeal colour — matte, warm and made for wearing often.",
       "createdAt": "2025-04-25T00:00:00.000Z",
-      "updatedAt": "2026-09-01T00:00:00.000Z",
+      "updatedAt": "2026-09-01T19:07:12.707Z",
       "frequentlyBoughtTogetherIds": [
         28,
         36
@@ -724,10 +663,9 @@
       "categoryId": 1,
       "brand": "Meghali's Silk",
       "images": [
-        "https://placehold.co/600x800/F2ECE1/8A6118?text=Muga+Saree",
-        "https://placehold.co/600x800/F2ECE1/8A6118?text=Anchal+Band",
-        "https://placehold.co/600x800/F2ECE1/8A6118?text=Border+Weave",
-        "https://placehold.co/600x800/F2ECE1/8A6118?text=Drape"
+        "https://res.cloudinary.com/v8vrixwq/image/upload/v1788289307/Muga_2_V2.png",
+        "https://res.cloudinary.com/v8vrixwq/image/upload/v1788289312/muga_2_V1.png",
+        "https://res.cloudinary.com/v8vrixwq/image/upload/v1788289308/muga_2_v3.png"
       ],
       "price": 27500,
       "comparePrice": 32000,
@@ -746,24 +684,14 @@
           "name": "Natural Gold",
           "price": 27500,
           "stock": 6,
-          "sku": "SAR-MUG-013-NGD",
-          "attributes": {
-            "Fabric": "Muga Silk",
-            "Color": "Natural Gold"
-          },
-          "swatchHex": "#C6A050"
+          "sku": "SAR-MUG-013-NGD"
         },
         {
           "id": "v2",
           "name": "Gold with Black Border",
           "price": 27500,
           "stock": 4,
-          "sku": "SAR-MUG-013-BLK",
-          "attributes": {
-            "Fabric": "Muga Silk",
-            "Color": "Gold Black"
-          },
-          "swatchHex": "#2B2724"
+          "sku": "SAR-MUG-013-BLK"
         }
       ],
       "tags": [
@@ -784,7 +712,7 @@
       "metaTitle": "Muga Silk Saree — Assam Golden | Meghali's Silk",
       "metaDescription": "Six yards of undyed Muga with a woven border — the drape, in saree form.",
       "createdAt": "2025-02-05T00:00:00.000Z",
-      "updatedAt": "2026-09-01T00:00:00.000Z",
+      "updatedAt": "2026-09-01T19:04:19.225Z",
       "frequentlyBoughtTogetherIds": [
         28,
         19
@@ -806,10 +734,9 @@
       "categoryId": 2,
       "brand": "Meghali's Silk",
       "images": [
-        "https://placehold.co/600x800/FAF6EC/8A6118?text=Ivory+Pat+Saree",
-        "https://placehold.co/600x800/FAF6EC/8A6118?text=Zari+Anchal",
-        "https://placehold.co/600x800/FAF6EC/8A6118?text=Border+Detail",
-        "https://placehold.co/600x800/FAF6EC/8A6118?text=Drape"
+        "https://res.cloudinary.com/v8vrixwq/image/upload/v1788289303/Pat_1_V1.png",
+        "https://res.cloudinary.com/v8vrixwq/image/upload/v1788289300/Pat_1_v2.png",
+        "https://res.cloudinary.com/v8vrixwq/image/upload/v1788289301/Pat_1_v3.png"
       ],
       "price": 14500,
       "comparePrice": 17500,
@@ -828,24 +755,14 @@
           "name": "Ivory",
           "price": 14500,
           "stock": 8,
-          "sku": "SAR-PAT-016-IVY",
-          "attributes": {
-            "Fabric": "Pat Silk",
-            "Color": "Ivory"
-          },
-          "swatchHex": "#EFE7D6"
+          "sku": "SAR-PAT-016-IVY"
         },
         {
           "id": "v2",
           "name": "Ivory with Red Border",
           "price": 14500,
           "stock": 6,
-          "sku": "SAR-PAT-016-RED",
-          "attributes": {
-            "Fabric": "Pat Silk",
-            "Color": "Ivory Red"
-          },
-          "swatchHex": "#9E3B2E"
+          "sku": "SAR-PAT-016-RED"
         }
       ],
       "tags": [
@@ -867,7 +784,7 @@
       "metaTitle": "Pat Silk Saree — Ivory Zari | Meghali's Silk",
       "metaDescription": "Ivory Pat silk with a gold zari border and anchal — the Assamese festive standard.",
       "createdAt": "2025-01-18T00:00:00.000Z",
-      "updatedAt": "2026-09-01T00:00:00.000Z",
+      "updatedAt": "2026-09-01T19:08:07.763Z",
       "frequentlyBoughtTogetherIds": [
         28,
         36
@@ -889,13 +806,12 @@
       "categoryId": 3,
       "brand": "Meghali's Silk",
       "images": [
-        "https://placehold.co/600x800/FAF6EC/5C554A?text=Eri+Shawl",
-        "https://placehold.co/600x800/FAF6EC/5C554A?text=Handspun+Weave",
-        "https://placehold.co/600x800/FAF6EC/5C554A?text=Knotted+Fringe",
-        "https://placehold.co/600x800/FAF6EC/5C554A?text=Worn"
+        "https://res.cloudinary.com/v8vrixwq/image/upload/v1788289290/Eri_2_v1.png",
+        "https://res.cloudinary.com/v8vrixwq/image/upload/v1788289288/ERI_2_V2.png",
+        "https://res.cloudinary.com/v8vrixwq/image/upload/v1788289288/ERI_2_v3.png"
       ],
       "price": 4800,
-      "comparePrice": null,
+      "comparePrice": 0,
       "costPrice": 3300,
       "stock": 30,
       "lowStockThreshold": 8,
@@ -911,24 +827,14 @@
           "name": "Undyed Ivory",
           "price": 4800,
           "stock": 16,
-          "sku": "STO-ERI-019-IVY",
-          "attributes": {
-            "Fabric": "Eri Silk",
-            "Color": "Undyed Ivory"
-          },
-          "swatchHex": "#E4DAC6"
+          "sku": "STO-ERI-019-IVY"
         },
         {
           "id": "v2",
           "name": "Natural Oatmeal",
           "price": 4800,
           "stock": 14,
-          "sku": "STO-ERI-019-NAT",
-          "attributes": {
-            "Fabric": "Eri Silk",
-            "Color": "Natural Oatmeal"
-          },
-          "swatchHex": "#D9CDB8"
+          "sku": "STO-ERI-019-NAT"
         }
       ],
       "tags": [
@@ -950,7 +856,7 @@
       "metaTitle": "Eri Silk Shawl — Undyed Ivory | Meghali's Silk",
       "metaDescription": "A handspun Eri shawl in undyed ivory, warm enough for a Guwahati winter evening.",
       "createdAt": "2025-01-09T00:00:00.000Z",
-      "updatedAt": "2026-09-01T00:00:00.000Z",
+      "updatedAt": "2026-09-01T19:08:45.403Z",
       "frequentlyBoughtTogetherIds": [
         28,
         36
@@ -960,334 +866,6 @@
         28,
         36,
         13
-      ]
-    },
-    {
-      "id": 28,
-      "name": "Gamosa Gift Set — Handwoven Pair",
-      "slug": "gamosa-gift-set-handwoven-pair",
-      "sku": "GFT-GAM-028",
-      "shortDescription": "Two handwoven gamosas, the red-bordered Assamese cloth given as a mark of respect.",
-      "description": "The gamosa is the cloth Assam gives: draped over a guest's shoulder, offered at Bihu, folded onto every household shrine. Ours are handwoven in cotton with the traditional red border and woven buta at both ends, and come as a pair in a plain kraft sleeve. Not silk, and not pretending to be — a gamosa is a cotton cloth by definition, and that is what makes it usable. Machine washable, and it softens quickly. The most common gift order we pack, usually several at once around Bohag Bihu.",
-      "categoryId": 5,
-      "brand": "Meghali's Silk",
-      "images": [
-        "https://placehold.co/600x800/F2ECE1/C8912A?text=Gamosa+Pair",
-        "https://placehold.co/600x800/F2ECE1/C8912A?text=Red+Border",
-        "https://placehold.co/600x800/F2ECE1/C8912A?text=Woven+Buta",
-        "https://placehold.co/600x800/F2ECE1/C8912A?text=Gift+Sleeve"
-      ],
-      "price": 980,
-      "comparePrice": null,
-      "costPrice": 620,
-      "stock": 60,
-      "lowStockThreshold": 15,
-      "weight": 0.24,
-      "dimensions": {
-        "length": 24,
-        "width": 18,
-        "height": 4
-      },
-      "variants": [
-        {
-          "id": "v1",
-          "name": "Classic Red Border",
-          "price": 980,
-          "stock": 32,
-          "sku": "GFT-GAM-028-RED",
-          "attributes": {
-            "Fabric": "Handloom Cotton",
-            "Color": "Ivory Red"
-          },
-          "swatchHex": "#9E3B2E"
-        },
-        {
-          "id": "v2",
-          "name": "Red and Gold Buta",
-          "price": 1180,
-          "stock": 28,
-          "sku": "GFT-GAM-028-GLD",
-          "attributes": {
-            "Fabric": "Handloom Cotton",
-            "Color": "Ivory Gold"
-          },
-          "swatchHex": "#C8912A"
-        }
-      ],
-      "tags": [
-        "gift",
-        "gamosa",
-        "assam",
-        "handloom",
-        "cotton",
-        "bihu",
-        "keepsake"
-      ],
-      "featured": true,
-      "trending": true,
-      "hot": false,
-      "isActive": true,
-      "rating": 4.6,
-      "totalReviews": 63,
-      "metaTitle": "Gamosa Gift Set — Handwoven Pair | Meghali's Silk",
-      "metaDescription": "Two handwoven gamosas, the red-bordered Assamese cloth given as a mark of respect.",
-      "createdAt": "2025-01-05T00:00:00.000Z",
-      "updatedAt": "2026-09-01T00:00:00.000Z",
-      "frequentlyBoughtTogetherIds": [
-        19,
-        36
-      ],
-      "relatedProductIds": [
-        36,
-        19,
-        10,
-        16
-      ]
-    },
-    {
-      "id": 34,
-      "name": "Toss Silk Mekhela Chador — Wild Honey",
-      "slug": "toss-silk-mekhela-chador-wild-honey",
-      "sku": "MEK-TOS-034",
-      "shortDescription": "A two-piece Toss silk drape in undyed honey-beige, with the slub the wild yarn is known for.",
-      "description": "Toss — the tussar reared in the foothills rather than on a farm — comes off the reel coarser than Muga and a shade cooler, closer to dry honey than to gold. The slub is left in: run a hand across the chador and the yarn is uneven on purpose, because combing it smooth would take out the very thing that separates Toss from mulberry silk. Mekhela and chador are woven as a matched pair, with a narrow kesa border and a plain anchal so the texture carries the piece. It drapes with more body than Pat and creases less. Dry clean the first year, then a cold hand wash. Store folded in unbleached muslin.",
-      "categoryId": 4,
-      "brand": "Meghali's Silk",
-      "images": [
-        "https://placehold.co/600x800/F2ECE1/A9682F?text=Toss+Mekhela",
-        "https://placehold.co/600x800/F2ECE1/A9682F?text=Chador+Anchal",
-        "https://placehold.co/600x800/F2ECE1/A9682F?text=Slub+Detail",
-        "https://placehold.co/600x800/F2ECE1/A9682F?text=Full+Drape"
-      ],
-      "price": 16800,
-      "comparePrice": 19500,
-      "costPrice": 11200,
-      "stock": 12,
-      "lowStockThreshold": 3,
-      "weight": 1.05,
-      "dimensions": {
-        "length": 38,
-        "width": 28,
-        "height": 8
-      },
-      "variants": [
-        {
-          "id": "v1",
-          "name": "Wild Honey",
-          "price": 16800,
-          "stock": 7,
-          "sku": "MEK-TOS-034-WHN",
-          "attributes": {
-            "Fabric": "Toss Silk",
-            "Color": "Wild Honey"
-          },
-          "swatchHex": "#B8894A"
-        },
-        {
-          "id": "v2",
-          "name": "Honey with Rust Border",
-          "price": 17400,
-          "stock": 5,
-          "sku": "MEK-TOS-034-HRB",
-          "attributes": {
-            "Fabric": "Toss Silk",
-            "Color": "Honey Rust"
-          },
-          "swatchHex": "#9C5F30"
-        }
-      ],
-      "tags": [
-        "mekhela chador",
-        "toss silk",
-        "tussar",
-        "assam silk",
-        "handloom",
-        "undyed",
-        "slub"
-      ],
-      "featured": true,
-      "trending": true,
-      "hot": false,
-      "isActive": true,
-      "rating": 4.6,
-      "totalReviews": 18,
-      "metaTitle": "Toss Silk Mekhela Chador — Wild Honey | Meghali's Silk",
-      "metaDescription": "A two-piece Toss silk drape in undyed honey-beige, with the slub the wild yarn is known for.",
-      "createdAt": "2026-09-01T00:00:00.000Z",
-      "updatedAt": "2026-09-01T00:00:00.000Z",
-      "frequentlyBoughtTogetherIds": [
-        28,
-        19
-      ],
-      "relatedProductIds": [
-        35,
-        1,
-        6,
-        13
-      ]
-    },
-    {
-      "id": 35,
-      "name": "Toss Silk Saree — Bark Beige",
-      "slug": "toss-silk-saree-bark-beige",
-      "sku": "SAR-TOS-035",
-      "shortDescription": "Six yards of Toss silk in an undyed bark beige, with a woven kesa border and a textured fall.",
-      "description": "The same wild yarn as the drape, put to six yards. Toss takes a border well because the ground is matte — a fine zari or a contrast kesa edge reads clearly against it instead of competing with a sheen. The anchal carries a woven band rather than applied work. Undyed, so the beige shifts slightly between bolts; the shade you see photographed is the bolt this one came from. Heavier than a Pat saree and it holds a pleat without starch, which is what most people buy it for. Dry clean first year, cold hand wash after.",
-      "categoryId": 4,
-      "brand": "Meghali's Silk",
-      "images": [
-        "https://placehold.co/600x800/F2ECE1/A9682F?text=Toss+Saree",
-        "https://placehold.co/600x800/F2ECE1/A9682F?text=Anchal",
-        "https://placehold.co/600x800/F2ECE1/A9682F?text=Kesa+Border",
-        "https://placehold.co/600x800/F2ECE1/A9682F?text=Pleat+Fall"
-      ],
-      "price": 12400,
-      "comparePrice": 14800,
-      "costPrice": 8100,
-      "stock": 15,
-      "lowStockThreshold": 4,
-      "weight": 0.78,
-      "dimensions": {
-        "length": 34,
-        "width": 26,
-        "height": 6
-      },
-      "variants": [
-        {
-          "id": "v1",
-          "name": "Bark Beige",
-          "price": 12400,
-          "stock": 9,
-          "sku": "SAR-TOS-035-BRK",
-          "attributes": {
-            "Fabric": "Toss Silk",
-            "Color": "Bark Beige"
-          },
-          "swatchHex": "#C0A176"
-        },
-        {
-          "id": "v2",
-          "name": "Beige with Black Border",
-          "price": 12900,
-          "stock": 6,
-          "sku": "SAR-TOS-035-BLK",
-          "attributes": {
-            "Fabric": "Toss Silk",
-            "Color": "Beige Black"
-          },
-          "swatchHex": "#2B2724"
-        }
-      ],
-      "tags": [
-        "saree",
-        "toss silk",
-        "tussar",
-        "assam silk",
-        "handloom",
-        "undyed",
-        "kesa border"
-      ],
-      "featured": true,
-      "trending": false,
-      "hot": true,
-      "isActive": true,
-      "rating": 4.5,
-      "totalReviews": 11,
-      "metaTitle": "Toss Silk Saree — Bark Beige | Meghali's Silk",
-      "metaDescription": "Six yards of Toss silk in an undyed bark beige, with a woven kesa border and a textured fall.",
-      "createdAt": "2026-09-01T00:00:00.000Z",
-      "updatedAt": "2026-09-01T00:00:00.000Z",
-      "frequentlyBoughtTogetherIds": [
-        28,
-        36
-      ],
-      "relatedProductIds": [
-        34,
-        13,
-        16,
-        19
-      ]
-    },
-    {
-      "id": 36,
-      "name": "Cotton Kesapat Mekhela Chador — Everyday Ivory",
-      "slug": "cotton-kesapat-mekhela-chador-everyday-ivory",
-      "sku": "MEK-CTK-036",
-      "shortDescription": "A handloom cotton drape with a kesapat silk border — the one you wear on an ordinary Tuesday.",
-      "description": "Cotton ground, kesapat border. The body is a fine handloom cotton that breathes through a Guwahati summer, and the border and anchal are thrown in kesapat so the piece still catches light where it should. This is the drape our customers actually wear to an office or a morning function — light, washable at home, and cheap enough that a stain is not a disaster. It softens after the second wash and keeps its shape for years. Cold machine wash on a gentle cycle, line dry in shade, warm iron on the cotton.",
-      "categoryId": 5,
-      "brand": "Meghali's Silk",
-      "images": [
-        "https://placehold.co/600x800/FAF6EC/6B7A5A?text=Cotton+Kesapat",
-        "https://placehold.co/600x800/FAF6EC/6B7A5A?text=Kesapat+Border",
-        "https://placehold.co/600x800/FAF6EC/6B7A5A?text=Anchal",
-        "https://placehold.co/600x800/FAF6EC/6B7A5A?text=Full+Drape"
-      ],
-      "price": 3200,
-      "comparePrice": 3900,
-      "costPrice": 1850,
-      "stock": 40,
-      "lowStockThreshold": 10,
-      "weight": 0.62,
-      "dimensions": {
-        "length": 32,
-        "width": 24,
-        "height": 5
-      },
-      "variants": [
-        {
-          "id": "v1",
-          "name": "Everyday Ivory",
-          "price": 3200,
-          "stock": 22,
-          "sku": "MEK-CTK-036-IVY",
-          "attributes": {
-            "Fabric": "Cotton Kesapat",
-            "Color": "Ivory"
-          },
-          "swatchHex": "#EFE7D6"
-        },
-        {
-          "id": "v2",
-          "name": "Ivory with Green Border",
-          "price": 3400,
-          "stock": 18,
-          "sku": "MEK-CTK-036-GRN",
-          "attributes": {
-            "Fabric": "Cotton Kesapat",
-            "Color": "Ivory Green"
-          },
-          "swatchHex": "#6B7A5A"
-        }
-      ],
-      "tags": [
-        "mekhela chador",
-        "cotton kesapat",
-        "kesapat",
-        "cotton",
-        "handloom",
-        "everyday",
-        "assam"
-      ],
-      "featured": true,
-      "trending": false,
-      "hot": false,
-      "isActive": true,
-      "rating": 4.4,
-      "totalReviews": 27,
-      "metaTitle": "Cotton Kesapat Mekhela Chador — Everyday Ivory | Meghali's Silk",
-      "metaDescription": "A handloom cotton drape with a kesapat silk border — the one you wear on an ordinary Tuesday.",
-      "createdAt": "2026-09-01T00:00:00.000Z",
-      "updatedAt": "2026-09-01T00:00:00.000Z",
-      "frequentlyBoughtTogetherIds": [
-        28,
-        19
-      ],
-      "relatedProductIds": [
-        28,
-        10,
-        19,
-        6
       ]
     }
   ],
@@ -3017,23 +2595,6 @@
   ],
   "reviews": [
     {
-      "id": 1,
-      "productId": 1,
-      "userId": 1,
-      "userName": "Sneha R.",
-      "rating": 5,
-      "title": "The gold is the fibre, not a dye",
-      "body": "I had only seen Muga in photographs and expected something brassier. It is a much deeper, quieter gold in person and it changes completely between daylight and a lit room. The mekhela came unpleated as described, which my tailor appreciated. Arrived folded in muslin with the care card.",
-      "status": "approved",
-      "isVerifiedPurchase": true,
-      "helpfulCount": 24,
-      "photos": [
-        "https://placehold.co/300x300/F2ECE1/8A6118?text=Drape"
-      ],
-      "createdAt": "2026-02-10T09:00:00.000Z",
-      "updatedAt": "2026-02-10T09:00:00.000Z"
-    },
-    {
       "id": 2,
       "productId": 1,
       "userId": 2,
@@ -3140,6 +2701,21 @@
       "helpfulCount": 0,
       "createdAt": "2026-06-24T10:30:00.000Z",
       "updatedAt": "2026-09-01T13:55:45.447Z"
+    },
+    {
+      "productId": 13,
+      "userId": null,
+      "userName": "shubendu",
+      "rating": 4,
+      "title": "none",
+      "body": "none",
+      "status": "approved",
+      "isVerifiedPurchase": true,
+      "helpfulCount": 0,
+      "source": "admin",
+      "createdAt": "2026-09-01T17:15:12.518Z",
+      "updatedAt": "2026-09-01T17:15:16.770Z",
+      "id": 12
     }
   ],
   "wishlist": [
