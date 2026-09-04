@@ -2,6 +2,32 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Backend API
+
+The storefront and admin console are a React front end over a Laravel + MySQL
+API hosted on Cloudways at `https://core.meghalisilk.in/api/v1`. Which backend
+the app talks to is decided by `.env`:
+
+| Mode | `REACT_APP_API_URL` | `REACT_APP_USE_MOCK_API` |
+| --- | --- | --- |
+| Production (default) | `https://core.meghalisilk.in/api/v1` | `false` |
+| Local mock (JSON Server over `db.json`) | `http://localhost:3001` | `true` |
+
+Restart the dev server after editing `.env`. `src/services/api.js` is the only
+module that talks to the network; every method has a production branch and a
+mock branch. The endpoint contract lives in `02_API_ENDPOINTS.md` and
+`backend-developer-guideline/`.
+
+### `npm run test:live`
+
+Runs `src/services/api.live.test.js`, which drives the real `api.js` against the
+production API: public catalogue reads, customer registration/login, cart,
+wishlist, coupons, order placement, the admin order/return/refund lifecycle and
+every admin CRUD screen. **It writes to the live database** (a throwaway
+customer, a few cancelled test orders, and records it creates then deletes), so
+it is skipped by plain `npm test` and only runs when invoked explicitly. Admin
+credentials come from `LIVE_ADMIN_EMAIL` / `LIVE_ADMIN_PASSWORD`.
+
 ## Available Scripts
 
 In the project directory, you can run:
