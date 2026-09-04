@@ -204,6 +204,9 @@
   border-top: 1px solid var(--sf-color-border);
 }
 
+/* NB: not position:relative — the collection panel inside the list positions
+   against .navBar so it can span the whole band; the measuring list below
+   positions against .navBar for the same reason. */
 .navInner {
   width: 100%;
   max-width: var(--sf-container-max);
@@ -211,21 +214,88 @@
   padding: 0 var(--sf-space-6);
 }
 
-/* Deliberately NOT an overflow scroller. The collection panel is a child of a
-   nav item (so the sub-collections follow their trigger in the tab order, which
-   is the only way a keyboard user ever reaches them), and any overflow here
-   would clip both that panel and the focus ring. If a catalogue ever carries
-   more labels than one line holds, the row wraps and the header grows — content
-   stays reachable either way. */
+/* Centred, one line, and deliberately NOT an overflow scroller. The collection
+   panel is a child of a nav item (so the sub-collections follow their trigger
+   in the tab order, which is the only way a keyboard user ever reaches them),
+   and any overflow here would clip both that panel and the focus ring. When a
+   catalogue carries more labels than the line holds, Header.js measures the
+   row (see .navMeasure) and shows only the entries that fit, followed by the
+   "All collections" button that opens the CategoriesDrawer — so nothing wraps,
+   nothing clips, and everything stays reachable. */
 .navList {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  justify-content: center;
   align-items: center;
   gap: var(--sf-space-4);
   min-height: 44px;
   margin: 0;
   padding: var(--sf-space-1) 0;
   list-style: none;
+}
+
+/* The measuring twin of .navList: every entry at its natural width, laid out
+   on one unclipped line, never painted and never in the accessibility tree.
+   It shares the link classes so its widths are the visible row's widths. */
+.navMeasure {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: max-content;
+  max-width: none;
+  height: 0;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* ---- "All collections" overflow button --------------------------------- */
+/* An outlined mark with the hidden count beside it, the same height as a link
+   and the same tracked type, so it reads as the row's last entry rather than
+   as a control bolted on. */
+.navMore {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sf-space-1);
+  min-height: 32px;
+  padding: 0 var(--sf-space-2) 0 var(--sf-space-2);
+  border: 1px solid var(--sf-color-border-strong);
+  border-radius: var(--sf-radius-sm);
+  background: transparent;
+  color: var(--sf-color-text-secondary);
+  font-family: var(--sf-font-family);
+  font-size: 0.6875rem;
+  font-weight: var(--sf-font-medium);
+  letter-spacing: 0.06em;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color var(--sf-transition-fast),
+    border-color var(--sf-transition-fast),
+    background var(--sf-transition-fast);
+}
+
+.navMore:hover,
+.navMore[aria-expanded="true"] {
+  color: var(--sf-color-text);
+  border-color: var(--sf-color-accent);
+  background: var(--sf-color-surface-hover);
+}
+
+.navMore:focus-visible {
+  outline: 2px solid transparent;
+  outline-offset: 2px;
+  box-shadow: var(--sf-shadow-focus);
+}
+
+.navMoreIcon {
+  font-size: 18px !important;
+}
+
+.navMoreCount {
+  font-variant-numeric: tabular-nums;
 }
 
 .navItem {
