@@ -36,18 +36,36 @@ const iconButtonTouchOverrides = {
 
 export const ThemeContextProvider = ({ children }) => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
-    // Light is the primary/default experience for Meghali's Silk — the warm
-    // ivory editorial ground. With no saved choice we default to light; only an
-    // explicit "dark" selection opts into the evening palette.
-    // NB: the pre-mount script at the bottom of public/index.html MUST apply the
-    // same rule, or the first paint flashes the wrong theme.
-    const savedTheme = localStorage.getItem("theme");
-    return savedTheme === "dark";
+    // Dark — the "evening gallery" palette — is the default experience for
+    // Meghali's Silk. With no saved choice we default to dark; only an explicit
+    // "light" selection opts into the warm ivory ground.
+    // NB: the pre-mount script at the bottom of public/index.html and the
+    // fallback in ErrorBoundary.js MUST apply the same rule, or the first paint
+    // flashes the wrong theme.
+    let savedTheme = null;
+    try {
+      savedTheme = localStorage.getItem("theme");
+    } catch {
+      savedTheme = null;
+    }
+    return savedTheme !== "light";
   });
 
   useEffect(() => {
-    localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+    try {
+      localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+    } catch {
+      // Storage can be unavailable (private mode, blocked); the choice then
+      // simply lives for the session.
+    }
     document.body.style.backgroundColor = isDarkMode ? DARK.background.default : LIGHT.background.default;
+
+    // Keep the browser chrome colour in step with the active ground (mirrors
+    // --sf-color-bg in storefront-tokens.css and the meta in public/index.html).
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    if (themeMeta) {
+      themeMeta.setAttribute("content", isDarkMode ? "#14120F" : "#FAF6EC");
+    }
 
     // Add/remove .dark class on body for CSS selectors
     if (isDarkMode) {

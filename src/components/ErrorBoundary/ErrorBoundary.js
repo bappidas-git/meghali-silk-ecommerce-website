@@ -1,19 +1,13 @@
 import React from "react";
 
 // Resolve the active theme without depending on React context (this component
-// must work even if the provider tree above it failed to render).
+// must work even if the provider tree above it failed to render). Mirrors
+// src/context/ThemeContext.js: dark unless the user explicitly chose light.
 const isDarkTheme = () => {
   try {
-    const saved = localStorage.getItem("theme");
-    if (saved === "dark") return true;
-    if (saved === "light") return false;
-    return (
-      typeof window !== "undefined" &&
-      window.matchMedia &&
-      window.matchMedia("(prefers-color-scheme: dark)").matches
-    );
+    return localStorage.getItem("theme") !== "light";
   } catch {
-    return false;
+    return true;
   }
 };
 

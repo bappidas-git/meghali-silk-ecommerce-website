@@ -1,4 +1,11 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, {
+  useState,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useCallback,
+  useRef,
+} from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useTheme } from "../../context/ThemeContext";
 import { useCart } from "../../hooks/useCart";
@@ -14,6 +21,7 @@ import CartDrawer from "../CartDrawer/CartDrawer";
 import SidebarMenu from "../SidebarMenu/SidebarMenu";
 import AuthModal from "../AuthModal/AuthModal";
 import SearchModal from "../SearchModal/SearchModal";
+import CategoriesDrawer from "../CategoriesDrawer/CategoriesDrawer";
 import {
   IconButton,
   Badge,
@@ -36,6 +44,7 @@ import {
   LogoutOutlined,
   LoginOutlined,
   PersonAddAltOutlined,
+  GridViewOutlined,
 } from "@mui/icons-material";
 import styles from "./Header.module.css";
 
@@ -83,6 +92,8 @@ const Header = () => {
   const [scrolled, setScrolled] = useState(false);
   // Key of the nav entry whose collection panel is showing (hover or focus).
   const [openCollection, setOpenCollection] = useState(null);
+  // The desktop "All Collections" drawer, opened from the nav's overflow button.
+  const [categoriesDrawerOpen, setCategoriesDrawerOpen] = useState(false);
 
   // Fetch categories on mount. Also refetch when the tab regains focus so any
   // change the admin makes (toggling a category into the main menu, reordering
@@ -189,15 +200,18 @@ const Header = () => {
     [mainMenuCategories, childrenOf]
   );
 
-  const editorialLinks = [
-    { key: "new", label: "New Arrivals", to: "/products?sort=newest" },
-    { key: "best", label: "Bestsellers", to: "/products?sort=popular" },
-    { key: "sale", label: "Sale", to: "/products?sort=discount" },
-    // Deals link is hidden when the admin disables the deals page.
-    ...(dealsEnabled
-      ? [{ key: "deals", label: "Today's Deals", to: "/special-offers" }]
-      : []),
-  ];
+  const editorialLinks = useMemo(
+    () => [
+      { key: "new", label: "New Arrivals", to: "/products?sort=newest" },
+      { key: "best", label: "Bestsellers", to: "/products?sort=popular" },
+      { key: "sale", label: "Sale", to: "/products?sort=discount" },
+      // Deals link is hidden when the admin disables the deals page.
+      ...(dealsEnabled
+        ? [{ key: "deals", label: "Today's Deals", to: "/special-offers" }]
+        : []),
+    ],
+    [dealsEnabled]
+  );
 
   // A link is active when the current route matches its path and every query
   // param the link sets is present with the same value.
@@ -212,6 +226,98 @@ const Header = () => {
     }
     return true;
   };
+
+  // ---------------------------------------------------------------------------
+  // OVERFLOW ("priority nav")
+  // ---------------------------------------------------------------------------
+  // The row is centred and never wraps or scrolls. Every entry — the category
+  // links, the hairline tick between the groups, and the editorial links — is
+  // rendered twice: once in a hidden, unclipped measuring list that always
+  // holds all of them, and once in the visible list, which shows only as many
+  // leading entries as fit beside the "All collections" button. The rest are
+  // reachable through that button, which opens the CategoriesDrawer (and only
+  // appears when something is actually hidden).
+  const navEntries = useMemo(() => {
+    const sep =
+      categoryLinks.length > 0 && editorialLinks.length > 0
+        ? [{ key: "sep", sep: true }]
+        : [];
+    return [...categoryLinks, ...sep, ...editorialLinks];
+  }, [categoryLinks, editorialLinks]);
+
+  const navInnerRef = useRef(null);
+  const measureListRef = useRef(null);
+  const measureMoreRef = useRef(null);
+  const [visibleCount, setVisibleCount] = useState(navEntries.length);
+
+  const measureOverflow = useCallback(() => {
+    const host = navInnerRef.current;
+    const list = measureListRef.current;
+    const more = measureMoreRef.current;
+    if (!host || !list) return;
+
+    const hostStyle = window.getComputedStyle(host);
+    const available =
+      host.clientWidth -
+      parseFloat(hostStyle.paddingLeft || "0") -
+      parseFloat(hostStyle.paddingRight || "0");
+    const gap = parseFloat(window.getComputedStyle(list).columnGap || "0") || 0;
+
+    const items = Array.from(list.children).filter(
+      (el) => el !== more && el.dataset.entry === "1"
+    );
+    const widths = items.map((el) => el.getBoundingClientRect().width);
+    const total = widths.reduce((sum, w) => sum + w, 0) + gap * Math.max(widths.length - 1, 0);
+
+    // Everything fits on its own: no button, no hidden entries.
+    if (total <= available + 0.5) {
+      setVisibleCount(widths.length);
+      return;
+    }
+
+    // Otherwise reserve room for the button and take entries until they no
+    // longer fit. A trailing separator is dropped (it would tick to nothing).
+    const moreWidth = more ? more.getBoundingClientRect().width : 0;
+    let budget = available - moreWidth - gap;
+    let count = 0;
+    let used = 0;
+    for (let i = 0; i < widths.length; i += 1) {
+      const next = used + (i > 0 ? gap : 0) + widths[i];
+      if (next > budget + 0.5) break;
+      used = next;
+      count = i + 1;
+    }
+    if (count > 0 && navEntries[count - 1]?.sep) count -= 1;
+    setVisibleCount(count);
+  }, [navEntries]);
+
+  // Measure before paint (so the row never flashes in a wrapped state), then
+  // again whenever the host resizes, the entries change, or the webfonts land
+  // and re-flow the tracked uppercase labels.
+  useLayoutEffect(() => {
+    if (isMobile) return undefined;
+    measureOverflow();
+    const host = navInnerRef.current;
+    let observer;
+    if (host && typeof ResizeObserver !== "undefined") {
+      observer = new ResizeObserver(() => measureOverflow());
+      observer.observe(host);
+    } else {
+      window.addEventListener("resize", measureOverflow);
+    }
+    if (document.fonts?.ready) {
+      document.fonts.ready.then(measureOverflow).catch(() => {});
+    }
+    return () => {
+      if (observer) observer.disconnect();
+      else window.removeEventListener("resize", measureOverflow);
+    };
+  }, [measureOverflow, isMobile]);
+
+  const visibleEntries = navEntries.slice(0, visibleCount);
+  const hiddenCount = navEntries.filter((e) => !e.sep).length -
+    visibleEntries.filter((e) => !e.sep).length;
+  const hasOverflow = hiddenCount > 0;
 
   const openPanelFor = (item) =>
     setOpenCollection(item.children && item.children.length ? item.key : null);
@@ -445,13 +551,62 @@ const Header = () => {
             onBlur={handleNavBlur}
             onKeyDown={handleNavKeyDown}
           >
-            <div className={styles.navInner}>
-              <ul className={styles.navList}>
-                {categoryLinks.map(renderNavLink)}
-                {categoryLinks.length > 0 && editorialLinks.length > 0 && (
-                  <li className={styles.navSep} role="presentation" />
+            <div className={styles.navInner} ref={navInnerRef}>
+              {/* Measuring twin: every entry, unclipped, never painted. */}
+              <ul
+                className={`${styles.navList} ${styles.navMeasure}`}
+                ref={measureListRef}
+                aria-hidden="true"
+              >
+                {navEntries.map((entry) =>
+                  entry.sep ? (
+                    <li key={entry.key} className={styles.navSep} data-entry="1" />
+                  ) : (
+                    <li key={entry.key} className={styles.navItem} data-entry="1">
+                      <span className={styles.navLink}>{entry.label}</span>
+                    </li>
+                  )
                 )}
-                {editorialLinks.map(renderNavLink)}
+                <li className={styles.navItem} ref={measureMoreRef}>
+                  <span className={styles.navMore}>
+                    <GridViewOutlined className={styles.navMoreIcon} />
+                    <span className={styles.navMoreCount}>+99</span>
+                  </span>
+                </li>
+              </ul>
+
+              <ul className={styles.navList}>
+                {visibleEntries.map((entry) =>
+                  entry.sep ? (
+                    <li key={entry.key} className={styles.navSep} role="presentation" />
+                  ) : (
+                    renderNavLink(entry)
+                  )
+                )}
+                {hasOverflow && (
+                  <li className={styles.navItem}>
+                    <button
+                      type="button"
+                      className={styles.navMore}
+                      onClick={() => {
+                        setOpenCollection(null);
+                        setCategoriesDrawerOpen(true);
+                      }}
+                      aria-label={`View all collections, ${hiddenCount} more`}
+                      aria-haspopup="dialog"
+                      aria-expanded={categoriesDrawerOpen}
+                      title="View all collections"
+                    >
+                      <GridViewOutlined
+                        className={styles.navMoreIcon}
+                        aria-hidden="true"
+                      />
+                      <span className={styles.navMoreCount} aria-hidden="true">
+                        +{hiddenCount}
+                      </span>
+                    </button>
+                  </li>
+                )}
               </ul>
             </div>
           </nav>
@@ -538,6 +693,15 @@ const Header = () => {
       />
       <AuthModal open={authModalOpen} onClose={closeAuthModal} defaultTab={authModalTab} />
       <SearchModal open={searchModalOpen} onClose={() => setSearchModalOpen(false)} />
+      {!isMobile && (
+        <CategoriesDrawer
+          open={categoriesDrawerOpen}
+          onClose={() => setCategoriesDrawerOpen(false)}
+          categories={categories}
+          editorialLinks={editorialLinks}
+          isLinkActive={isLinkActive}
+        />
+      )}
     </>
   );
 };

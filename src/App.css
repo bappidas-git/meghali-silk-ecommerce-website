@@ -4,7 +4,8 @@
  * The page ground, the scrollbars, the shared utilities and the SweetAlert2
  * skin. Everything here reads the design tokens in
  * `src/theme/storefront-tokens.css` (--sf-*) — no brand hex is hardcoded in this
- * file. LIGHT IS THE DEFAULT; `body.dark` flips the tokens, so most rules below
+ * file. DARK IS THE DEFAULT (ThemeContext sets `body.dark`), and the same
+ * tokens flip under it, so most rules below
  * need no dark-mode twin.
  *
  * ADMIN IS OUT OF SCOPE. The admin panel keeps its flat slate design language:

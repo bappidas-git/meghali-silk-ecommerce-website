@@ -9,8 +9,9 @@
  * `colors.js` for the MUI layer); you do not edit component code.
  *
  * HOW THEMING WORKS
- *   • Light mode  → the `:root` block below. LIGHT IS THE DEFAULT.
+ *   • Light mode  → the `:root` block below (the base token set).
  *   • Dark mode   → the `body.dark` block (ThemeContext toggles `body.dark`).
+ *                   DARK IS THE DEFAULT THEME; light is the user's opt-in.
  *   • Structural tokens (spacing/radius/shadows/type) are mode-agnostic and
  *     declared once in `:root`.
  *

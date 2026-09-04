@@ -20,7 +20,7 @@
 // =====================================================================
 
 // ---------------------
-// LIGHT MODE PALETTE  (the default)
+// LIGHT MODE PALETTE  (opt-in; dark is the default, see ThemeContext)
 // ---------------------
 export const LIGHT = {
   // Primary — warm near-black ink. Carries type and the primary CTA fill.

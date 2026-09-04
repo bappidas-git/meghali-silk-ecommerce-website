@@ -46,22 +46,12 @@
 
     <!--
       Browser chrome colour. Mirrors --sf-color-bg from
-      src/theme/storefront-tokens.css: #FAF6EC (light ivory ground) and #14120F
-      (dark "evening gallery" ground). Media-scoped entries must come BEFORE any
-      unscoped one — the HTML spec takes the first meta whose media matches, and
-      an unscoped meta always matches. Browsers that ignore `media` fall back to
-      reading the first entry, which is the light default we want.
+      src/theme/storefront-tokens.css: #14120F is the dark "evening gallery"
+      ground, which is the site's default theme regardless of the OS
+      preference. src/context/ThemeContext.js rewrites this meta to #FAF6EC
+      (the light ivory ground) when the visitor switches to light.
     -->
-    <meta
-      name="theme-color"
-      content="#FAF6EC"
-      media="(prefers-color-scheme: light)"
-    />
-    <meta
-      name="theme-color"
-      content="#14120F"
-      media="(prefers-color-scheme: dark)"
-    />
+    <meta name="theme-color" content="#14120F" />
 
     <!-- Copy is kept in sync with settings.seo in db.json. -->
     <meta
@@ -185,10 +175,11 @@
           "Helvetica Neue", sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
-        /* Light (warm ivory) is the default theme — this static rule paints
-           before the pre-mount script runs, so it must match the light branch
-           there. The script overrides it inline when dark is the saved choice. */
-        background: linear-gradient(135deg, #faf6ec 0%, #ffffff 100%);
+        /* Dark ("evening gallery") is the default theme — this static rule
+           paints before the pre-mount script runs, so it must match the dark
+           branch there. The script overrides it inline when light is the
+           saved choice. */
+        background: linear-gradient(135deg, #14120f 0%, #1b1815 100%);
         min-height: 100vh;
       }
 
@@ -471,11 +462,16 @@
       // first paint already has the correct theme (matches src/context/ThemeContext.js,
       // which keys CSS off body.dark / body.light). Avoids a flash of the wrong theme.
       (function () {
-        // Light (warm ivory) is the default for Meghali's Silk — this MUST
-        // mirror src/context/ThemeContext.js: light unless the user has
-        // explicitly chosen dark.
-        var savedTheme = localStorage.getItem("theme");
-        var isDark = savedTheme === "dark";
+        // Dark ("evening gallery") is the default for Meghali's Silk — this
+        // MUST mirror src/context/ThemeContext.js: dark unless the user has
+        // explicitly chosen light.
+        var savedTheme = null;
+        try {
+          savedTheme = localStorage.getItem("theme");
+        } catch (e) {
+          savedTheme = null;
+        }
+        var isDark = savedTheme !== "light";
 
         document.body.classList.add(isDark ? "dark" : "light");
         // Keep these two gradients in sync with LIGHT/DARK.bodyBackground in
