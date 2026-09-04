@@ -2,13 +2,19 @@
 // API Base URL Configuration
 // =============================================================================
 //
-// TO SWITCH FROM JSON SERVER TO PRODUCTION LARAVEL API:
-// ======================================================
-//   1. In .env, set: REACT_APP_API_URL=https://your-laravel-api.com/api/v1
-//   2. In .env, set: REACT_APP_USE_MOCK_API=false
-//   3. Restart the dev server.
+// The app talks to ONE of two backends, chosen entirely by .env:
 //
-// That's it. No other code changes required.
+//   Production (default)  REACT_APP_API_URL=https://core.meghalisilk.in/api/v1
+//                         REACT_APP_USE_MOCK_API=false
+//                         → the Laravel API + MySQL database on Cloudways.
+//
+//   Local mock            REACT_APP_API_URL=http://localhost:3001
+//                         REACT_APP_USE_MOCK_API=true
+//                         → JSON Server over db.json (npm run dev).
+//
+// Restart the dev server after changing .env. No code changes are needed to
+// switch; every service method in api.js branches on IS_MOCK_API below.
+// `npm run test:live` drives api.js against the production API end to end.
 // =============================================================================
 
 // Development / Mock API URL (JSON Server)
